@@ -20,25 +20,27 @@ const {
 
 // 집게 중앙에 위치한 물리 충돌체 (인형과 충돌)
 const ClawCollider = () => {
-  const { claw, phase } = useGameStore();
-  const { position, isOpen } = claw;
+  const position = useGameStore((state) => state.claw.position);
+  const isOpen = useGameStore((state) => state.claw.isOpen);
 
-  // 집게가 열렸을 때만 작은 충돌체 (인형을 살짝 밀어내는 정도)
-  const colliderSize = isOpen ? 0.08 : 0.01;
+  // 집게가 열렸을 때만 작은 충돌체. 
+  // 잡는 순간 인형을 밀어내지 않도록 충분히 작게 유지하고 위치를 위로.
+  const colliderSize = isOpen ? 0.05 : 0.01;
 
   const [ref, api] = useSphere<Mesh>(() => ({
     type: 'Kinematic',
     args: [colliderSize],
-    position: [position.x, position.y - 0.3, position.z],
+    position: [position.x, position.y + 0.2, position.z], // -0.3 -> +0.2 위로 올림
     material: {
       friction: 0.1,
-      restitution: 0.05, // 거의 튕기지 않음
+      restitution: 0.05,
     },
   }));
 
   // 집게 위치에 따라 충돌체 위치 업데이트
   useFrame(() => {
-    api.position.set(position.x, position.y - 0.3, position.z);
+    // 집게 중심보다 약간 위(0.2)에 둬서 잡히는 인형과의 충돌 방지
+    api.position.set(position.x, position.y + 0.2, position.z);
   });
 
   return (
@@ -57,6 +59,7 @@ interface ClawFingerProps {
 }
 
 const ClawFinger = ({ index, isOpen, strengthVariance, clawPosition }: ClawFingerProps) => {
+  // ... (implementation same as before)
   const groupRef = useRef<Group>(null);
   const angleOffset = (index / fingerCount) * Math.PI * 2;
   const targetAngle = isOpen ? openAngle : closedAngle;
@@ -157,14 +160,27 @@ const ClawBase = () => {
   );
 };
 
+
+// Import doll components
+import { BunnyDoll, BearDoll, CatDoll, CuteDollConfig } from './dolls';
+import { DollConfig } from '../types/game.types';
+
+// ... (ClawCollider and ClawFinger components remain unchanged)
+
 const Claw = () => {
   const groupRef = useRef<Group>(null);
   const targetPosition = useRef(new Vector3());
   const currentVelocity = useRef(new Vector3());
-  const visualPosition = useRef({ x: 0, y: 0, z: 0 });
 
-  const { claw, phase } = useGameStore();
-  const { position, isOpen, gripStrength } = claw;
+  // Use selectors to avoid re-rendering on every visualClawPosition update
+  const clawPosition = useGameStore((state) => state.claw.position);
+  const isOpen = useGameStore((state) => state.claw.isOpen);
+  const gripStrength = useGameStore((state) => state.claw.gripStrength);
+  const phase = useGameStore((state) => state.phase);
+  const setVisualClawPosition = useGameStore((state) => state.setVisualClawPosition);
+
+  // 잡힌 인형 정보 가져오기
+  const grabbedDoll = useGameStore((state) => state.grabbedDoll);
 
   const fingerStrengths = useMemo(
     () => generateFingerStrengths(gripStrength, fingerCount, 0.05),
@@ -172,8 +188,8 @@ const Claw = () => {
   );
 
   useEffect(() => {
-    targetPosition.current.set(position.x, position.y, position.z);
-  }, [position.x, position.y, position.z]);
+    targetPosition.current.set(clawPosition.x, clawPosition.y, clawPosition.z);
+  }, [clawPosition.x, clawPosition.y, clawPosition.z]);
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
@@ -198,8 +214,8 @@ const Claw = () => {
     current.y += currentVelocity.current.y * delta;
     current.z += currentVelocity.current.z * delta;
 
-    // 시각적 위치 업데이트 (물리 충돌체용)
-    visualPosition.current = { x: current.x, y: current.y, z: current.z };
+    // 시각적 위치를 store에 업데이트 (그랩 판정용)
+    setVisualClawPosition(current.x, current.y, current.z);
 
     const swayAmount = 0.02;
     const swaySpeed = 3;
@@ -212,12 +228,37 @@ const Claw = () => {
     }
   });
 
+  // 잡힌 인형 렌더링 헬퍼
+  const startDollY = -0.55; // 인형이 집게에 매달릴 시각적 위치 (조정 가능)
+
+  const renderGrabbedDoll = () => {
+    if (!grabbedDoll.config) return null;
+
+    // 타입 단언 (DollConfig -> CuteDollConfig)
+    // 실제로는 CuteDollConfig가 맞음
+    const config = grabbedDoll.config as any as CuteDollConfig;
+
+    // 인형 종류에 따라 렌더링
+    const DollComponent =
+      config.cuteType === 'bunny' ? BunnyDoll :
+        config.cuteType === 'bear' ? BearDoll :
+          config.cuteType === 'cat' ? CatDoll : null;
+
+    if (!DollComponent) return null;
+
+    return (
+      <group position={[0, startDollY - config.size * 0.2, 0]}>
+        <DollComponent config={config} />
+      </group>
+    );
+  };
+
   return (
     <>
       <ClawCollider />
       <group
         ref={groupRef}
-        position={[position.x, position.y, position.z]}
+      // Position is controlled by spring physics in useFrame, do not bind prop
       >
         <ClawBase />
 
@@ -227,12 +268,16 @@ const Claw = () => {
             index={index}
             isOpen={isOpen}
             strengthVariance={fingerStrengths[index]}
-            clawPosition={position}
+            clawPosition={clawPosition}
           />
         ))}
+
+        {/* 잡은 인형 렌더링 - 집게의 자식으로 렌더링되어 완벽하게 따라감 */}
+        {renderGrabbedDoll()}
       </group>
     </>
   );
 };
 
 export default Claw;
+
