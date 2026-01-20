@@ -38,6 +38,9 @@ interface GameStore extends GameState {
   // Velocity tracking for inertia
   velocity: Position3D;
 
+  // Visual claw position (실제 렌더링된 집게 위치 - spring 물리 적용 후)
+  visualClawPosition: Position3D;
+
   // Core state setters
   setPhase: (phase: GamePhase) => void;
   setClawPosition: (x: number, y: number, z: number) => void;
@@ -50,6 +53,7 @@ interface GameStore extends GameState {
   setSoundCallbacks: (callbacks: SoundCallbacks) => void;
   setConfig: (config: Partial<GameConfig>) => void;
   setVelocity: (x: number, y: number, z: number) => void;
+  setVisualClawPosition: (x: number, y: number, z: number) => void;
 
   // Game flow actions
   startGame: () => void;
@@ -106,6 +110,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   soundCallbacks: {},
   grabbedDoll: initialGrabbedDollState,
   velocity: initialVelocity,
+  visualClawPosition: { ...initialClawPosition },
 
   setPhase: (phase: GamePhase) => {
     set({ phase });
@@ -185,6 +190,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ velocity: { x, y, z } });
   },
 
+  setVisualClawPosition: (x: number, y: number, z: number) => {
+    set({ visualClawPosition: { x, y, z } });
+  },
+
   startGame: () => {
     const { phase, soundCallbacks } = get();
     if (phase !== 'idle' && phase !== 'result') return;
@@ -197,6 +206,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       },
       velocity: initialVelocity,
       grabbedDoll: initialGrabbedDollState,
+      visualClawPosition: { ...initialClawPosition },
     });
     get().callbacks.onPhaseChange?.('moving');
   },
@@ -297,30 +307,28 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return true;
     }
 
-    // Calculate grip decay during rising/returning phase
     let newGripStrength = grabbedDoll.currentGripStrength;
 
     if (phase === 'rising' || phase === 'returning') {
-      // 정확도에 따른 decay rate 조정
-      // 정확도가 낮을수록 더 빨리 약해짐
-      const accuracyFactor = 0.5 + grabbedDoll.accuracy * 0.5; // 0.5 ~ 1.0
-      const adjustedDecayRate = GRIP_CONFIG.decayRate + (1 - accuracyFactor) * 0.02;
+      const accuracyFactor = 0.5 + grabbedDoll.accuracy * 0.5;
 
-      // Apply decay
+      // 걸친 경우(낮은 정확도)는 빠르게 grip 감소, 완벽하면 거의 감소 없음
+      const adjustedDecayRate = grabbedDoll.accuracy > 0.8
+        ? GRIP_CONFIG.decayRate // 완벽: 기본 decay만
+        : GRIP_CONFIG.decayRate - (1 - accuracyFactor) * 0.002; // 걸침: 더 빠른 decay (0.015 -> 0.005 -> 0.002로 완화)
+
       newGripStrength *= adjustedDecayRate;
 
-      // 정확도 기반 slip chance
-      // 정확도가 낮을수록 미끄러질 확률 높음
-      const baseSlipChance = (1 - grabbedDoll.accuracy) * 0.08; // 최대 8% 확률
+      // slip chance: 걸친 경우 높은 확률로 미끄러짐
+      const baseSlipChance = grabbedDoll.accuracy > 0.6
+        ? 0 // 60% 이상 정확도면 절대 미끄러지지 않음
+        : (1 - grabbedDoll.accuracy) * 0.05; // 걸침: 최대 5%
 
-      // 이동 중(returning)일 때 추가 slip 확률
-      const movementSlipBonus = phase === 'returning' ? 0.03 : 0;
-
+      const movementSlipBonus = phase === 'returning' ? 0.02 : 0;
       const totalSlipChance = baseSlipChance + movementSlipBonus;
 
-      // Random slip check
       if (Math.random() < totalSlipChance) {
-        newGripStrength *= 0.7; // 미끄러지면 그립 크게 감소
+        newGripStrength *= 0.8; // 미끄러지면 grip 크게 감소 (0.5 -> 0.8)
       }
 
       set({
@@ -330,9 +338,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         },
       });
 
-      // Check if grip is too weak
       if (newGripStrength < GRIP_CONFIG.releaseThreshold) {
-        return false; // Doll should be dropped
+        return false;
       }
     }
 
