@@ -30,9 +30,13 @@ const DOLL_PALETTES = [
 // 인형 타입 (토끼, 곰, 고양이)
 type CuteDollType = 'bunny' | 'bear' | 'cat';
 
-interface CuteDollConfig extends DollConfig {
+export interface CuteDollConfig extends DollConfig {
   cuteType: CuteDollType;
   palette: typeof DOLL_PALETTES[0];
+}
+
+export interface CuteDollProps {
+  config: CuteDollConfig;
 }
 
 const generateDollConfigs = (count: number): CuteDollConfig[] => {
@@ -69,77 +73,134 @@ const generateDollConfigs = (count: number): CuteDollConfig[] => {
 
 
 const useDollLogic = (api: any, ref: any, config: DollConfig) => {
-  const { claw, phase, setGrabbedDoll, grabbedDoll } = useGameStore();
   const wasGrabbingRef = useRef(false);
   const grabCheckDoneRef = useRef(false);
+  const positionRef = useRef<[number, number, number]>([0, 0, 0]);
+  const wasGrabbedRef = useRef(false);
+
+  useEffect(() => {
+    const unsubscribe = api.position.subscribe((p: [number, number, number]) => {
+      positionRef.current = p;
+    });
+    return unsubscribe;
+  }, [api]);
 
   useFrame(() => {
     if (!ref.current) return;
 
-    // 잡힌 인형은 집게를 따라다님
-    if (grabbedDoll.id === config.id) {
-      const targetY = claw.position.y - 0.3;
-      api.position.set(claw.position.x, targetY, claw.position.z);
+    // 매 프레임 최신 상태 가져오기 (closure 문제 방지)
+    const state = useGameStore.getState();
+    const { phase, grabbedDoll, visualClawPosition, setGrabbedDoll } = state;
+
+    const isGrabbed = grabbedDoll.id === config.id;
+
+    // 잡힘 상태 변경 감지
+    if (isGrabbed) {
+      if (!wasGrabbedRef.current) {
+        wasGrabbedRef.current = true;
+
+        // 물리 타입을 Kinematic으로 변경하여 물리 연산에서 제외하고 위치 제어만 가능하게 함
+        // (mass=0 과 유사하지만 충돌 계산 등에서 더 확실함)
+        // api.type.set('Kinematic')이 지원되지 않을 수 있으므로 mass=0 및 collisionResponse 비활성화 등 사용
+        api.mass.set(0);
+        api.velocity.set(0, 0, 0);
+        api.angularVelocity.set(0, 0, 0);
+        api.collisionResponse.set(false); // 다른 물체완 충돌하지 않음
+      }
+
+      // ** 위치 강제 고정 **
+      // 오프셋 무시하고 집게 바로 아래 중심에 고정
+      const targetX = visualClawPosition.x;
+      const targetY = visualClawPosition.y - 0.25; // 집게 약간 아래
+      const targetZ = visualClawPosition.z;
+
+      api.position.set(targetX, targetY, targetZ);
       api.velocity.set(0, 0, 0);
       api.angularVelocity.set(0, 0, 0);
+      api.rotation.set(0, 0, 0);
+
+      if (ref.current) {
+        ref.current.position.set(targetX, targetY, targetZ);
+        ref.current.rotation.set(0, 0, 0); // 회전도 고정
+      }
       return;
     }
 
-    // rising 단계로 전환될 때 한 번만 잡기 체크
-    if (phase === 'rising' && wasGrabbingRef.current && !grabCheckDoneRef.current) {
-      grabCheckDoneRef.current = true;
+    // 놓쳤을 때
+    if (!isGrabbed && wasGrabbedRef.current) {
+      wasGrabbedRef.current = false;
 
-      if (!grabbedDoll.id) {
-        const { x, y, z } = ref.current.position;
-        const cx = claw.position.x;
-        const cy = claw.position.y;
-        const cz = claw.position.z;
+      api.mass.set(config.mass);
+      api.collisionResponse.set(true); // 충돌 다시 활성화
 
-        // 잡기 범위 체크 (더 관대하게)
-        const distXZ = Math.sqrt((x - cx) ** 2 + (z - cz) ** 2);
-        const clawBottomY = cy - 0.5;
-        const dollTopY = y + config.size;
-        const isUnderClaw = dollTopY >= clawBottomY - 0.15 && y < cy;
+      api.velocity.set(0, -1, 0);
+      api.wakeUp();
+    }
 
-        // 잡기 범위: 중심에서 0.28 이내 (더 관대하게)
-        const GRAB_RADIUS = 0.28;
-        const PERFECT_RADIUS = 0.08; // 완벽한 잡기 범위
+    // grabbing 단계에서 미리 잡기 체크 (집게가 멈춰있을 때)
+    if (phase === 'grabbing') {
+      // 그랩 애니메이션이 어느정도 진행된 후 판정
+      // 집게 오므리는 시간을 고려하여 0.6초 딜레이
+      if (!grabCheckDoneRef.current) {
+        // 타이머 시작 (없으면 초기화)
+        if (!ref.current.userData.grabTimer) {
+          ref.current.userData.grabTimer = Date.now();
+        }
 
-        if (distXZ < GRAB_RADIUS && isUnderClaw) {
-          const offset = {
-            x: x - cx,
-            y: y - (cy - 0.3),
-            z: z - cz
-          };
+        const elapsed = Date.now() - ref.current.userData.grabTimer;
 
-          // 정확도 계산 (0 ~ 1, 1이 완벽)
-          // 중심에 가까울수록 정확도 높음
-          const accuracy = Math.max(0, 1 - (distXZ / GRAB_RADIUS));
+        if (elapsed > 1400) { // 1.4초 후 판정 (집게가 완전히 오므라든 후)
+          if (!grabbedDoll.id) {
+            const [x, y, z] = positionRef.current;
+            const cx = visualClawPosition.x;
+            const cy = visualClawPosition.y;
+            const cz = visualClawPosition.z;
 
-          // 완벽한 잡기인지 판단
-          const isPerfectGrab = distXZ < PERFECT_RADIUS;
+            const distXZ = Math.sqrt((x - cx) ** 2 + (z - cz) ** 2);
+            // 높이 판정: 범위 축소
+            const clawBottomY = cy - 0.5;
+            const dollTopY = y + config.size;
+            // 바닥(-1.0) -> -0.5로 축소, 위(+0.5) -> +0.2로 축소
+            const isUnderClaw = dollTopY >= clawBottomY - 0.5 && y < cy + 0.2;
 
-          setGrabbedDoll(config, offset, accuracy, isPerfectGrab);
+            const CLAW_GRAB_RADIUS = 0.4; // 0.5 -> 0.4로 축소
+
+            if (distXZ < CLAW_GRAB_RADIUS && isUnderClaw) {
+              grabCheckDoneRef.current = true; // 하나 잡으면 체크 종료
+
+              const offset = { x: 0, y: 0, z: 0 };
+              const accuracy = 1.0;
+              const isPerfectGrab = true;
+
+              setGrabbedDoll(config, offset, accuracy, isPerfectGrab);
+            }
+          } else {
+            // 이미 누군가 잡혔으면 나는 체크 종료
+            grabCheckDoneRef.current = true;
+          }
         }
       }
     }
 
-    // phase 상태 추적
-    if (phase === 'grabbing') {
-      wasGrabbingRef.current = true;
-    } else if (phase === 'idle' || phase === 'moving') {
-      wasGrabbingRef.current = false;
+    // 상태 초기화
+    if (phase !== 'grabbing' && phase !== 'rising' && phase !== 'returning') {
       grabCheckDoneRef.current = false;
+      if (ref.current) {
+        ref.current.userData.grabTimer = null;
+      }
     }
+
   });
 };
 
-interface CuteDollProps {
+// 렌더링용 Props (물리 Ref는 선택 사항)
+export interface DollRenderProps {
   config: CuteDollConfig;
+  physicsRef?: React.RefObject<Mesh>;
 }
 
 // 토끼 인형 (긴 귀)
-const BunnyDoll = ({ config, physicsRef }: CuteDollProps & { physicsRef: React.RefObject<Mesh> }) => {
+export const BunnyDoll = ({ config, physicsRef }: DollRenderProps) => {
   const s = config.size;
   const { body, accent, cheek } = config.palette;
 
@@ -150,6 +211,10 @@ const BunnyDoll = ({ config, physicsRef }: CuteDollProps & { physicsRef: React.R
         <sphereGeometry args={[s * 0.8, 16, 16]} />
         <meshStandardMaterial color={body} roughness={0.8} />
       </mesh>
+      {/* ... (나머지 렌더링 코드는 동일하므로 생략하지 않고 그대로 유지해야 함, 하지만 replace_file_content는 전체 교체가 아니므로 주의) */}
+      {/* 지면 관계상 전체 코드를 다 쓸 수 없으니 원래 코드의 구조를 유지하며 export 키워드만 붙이는 식으로 수정해야 함. */}
+      {/* 하지만 replace_file_content는 블록 단위 교체이므로 전체 함수를 다시 써줌 */}
+
       {/* 머리 */}
       <mesh castShadow position={[0, s * 0.4, 0]}>
         <sphereGeometry args={[s * 0.65, 16, 16]} />
@@ -205,7 +270,7 @@ const BunnyDoll = ({ config, physicsRef }: CuteDollProps & { physicsRef: React.R
 };
 
 // 곰 인형 (둥근 귀)
-const BearDoll = ({ config, physicsRef }: CuteDollProps & { physicsRef: React.RefObject<Mesh> }) => {
+export const BearDoll = ({ config, physicsRef }: DollRenderProps) => {
   const s = config.size;
   const { body, accent, cheek } = config.palette;
 
@@ -276,7 +341,7 @@ const BearDoll = ({ config, physicsRef }: CuteDollProps & { physicsRef: React.Re
 };
 
 // 고양이 인형 (삼각 귀)
-const CatDoll = ({ config, physicsRef }: CuteDollProps & { physicsRef: React.RefObject<Mesh> }) => {
+export const CatDoll = ({ config, physicsRef }: DollRenderProps) => {
   const s = config.size;
   const { body, accent, cheek } = config.palette;
 
@@ -363,6 +428,9 @@ const CatDoll = ({ config, physicsRef }: CuteDollProps & { physicsRef: React.Ref
 
 // 물리 + 렌더링을 합친 통합 인형 컴포넌트
 const CuteDoll = ({ config }: CuteDollProps) => {
+  const grabbedDollId = useGameStore((state) => state.grabbedDoll.id);
+  const isGrabbed = grabbedDollId === config.id;
+
   const [ref, api] = useSphere<Mesh>(() => ({
     mass: config.mass,
     position: config.position,
@@ -391,7 +459,7 @@ const CuteDoll = ({ config }: CuteDollProps) => {
   };
 
   return (
-    <group ref={ref as any}>
+    <group ref={ref as any} visible={!isGrabbed}>
       {renderDoll()}
     </group>
   );
