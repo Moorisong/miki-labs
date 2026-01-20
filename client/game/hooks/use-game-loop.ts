@@ -148,7 +148,7 @@ export const useGameLoop = () => {
         if (phase === 'grabbing') {
             grabTimer.current = setTimeout(() => {
                 riseClaw();
-            }, 1000); // Wait 1 second before rising
+            }, 2000); // Wait 2 seconds before rising (more realistic grab time)
         }
 
         return () => {
