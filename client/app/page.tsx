@@ -1,66 +1,135 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from 'next/link';
+import styles from './page.module.css';
 
-export default function Home() {
+// 더미 랭킹 데이터
+const topRankings = [
+  { rank: 1, nickname: 'ClawMaster', score: 15800, date: '2024-01-15' },
+  { rank: 2, nickname: '인형킹', score: 14200, date: '2024-01-14' },
+  { rank: 3, nickname: 'GamerPro', score: 13500, date: '2024-01-13' },
+  { rank: 4, nickname: '뽑기달인', score: 12800, date: '2024-01-12' },
+  { rank: 5, nickname: 'LuckyOne', score: 11900, date: '2024-01-11' },
+];
+
+const features = [
+  {
+    icon: '🎯',
+    title: '리얼한 물리 엔진',
+    description: '실제 인형뽑기처럼 정교한 물리 시뮬레이션으로 진짜 손맛을 느껴보세요.',
+  },
+  {
+    icon: '🏆',
+    title: '랭킹 시스템',
+    description: '전국의 플레이어들과 점수를 겨루고 최고의 자리에 도전하세요.',
+  },
+  {
+    icon: '🧸',
+    title: '다양한 인형',
+    description: '귀여운 동물부터 캐릭터까지, 다양한 인형들을 뽑아보세요.',
+  },
+];
+
+export default function HomePage() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className={styles.container}>
+      {/* Hero Section */}
+      <section className={styles.hero}>
+        <div className={styles.heroContent}>
+          <h1 className={styles.heroTitle}>
+            <span className={styles.titleLine}>리얼한 손맛의</span>
+            <span className={styles.titleHighlight}>웹 인형뽑기</span>
+          </h1>
+          <p className={styles.heroDescription}>
+            진짜 인형뽑기의 짜릿함을 웹에서 그대로!
+            <br />
+            물리 엔진 기반의 리얼한 크레인 게임을 즐겨보세요.
           </p>
+          <div className={styles.heroCta}>
+            <Link href="/game" className={styles.primaryButton}>
+              지금 바로 시작하기
+            </Link>
+            <Link href="/about" className={styles.secondaryButton}>
+              게임 소개
+            </Link>
+          </div>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className={styles.heroVisual}>
+          <div className={styles.clawMachine}>
+            <div className={styles.machineBody}>
+              <div className={styles.machineGlass}>
+                <div className={styles.plushie} style={{ top: '60%', left: '20%' }}>🧸</div>
+                <div className={styles.plushie} style={{ top: '65%', left: '45%' }}>🐰</div>
+                <div className={styles.plushie} style={{ top: '55%', left: '70%' }}>🐻</div>
+                <div className={styles.plushie} style={{ top: '70%', left: '35%' }}>🐱</div>
+                <div className={styles.plushie} style={{ top: '60%', left: '60%' }}>🐶</div>
+              </div>
+              <div className={styles.claw}>
+                <div className={styles.clawArm}></div>
+                <div className={styles.clawGripper}></div>
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
+      </section>
+
+      {/* Features Section */}
+      <section className={styles.features}>
+        <h2 className={styles.sectionTitle}>게임 특징</h2>
+        <div className={styles.featureGrid}>
+          {features.map((feature, index) => (
+            <div key={index} className={styles.featureCard}>
+              <div className={styles.featureIcon}>{feature.icon}</div>
+              <h3 className={styles.featureTitle}>{feature.title}</h3>
+              <p className={styles.featureDescription}>{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Mini Ranking Section */}
+      <section className={styles.ranking}>
+        <div className={styles.rankingHeader}>
+          <h2 className={styles.sectionTitle}>TOP 5 랭킹</h2>
+          <Link href="/ranking" className={styles.viewAllLink}>
+            전체 보기 →
+          </Link>
+        </div>
+        <div className={styles.rankingTable}>
+          <div className={styles.rankingHeader}>
+            <span>순위</span>
+            <span>닉네임</span>
+            <span>점수</span>
+          </div>
+          {topRankings.map((player) => (
+            <div
+              key={player.rank}
+              className={`${styles.rankingRow} ${player.rank <= 3 ? styles.topThree : ''}`}
+            >
+              <span className={styles.rankNumber}>
+                {player.rank <= 3 ? (
+                  <span className={styles.medal}>
+                    {player.rank === 1 ? '🥇' : player.rank === 2 ? '🥈' : '🥉'}
+                  </span>
+                ) : (
+                  player.rank
+                )}
+              </span>
+              <span className={styles.nickname}>{player.nickname}</span>
+              <span className={styles.score}>{player.score.toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className={styles.cta}>
+        <h2 className={styles.ctaTitle}>지금 바로 도전하세요!</h2>
+        <p className={styles.ctaDescription}>
+          무료로 즐기는 웹 인형뽑기, 당신의 실력을 보여주세요.
+        </p>
+        <Link href="/game" className={styles.ctaButton}>
+          게임 시작
+        </Link>
+      </section>
     </div>
   );
 }
