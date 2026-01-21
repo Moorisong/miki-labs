@@ -30,6 +30,22 @@ const DOLL_PALETTES = [
   { body: '#FFEFD5', accent: '#F4A460', cheek: '#FF6B6B' }, // 크림 햄스터
   { body: '#F4A460', accent: '#8B4513', cheek: '#FF6B6B' }, // 강아지
   { body: '#D3D3D3', accent: '#FFFFFF', cheek: '#FF69B4' }, // 회색 강아지
+  // New Additions:
+  { body: '#957DAD', accent: '#845EC2', cheek: '#FF9EAA' }, // 라벤더
+  { body: '#FF9EAA', accent: '#FFD3E0', cheek: '#FF6F91' }, // 소프트 핑크
+  { body: '#D6E5FA', accent: '#B4D7FA', cheek: '#F3C5FF' }, // 베이비 블루
+  { body: '#FFF0F5', accent: '#DB7093', cheek: '#FF69B4' }, // 라벤더 블러쉬
+  { body: '#F0FFF0', accent: '#F0E68C', cheek: '#FFA07A' }, // 허니듀
+  { body: '#E0FFFF', accent: '#87CEFA', cheek: '#FFB6C1' }, // 라이트 시안
+  { body: '#FAFAD2', accent: '#FFD700', cheek: '#FF6347' }, // 라이트 골든로드
+  { body: '#FFE4E1', accent: '#FA8072', cheek: '#DC143C' }, // 미스티 로즈
+  { body: '#B0E0E6', accent: '#4682B4', cheek: '#FF69B4' }, // 파우더 블루
+  { body: '#C8A2C8', accent: '#800080', cheek: '#FFC0CB' }, // 라일락
+  { body: '#98FF98', accent: '#32CD32', cheek: '#FF4500' }, // 민트 그린
+  { body: '#FFDAB9', accent: '#FF8C00', cheek: '#CD5C5C' }, // 피치 퍼프
+  { body: '#D8BFD8', accent: '#9932CC', cheek: '#8B008B' }, // 엉겅퀴
+  { body: '#F5FFFA', accent: '#00FA9A', cheek: '#FF1493' }, // 민트 크림
+  { body: '#778899', accent: '#2F4F4F', cheek: '#FFA500' }, // 쿨 그레이
 ];
 
 // 인형 타입 (토끼, 곰, 고양이, 햄스터, 강아지)
@@ -49,6 +65,13 @@ const generateDollConfigs = (count: number): CuteDollConfig[] => {
   const margin = 0.3;
   const dolls: CuteDollConfig[] = [];
 
+  // 구멍 위치 범위 (여유를 두고 설정)
+  // EXIT_ZONE: x[1.5 ~ 2.5], z[1.0 ~ 2.0]
+  // 인형 크기(약 0.2)와 물리적 튀는 현상 고려하여 x > 1.0, z > 0.5 정도면 위험
+  const isTooCloseToHole = (x: number, z: number) => {
+    return x > 1.2 && z > 0.8;
+  };
+
   const cuteTypes: CuteDollType[] = ['bunny', 'bear', 'cat', 'hamster', 'dog'];
 
   // 햄스터 전용 팔레트 인덱스 (10, 11, 12)
@@ -58,8 +81,15 @@ const generateDollConfigs = (count: number): CuteDollConfig[] => {
   for (let i = 0; i < 2; i++) {
     const size = 0.16 + Math.random() * 0.06; // 햄스터는 약간 작게
 
-    const x = (Math.random() - 0.5) * (width - margin * 2 - size * 2);
-    const z = (Math.random() - 0.5) * (depth - margin * 2 - size * 2);
+    let x = (Math.random() - 0.5) * (width - margin * 2 - size * 2);
+    let z = (Math.random() - 0.5) * (depth - margin * 2 - size * 2);
+
+    // 구멍 근처라면 반대편으로 이동
+    if (isTooCloseToHole(x, z)) {
+      x = -Math.abs(x);
+      z = -Math.abs(z);
+    }
+
     const y = floorHeight + size + Math.random() * 0.5;
 
     dolls.push({
@@ -80,8 +110,15 @@ const generateDollConfigs = (count: number): CuteDollConfig[] => {
     const cuteType = cuteTypes[Math.floor(Math.random() * cuteTypes.length)];
     const size = cuteType === 'hamster' ? 0.16 + Math.random() * 0.06 : 0.18 + Math.random() * 0.08;
 
-    const x = (Math.random() - 0.5) * (width - margin * 2 - size * 2);
-    const z = (Math.random() - 0.5) * (depth - margin * 2 - size * 2);
+    let x = (Math.random() - 0.5) * (width - margin * 2 - size * 2);
+    let z = (Math.random() - 0.5) * (depth - margin * 2 - size * 2);
+
+    // 구멍 근처라면 반대편으로 이동
+    if (isTooCloseToHole(x, z)) {
+      x = -Math.abs(x);
+      z = -Math.abs(z);
+    }
+
     const y = floorHeight + size + Math.random() * 0.5;
 
     // 햄스터면 햄스터 팔레트, 강아지면 강아지 팔레트 (13, 14), 나머지는 랜덤
@@ -91,7 +128,13 @@ const generateDollConfigs = (count: number): CuteDollConfig[] => {
     } else if (cuteType === 'dog') {
       paletteIndex = 13 + Math.floor(Math.random() * 2);
     } else {
-      paletteIndex = Math.floor(Math.random() * 10); // 기존 팔레트 0-9
+      // 기존 팔레트(0-9) + 새로운 파스텔 팔레트(15-29) 중 랜덤 선택
+      // 햄스터/강아지 전용 제외하고 모든 색상 사용
+      const availableIndices = [
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+        15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29
+      ];
+      paletteIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
     }
 
     dolls.push({
@@ -156,19 +199,23 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
       }
 
       // ** 위치 강제 고정 **
-      // 오프셋 적용하여 실제 잡힌 위치에 고정
-      const targetX = visualClawPosition.x + grabbedDoll.grabOffset.x;
-      const targetY = visualClawPosition.y - 0.25 + grabbedDoll.grabOffset.y;
-      const targetZ = visualClawPosition.z + grabbedDoll.grabOffset.z;
+      // 논리적 집게 위치 기준으로 계산 (인형이 제자리에서 시작하도록)
+      const clawPos = state.claw.position;
+      const targetX = clawPos.x + grabbedDoll.grabOffset.x;
+      const targetY = clawPos.y - 0.25 + grabbedDoll.grabOffset.y;
+      const targetZ = clawPos.z + grabbedDoll.grabOffset.z;
+
+      // 저장된 회전값 사용 (갑자기 자세가 바뀌는 것 방지)
+      const savedRotation = grabbedDoll.rotation || { x: 0, y: 0, z: 0 };
 
       api.position.set(targetX, targetY, targetZ);
       api.velocity.set(0, 0, 0);
       api.angularVelocity.set(0, 0, 0);
-      api.rotation.set(0, 0, 0);
+      api.rotation.set(savedRotation.x, savedRotation.y, savedRotation.z);
 
       if (ref.current) {
         ref.current.position.set(targetX, targetY, targetZ);
-        ref.current.rotation.set(0, 0, 0); // 회전도 고정
+        ref.current.rotation.set(savedRotation.x, savedRotation.y, savedRotation.z);
       }
       return;
     }
@@ -187,15 +234,15 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
       if (isSuccessDrop) {
         // 성공적인 놓기: 똑바로 아래로 떨어지도록 함
         // 랜덤성을 제거하고 약간의 하방 속도만 부여
-        api.velocity.set(0, -1, 0);
+        api.velocity.set(0, 0, 0);
         api.angularVelocity.set(0, 0, 0);
       } else {
-        // 실수로 놓침 (Slip): 걸려서 떨어지는 효과 (랜덤 속도 및 회전)
-        const randX = (Math.random() - 0.5) * 1.0;
-        const randZ = (Math.random() - 0.5) * 1.0;
-        api.velocity.set(randX, -1, randZ);
+        // 실수로 놓침 (Slip): 부드럽게 미끄러지는 효과
+        const randX = (Math.random() - 0.5) * 0.4;
+        const randZ = (Math.random() - 0.5) * 0.4;
+        api.velocity.set(randX, 0, randZ);
 
-        const randAng = 5;
+        const randAng = 2;
         api.angularVelocity.set(
           (Math.random() - 0.5) * randAng,
           (Math.random() - 0.5) * randAng,
@@ -249,12 +296,14 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
 
         const elapsed = Date.now() - ref.current.userData.grabTimer;
 
-        if (elapsed > 1400) { // 1.4초 후 판정 (집게가 완전히 오므라든 후)
+        if (elapsed > 1400) { // 1.4초 후 판정 (집게가 완전히 오문라든 후)
           if (!grabbedDoll.id) {
             const [x, y, z] = positionRef.current;
-            const cx = visualClawPosition.x;
-            const cy = visualClawPosition.y;
-            const cz = visualClawPosition.z;
+            // 논리적 집게 위치 사용 (spring 지연 문제 해결)
+            const clawPos = state.claw.position;
+            const cx = clawPos.x;
+            const cy = clawPos.y;
+            const cz = clawPos.z;
 
             const distXZ = Math.sqrt((x - cx) ** 2 + (z - cz) ** 2);
             // 높이 판정
@@ -287,9 +336,10 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
               if (accuracy >= PARTIAL_THRESHOLD) {
                 grabCheckDoneRef.current = true;
 
+                // 논리적 집게 위치 기준으로 오프셋 계산 (인형이 제자리에 있도록)
                 const offset = {
                   x: x - cx,
-                  y: 0,
+                  y: y - (cy - 0.25),  // Y 오프셋도 정확히 계산
                   z: z - cz
                 };
                 const isPerfectGrab = accuracy >= PERFECT_THRESHOLD;
@@ -762,12 +812,27 @@ const CuteDoll = ({ config }: CuteDollProps) => {
       case 'dog':
         return <DogDoll config={config} physicsRef={ref} />;
       default:
-        return null;
+        // 혹시라도 타입이 없거나 잘못된 경우 기본값으로 곰인형 렌더링 (동그라미 구체만 나오는 문제 방지)
+        // 팔레트가 없을 경우를 대비해 기본 팔레트 사용
+        const safeConfig = {
+          ...config,
+          palette: config.palette || DOLL_PALETTES[1] // 갈색 곰 팔레트
+        };
+        return <BearDoll config={safeConfig} physicsRef={ref} />;
     }
   };
 
+  // 잡혔을 때는 집게 내부에서 렌더링하지 않고, 여기서 직접 위치를 제어하여 절대 사라지지 않게 함
+  // 집게 쪽 GrabbedDollRenderer는 제거해야 함 (중복 렌더링 방지 및 깜빡임 원인 제거)
+  useFrame(() => {
+    if (isGrabbed && ref.current) {
+      // useDollLogic에서 위치를 제어하므로 여기서는 visible만 항상 true로 유지
+      // ref.current.visible = true; // 기본값이므로 불필요
+    }
+  });
+
   return (
-    <group ref={ref as any} visible={!isGrabbed}>
+    <group ref={ref as any}>
       {renderDoll()}
     </group>
   );
