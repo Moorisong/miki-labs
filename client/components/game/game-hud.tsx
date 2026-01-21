@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import styles from './game-hud.module.css';
@@ -24,6 +25,14 @@ export default function GameHUD({
     const { data: session, status } = useSession();
     const isLoggedIn = status === 'authenticated';
     const isLastAttempt = remainingAttempts === 1 && !isOnCooldown;
+    const [hasGameStarted, setHasGameStarted] = useState(false);
+
+    // 게임이 한 번이라도 시작되면 안내 문구를 숨기기 위한 처리
+    useEffect(() => {
+        if (phase !== 'idle') {
+            setHasGameStarted(true);
+        }
+    }, [phase]);
 
     return (
         <div className={styles.hud}>
@@ -70,8 +79,8 @@ export default function GameHUD({
                 </div>
             )}
 
-            {/* 비로그인 안내 문구 (게임 시작 전만 노출) */}
-            {!isLoggedIn && phase === 'idle' && (
+            {/* 비로그인 안내 문구 (최초 게임 시작 전까지만 노출) */}
+            {!isLoggedIn && phase === 'idle' && !hasGameStarted && (
                 <div className={styles.loginPrompt}>
                     <p className={styles.promptText}>
                         <span className={styles.infoIcon}>ℹ️</span>
