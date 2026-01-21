@@ -26,7 +26,7 @@ ppopgi-addict/
 * `NEXT_PUBLIC_API_URL`: 백엔드 API 주소
 
 ### Server (`server/.env`)
-* `PORT`: 서버 포트 (기본 4000)
+* `PORT`: 서버 포트 (기본 3000)
 * `MONGO_URI`: MongoDB 접속 주소
 * `OAUTH_CLIENT_ID`: OAuth 클라이언트 ID
 

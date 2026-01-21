@@ -7,7 +7,7 @@ This document outlines how the sub-agents collaborate to achieve the "Claw Addic
 1.  **Phase 1: Foundation (Parallel)**
     *   **Agent 01 (Game)**: Sets up an empty Three.js canvas with basic physics world.
     *   **Agent 02 (Web)**: Sets up the Next.js layouts and routing.
-    *   **Agent 03 (Server)**: Sets up the Express server listening on port 4000.
+    *   **Agent 03 (Server)**: Sets up the Express server listening on port 3000.
 
 2.  **Phase 2: Integration I (Game Embedding)**
     *   Agent 02 creates the `/game` page structure.
