@@ -31,23 +31,58 @@ const GlassPanel = ({ position, rotation = [0, 0, 0], size }: GlassPanelProps) =
 };
 
 const Floor = () => {
-  // 물리용 평면 (보이지 않음)
-  usePlane<Mesh>(() => ({
-    rotation: [-Math.PI / 2, 0, 0],
-    position: [0, floorHeight, 0],
-    material: {
-      friction: PHYSICS_CONFIG.floorFriction,
-      restitution: 0.2,
-    },
+  // Dimensions
+  const { width, depth, floorHeight } = CABINET_DIMENSIONS;
+
+  // Floor Logic:
+  // Cabinet is Width 5 (-2.5 to 2.5), Depth 4 (-2.0 to 2.0).
+  // Exit hole is at Front-Right: X[1.5, 2.5], Z[1.0, 2.0].
+
+  // 1. Left Main Section (X: -2.5 to 1.5, Full Z)
+  // Width: 4, Depth: 4
+  // Center X: -0.5, Center Z: 0
+  const leftFloorSize: [number, number, number] = [4, floorHeight, 4];
+  const leftFloorPos: [number, number, number] = [-0.5, floorHeight / 2, 0];
+
+  // 2. Right Back Section (X: 1.5 to 2.5, Z: -2.0 to 1.0)
+  // Width: 1, Depth: 3
+  // Center X: 2.0, Center Z: -0.5 (Midpoint of -2.0 and 1.0)
+  const rightFloorSize: [number, number, number] = [1, floorHeight, 3];
+  const rightFloorPos: [number, number, number] = [2.0, floorHeight / 2, -0.5];
+
+  // Physics Bodies (Static Boxes)
+  useBox(() => ({
+    args: leftFloorSize,
+    position: leftFloorPos,
     type: 'Static',
+    material: { friction: PHYSICS_CONFIG.floorFriction, restitution: 0.2 },
   }));
 
-  // 시각적 바닥 (물리와 분리)
+  useBox(() => ({
+    args: rightFloorSize,
+    position: rightFloorPos,
+    type: 'Static',
+    material: { friction: PHYSICS_CONFIG.floorFriction, restitution: 0.2 },
+  }));
+
+  // Visuals
   return (
-    <mesh position={[0, floorHeight / 2, 0]} receiveShadow>
-      <boxGeometry args={[width - glassThickness * 2, floorHeight, depth - glassThickness * 2]} />
-      <meshStandardMaterial color="#2a2a2a" roughness={0.8} />
-    </mesh>
+    <group>
+      <mesh position={leftFloorPos} receiveShadow>
+        <boxGeometry args={leftFloorSize} />
+        <meshStandardMaterial color="#2a2a2a" roughness={0.8} />
+      </mesh>
+      <mesh position={rightFloorPos} receiveShadow>
+        <boxGeometry args={rightFloorSize} />
+        <meshStandardMaterial color="#2a2a2a" roughness={0.8} />
+      </mesh>
+
+      {/* Decorative Chute/Hole Frame */}
+      <mesh position={[2.0, floorHeight / 2, 1.5]}>
+        <boxGeometry args={[1, floorHeight * 0.9, 1]} />
+        <meshStandardMaterial color="#000000" />
+      </mesh>
+    </group>
   );
 };
 

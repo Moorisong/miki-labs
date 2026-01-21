@@ -22,6 +22,7 @@ const {
 const ClawCollider = () => {
   const position = useGameStore((state) => state.claw.position);
   const isOpen = useGameStore((state) => state.claw.isOpen);
+  const phase = useGameStore((state) => state.phase);
 
   // 집게가 열렸을 때만 작은 충돌체. 
   // 잡는 순간 인형을 밀어내지 않도록 충분히 작게 유지하고 위치를 위로.
@@ -35,12 +36,24 @@ const ClawCollider = () => {
       friction: 0.1,
       restitution: 0.05,
     },
+    collisionResponse: true,
   }));
 
   // 집게 위치에 따라 충돌체 위치 업데이트
   useFrame(() => {
-    // 집게 중심보다 약간 위(0.2)에 둬서 잡히는 인형과의 충돌 방지
-    api.position.set(position.x, position.y + 0.2, position.z);
+    // 인형을 잡고 이동 중일 때는 충돌 비활성화
+    // 또한 구멍 구역(x > 1.0)에 있을 때도 충돌 비활성화 (떨어지는 인형을 쳐내지 않도록)
+    const isInHoleZone = position.x > 1.0;
+    const disableCollision = phase === 'rising' || phase === 'returning' || phase === 'releasing' || isInHoleZone;
+    api.collisionResponse.set(!disableCollision);
+
+    if (disableCollision) {
+      // 충돌체를 멀리 치워버림 (벽 충돌 방지 최후의 수단)
+      api.position.set(0, 1000, 0);
+    } else {
+      // 정상 위치 업데이트
+      api.position.set(position.x, position.y + 0.2, position.z);
+    }
   });
 
   return (
@@ -63,8 +76,8 @@ const GrabbedDollRenderer = () => {
   const config = grabbedDoll.config ? (grabbedDoll.config as any as CuteDollConfig) : null;
 
   // startDollY: 인형이 서 있을 때의 기준 Y 위치 (발바닥이 이 위치에 옴)
-  // 값을 더 올려서 바닥 뚫림 현상 완전히 방지 (-0.25 -> -0.15)
-  const startDollY = -0.15;
+  // 값을 내려서 집게 아래쪽에 위치하도록 함 (-0.15 -> -0.35)
+  const startDollY = -0.35;
 
   // 회전 보정된 Y 위치 계산
   const basePosY = useMemo(() => {
@@ -78,8 +91,13 @@ const GrabbedDollRenderer = () => {
     localCenter.applyEuler(new Euler(rotation.x, rotation.y, rotation.z));
 
     // 목표: "회전된 인형의 중심"이 "집게의 잡는 지점"에 와야 함.
-    // 중심점을 더 위로 잡아(0.3 -> 0.6) 큰 인형도 처지지 않게 함
-    const targetCenterY = startDollY + config.size * 0.6;
+    // 기존 로직 유지하되, 최대 높이 제한을 둠 (집게 위로 뚫고 가지 않도록)
+    let targetCenterY = startDollY + config.size * 0.6;
+
+    // 최대 높이 제한: 집게 본체를 뚫지 않도록 -0.1 이하로 제한
+    if (targetCenterY > -0.15) {
+      targetCenterY = -0.15;
+    }
 
     // 목표 중심점 높이를 맞추기 위해 인형의 발바닥(Origin)을 어디에 둬야 하는가?
     // OriginY + RotatedCenterY = TargetCenterY
@@ -152,6 +170,9 @@ const ClawFinger = ({ index, isOpen, strengthVariance, clawPosition }: ClawFinge
   const targetAngle = isOpen ? openAngle : closedAngle;
   const currentAngleRef = useRef(openAngle);
 
+  // 현재 게임 단계 가져오기
+  const phase = useGameStore((state) => state.phase);
+
   // 손가락 끝 위치에 물리 충돌체 (작게, 부드럽게)
   const [fingerRef, fingerApi] = useSphere<Mesh>(() => ({
     type: 'Kinematic',
@@ -161,10 +182,17 @@ const ClawFinger = ({ index, isOpen, strengthVariance, clawPosition }: ClawFinge
       friction: 0.2,
       restitution: 0.02, // 거의 튕기지 않음
     },
+    collisionResponse: true, // 초기값
   }));
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
+
+    // 인형을 잡고 이동 중일 때는 손가락 충돌 비활성화 (벽과 충돌 방지)
+    // 또한 구멍 구역(x > 1.0)에 있을 때도 충돌 비활성화 (떨어지는 인형을 쳐내지 않도록)
+    const isInHoleZone = clawPosition.x > 1.0;
+    const disableCollision = phase === 'rising' || phase === 'returning' || phase === 'releasing' || isInHoleZone;
+    fingerApi.collisionResponse.set(!disableCollision);
 
     const currentAngle = currentAngleRef.current;
     const adjustedTarget = targetAngle * (1 + (strengthVariance - 1) * 0.1);
@@ -189,7 +217,12 @@ const ClawFinger = ({ index, isOpen, strengthVariance, clawPosition }: ClawFinge
     const worldZ = clawPosition.z + fingerTipLocalX * sinOffset + rotatedZ * cosOffset;
     const worldY = clawPosition.y + rotatedY - baseRadius * 0.5;
 
-    fingerApi.position.set(worldX, worldY, worldZ);
+    if (disableCollision) {
+      // 충돌체를 멀리 치워버림
+      fingerApi.position.set(0, 1000, 0);
+    } else {
+      fingerApi.position.set(worldX, worldY, worldZ);
+    }
   });
 
   return (

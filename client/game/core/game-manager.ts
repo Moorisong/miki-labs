@@ -28,6 +28,12 @@ interface GrabbedDollState {
   rotation: { x: number; y: number; z: number } | null; // 잡혔을 때의 회전값
 }
 
+// Pending release doll state (waiting to fall into hole)
+interface PendingReleaseDoll {
+  id: string | null;
+  config: DollConfig | null;
+}
+
 interface GameStore extends GameState {
   config: GameConfig;
   callbacks: GameEventCallbacks;
@@ -35,6 +41,9 @@ interface GameStore extends GameState {
 
   // Grabbed doll tracking
   grabbedDoll: GrabbedDollState;
+
+  // Pending release doll (released over hole, waiting for physics)
+  pendingReleaseDoll: PendingReleaseDoll;
 
   // Velocity tracking for inertia
   velocity: Position3D;
@@ -62,12 +71,16 @@ interface GameStore extends GameState {
   grabDoll: () => void;
   riseClaw: () => void;
   returnClaw: () => void;
-  endAttempt: (success: boolean) => void;
+  endAttempt: (success: boolean, dollConfig?: DollConfig) => void;
 
   // Grab mechanics
   setGrabbedDoll: (doll: DollConfig | null, offset?: Position3D, accuracy?: number, isPerfectGrab?: boolean, rotation?: { x: number; y: number; z: number }) => void;
   updateGrabbedDollGrip: () => boolean; // Returns false if doll should be dropped
   releaseDoll: () => void;
+
+  // Pending release mechanics
+  setPendingReleaseDoll: (doll: DollConfig | null) => void;
+  reportDollFellInHole: (doll: DollConfig) => void;
 
   // Success/failure detection
   checkSuccess: (dollPosition: Position3D) => boolean;
@@ -96,6 +109,11 @@ const initialGrabbedDollState: GrabbedDollState = {
   rotation: null,
 };
 
+const initialPendingReleaseDoll: PendingReleaseDoll = {
+  id: null,
+  config: null,
+};
+
 const initialVelocity: Position3D = { x: 0, y: 0, z: 0 };
 
 const initialGameState: GameState = {
@@ -111,6 +129,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   callbacks: {},
   soundCallbacks: {},
   grabbedDoll: initialGrabbedDollState,
+  pendingReleaseDoll: initialPendingReleaseDoll,
   velocity: initialVelocity,
   visualClawPosition: { ...initialClawPosition },
 
@@ -245,11 +264,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     get().setPhase('returning');
   },
 
-  endAttempt: (success: boolean) => {
+  endAttempt: (success: boolean, dollConfig?: DollConfig) => {
     const { grabbedDoll, soundCallbacks } = get();
+    const targetDoll = dollConfig || grabbedDoll.config;
 
-    if (success && grabbedDoll.config) {
-      const score = get().calculateScore(grabbedDoll.config, true);
+    if (success && targetDoll) {
+      const score = get().calculateScore(targetDoll, true);
       get().addScore(score);
       soundCallbacks.onSuccess?.();
     } else {
@@ -315,27 +335,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     if (phase === 'rising' || phase === 'returning') {
       // 정확도가 낮을수록 빠르게 감소
-      // accuracy 0.35 -> decayRate 약 0.65 (매우 빠른 감소)
-      // accuracy 0.79 -> decayRate 약 0.92 (느린 감소)
-      const normalizedAccuracy = Math.max(0, Math.min(1, (grabbedDoll.accuracy - 0.35) / 0.45)); // 0.35~0.80를 0~1로 매핑, 클램프
-      const baseDecay = 0.65; // 최저 감소율 (35% 정확도) - 매우 공격적
-      const maxDecay = 0.92; // 최고 감소율 (79% 정확도)
+      const normalizedAccuracy = Math.max(0, Math.min(1, (grabbedDoll.accuracy - 0.35) / 0.45));
+
+      // Decay 대폭 완화 (더 잘 잡고 있도록)
+      const baseDecay = 0.90; // 0.65 -> 0.90
+      const maxDecay = 0.99;  // 0.92 -> 0.99
       const adjustedDecayRate = baseDecay + normalizedAccuracy * (maxDecay - baseDecay);
 
       newGripStrength *= adjustedDecayRate;
 
-      // 미끄러짐 확률: 정확도가 낮을수록 높음
-      // accuracy 0.35 -> slipChance 약 50%
-      // accuracy 0.55 -> slipChance 약 35%
-      // accuracy 0.79 -> slipChance 약 15%
-      const slipChance = (1 - normalizedAccuracy) * 0.4 + 0.1;
+      // 미끄러짐 확률 대폭 감소
+      const slipChance = (1 - normalizedAccuracy) * 0.1 + 0.02; // 매우 낮음
 
-      // returning 단계에서 추가 미끄러짐
-      const totalSlipChance = slipChance + (phase === 'returning' ? 0.15 : 0);
+      // returning 단계에서 추가 미끄러짐도 대폭 감소 (0.35 -> 0.05)
+      const totalSlipChance = slipChance + (phase === 'returning' ? 0.05 : 0);
 
       if (Math.random() < totalSlipChance) {
-        // 미끄러지면 그립 크게 감소
-        const slipAmount = 0.3 + normalizedAccuracy * 0.3; // 0.3~0.6
+        // 미끄러져도 그립이 살짝만 감소하도록 변경
+        const slipAmount = 0.8 + normalizedAccuracy * 0.15; // 0.8~0.95 (기존: 0.3~0.6)
         newGripStrength *= slipAmount;
         console.log(`[Slip] Grip reduced to ${(newGripStrength * 100).toFixed(1)}%`);
       }
@@ -359,6 +376,74 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   releaseDoll: () => {
     set({ grabbedDoll: initialGrabbedDollState });
+  },
+
+  setPendingReleaseDoll: (doll: DollConfig | null) => {
+    if (!doll) {
+      set({ pendingReleaseDoll: initialPendingReleaseDoll });
+      return;
+    }
+    set({
+      pendingReleaseDoll: {
+        id: doll.id,
+        config: doll,
+      },
+    });
+  },
+
+  reportDollFellInHole: (doll: DollConfig) => {
+    const { phase, soundCallbacks, pendingReleaseDoll } = get();
+
+    // Allow success in any active phase OR idle with pending doll (async success detection)
+    // Ignore if game result is showing
+    if (phase === 'result') {
+      return;
+    }
+
+    // idle 상태에서는 pendingReleaseDoll과 일치하는 인형만 성공 처리
+    if (phase === 'idle') {
+      if (!pendingReleaseDoll.id || pendingReleaseDoll.id !== doll.id) {
+        return;
+      }
+    }
+
+    console.log('Success! Doll fell into hole:', doll.id);
+
+    // Calculate and add score
+    const score = get().calculateScore(doll, true);
+    get().addScore(score);
+    soundCallbacks.onSuccess?.();
+
+    // Clear pending doll
+    set({ pendingReleaseDoll: initialPendingReleaseDoll });
+
+    // idle 상태에서 성공한 경우 attempt는 이미 차감되었음
+    if (phase === 'idle') {
+      // 이미 idle 상태이므로 상태 전환 불필요
+      // 단, 시도가 0이면 result로 전환
+      const remaining = get().attempts;
+      if (remaining <= 0) {
+        get().setPhase('result');
+      }
+      return;
+    }
+
+    // 다른 단계에서 성공한 경우 (기존 로직)
+    get().useAttempt();
+    get().setClawOpen(true);
+
+    const remaining = get().attempts;
+    if (remaining > 0) {
+      get().setPhase('idle');
+      get().setClawPosition(
+        initialClawPosition.x,
+        initialClawPosition.y,
+        initialClawPosition.z
+      );
+      set({ velocity: initialVelocity });
+    } else {
+      get().setPhase('result');
+    }
   },
 
   // Success/failure detection

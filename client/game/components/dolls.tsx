@@ -118,6 +118,7 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
   const positionRef = useRef<[number, number, number]>([0, 0, 0]);
   const wasGrabbedRef = useRef(false);
   const rotationRef = useRef<[number, number, number]>([0, 0, 0]);
+  const holeFallReportedRef = useRef(false);
 
   useEffect(() => {
     const unsubscribePos = api.position.subscribe((p: [number, number, number]) => {
@@ -137,7 +138,7 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
 
     // 매 프레임 최신 상태 가져오기 (closure 문제 방지)
     const state = useGameStore.getState();
-    const { phase, grabbedDoll, visualClawPosition, setGrabbedDoll } = state;
+    const { phase, grabbedDoll, visualClawPosition, setGrabbedDoll, pendingReleaseDoll, reportDollFellInHole } = state;
 
     const isGrabbed = grabbedDoll.id === config.id;
 
@@ -145,10 +146,9 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
     if (isGrabbed) {
       if (!wasGrabbedRef.current) {
         wasGrabbedRef.current = true;
+        holeFallReportedRef.current = false; // Reset hole fall tracking
 
         // 물리 타입을 Kinematic으로 변경하여 물리 연산에서 제외하고 위치 제어만 가능하게 함
-        // (mass=0 과 유사하지만 충돌 계산 등에서 더 확실함)
-        // api.type.set('Kinematic')이 지원되지 않을 수 있으므로 mass=0 및 collisionResponse 비활성화 등 사용
         api.mass.set(0);
         api.velocity.set(0, 0, 0);
         api.angularVelocity.set(0, 0, 0);
@@ -180,18 +180,61 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
       api.mass.set(config.mass);
       api.collisionResponse.set(true); // 충돌 다시 활성화
 
-      // 걸려서 떨어지는 효과 (랜덤 속도 및 회전)
-      const randX = (Math.random() - 0.5) * 1.0;
-      const randZ = (Math.random() - 0.5) * 1.0;
-      api.velocity.set(randX, -1, randZ);
+      // 성공적인 놓기인지 확인 (releasing 단계이거나, 이미 idle로 넘어갔지만 pendingDoll인 경우)
+      const isSuccessDrop = phase === 'releasing' ||
+        (state.pendingReleaseDoll.id === config.id);
 
-      const randAng = 5;
-      api.angularVelocity.set(
-        (Math.random() - 0.5) * randAng,
-        (Math.random() - 0.5) * randAng,
-        (Math.random() - 0.5) * randAng
-      );
+      if (isSuccessDrop) {
+        // 성공적인 놓기: 똑바로 아래로 떨어지도록 함
+        // 랜덤성을 제거하고 약간의 하방 속도만 부여
+        api.velocity.set(0, -1, 0);
+        api.angularVelocity.set(0, 0, 0);
+      } else {
+        // 실수로 놓침 (Slip): 걸려서 떨어지는 효과 (랜덤 속도 및 회전)
+        const randX = (Math.random() - 0.5) * 1.0;
+        const randZ = (Math.random() - 0.5) * 1.0;
+        api.velocity.set(randX, -1, randZ);
+
+        const randAng = 5;
+        api.angularVelocity.set(
+          (Math.random() - 0.5) * randAng,
+          (Math.random() - 0.5) * randAng,
+          (Math.random() - 0.5) * randAng
+        );
+      }
       api.wakeUp();
+    }
+
+    // *** 구멍 낙하 감지 ***
+    // 게임 진행 중일 경우 언제든지 구멍에 떨어지면 성공 (굴러서 들어가는 경우 포함)
+    // 단, moving 단계(시작 직후)는 인형 물리 초기화로 튀는 경우가 있어 제외함
+    // idle 상태에서도 pendingReleaseDoll과 일치하는 인형은 감지 (비동기 성공 처리)
+    const pendingDoll = state.pendingReleaseDoll;
+    const isPendingDoll = pendingDoll.id === config.id;
+    const isGameActive = (phase !== 'result' && phase !== 'moving') &&
+      (phase !== 'idle' || isPendingDoll);
+
+    if (isGameActive && !holeFallReportedRef.current) {
+      const [x, y, z] = positionRef.current;
+
+      // EXIT_ZONE check: XZ 범위 안이고 Y가 임계값(-0.5) 아래로 떨어지면 성공
+      const EXIT_ZONE = {
+        x: { min: 1.5, max: 2.5 },
+        z: { min: 1.0, max: 2.0 },
+      };
+      const FALL_THRESHOLD_Y = -0.5; // 구멍 바닥 아래
+      const MIN_VALID_Y = -10.0; // 너무 깊게 떨어진 인형은 무시 (이전 게임 잔재 등)
+
+      const inExitZoneXZ =
+        x >= EXIT_ZONE.x.min && x <= EXIT_ZONE.x.max &&
+        z >= EXIT_ZONE.z.min && z <= EXIT_ZONE.z.max;
+
+      // Y가 임계값보다 작고, 너무 깊지 않은 경우에만 성공 처리
+      if (inExitZoneXZ && y < FALL_THRESHOLD_Y && y > MIN_VALID_Y) {
+        holeFallReportedRef.current = true;
+        console.log(`[Hole Fall] Doll ${config.id} fell into hole at Y=${y.toFixed(2)}`);
+        reportDollFellInHole(config);
+      }
     }
 
     // grabbing 단계에서 미리 잡기 체크 (집게가 멈춰있을 때)
@@ -272,6 +315,11 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
       if (ref.current) {
         ref.current.userData.grabTimer = null;
       }
+    }
+
+    // Reset hole fall reported when phase changes away from releasing
+    if (phase !== 'releasing') {
+      holeFallReportedRef.current = false;
     }
 
   });
