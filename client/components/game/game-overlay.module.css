@@ -266,7 +266,7 @@
 /* Start Button */
 .startOverlay {
   position: absolute;
-  bottom: var(--space-xl);
+  bottom: 20%;
   left: 0;
   right: 0;
   display: flex;

@@ -279,7 +279,6 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
       // Y가 임계값보다 작고, 너무 깊지 않은 경우에만 성공 처리
       if (inExitZoneXZ && y < FALL_THRESHOLD_Y && y > MIN_VALID_Y) {
         holeFallReportedRef.current = true;
-        console.log(`[Hole Fall] Doll ${config.id} fell into hole at Y=${y.toFixed(2)}`);
         reportDollFellInHole(config);
       }
     }
@@ -343,8 +342,6 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
                   z: z - cz
                 };
                 const isPerfectGrab = accuracy >= PERFECT_THRESHOLD;
-
-                console.log(`[Grab] Accuracy: ${(accuracy * 100).toFixed(1)}%, Perfect: ${isPerfectGrab}`);
 
                 const [rx, ry, rz] = rotationRef.current;
                 setGrabbedDoll(config, offset, accuracy, isPerfectGrab, { x: rx, y: ry, z: rz });

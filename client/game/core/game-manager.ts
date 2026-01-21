@@ -335,7 +335,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // 프레임당 약 13% 확률 -> 1초(10회) 생존율 약 25%
       const rareFailChance = 0.13;
       if (Math.random() < rareFailChance) {
-        console.log(`[Bad Luck Drop] Even perfect grab failed! Accuracy: ${(grabbedDoll.accuracy * 100).toFixed(1)}%`);
         return false;
       }
       return true;
@@ -353,7 +352,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const failChance = 0.50 - (normalized * 0.30);
 
     if (Math.random() < failChance) {
-      console.log(`[Normal Drop] Grip failed. Accuracy: ${(grabbedDoll.accuracy * 100).toFixed(1)}%`);
       return false;
     }
 
@@ -395,7 +393,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
-    console.log('Success! Doll fell into hole:', doll.id);
+
 
     // Calculate and add score
     const score = get().calculateScore(doll, true);
