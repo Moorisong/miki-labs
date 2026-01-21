@@ -140,7 +140,7 @@ export default function GamePage() {
   return (
     <div className={styles.container}>
       <div className={styles.gameCanvas}>
-        <ClawMachine dollCount={12} />
+        <ClawMachine dollCount={25} />
       </div>
 
       <GameOverlay
