@@ -116,8 +116,17 @@ export const useGameLoop = () => {
                         setClawPosition(x, newY, z);
                     }
 
-                    // 그립 체크 제거됨: 인형은 구멍 위에 도달한 후에만 놓음
-                    // 중간에 절대 떨어뜨리지 않음
+                    // 그립 체크 (0.1초마다)
+                    // rising 단계에서만 떨어짐. returning 단계에서는 안전.
+                    gripCheckTimer.current += dt;
+                    if (gripCheckTimer.current > 0.1 && state.grabbedDoll.id) {
+                        gripCheckTimer.current = 0;
+                        const stillHolding = updateGrabbedDollGrip();
+                        if (!stillHolding) {
+                            // 인형 떨어뜨림!
+                            releaseDoll();
+                        }
+                    }
 
                     if (newY >= topY) {
                         // Reached top

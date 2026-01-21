@@ -325,51 +325,39 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     if (!grabbedDoll.id) return true;
 
-    // 완벽하게 잡은 경우 (90% 이상) 절대 떨어지지 않음
-    if (grabbedDoll.isPerfectGrab) {
+    // 1. 완벽한 잡기 중 초고수 (Accuracy 90% 이상): 절대 안 떨어짐 (무적)
+    if (grabbedDoll.accuracy >= 0.90) {
       return true;
     }
 
-    // 여기서부터는 40-89% 정확도의 불완전한 잡기
-    let newGripStrength = grabbedDoll.currentGripStrength;
-
-    if (phase === 'rising' || phase === 'returning') {
-      // 정확도가 낮을수록 빠르게 감소
-      const normalizedAccuracy = Math.max(0, Math.min(1, (grabbedDoll.accuracy - 0.35) / 0.45));
-
-      // Decay 대폭 완화 (더 잘 잡고 있도록)
-      const baseDecay = 0.90; // 0.65 -> 0.90
-      const maxDecay = 0.99;  // 0.92 -> 0.99
-      const adjustedDecayRate = baseDecay + normalizedAccuracy * (maxDecay - baseDecay);
-
-      newGripStrength *= adjustedDecayRate;
-
-      // 미끄러짐 확률 대폭 감소
-      const slipChance = (1 - normalizedAccuracy) * 0.1 + 0.02; // 매우 낮음
-
-      // returning 단계에서 추가 미끄러짐도 대폭 감소 (0.35 -> 0.05)
-      const totalSlipChance = slipChance + (phase === 'returning' ? 0.05 : 0);
-
-      if (Math.random() < totalSlipChance) {
-        // 미끄러져도 그립이 살짝만 감소하도록 변경
-        const slipAmount = 0.8 + normalizedAccuracy * 0.15; // 0.8~0.95 (기존: 0.3~0.6)
-        newGripStrength *= slipAmount;
-        console.log(`[Slip] Grip reduced to ${(newGripStrength * 100).toFixed(1)}%`);
-      }
-
-      set({
-        grabbedDoll: {
-          ...grabbedDoll,
-          currentGripStrength: newGripStrength,
-        },
-      });
-
-      // 그립이 임계값 이하면 떨어뜨림
-      if (newGripStrength < GRIP_CONFIG.releaseThreshold) {
-        console.log(`[Drop] Doll dropped! Final grip: ${(newGripStrength * 100).toFixed(1)}%`);
+    // 2. 완벽한 잡기 하위권 (Accuracy 80% ~ 89%): 높은 확률로 떨어질 수 있음
+    if (grabbedDoll.accuracy >= 0.80) {
+      // 프레임당 약 9% 확률 -> 1초(10회) 생존율 약 40%
+      const rareFailChance = 0.09;
+      if (Math.random() < rareFailChance) {
+        console.log(`[Bad Luck Drop] Even perfect grab failed! Accuracy: ${(grabbedDoll.accuracy * 100).toFixed(1)}%`);
         return false;
       }
+      return true;
     }
+
+    // 3. 일반 잡기 (Accuracy 35% ~ 79%)
+    // 정확도가 낮을수록 떨어질 확률 급격히 증가
+    // Accuracy 0.35 -> Chance 5% per check
+    // Accuracy 0.79 -> Chance 0.5% per check
+
+    // 0.35~0.80 범위를 0~1로 정규화 (값이 클수록 **잘 잡은 것**)
+    const normalized = (grabbedDoll.accuracy - 0.35) / (0.80 - 0.35);
+
+    // 0.15(15%) 에서 시작해서 0.08(8%) 만큼 감소 -> 0.07(7%) 까지
+    const failChance = 0.15 - (normalized * 0.08);
+
+    if (Math.random() < failChance) {
+      console.log(`[Normal Drop] Grip failed. Accuracy: ${(grabbedDoll.accuracy * 100).toFixed(1)}%`);
+      return false;
+    }
+
+    return true;
 
     return true;
   },
