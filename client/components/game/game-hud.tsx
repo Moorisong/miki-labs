@@ -27,50 +27,51 @@ export default function GameHUD({
 
     return (
         <div className={styles.hud}>
-            {/* 점수 표시 */}
-            <div className={styles.scoreSection}>
-                <div className={styles.scoreItem}>
-                    <span className={styles.label}>점수</span>
-                    <span className={styles.value}>{score.toLocaleString()}</span>
+            {/* 상단 바 (시도 횟수 - 점수) */}
+            <div className={styles.topBar}>
+                {/* 시도 횟수 / 쿨타임 표시 */}
+                <div className={styles.attemptsSection}>
+                    {isOnCooldown ? (
+                        <div className={styles.cooldownContainer}>
+                            <div className={styles.cooldownBadge}>
+                                <span className={styles.cooldownIcon}>⏳</span>
+                                <span className={styles.cooldownLabel}>소진</span>
+                            </div>
+                            <div className={styles.cooldownTimer}>
+                                <span className={styles.timerValue}>{cooldownRemaining}</span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className={styles.attemptsContainer}>
+                            <div className={styles.attemptsDisplay}>
+                                <span className={styles.label}>남은 시도</span>
+                                <span className={`${styles.attemptsValue} ${isLastAttempt ? styles.warning : ''}`}>
+                                    {remainingAttempts} / 3
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* 점수 표시 */}
+                <div className={styles.scoreSection}>
+                    <div className={styles.scoreItem}>
+                        <span className={styles.label}>점수</span>
+                        <span className={styles.value}>{score.toLocaleString()}</span>
+                    </div>
                 </div>
             </div>
 
-            {/* 시도 횟수 / 쿨타임 표시 */}
-            <div className={styles.attemptsSection}>
-                {isOnCooldown ? (
-                    <div className={styles.cooldownContainer}>
-                        <div className={styles.cooldownBadge}>
-                            <span className={styles.cooldownIcon}>⏳</span>
-                            <span className={styles.cooldownLabel}>시도 횟수 소진</span>
-                        </div>
-                        <div className={styles.cooldownTimer}>
-                            <span className={styles.timerLabel}>다음 시도까지</span>
-                            <span className={styles.timerValue}>{cooldownRemaining}</span>
-                        </div>
-                        <p className={styles.cooldownHint}>
-                            쿨타임 종료 후 시도 횟수 3회가 충전돼요
-                        </p>
-                    </div>
-                ) : (
-                    <div className={styles.attemptsContainer}>
-                        <div className={styles.attemptsDisplay}>
-                            <span className={styles.label}>남은 시도 횟수</span>
-                            <span className={`${styles.attemptsValue} ${isLastAttempt ? styles.warning : ''}`}>
-                                {remainingAttempts}회
-                            </span>
-                        </div>
-                        {isLastAttempt && (
-                            <div className={styles.lastAttemptWarning}>
-                                <span className={styles.warningIcon}>⚠️</span>
-                                <span>마지막 기회예요! 성공하면 기회가 하나 더 늘어나요!</span>
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
+            {/* 경고 메시지 (상단 바 아래 중앙) */}
+            {!isOnCooldown && isLastAttempt && (
+                <div className={styles.warningMessage}>
+                    <span className={styles.warningIcon}>⚠️</span>
+                    <span>마지막 기회예요! 성공하면 +1회!</span>
+                </div>
+            )}
 
-            {/* 비로그인 안내 문구 */}
-            {!isLoggedIn && phase !== 'result' && (
+            {/* 비로그인 안내 문구 (게임 시작 전만 노출) */}
+            {!isLoggedIn && phase === 'idle' && (
                 <div className={styles.loginPrompt}>
                     <p className={styles.promptText}>
                         <span className={styles.infoIcon}>ℹ️</span>

@@ -72,29 +72,30 @@ const useGameControls = ({
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (!enabled) return;
 
-    switch (event.key.toLowerCase()) {
-      case 'w':
-      case 'arrowup':
+    // event.code를 사용하여 키보드 레이아웃/언어 설정과 무관하게 처리
+    switch (event.code) {
+      case 'KeyW':
+      case 'ArrowUp':
         event.preventDefault();
         keyState.current.up = true;
         break;
-      case 's':
-      case 'arrowdown':
+      case 'KeyS':
+      case 'ArrowDown':
         event.preventDefault();
         keyState.current.down = true;
         break;
-      case 'a':
-      case 'arrowleft':
+      case 'KeyA':
+      case 'ArrowLeft':
         event.preventDefault();
         keyState.current.left = true;
         break;
-      case 'd':
-      case 'arrowright':
+      case 'KeyD':
+      case 'ArrowRight':
         event.preventDefault();
         keyState.current.right = true;
         break;
-      case ' ':
-      case 'enter':
+      case 'Space':
+      case 'Enter':
         event.preventDefault();
         keyState.current.action = true;
 
@@ -108,25 +109,25 @@ const useGameControls = ({
   }, [enabled, phase, startGame, dropClaw]);
 
   const handleKeyUp = useCallback((event: KeyboardEvent) => {
-    switch (event.key.toLowerCase()) {
-      case 'w':
-      case 'arrowup':
+    switch (event.code) {
+      case 'KeyW':
+      case 'ArrowUp':
         keyState.current.up = false;
         break;
-      case 's':
-      case 'arrowdown':
+      case 'KeyS':
+      case 'ArrowDown':
         keyState.current.down = false;
         break;
-      case 'a':
-      case 'arrowleft':
+      case 'KeyA':
+      case 'ArrowLeft':
         keyState.current.left = false;
         break;
-      case 'd':
-      case 'arrowright':
+      case 'KeyD':
+      case 'ArrowRight':
         keyState.current.right = false;
         break;
-      case ' ':
-      case 'enter':
+      case 'Space':
+      case 'Enter':
         keyState.current.action = false;
         break;
     }
