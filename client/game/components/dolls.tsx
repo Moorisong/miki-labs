@@ -25,10 +25,15 @@ const DOLL_PALETTES = [
   { body: '#87CEEB', accent: '#4169E1', cheek: '#FF69B4' }, // 하늘 곰
   { body: '#F0E68C', accent: '#DAA520', cheek: '#FF6B6B' }, // 노랑 토끼
   { body: '#E6E6FA', accent: '#9370DB', cheek: '#FF69B4' }, // 연보라 고양이
+  { body: '#F5DEB3', accent: '#D2B48C', cheek: '#FF9999' }, // 갈색 햄스터
+  { body: '#FFF5EE', accent: '#FFB6C1', cheek: '#FF69B4' }, // 흰 햄스터
+  { body: '#FFEFD5', accent: '#F4A460', cheek: '#FF6B6B' }, // 크림 햄스터
+  { body: '#F4A460', accent: '#8B4513', cheek: '#FF6B6B' }, // 강아지
+  { body: '#D3D3D3', accent: '#FFFFFF', cheek: '#FF69B4' }, // 회색 강아지
 ];
 
-// 인형 타입 (토끼, 곰, 고양이)
-type CuteDollType = 'bunny' | 'bear' | 'cat';
+// 인형 타입 (토끼, 곰, 고양이, 햄스터, 강아지)
+type CuteDollType = 'bunny' | 'bear' | 'cat' | 'hamster' | 'dog';
 
 export interface CuteDollConfig extends DollConfig {
   cuteType: CuteDollType;
@@ -44,11 +49,14 @@ const generateDollConfigs = (count: number): CuteDollConfig[] => {
   const margin = 0.3;
   const dolls: CuteDollConfig[] = [];
 
-  const cuteTypes: CuteDollType[] = ['bunny', 'bear', 'cat'];
+  const cuteTypes: CuteDollType[] = ['bunny', 'bear', 'cat', 'hamster', 'dog'];
 
-  for (let i = 0; i < count; i++) {
-    const cuteType = cuteTypes[Math.floor(Math.random() * cuteTypes.length)];
-    const size = 0.18 + Math.random() * 0.08;
+  // 햄스터 전용 팔레트 인덱스 (10, 11, 12)
+  const hamsterPalettes = [10, 11, 12];
+
+  // 햄스터 2마리 보장
+  for (let i = 0; i < 2; i++) {
+    const size = 0.16 + Math.random() * 0.06; // 햄스터는 약간 작게
 
     const x = (Math.random() - 0.5) * (width - margin * 2 - size * 2);
     const z = (Math.random() - 0.5) * (depth - margin * 2 - size * 2);
@@ -59,11 +67,43 @@ const generateDollConfigs = (count: number): CuteDollConfig[] => {
       position: [x, y, z],
       mass: generateRandomMass(),
       friction: generateRandomFriction(),
-      type: 'sphere', // 물리는 구체로 통일
+      type: 'sphere',
+      color: '#ffffff',
+      size,
+      cuteType: 'hamster',
+      palette: DOLL_PALETTES[hamsterPalettes[Math.floor(Math.random() * hamsterPalettes.length)]],
+    });
+  }
+
+  // 나머지 인형들
+  for (let i = 2; i < count; i++) {
+    const cuteType = cuteTypes[Math.floor(Math.random() * cuteTypes.length)];
+    const size = cuteType === 'hamster' ? 0.16 + Math.random() * 0.06 : 0.18 + Math.random() * 0.08;
+
+    const x = (Math.random() - 0.5) * (width - margin * 2 - size * 2);
+    const z = (Math.random() - 0.5) * (depth - margin * 2 - size * 2);
+    const y = floorHeight + size + Math.random() * 0.5;
+
+    // 햄스터면 햄스터 팔레트, 강아지면 강아지 팔레트 (13, 14), 나머지는 랜덤
+    let paletteIndex: number;
+    if (cuteType === 'hamster') {
+      paletteIndex = hamsterPalettes[Math.floor(Math.random() * hamsterPalettes.length)];
+    } else if (cuteType === 'dog') {
+      paletteIndex = 13 + Math.floor(Math.random() * 2);
+    } else {
+      paletteIndex = Math.floor(Math.random() * 10); // 기존 팔레트 0-9
+    }
+
+    dolls.push({
+      id: `doll-${i}`,
+      position: [x, y, z],
+      mass: generateRandomMass(),
+      friction: generateRandomFriction(),
+      type: 'sphere',
       color: '#ffffff',
       size,
       cuteType,
-      palette: DOLL_PALETTES[Math.floor(Math.random() * DOLL_PALETTES.length)],
+      palette: DOLL_PALETTES[paletteIndex],
     });
   }
 
@@ -116,10 +156,10 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
       }
 
       // ** 위치 강제 고정 **
-      // 오프셋 무시하고 집게 바로 아래 중심에 고정
-      const targetX = visualClawPosition.x;
-      const targetY = visualClawPosition.y - 0.25; // 집게 약간 아래
-      const targetZ = visualClawPosition.z;
+      // 오프셋 적용하여 실제 잡힌 위치에 고정
+      const targetX = visualClawPosition.x + grabbedDoll.grabOffset.x;
+      const targetY = visualClawPosition.y - 0.25 + grabbedDoll.grabOffset.y;
+      const targetZ = visualClawPosition.z + grabbedDoll.grabOffset.z;
 
       api.position.set(targetX, targetY, targetZ);
       api.velocity.set(0, 0, 0);
@@ -204,7 +244,11 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
               if (accuracy >= PARTIAL_THRESHOLD) {
                 grabCheckDoneRef.current = true;
 
-                const offset = { x: 0, y: 0, z: 0 };
+                const offset = {
+                  x: x - cx,
+                  y: 0,
+                  z: z - cz
+                };
                 const isPerfectGrab = accuracy >= PERFECT_THRESHOLD;
 
                 console.log(`[Grab] Accuracy: ${(accuracy * 100).toFixed(1)}%, Perfect: ${isPerfectGrab}`);
@@ -466,6 +510,178 @@ export const CatDoll = ({ config, physicsRef }: DollRenderProps) => {
   );
 };
 
+// 햄스터 인형 (둥근 몸, 작은 귀, 큰 볼)
+export const HamsterDoll = ({ config, physicsRef }: DollRenderProps) => {
+  const s = config.size;
+  const { body, accent, cheek } = config.palette;
+
+  return (
+    <group>
+      {/* 몸통 (통통함) */}
+      <mesh castShadow position={[0, -s * 0.2, 0]}>
+        <sphereGeometry args={[s * 0.9, 16, 16]} />
+        <meshStandardMaterial color={body} roughness={0.9} />
+      </mesh>
+      {/* 머리 */}
+      <mesh castShadow position={[0, s * 0.5, 0]}>
+        <sphereGeometry args={[s * 0.65, 16, 16]} />
+        <meshStandardMaterial color={body} roughness={0.9} />
+      </mesh>
+      {/* 왼쪽 귀 (작고 둥근) */}
+      <mesh castShadow position={[-s * 0.35, s * 0.95, 0]}>
+        <sphereGeometry args={[s * 0.12, 10, 10]} />
+        <meshStandardMaterial color={body} roughness={0.9} />
+      </mesh>
+      {/* 왼쪽 귀 안쪽 */}
+      <mesh position={[-s * 0.35, s * 0.95, s * 0.05]}>
+        <sphereGeometry args={[s * 0.06, 8, 8]} />
+        <meshStandardMaterial color={accent} roughness={0.9} />
+      </mesh>
+      {/* 오른쪽 귀 (작고 둥근) */}
+      <mesh castShadow position={[s * 0.35, s * 0.95, 0]}>
+        <sphereGeometry args={[s * 0.12, 10, 10]} />
+        <meshStandardMaterial color={body} roughness={0.9} />
+      </mesh>
+      {/* 오른쪽 귀 안쪽 */}
+      <mesh position={[s * 0.35, s * 0.95, s * 0.05]}>
+        <sphereGeometry args={[s * 0.06, 8, 8]} />
+        <meshStandardMaterial color={accent} roughness={0.9} />
+      </mesh>
+      {/* 큰 볼 왼쪽 (햄스터 특징!) */}
+      <mesh castShadow position={[-s * 0.45, s * 0.35, s * 0.25]}>
+        <sphereGeometry args={[s * 0.22, 12, 12]} />
+        <meshStandardMaterial color={cheek} roughness={0.8} />
+      </mesh>
+      {/* 큰 볼 오른쪽 */}
+      <mesh castShadow position={[s * 0.45, s * 0.35, s * 0.25]}>
+        <sphereGeometry args={[s * 0.22, 12, 12]} />
+        <meshStandardMaterial color={cheek} roughness={0.8} />
+      </mesh>
+      {/* 왼쪽 눈 */}
+      <mesh position={[-s * 0.18, s * 0.6, s * 0.5]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.3} />
+      </mesh>
+      {/* 눈 하이라이트 왼쪽 */}
+      <mesh position={[-s * 0.15, s * 0.63, s * 0.58]}>
+        <sphereGeometry args={[s * 0.03, 6, 6]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.2} />
+      </mesh>
+      {/* 오른쪽 눈 */}
+      <mesh position={[s * 0.18, s * 0.6, s * 0.5]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.3} />
+      </mesh>
+      {/* 눈 하이라이트 오른쪽 */}
+      <mesh position={[s * 0.21, s * 0.63, s * 0.58]}>
+        <sphereGeometry args={[s * 0.03, 6, 6]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.2} />
+      </mesh>
+      {/* 코 */}
+      <mesh position={[0, s * 0.45, s * 0.6]}>
+        <sphereGeometry args={[s * 0.06, 8, 8]} />
+        <meshStandardMaterial color="#FF9999" roughness={0.5} />
+      </mesh>
+      {/* 손 왼쪽 */}
+      <mesh castShadow position={[-s * 0.5, s * 0.0, s * 0.3]}>
+        <sphereGeometry args={[s * 0.12, 8, 8]} />
+        <meshStandardMaterial color={body} roughness={0.9} />
+      </mesh>
+      {/* 손 오른쪽 */}
+      <mesh castShadow position={[s * 0.5, s * 0.0, s * 0.3]}>
+        <sphereGeometry args={[s * 0.12, 8, 8]} />
+        <meshStandardMaterial color={body} roughness={0.9} />
+      </mesh>
+      {/* 꼬리 */}
+      <mesh castShadow position={[0, -s * 0.3, -s * 0.7]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color={body} roughness={0.9} />
+      </mesh>
+    </group>
+  );
+};
+
+// 강아지 인형 (늘어진 귀, 귀여운 표정)
+export const DogDoll = ({ config, physicsRef }: DollRenderProps) => {
+  const s = config.size;
+  const { body, accent, cheek } = config.palette;
+
+  return (
+    <group>
+      {/* 몸통 */}
+      <mesh castShadow position={[0, -s * 0.3, 0]}>
+        <sphereGeometry args={[s * 0.8, 16, 16]} />
+        <meshStandardMaterial color={body} roughness={0.85} />
+      </mesh>
+      {/* 머리 */}
+      <mesh castShadow position={[0, s * 0.4, 0]}>
+        <sphereGeometry args={[s * 0.65, 16, 16]} />
+        <meshStandardMaterial color={body} roughness={0.85} />
+      </mesh>
+      {/* 왼쪽 귀 (늘어진) */}
+      <mesh castShadow position={[-s * 0.45, s * 0.5, -s * 0.1]} rotation={[0.3, 0, -0.4]}>
+        <capsuleGeometry args={[s * 0.12, s * 0.35, 4, 8]} />
+        <meshStandardMaterial color={accent} roughness={0.85} />
+      </mesh>
+      {/* 오른쪽 귀 (늘어진) */}
+      <mesh castShadow position={[s * 0.45, s * 0.5, -s * 0.1]} rotation={[0.3, 0, 0.4]}>
+        <capsuleGeometry args={[s * 0.12, s * 0.35, 4, 8]} />
+        <meshStandardMaterial color={accent} roughness={0.85} />
+      </mesh>
+      {/* 주둥이 */}
+      <mesh castShadow position={[0, s * 0.25, s * 0.5]}>
+        <sphereGeometry args={[s * 0.3, 12, 12]} />
+        <meshStandardMaterial color={accent} roughness={0.8} />
+      </mesh>
+      {/* 왼쪽 눈 */}
+      <mesh position={[-s * 0.2, s * 0.55, s * 0.5]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.3} />
+      </mesh>
+      {/* 눈 하이라이트 왼쪽 */}
+      <mesh position={[-s * 0.17, s * 0.58, s * 0.58]}>
+        <sphereGeometry args={[s * 0.03, 6, 6]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.2} />
+      </mesh>
+      {/* 오른쪽 눈 */}
+      <mesh position={[s * 0.2, s * 0.55, s * 0.5]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.3} />
+      </mesh>
+      {/* 눈 하이라이트 오른쪽 */}
+      <mesh position={[s * 0.23, s * 0.58, s * 0.58]}>
+        <sphereGeometry args={[s * 0.03, 6, 6]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.2} />
+      </mesh>
+      {/* 코 */}
+      <mesh position={[0, s * 0.3, s * 0.78]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.4} />
+      </mesh>
+      {/* 혀 */}
+      <mesh position={[0, s * 0.12, s * 0.7]} rotation={[-0.3, 0, 0]}>
+        <boxGeometry args={[s * 0.12, s * 0.15, s * 0.05]} />
+        <meshStandardMaterial color="#FF6B6B" roughness={0.6} />
+      </mesh>
+      {/* 볼터치 왼쪽 */}
+      <mesh position={[-s * 0.38, s * 0.35, s * 0.4]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+      {/* 볼터치 오른쪽 */}
+      <mesh position={[s * 0.38, s * 0.35, s * 0.4]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+      {/* 꼬리 */}
+      <mesh castShadow position={[0, -s * 0.1, -s * 0.65]} rotation={[0.5, 0, 0]}>
+        <capsuleGeometry args={[s * 0.08, s * 0.2, 4, 8]} />
+        <meshStandardMaterial color={body} roughness={0.85} />
+      </mesh>
+    </group>
+  );
+};
+
 // 물리 + 렌더링을 합친 통합 인형 컴포넌트
 const CuteDoll = ({ config }: CuteDollProps) => {
   const grabbedDollId = useGameStore((state) => state.grabbedDoll.id);
@@ -493,6 +709,10 @@ const CuteDoll = ({ config }: CuteDollProps) => {
         return <BearDoll config={config} physicsRef={ref} />;
       case 'cat':
         return <CatDoll config={config} physicsRef={ref} />;
+      case 'hamster':
+        return <HamsterDoll config={config} physicsRef={ref} />;
+      case 'dog':
+        return <DogDoll config={config} physicsRef={ref} />;
       default:
         return null;
     }

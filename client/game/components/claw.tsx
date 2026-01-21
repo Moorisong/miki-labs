@@ -98,8 +98,12 @@ const GrabbedDollRenderer = () => {
     const ny = Math.cos(time * 25 + noiseOffset.current) * shakeAmount;
     const nz = Math.sin(time * 15 + noiseOffset.current) * shakeAmount;
 
-    // 보정된 Y 위치에 노이즈 추가하여 설정
-    groupRef.current.position.set(nx, basePosY + ny, nz);
+    // 보정된 Y 위치에 노이즈 추가하여 설정 + 오프셋 적용
+    groupRef.current.position.set(
+      nx + grabbedDoll.grabOffset.x,
+      basePosY + ny + grabbedDoll.grabOffset.y,
+      nz + grabbedDoll.grabOffset.z
+    );
 
     // 회전에도 약간의 노이즈 추가
     groupRef.current.rotation.set(
@@ -114,13 +118,15 @@ const GrabbedDollRenderer = () => {
   const DollComponent =
     config.cuteType === 'bunny' ? BunnyDoll :
       config.cuteType === 'bear' ? BearDoll :
-        config.cuteType === 'cat' ? CatDoll : null;
+        config.cuteType === 'cat' ? CatDoll :
+          config.cuteType === 'hamster' ? HamsterDoll :
+            config.cuteType === 'dog' ? DogDoll : null;
 
   if (!DollComponent) return null;
 
   return (
     // 초기 위치는 여기서 설정하나 useFrame이 덮어씀
-    <group position={[0, basePosY, 0]}>
+    <group position={[grabbedDoll.grabOffset.x, basePosY + grabbedDoll.grabOffset.y, grabbedDoll.grabOffset.z]}>
       {/* 미세 떨림 적용 그룹 */}
       <group ref={groupRef}>
         {/* 원래 회전값 적용 그룹 */}
@@ -243,7 +249,7 @@ const ClawBase = () => {
 
 
 // Import doll components
-import { BunnyDoll, BearDoll, CatDoll, CuteDollConfig } from './dolls';
+import { BunnyDoll, BearDoll, CatDoll, HamsterDoll, DogDoll, CuteDollConfig } from './dolls';
 import { DollConfig } from '../types/game.types';
 
 // ... (ClawCollider and ClawFinger components remain unchanged)

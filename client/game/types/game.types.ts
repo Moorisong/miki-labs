@@ -87,8 +87,8 @@ export const PHYSICS_CONFIG = {
   dollFrictionMax: 0.95,
   dollMassMin: 0.8,
   dollMassMax: 2.5,
-  dollLinearDamping: 0.7,
-  dollAngularDamping: 0.9,
+  dollLinearDamping: 0.9,
+  dollAngularDamping: 0.95,
 };
 
 // Movement bounds for claw (inside cabinet)
