@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getDatabase } from '@/lib/mongodb';
+import AdBanner from '@/components/ads/ad-banner';
 import styles from './page.module.css';
 
 // 랭킹 데이터 타입 정의
@@ -110,6 +111,9 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* Ad Banner */}
+      <AdBanner />
 
       {/* Mini Ranking Section */}
       <section className={styles.ranking}>
