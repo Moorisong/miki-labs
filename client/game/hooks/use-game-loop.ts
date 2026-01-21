@@ -90,6 +90,9 @@ export const useGameLoop = () => {
                     break;
                 }
                 case 'dropping': {
+                    // 내려갈 때는 무조건 벌린 상태여야 함 (안전장치)
+                    if (!state.claw.isOpen) setClawOpen(true);
+
                     const speed = config.dropSpeed * 2; // Adjust speed as needed
                     const newY = Math.max(bottomY, y - speed * dt);
 
@@ -158,31 +161,34 @@ export const useGameLoop = () => {
                         // Arrived at target
                         setClawPosition(targetX, y, targetZ);
 
-                        // 시각적 집게(스프링/관성)가 따라올 시간을 주기 위해 잠시 대기
-                        arrivalTimer.current += dt;
+                        if (hasDoll) {
+                            // 시각적 집게(스프링/관성)가 따라올 시간을 주기 위해 잠시 대기
+                            arrivalTimer.current += dt;
 
-                        if (arrivalTimer.current > 1.0) {
-                            if (hasDoll && state.grabbedDoll.config) {
-                                // 인형이 있으면 구멍에서 놓기
-                                const dollConfig = state.grabbedDoll.config;
-                                useGameStore.getState().setPendingReleaseDoll(dollConfig);
-                                setClawOpen(true);
-                                releaseDoll();
+                            if (arrivalTimer.current > 1.0) {
+                                if (state.grabbedDoll.config) {
+                                    // 인형이 있으면 구멍에서 놓기
+                                    const dollConfig = state.grabbedDoll.config;
+                                    useGameStore.getState().setPendingReleaseDoll(dollConfig);
+                                    setClawOpen(true);
+                                    releaseDoll();
 
-                                // 즉시 attempt 사용하고 idle로 전환 (스타트 버튼 바로 표시)
-                                useGameStore.getState().useAttempt();
-                                const remaining = useGameStore.getState().attempts;
-                                if (remaining > 0) {
-                                    setPhase('idle');
-                                } else {
-                                    setPhase('result');
+                                    // 즉시 attempt 사용하고 idle로 전환 (스타트 버튼 바로 표시)
+                                    useGameStore.getState().useAttempt();
+                                    const remaining = useGameStore.getState().attempts;
+                                    if (remaining > 0) {
+                                        setPhase('idle');
+                                    } else {
+                                        setPhase('result');
+                                    }
+                                    // 집게 위치는 별도로 초기화하지 않음 (spring physics가 자연스럽게 처리)
                                 }
-                                // 집게 위치는 별도로 초기화하지 않음 (spring physics가 자연스럽게 처리)
-                            } else {
-                                // 인형이 없으면 바로 시도 종료 (실패)
-                                setClawOpen(true);
-                                endAttempt(false);
                             }
+                        } else {
+                            // 인형이 없으면 대기 없이 바로 시도 종료 (실패)
+                            arrivalTimer.current = 0;
+                            setClawOpen(true);
+                            endAttempt(false);
                         }
                     } else {
                         // 아직 이동 중이면 타이머 초기화
