@@ -477,8 +477,7 @@ const Claw = () => {
           />
         ))}
 
-        {/* 잡은 인형 렌더링 - GrabbedDollRenderer로 대체되어 미세 떨림 적용됨 */}
-        <GrabbedDollRenderer />
+        {/* GrabbedDollRenderer Removed: 인형이 절대 사라지지 않도록 dolls.tsx에서 직접 렌더링 유지 */}
       </group>
 
       {/* Slack Cable Line */}
