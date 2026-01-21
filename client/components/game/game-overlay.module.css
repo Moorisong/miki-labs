@@ -1,0 +1,330 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Score Panel */
+.scorePanel {
+  position: absolute;
+  top: var(--space-md);
+  left: var(--space-md);
+  display: flex;
+  gap: var(--space-md);
+}
+
+.scoreItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(162, 155, 254, 0.2);
+}
+
+.scoreLabel {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.scoreValue {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.scoreValue.warning {
+  color: var(--color-accent);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Mobile Controls */
+.mobileControls {
+  position: absolute;
+  bottom: var(--space-xl);
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 var(--space-lg);
+  pointer-events: auto;
+}
+
+/* D-Pad */
+.dPad {
+  position: relative;
+  width: 140px;
+  height: 140px;
+}
+
+.dPadButton {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  border: 2px solid rgba(162, 155, 254, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dPadButton:active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  transform: scale(0.95);
+}
+
+.dPadButton svg {
+  width: 24px;
+  height: 24px;
+}
+
+.dPadButton.up {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.dPadButton.up:active {
+  transform: translateX(-50%) scale(0.95);
+}
+
+.dPadButton.down {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.dPadButton.down:active {
+  transform: translateX(-50%) scale(0.95);
+}
+
+.dPadButton.left {
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.dPadButton.left:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.dPadButton.right {
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.dPadButton.right:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.dPadCenter {
+  display: none;
+}
+
+/* Drop Button */
+.dropButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  width: 80px;
+  height: 80px;
+  background: var(--gradient-accent);
+  border: none;
+  border-radius: 50%;
+  color: var(--color-text);
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(253, 121, 168, 0.4);
+  transition: all var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dropButton:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 10px rgba(253, 121, 168, 0.4);
+}
+
+.dropIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropIcon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.dropText {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* Game Over */
+.gameOver {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-2xl);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--color-primary);
+  text-align: center;
+  animation: fadeIn 0.5s ease-out;
+  pointer-events: auto;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.gameOverTitle {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.gameOverScore {
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+}
+
+
+
+/* Adjust for smaller screens */
+@media (max-width: 400px) {
+  .dPad {
+    width: 120px;
+    height: 120px;
+  }
+
+  .dPadButton {
+    width: 40px;
+    height: 40px;
+  }
+
+  .dPadButton svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .dropButton {
+    width: 70px;
+    height: 70px;
+  }
+
+  .dropIcon svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Start Button */
+.startOverlay {
+  position: absolute;
+  bottom: 20%;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 var(--space-lg);
+  pointer-events: auto;
+  z-index: 20;
+}
+
+.startButton {
+  padding: var(--space-md) var(--space-xl);
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: var(--radius-full);
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
+  transition: all var(--transition-medium);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  animation: pulse-button 2s infinite;
+}
+
+.startButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(108, 92, 231, 0.5);
+}
+
+.startButton:active {
+  transform: translateY(1px);
+}
+
+.startButton.disabled {
+  background: linear-gradient(135deg, #4a4a4a, #666);
+  cursor: not-allowed;
+  animation: none;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+.startButton.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+@keyframes pulse-button {
+  0% {
+    box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.7);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(108, 92, 231, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(108, 92, 231, 0);
+  }
+}
