@@ -30,10 +30,13 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     opacity: 0.5;
   }
+
   50% {
     transform: scale(1.1);
     opacity: 0.8;
@@ -83,7 +86,7 @@
   gap: var(--space-md);
   margin-top: var(--space-md);
   width: 100%;
-  max-width: 300px;
+  max-width: 400px;
 }
 
 .primaryButton {
@@ -165,14 +168,32 @@
   animation: float 3s ease-in-out infinite;
 }
 
-.plushie:nth-child(2) { animation-delay: 0.5s; }
-.plushie:nth-child(3) { animation-delay: 1s; }
-.plushie:nth-child(4) { animation-delay: 1.5s; }
-.plushie:nth-child(5) { animation-delay: 2s; }
+.plushie:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.plushie:nth-child(3) {
+  animation-delay: 1s;
+}
+
+.plushie:nth-child(4) {
+  animation-delay: 1.5s;
+}
+
+.plushie:nth-child(5) {
+  animation-delay: 2s;
+}
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
 }
 
 .claw {
@@ -184,8 +205,15 @@
 }
 
 @keyframes clawMove {
-  0%, 100% { left: 30%; }
-  50% { left: 70%; }
+
+  0%,
+  100% {
+    left: 30%;
+  }
+
+  50% {
+    left: 70%;
+  }
 }
 
 .clawArm {
@@ -442,4 +470,11 @@
   .heroContent {
     max-width: 500px;
   }
+}
+
+.noData {
+  padding: var(--space-xl);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
 }

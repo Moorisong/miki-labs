@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import NavBar from '@/components/layout/nav-bar';
 import Footer from '@/components/layout/footer';
+import SessionProvider from '@/components/providers/session-provider';
+import NicknameProvider from '@/components/providers/nickname-provider';
 import './globals.css';
 
 const geistSans = Geist({
@@ -41,11 +43,15 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <NavBar />
-        <main style={{ paddingTop: '64px', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-          {children}
-        </main>
-        <Footer />
+        <SessionProvider>
+          <NicknameProvider>
+            <NavBar />
+            <main style={{ paddingTop: '64px', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+              {children}
+            </main>
+            <Footer />
+          </NicknameProvider>
+        </SessionProvider>
       </body>
     </html>
   );

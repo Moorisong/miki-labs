@@ -228,7 +228,7 @@ const ClawFinger = ({ index, isOpen, strengthVariance, clawPosition }: ClawFinge
   return (
     <group rotation={[0, angleOffset, 0]}>
       <group ref={groupRef} position={[baseRadius * 0.8, -baseRadius * 0.5, 0]}>
-        <mesh castShadow position={[fingerWidth / 2, -fingerLength / 2, 0]}>
+        <mesh position={[fingerWidth / 2, -fingerLength / 2, 0]}>
           <boxGeometry args={[fingerWidth, fingerLength, fingerWidth]} />
           <meshStandardMaterial
             color="#888888"
@@ -238,7 +238,6 @@ const ClawFinger = ({ index, isOpen, strengthVariance, clawPosition }: ClawFinge
         </mesh>
 
         <mesh
-          castShadow
           position={[fingerWidth / 2, -fingerLength - fingerLength * 0.3, fingerWidth * 0.3]}
           rotation={[Math.PI / 6, 0, 0]}
         >
@@ -262,17 +261,17 @@ const ClawFinger = ({ index, isOpen, strengthVariance, clawPosition }: ClawFinge
 const ClawBase = () => {
   return (
     <group>
-      <mesh castShadow position={[0, cableLength / 2, 0]}>
+      <mesh position={[0, cableLength / 2, 0]}>
         <cylinderGeometry args={[0.02, 0.02, cableLength, 8]} />
         <meshStandardMaterial color="#333333" metalness={0.9} roughness={0.1} />
       </mesh>
 
-      <mesh castShadow position={[0, 0, 0]}>
+      <mesh position={[0, 0, 0]}>
         <cylinderGeometry args={[baseRadius, baseRadius * 1.2, baseRadius, 16]} />
         <meshStandardMaterial color="#555555" metalness={0.7} roughness={0.3} />
       </mesh>
 
-      <mesh castShadow position={[0, -baseRadius * 0.4, 0]}>
+      <mesh position={[0, -baseRadius * 0.4, 0]}>
         <cylinderGeometry args={[baseRadius * 0.8, baseRadius * 0.6, baseRadius * 0.3, 16]} />
         <meshStandardMaterial color="#444444" metalness={0.8} roughness={0.2} />
       </mesh>

@@ -16,14 +16,8 @@ interface PopulatedScore {
 
 export const getTopRankings = async (limit: number): Promise<RankingEntry[]> => {
   if (mongoose.connection.readyState !== 1) {
-    console.warn('DB not connected, returning mock rankings');
-    return Array(5).fill(null).map((_, i) => ({
-      rank: i + 1,
-      userId: `mock-user-${i}`,
-      nickname: ['ClawMaster', '인형킹', 'GamerPro', '뽑기달인', 'LuckyOne'][i],
-      score: 15000 - (i * 1000),
-      createdAt: new Date()
-    }));
+    console.warn('DB not connected, returning empty rankings');
+    return [];
   }
 
   const scores = await Score.find()
@@ -48,16 +42,7 @@ export const submitScore = async (
   dollsCaught: number
 ): Promise<IScore> => {
   if (mongoose.connection.readyState !== 1) {
-    console.warn('DB not connected, returning mock score');
-    return {
-      _id: new Types.ObjectId(),
-      userId: new Types.ObjectId(userId.length === 24 ? userId : undefined),
-      score,
-      attempts,
-      dollsCaught,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    } as unknown as IScore;
+    throw new Error('DB not connected, cannot submit score');
   }
 
   const newScore = new Score({
@@ -72,13 +57,8 @@ export const submitScore = async (
 
 export const getUserRanking = async (userId: string): Promise<RankingEntry | null> => {
   if (mongoose.connection.readyState !== 1) {
-    return {
-      rank: 42,
-      userId: userId,
-      nickname: 'MockUser',
-      score: 12345,
-      createdAt: new Date()
-    };
+    console.warn('DB not connected, cannot get user ranking');
+    return null;
   }
 
   // Get user's best score

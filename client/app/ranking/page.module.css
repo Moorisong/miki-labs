@@ -21,6 +21,31 @@
   color: var(--color-text-muted);
 }
 
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3xl) var(--space-lg);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(162, 155, 254, 0.1);
+  text-align: center;
+}
+
+.emptyText {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-sm);
+}
+
+.emptySubtext {
+  font-size: var(--font-size-md);
+  color: var(--color-text-muted);
+}
+
 /* Top 3 Section */
 .topThree {
   display: flex;

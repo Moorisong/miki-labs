@@ -122,6 +122,128 @@
   transform: translateY(-7px) rotate(-45deg);
 }
 
+/* Auth Styles */
+.authItem {
+  display: flex;
+  align-items: center;
+  margin-left: var(--space-md);
+}
+
+.authLoading {
+  color: var(--color-text-muted);
+}
+
+.userMenu {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.userAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--color-primary);
+}
+
+.userName {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  font-weight: 500;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.userNickname {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  font-weight: 600;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userNicknameButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  max-width: 120px;
+}
+
+.userNicknameButton:hover {
+  background: rgba(162, 155, 254, 0.1);
+  border-color: rgba(162, 155, 254, 0.3);
+}
+
+.editIcon {
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.userNicknameButton:hover .editIcon {
+  opacity: 1;
+}
+
+.noNickname {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.loginButton {
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--gradient-primary);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.loginButton:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+  color: var(--color-text);
+}
+
+.logoutButton {
+  padding: var(--space-xs) var(--space-md);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  border: 1px solid rgba(162, 155, 254, 0.3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.logoutButton:hover {
+  background: rgba(108, 92, 231, 0.1);
+  color: var(--color-text);
+  border-color: var(--color-primary);
+}
+
 /* Mobile Styles */
 @media (max-width: 768px) {
   .hamburger {
@@ -159,5 +281,45 @@
 
   .navLink.active::after {
     bottom: 4px;
+  }
+
+  .authItem {
+    margin-left: 0;
+    margin-top: var(--space-lg);
+    padding: var(--space-md);
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .userMenu {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .userName {
+    max-width: none;
+  }
+
+  .userInfo {
+    align-items: center;
+  }
+
+  .userNickname {
+    max-width: none;
+    font-size: var(--font-size-md);
+  }
+
+  .userNicknameButton {
+    max-width: none;
+    font-size: var(--font-size-md);
+  }
+
+  .userNicknameButton .editIcon {
+    opacity: 1;
+  }
+
+  .loginButton {
+    padding: var(--space-md) var(--space-2xl);
+    font-size: var(--font-size-md);
   }
 }

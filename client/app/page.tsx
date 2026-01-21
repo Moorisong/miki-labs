@@ -1,14 +1,38 @@
 import Link from 'next/link';
+import { getDatabase } from '@/lib/mongodb';
 import styles from './page.module.css';
 
-// 더미 랭킹 데이터
-const topRankings = [
-  { rank: 1, nickname: 'ClawMaster', score: 15800, date: '2024-01-15' },
-  { rank: 2, nickname: '인형킹', score: 14200, date: '2024-01-14' },
-  { rank: 3, nickname: 'GamerPro', score: 13500, date: '2024-01-13' },
-  { rank: 4, nickname: '뽑기달인', score: 12800, date: '2024-01-12' },
-  { rank: 5, nickname: 'LuckyOne', score: 11900, date: '2024-01-11' },
-];
+// 랭킹 데이터 타입 정의
+interface RankEntry {
+  rank: number;
+  nickname: string;
+  score: number;
+  date: string;
+}
+
+async function getTopRankings(): Promise<RankEntry[]> {
+  try {
+    const db = await getDatabase();
+    const scores = db.collection('scores');
+
+    // 점수 높은 순, 같은 점수면 먼저 달성한 순으로 5개만 가져오기
+    const rankings = await scores
+      .find({})
+      .sort({ score: -1, createdAt: 1 })
+      .limit(5)
+      .toArray();
+
+    return rankings.map((entry, index) => ({
+      rank: index + 1,
+      nickname: entry.nickname || 'Unknown',
+      score: entry.score,
+      date: entry.createdAt ? new Date(entry.createdAt).toISOString().split('T')[0] : '',
+    }));
+  } catch (error) {
+    console.error('메인 랭킹 조회 오류:', error);
+    return [];
+  }
+}
 
 const features = [
   {
@@ -28,7 +52,9 @@ const features = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const topRankings = await getTopRankings();
+
   return (
     <div className={styles.container}>
       {/* Hero Section */}
@@ -99,24 +125,30 @@ export default function HomePage() {
             <span>닉네임</span>
             <span>점수</span>
           </div>
-          {topRankings.map((player) => (
-            <div
-              key={player.rank}
-              className={`${styles.rankingRow} ${player.rank <= 3 ? styles.topThree : ''}`}
-            >
-              <span className={styles.rankNumber}>
-                {player.rank <= 3 ? (
-                  <span className={styles.medal}>
-                    {player.rank === 1 ? '🥇' : player.rank === 2 ? '🥈' : '🥉'}
-                  </span>
-                ) : (
-                  player.rank
-                )}
-              </span>
-              <span className={styles.nickname}>{player.nickname}</span>
-              <span className={styles.score}>{player.score.toLocaleString()}</span>
+          {topRankings.length > 0 ? (
+            topRankings.map((player) => (
+              <div
+                key={player.rank}
+                className={`${styles.rankingRow} ${player.rank <= 3 ? styles.topThree : ''}`}
+              >
+                <span className={styles.rankNumber}>
+                  {player.rank <= 3 ? (
+                    <span className={styles.medal}>
+                      {player.rank === 1 ? '🥇' : player.rank === 2 ? '🥈' : '🥉'}
+                    </span>
+                  ) : (
+                    player.rank
+                  )}
+                </span>
+                <span className={styles.nickname}>{player.nickname}</span>
+                <span className={styles.score}>{player.score.toLocaleString()}</span>
+              </div>
+            ))
+          ) : (
+            <div className={styles.noData}>
+              아직 랭킹 정보가 없습니다. 첫 1등의 주인공이 되어보세요!
             </div>
-          ))}
+          )}
         </div>
       </section>
 

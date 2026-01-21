@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, ReactNode } from 'react';
+import { useEffect, useCallback, ReactNode, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './modal.module.css';
 
@@ -25,6 +25,9 @@ export default function Modal({
   closeOnEscape = true,
   showCloseButton = true,
 }: ModalProps) {
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const mouseDownTarget = useRef<EventTarget | null>(null);
+
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === 'Escape' && closeOnEscape) {
@@ -34,10 +37,33 @@ export default function Modal({
     [closeOnEscape, onClose]
   );
 
-  const handleOverlayClick = () => {
-    if (closeOnOverlayClick) {
+  const handleOverlayMouseDown = (e: React.MouseEvent) => {
+    // 오버레이(배경)에서 클릭이 시작되었는지 확인
+    if (e.target === e.currentTarget) {
+      mouseDownTarget.current = e.target;
+    } else {
+      mouseDownTarget.current = null;
+    }
+  };
+
+  const handleOverlayMouseUp = (e: React.MouseEvent) => {
+    // 모바일 환경(768px 미만)에서는 오버레이 클릭으로 닫기 방지
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      return;
+    }
+
+    // 마우스를 뗐을 때 타겟이 오버레이이고,
+    // 마우스를 눌렀을 때도 오버레이였을 경우에만 닫기 (드래그 실수 방지)
+    if (
+      closeOnOverlayClick &&
+      e.target === e.currentTarget &&
+      mouseDownTarget.current === e.currentTarget
+    ) {
       onClose();
     }
+
+    // 초기화
+    mouseDownTarget.current = null;
   };
 
   const handleContentClick = (event: React.MouseEvent) => {
@@ -59,7 +85,12 @@ export default function Modal({
   if (!isOpen) return null;
 
   const modalContent = (
-    <div className={styles.overlay} onClick={handleOverlayClick}>
+    <div
+      ref={overlayRef}
+      className={styles.overlay}
+      onMouseDown={handleOverlayMouseDown}
+      onMouseUp={handleOverlayMouseUp}
+    >
       <div
         className={`${styles.modal} ${styles[size]}`}
         onClick={handleContentClick}

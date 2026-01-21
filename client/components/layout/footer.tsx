@@ -34,7 +34,7 @@ export default function Footer() {
               <ul className={styles.linkList}>
                 <li>
                   <a
-                    href="https://github.com"
+                    href="https://github.com/Moorisong/pawlink"
                     target="_blank"
                     rel="noopener noreferrer"
                   >

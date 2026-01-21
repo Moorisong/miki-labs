@@ -1,6 +1,6 @@
 export interface RankingEntry {
   rank: number;
-  userId: string;
+  oderId: string;
   nickname: string;
   score: number;
   catches?: number;

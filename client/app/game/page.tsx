@@ -106,27 +106,26 @@ export default function GamePage() {
     }
   }, [setInputState]);
 
-  const handleRankingSubmit = async (name: string) => {
+  const handleRankingSubmit = async (): Promise<{ success: boolean; error?: string }> => {
     setIsSubmitting(true);
     try {
-      const success = await rankingApi.submitScore({
+      const result = await rankingApi.submitScore({
         score,
         attempts: config.maxAttempts,
         dollsCaught: Math.floor(score / 100), // 점수 기반으로 계산
-        tempUserId: `user-${Date.now()}`,
-        nickname: name
       });
 
-      if (!success) {
-        throw new Error('Failed to submit score');
+      if (!result.success) {
+        return { success: false, error: result.error };
       }
 
       // Refresh rankings
       const newRankings = await rankingApi.getTopRanking(10);
       setRankings(newRankings);
+      return { success: true };
     } catch (e) {
       console.error('Failed to submit score:', e);
-      throw e; // 에러를 다시 던져서 ranking-board에서 처리
+      return { success: false, error: '점수 저장에 실패했습니다.' };
     } finally {
       setIsSubmitting(false);
     }
