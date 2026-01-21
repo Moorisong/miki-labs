@@ -20,6 +20,7 @@ export default function GameOverlay({
   onMoveEnd,
   onDrop,
   onStart,
+  canPlay = true,
   children
 }: {
   score: number;
@@ -29,31 +30,24 @@ export default function GameOverlay({
   onMoveEnd: (direction: 'left' | 'right' | 'forward' | 'backward') => void;
   onDrop: () => void;
   onStart: () => void;
+  canPlay?: boolean;
   children?: React.ReactNode;
 }) {
   return (
     <div className={styles.overlay}>
-      {/* Score Panel */}
-      <div className={styles.scorePanel}>
-        <div className={styles.scoreItem}>
-          <span className={styles.scoreLabel}>점수</span>
-          <span className={styles.scoreValue}>{score.toLocaleString()}</span>
-        </div>
-        <div className={styles.scoreItem}>
-          <span className={styles.scoreLabel}>남은 시도</span>
-          <span className={`${styles.scoreValue} ${attempts <= 1 ? styles.warning : ''}`}>
-            {attempts}
-          </span>
-        </div>
-      </div>
+      {/* Score Panel - 기존 HUD는 GameHUD로 대체됨, 여기서는 제거 또는 간소화 */}
 
       {children}
 
       {/* Start Button */}
       {phase === 'idle' && (
         <div className={styles.startOverlay}>
-          <button className={styles.startButton} onClick={onStart}>
-            Game Start
+          <button
+            className={`${styles.startButton} ${!canPlay ? styles.disabled : ''}`}
+            onClick={onStart}
+            disabled={!canPlay}
+          >
+            {canPlay ? 'Game Start' : '쿨타임 중...'}
           </button>
         </div>
       )}

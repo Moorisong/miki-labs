@@ -424,6 +424,56 @@
   }
 }
 
+/* 로그인 유도 문구 */
+.loginPrompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px 20px;
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  border: 1px solid rgba(162, 155, 254, 0.3);
+  animation: promptSlideIn 0.5s ease-out 0.8s both;
+  pointer-events: auto;
+}
+
+.loginPrompt p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text, #fff);
+  text-align: center;
+}
+
+.loginLink {
+  padding: 8px 16px;
+  background: var(--gradient-primary, linear-gradient(135deg, #6C5CE7, #A29BFE));
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 20px;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.loginLink:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(108, 92, 231, 0.5);
+}
+
+@keyframes promptSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 
 @media (max-width: 480px) {

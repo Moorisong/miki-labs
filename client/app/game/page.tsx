@@ -6,8 +6,10 @@ import { useGameStore } from '@/game/core/game-manager';
 import useGameControls from '@/game/hooks/use-game-controls';
 import { useGameLoop } from '@/game/hooks/use-game-loop';
 import GameOverlay from '@/components/game/game-overlay';
+import GameHUD from '@/components/game/game-hud';
 import RankingBoard from '@/components/game/ranking-board';
 import SuccessEffect from '@/components/game/success-effect';
+import { useGameAttempts } from '@/lib/hooks/use-game-attempts';
 import { rankingApi } from '@/lib/api/ranking';
 import type { RankingEntry } from '@/lib/api/types';
 import styles from './page.module.css';
@@ -30,6 +32,16 @@ export default function GamePage() {
   const dropClaw = useGameStore((state) => state.dropClaw);
   const startGame = useGameStore((state) => state.startGame);
 
+  // 시도 횟수/쿨타임 시스템
+  const {
+    remainingAttempts,
+    isOnCooldown,
+    cooldownRemaining,
+    canPlay,
+    useAttempt,
+    addAttempt,
+  } = useGameAttempts();
+
   useGameLoop(); // Start the game loop
   const { setInputState } = useGameControls({ enabled: true });
   const [rankings, setRankings] = useState<RankingEntry[]>([]);
@@ -37,6 +49,7 @@ export default function GamePage() {
   const [showRanking, setShowRanking] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [lastEarnedScore, setLastEarnedScore] = useState(0);
+  const [wasSuccessThisAttempt, setWasSuccessThisAttempt] = useState(false);
   const prevScoreRef = useRef(score);
 
   // Load initial rankings
@@ -50,6 +63,7 @@ export default function GamePage() {
       const earned = score - prevScoreRef.current;
       setLastEarnedScore(earned);
       setShowSuccess(true);
+      setWasSuccessThisAttempt(true);
     }
     prevScoreRef.current = score;
   }, [score]);
@@ -69,9 +83,14 @@ export default function GamePage() {
         setShowRanking(true);
       },
       onAttemptUsed: (remaining) => {
-        if (remaining === 0) {
-          // Wait for result phase
+        // 시도 횟수 변경 시 (결과 단계에서)
+        // 성공 시 +1, 실패 시 -1
+        if (wasSuccessThisAttempt) {
+          addAttempt();
+        } else {
+          useAttempt();
         }
+        setWasSuccessThisAttempt(false);
       }
     });
 
@@ -84,7 +103,7 @@ export default function GamePage() {
     return () => {
       resetGame();
     };
-  }, [setCallbacks, setSoundCallbacks, resetGame]);
+  }, [setCallbacks, setSoundCallbacks, resetGame, wasSuccessThisAttempt, addAttempt, useAttempt]);
 
   const handleMoveStart = useCallback((direction: 'left' | 'right' | 'forward' | 'backward') => {
     if (phase !== 'moving') return;
@@ -136,8 +155,24 @@ export default function GamePage() {
     resetGame();
   };
 
+  // 게임 시작 핸들러 (쿨타임 체크)
+  const handleStartGame = useCallback(() => {
+    if (!canPlay) return;
+    startGame();
+  }, [canPlay, startGame]);
+
   return (
     <div className={styles.container}>
+      {/* 게임 HUD (시도 횟수, 쿨타임, 비로그인 안내) */}
+      <GameHUD
+        score={score}
+        remainingAttempts={remainingAttempts}
+        isOnCooldown={isOnCooldown}
+        cooldownRemaining={cooldownRemaining}
+        canPlay={canPlay}
+        phase={phase}
+      />
+
       <div className={styles.gameCanvas}>
         <ClawMachine dollCount={25} />
       </div>
@@ -146,10 +181,11 @@ export default function GamePage() {
         score={score}
         attempts={attempts}
         phase={phase}
-        onStart={startGame}
+        onStart={handleStartGame}
         onMoveStart={handleMoveStart}
         onMoveEnd={handleMoveEnd}
         onDrop={dropClaw}
+        canPlay={canPlay}
       >
         {showRanking && (
           <div className={styles.rankingOverlay}>
@@ -168,6 +204,7 @@ export default function GamePage() {
         show={showSuccess}
         score={lastEarnedScore}
         onComplete={() => setShowSuccess(false)}
+        showLoginPrompt={true}
       />
     </div>
   );

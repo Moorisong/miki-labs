@@ -1,0 +1,235 @@
+.hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    pointer-events: none;
+    z-index: 100;
+}
+
+.hud>* {
+    pointer-events: auto;
+}
+
+/* 점수 섹션 */
+.scoreSection {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.scoreItem {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    background: rgba(26, 26, 46, 0.9);
+    backdrop-filter: blur(8px);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(162, 155, 254, 0.2);
+}
+
+.label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.value {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+/* 시도 횟수 섹션 */
+.attemptsSection {
+    display: flex;
+    justify-content: center;
+}
+
+.attemptsContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.attemptsDisplay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(26, 26, 46, 0.9);
+    backdrop-filter: blur(8px);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(162, 155, 254, 0.2);
+}
+
+.attemptsValue {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.attemptsValue.warning {
+    color: var(--color-warning, #ffa500);
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.lastAttemptWarning {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: rgba(255, 165, 0, 0.15);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    color: var(--color-warning, #ffa500);
+}
+
+.warningIcon {
+    font-size: 14px;
+}
+
+/* 쿨타임 표시 */
+.cooldownContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    background: rgba(26, 26, 46, 0.95);
+    backdrop-filter: blur(12px);
+    padding: var(--space-md) var(--space-xl);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.cooldownBadge {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--color-error, #ff6b6b);
+}
+
+.cooldownIcon {
+    font-size: 18px;
+}
+
+.cooldownLabel {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
+.cooldownTimer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.timerLabel {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.timerValue {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    color: var(--color-text);
+    letter-spacing: 2px;
+}
+
+.cooldownHint {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-align: center;
+    margin: 0;
+}
+
+/* 비로그인 안내 */
+.loginPrompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    background: rgba(108, 92, 231, 0.1);
+    backdrop-filter: blur(8px);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(162, 155, 254, 0.2);
+    margin-top: auto;
+    align-self: center;
+}
+
+.promptText {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    margin: 0;
+}
+
+.infoIcon {
+    font-size: 14px;
+}
+
+.promptSubtext {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+.loginLink {
+    font-size: var(--font-size-xs);
+    color: var(--color-primary);
+    font-weight: 600;
+    transition: color var(--transition-fast);
+}
+
+.loginLink:hover {
+    color: var(--color-secondary);
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .hud {
+        padding: var(--space-sm);
+    }
+
+    .value {
+        font-size: var(--font-size-xl);
+    }
+
+    .attemptsValue {
+        font-size: var(--font-size-lg);
+    }
+
+    .timerValue {
+        font-size: var(--font-size-xl);
+    }
+
+    .loginPrompt {
+        padding: var(--space-xs) var(--space-sm);
+    }
+
+    .promptText {
+        font-size: var(--font-size-xs);
+    }
+}
