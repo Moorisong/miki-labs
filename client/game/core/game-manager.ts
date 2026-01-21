@@ -25,6 +25,7 @@ interface GrabbedDollState {
   currentGripStrength: number;
   accuracy: number; // 0 ~ 1, 1이 완벽한 잡기
   isPerfectGrab: boolean; // 완벽하게 잡았는지 여부
+  rotation: { x: number; y: number; z: number } | null; // 잡혔을 때의 회전값
 }
 
 interface GameStore extends GameState {
@@ -64,7 +65,7 @@ interface GameStore extends GameState {
   endAttempt: (success: boolean) => void;
 
   // Grab mechanics
-  setGrabbedDoll: (doll: DollConfig | null, offset?: Position3D, accuracy?: number, isPerfectGrab?: boolean) => void;
+  setGrabbedDoll: (doll: DollConfig | null, offset?: Position3D, accuracy?: number, isPerfectGrab?: boolean, rotation?: { x: number; y: number; z: number }) => void;
   updateGrabbedDollGrip: () => boolean; // Returns false if doll should be dropped
   releaseDoll: () => void;
 
@@ -92,6 +93,7 @@ const initialGrabbedDollState: GrabbedDollState = {
   currentGripStrength: GRIP_CONFIG.baseStrength,
   accuracy: 0,
   isPerfectGrab: false,
+  rotation: null,
 };
 
 const initialVelocity: Position3D = { x: 0, y: 0, z: 0 };
@@ -273,7 +275,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   // Grab mechanics
-  setGrabbedDoll: (doll: DollConfig | null, offset?: Position3D, accuracy?: number, isPerfectGrab?: boolean) => {
+  setGrabbedDoll: (doll: DollConfig | null, offset?: Position3D, accuracy?: number, isPerfectGrab?: boolean, rotation?: { x: number; y: number; z: number }) => {
     if (!doll) {
       set({ grabbedDoll: initialGrabbedDollState });
       return;
@@ -293,6 +295,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         currentGripStrength: initialGripStrength,
         accuracy: accuracy || 0,
         isPerfectGrab: isPerfectGrab || false,
+        rotation: rotation || null,
       },
     });
   },

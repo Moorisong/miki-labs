@@ -77,12 +77,19 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
   const grabCheckDoneRef = useRef(false);
   const positionRef = useRef<[number, number, number]>([0, 0, 0]);
   const wasGrabbedRef = useRef(false);
+  const rotationRef = useRef<[number, number, number]>([0, 0, 0]);
 
   useEffect(() => {
-    const unsubscribe = api.position.subscribe((p: [number, number, number]) => {
+    const unsubscribePos = api.position.subscribe((p: [number, number, number]) => {
       positionRef.current = p;
     });
-    return unsubscribe;
+    const unsubscribeRot = api.rotation.subscribe((r: [number, number, number]) => {
+      rotationRef.current = r;
+    });
+    return () => {
+      unsubscribePos();
+      unsubscribeRot();
+    };
   }, [api]);
 
   useFrame(() => {
@@ -191,7 +198,9 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
                 const isPerfectGrab = accuracy >= PERFECT_THRESHOLD;
 
                 console.log(`[Grab] Accuracy: ${(accuracy * 100).toFixed(1)}%, Perfect: ${isPerfectGrab}`);
-                setGrabbedDoll(config, offset, accuracy, isPerfectGrab);
+
+                const [rx, ry, rz] = rotationRef.current;
+                setGrabbedDoll(config, offset, accuracy, isPerfectGrab, { x: rx, y: ry, z: rz });
               }
               // accuracy < 0.4면 아예 잡히지 않음 (아무것도 하지 않음)
             }

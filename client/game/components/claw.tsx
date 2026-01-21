@@ -293,9 +293,14 @@ const Claw = () => {
 
     if (!DollComponent) return null;
 
+    // 저장된 회전값 적용 (없으면 0,0,0)
+    const rotation = grabbedDoll.rotation || { x: 0, y: 0, z: 0 };
+
     return (
       <group position={[0, startDollY - config.size * 0.2, 0]}>
-        <DollComponent config={config} />
+        <group rotation={[rotation.x, rotation.y, rotation.z]}>
+          <DollComponent config={config} />
+        </group>
       </group>
     );
   };
