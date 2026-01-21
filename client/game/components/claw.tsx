@@ -76,8 +76,8 @@ const GrabbedDollRenderer = () => {
   const config = grabbedDoll.config ? (grabbedDoll.config as any as CuteDollConfig) : null;
 
   // startDollY: 인형이 서 있을 때의 기준 Y 위치 (발바닥이 이 위치에 옴)
-  // 값을 내려서 집게 아래쪽에 위치하도록 함 (-0.15 -> -0.35)
-  const startDollY = -0.35;
+  // 값을 -0.15에서 0.0으로 더 올려서 집게 안쪽에 바짝 붙게 함
+  const startDollY = 0.0;
 
   // 회전 보정된 Y 위치 계산
   const basePosY = useMemo(() => {
@@ -91,12 +91,11 @@ const GrabbedDollRenderer = () => {
     localCenter.applyEuler(new Euler(rotation.x, rotation.y, rotation.z));
 
     // 목표: "회전된 인형의 중심"이 "집게의 잡는 지점"에 와야 함.
-    // 기존 로직 유지하되, 최대 높이 제한을 둠 (집게 위로 뚫고 가지 않도록)
     let targetCenterY = startDollY + config.size * 0.6;
 
-    // 최대 높이 제한: 집게 본체를 뚫지 않도록 -0.1 이하로 제한
-    if (targetCenterY > -0.15) {
-      targetCenterY = -0.15;
+    // 최대 높이 제한: 집게 본체를 뚫지 않도록 0.05 이하로 제한 (거의 닿을락 말락)
+    if (targetCenterY > 0.05) {
+      targetCenterY = 0.05;
     }
 
     // 목표 중심점 높이를 맞추기 위해 인형의 발바닥(Origin)을 어디에 둬야 하는가?
@@ -477,7 +476,7 @@ const Claw = () => {
           />
         ))}
 
-        {/* GrabbedDollRenderer Removed: 인형이 절대 사라지지 않도록 dolls.tsx에서 직접 렌더링 유지 */}
+        <GrabbedDollRenderer />
       </group>
 
       {/* Slack Cable Line */}
