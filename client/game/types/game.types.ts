@@ -124,9 +124,10 @@ export const EXIT_HOLE_POSITION = {
 };
 
 // Scoring constants
+// Scoring constants
 export const SCORING = {
-  baseScore: 100,
-  difficultyMultiplier: 50,
+  baseScore: 0,
+  difficultyMultiplier: 100,
 };
 
 // Grip physics constants
