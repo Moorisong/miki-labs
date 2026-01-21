@@ -332,8 +332,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     // 2. 완벽한 잡기 하위권 (Accuracy 80% ~ 89%): 높은 확률로 떨어질 수 있음
     if (grabbedDoll.accuracy >= 0.80) {
-      // 프레임당 약 9% 확률 -> 1초(10회) 생존율 약 40%
-      const rareFailChance = 0.09;
+      // 프레임당 약 13% 확률 -> 1초(10회) 생존율 약 25%
+      const rareFailChance = 0.13;
       if (Math.random() < rareFailChance) {
         console.log(`[Bad Luck Drop] Even perfect grab failed! Accuracy: ${(grabbedDoll.accuracy * 100).toFixed(1)}%`);
         return false;
@@ -341,16 +341,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return true;
     }
 
-    // 3. 일반 잡기 (Accuracy 35% ~ 79%)
-    // 정확도가 낮을수록 떨어질 확률 급격히 증가
-    // Accuracy 0.35 -> Chance 5% per check
-    // Accuracy 0.79 -> Chance 0.5% per check
+    // 3. 일반 잡기 (Accuracy 35% ~ 79%) - 현실 반영 (매운맛)
+    // 생존율 0.1% ~ 10% 목표 (거의 다 떨어짐)
+    // Accuracy 0.35 (최악) -> Chance 50% per check -> 생존율 약 0.1%
+    // Accuracy 0.79 (최선) -> Chance 20% per check -> 생존율 약 10%
 
     // 0.35~0.80 범위를 0~1로 정규화 (값이 클수록 **잘 잡은 것**)
     const normalized = (grabbedDoll.accuracy - 0.35) / (0.80 - 0.35);
 
-    // 0.15(15%) 에서 시작해서 0.08(8%) 만큼 감소 -> 0.07(7%) 까지
-    const failChance = 0.15 - (normalized * 0.08);
+    // 0.50(50%) 에서 시작해서 0.30(30%) 만큼 감소 -> 0.20(20%) 까지
+    const failChance = 0.50 - (normalized * 0.30);
 
     if (Math.random() < failChance) {
       console.log(`[Normal Drop] Grip failed. Accuracy: ${(grabbedDoll.accuracy * 100).toFixed(1)}%`);
