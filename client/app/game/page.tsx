@@ -43,13 +43,19 @@ export default function GamePage() {
   } = useGameAttempts();
 
   useGameLoop(); // Start the game loop
-  const { setInputState } = useGameControls({ enabled: true });
+  // Stop keyboard controls if game cannot be played (cooldown or no attempts)
+  const { setInputState } = useGameControls({ enabled: canPlay });
   const [rankings, setRankings] = useState<RankingEntry[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showRanking, setShowRanking] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [lastEarnedScore, setLastEarnedScore] = useState(0);
   const prevScoreRef = useRef(score);
+
+  // Sync persistent attempts state to game store to ensure consistency
+  useEffect(() => {
+    useGameStore.setState({ attempts: remainingAttempts });
+  }, [remainingAttempts]);
 
   // Load initial rankings & Restore score from login
   useEffect(() => {
