@@ -211,19 +211,9 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
         api.wakeUp();
       }
 
-      // ** 시각적 mesh만 제어 (물리 바디는 멀리 치워둠) **
-      const clawPos = visualClawPosition;
-      const targetX = clawPos.x + grabbedDoll.grabOffset.x;
-      const targetY = clawPos.y - 0.25 + grabbedDoll.grabOffset.y;
-      const targetZ = clawPos.z + grabbedDoll.grabOffset.z;
-
-      const savedRotation = grabbedDoll.rotation || { x: 0, y: 0, z: 0 };
-
-      // Mesh 위치 직접 설정 (물리 바디와 분리됨)
-      if (ref.current) {
-        ref.current.position.set(targetX, targetY, targetZ);
-        ref.current.rotation.set(savedRotation.x, savedRotation.y, savedRotation.z);
-      }
+      // ** 시각적 mesh는 물리 바디를 따라감 (화면 밖으로 사라짐) **
+      // 대신 Claw 컴포넌트에서 별도의 GrabbedDollVisual을 렌더링하여 보여줌.
+      // 이렇게 하면 물리 엔진과의 싸움을 피하고 코드가 분리됨.
       return;
     }
 
@@ -231,11 +221,22 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
     if (!isGrabbed && wasGrabbedRef.current) {
       wasGrabbedRef.current = false;
 
-      // 현재 mesh 위치를 기준으로 물리 바디 복귀
-      const releasePos = ref.current ? ref.current.position : { x: 0, y: 1, z: 0 };
-      console.log(`[Doll ${config.id}] Released at (${releasePos.x.toFixed(2)}, ${releasePos.y.toFixed(2)}, ${releasePos.z.toFixed(2)})`);
+      // GrabbedDollVisual이 있던 위치(집게)에서 물리 바디를 되살림
+      // 정확한 위치 동기화를 위해 store의 visualClawPosition 활용 가능하나,
+      // 여기서는 물리 바디가 -1000에 있다가 돌아오는 것이므로,
+      // "놓는 순간"의 위치를 잘 지정해야 함.
 
-      api.position.set(releasePos.x, releasePos.y, releasePos.z);
+      const clawPos = state.visualClawPosition;
+
+      // 집게 위치 + 오프셋에서 시작
+      const dropX = clawPos.x + grabbedDoll.grabOffset.x;
+      const dropY = clawPos.y - 0.55 + grabbedDoll.grabOffset.y; // 집게 기준점(0.55) 재적용
+      const dropZ = clawPos.z + grabbedDoll.grabOffset.z;
+
+      console.log(`[Doll ${config.id}] Released at (${dropX.toFixed(2)}, ${dropY.toFixed(2)}, ${dropZ.toFixed(2)})`);
+
+      api.position.set(dropX, dropY, dropZ);
+      api.velocity.set(0, 0, 0); // 초기 속도 0
       api.mass.set(config.mass);
       api.collisionResponse.set(true);
 
@@ -354,7 +355,7 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
                 // 나중에 적용할 때: 시각적 집게 위치 + 오프셋 = 인형 위치 (바로 여기!)
                 const offset = {
                   x: x - cx,
-                  y: y - (cy - 0.25),  // Y 오프셋도 정확히 계산
+                  y: y - (cy - 0.55),  // 오프셋 기준점을 낮춰서(0.25 -> 0.55) 인형이 더 위로 붙게 함
                   z: z - cz
                 };
                 const isPerfectGrab = accuracy >= PERFECT_THRESHOLD;
