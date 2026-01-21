@@ -216,7 +216,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   startGame: () => {
-    const { phase, soundCallbacks } = get();
+    const { phase, soundCallbacks, attempts } = get();
+    if (attempts <= 0) return;
     if (phase !== 'idle' && phase !== 'result') return;
 
     set({
@@ -233,7 +234,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   dropClaw: () => {
-    const { phase, soundCallbacks } = get();
+    const { phase, soundCallbacks, attempts } = get();
+    if (attempts <= 0) return;
     if (phase !== 'moving') return;
 
     soundCallbacks.onClawDrop?.();
