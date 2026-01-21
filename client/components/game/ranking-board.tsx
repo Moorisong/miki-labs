@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signIn } from 'next-auth/react';
 import Link from 'next/link';
 import type { RankingEntry } from '@/lib/api/types';
 import styles from './ranking-board.module.css';
@@ -21,9 +21,11 @@ export default function RankingBoard({
     onSubmit,
     isSubmitting = false,
 }: RankingBoardProps) {
-    const { data: session, status } = useSession();
+    const { data: session, status, update } = useSession();
     const [hasSubmitted, setHasSubmitted] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [nicknameInput, setNicknameInput] = useState('');
+    const [isNicknameSubmitting, setIsNicknameSubmitting] = useState(false);
 
     const isLoggedIn = status === 'authenticated' && session?.user;
     const hasNickname = isLoggedIn && session.user.nickname;
@@ -53,6 +55,48 @@ export default function RankingBoard({
 
     const handleManualSubmit = async () => {
         await handleAutoSubmit();
+    };
+
+    const handleLogin = () => {
+        // 로그인하러 가기 전에 점수 저장
+        sessionStorage.setItem('pendingRankingScore', currentScore.toString());
+        signIn('kakao', { callbackUrl: '/game' });
+    };
+
+    const handleNicknameSubmit = async () => {
+        if (!nicknameInput.trim()) return;
+
+        setIsNicknameSubmitting(true);
+        setError(null);
+        try {
+            const response = await fetch('/api/user/nickname', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nickname: nicknameInput }),
+            });
+
+            if (response.ok) {
+                // 세션 업데이트 (JWT 토큰의 닉네임 정보 갱신)
+                await update();
+
+                // 세션이 업데이트되면 useEffect의 hasNickname 조건이 true가 되어
+                // 자동으로 handleAutoSubmit이 호출됨
+                // 하지만 state 업데이트 타이밍 이슈를 방지하기 위해 직접 호출도 해둠
+                const submitResult = await onSubmit();
+                if (submitResult.success) {
+                    setHasSubmitted(true);
+                } else {
+                    setError(submitResult.error || '랭킹 저장에 실패했습니다.');
+                }
+            } else {
+                const data = await response.json();
+                setError(data.error || '닉네임 설정에 실패했습니다.');
+            }
+        } catch (err) {
+            setError('닉네임 설정 중 오류가 발생했습니다.');
+        } finally {
+            setIsNicknameSubmitting(false);
+        }
     };
 
     return (
@@ -90,9 +134,9 @@ export default function RankingBoard({
                     <div className={styles.loginPrompt}>
                         <p className={styles.promptText}>로그인하면 랭킹에 기록할 수 있어요!</p>
                         <div className={styles.buttonGroup}>
-                            <Link href="/login" className={styles.loginButton}>
-                                로그인하기
-                            </Link>
+                            <button onClick={handleLogin} className={styles.loginButton}>
+                                로그인하고 랭킹 점수 넣기
+                            </button>
                             <button className={styles.cancelButton} onClick={onRestart}>
                                 그냥 다시하기
                             </button>
@@ -101,8 +145,31 @@ export default function RankingBoard({
                 ) : !hasNickname ? (
                     // 로그인했지만 닉네임 없음
                     <div className={styles.loginPrompt}>
-                        <p className={styles.promptText}>닉네임을 설정하면 랭킹에 기록됩니다.</p>
-                        <button className={styles.button} onClick={onRestart}>
+                        <p className={styles.promptText}>닉네임을 설정하고 랭킹에 도전하세요!</p>
+                        <div className={styles.inputGroup} style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '10px' }}>
+                            <input
+                                type="text"
+                                className={styles.input}
+                                value={nicknameInput}
+                                onChange={(e) => setNicknameInput(e.target.value)}
+                                placeholder="닉네임 입력 (2~10자)"
+                                style={{
+                                    padding: '8px 12px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #ddd',
+                                    background: 'rgba(255,255,255,0.9)',
+                                    color: '#333'
+                                }}
+                            />
+                            <button
+                                className={styles.button}
+                                onClick={handleNicknameSubmit}
+                                disabled={isNicknameSubmitting}
+                            >
+                                {isNicknameSubmitting ? '저장 중...' : '확인'}
+                            </button>
+                        </div>
+                        <button className={styles.cancelButton} onClick={onRestart}>
                             다시 하기
                         </button>
                     </div>

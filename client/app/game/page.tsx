@@ -49,12 +49,23 @@ export default function GamePage() {
   const [showRanking, setShowRanking] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [lastEarnedScore, setLastEarnedScore] = useState(0);
-  const [wasSuccessThisAttempt, setWasSuccessThisAttempt] = useState(false);
   const prevScoreRef = useRef(score);
 
-  // Load initial rankings
+  // Load initial rankings & Restore score from login
   useEffect(() => {
     rankingApi.getTopRanking(10).then(setRankings);
+
+    // 로그인 후 돌아왔을 때 점수 복구
+    const savedScore = sessionStorage.getItem('pendingRankingScore');
+    if (savedScore) {
+      const scoreNum = parseInt(savedScore, 10);
+      if (!isNaN(scoreNum)) {
+        // Zustand store 직접 업데이트
+        useGameStore.setState({ score: scoreNum });
+        setShowRanking(true);
+      }
+      sessionStorage.removeItem('pendingRankingScore');
+    }
   }, []);
 
   // 점수 변화 감지하여 성공 효과 표시
@@ -63,7 +74,6 @@ export default function GamePage() {
       const earned = score - prevScoreRef.current;
       setLastEarnedScore(earned);
       setShowSuccess(true);
-      setWasSuccessThisAttempt(true);
     }
     prevScoreRef.current = score;
   }, [score]);
@@ -85,12 +95,13 @@ export default function GamePage() {
       onAttemptUsed: (remaining) => {
         // 시도 횟수 변경 시 (결과 단계에서)
         // 성공 시 +1, 실패 시 -1
-        if (wasSuccessThisAttempt) {
+        // wasSuccessThisAttempt를 직접 참조하지 않고 현재 상태를 확인
+        const wasSuccess = prevScoreRef.current > 0 && score > prevScoreRef.current;
+        if (wasSuccess) {
           addAttempt();
         } else {
           useAttempt();
         }
-        setWasSuccessThisAttempt(false);
       }
     });
 
@@ -99,11 +110,18 @@ export default function GamePage() {
         // 성공 효과는 score 변화로 감지하므로 여기서는 추가 처리 필요 없음
       },
     });
+  }, [setCallbacks, setSoundCallbacks, addAttempt, useAttempt, score]);
 
+  // 컴포넌트 언마운트 시에만 게임 리셋 (점수 복구 문제 방지)
+  useEffect(() => {
     return () => {
-      resetGame();
+      // 랭킹보드가 표시 중이면 리셋하지 않음 (sessionStorage에서 복구한 점수 유지)
+      const hasPendingScore = sessionStorage.getItem('pendingRankingScore');
+      if (!hasPendingScore) {
+        resetGame();
+      }
     };
-  }, [setCallbacks, setSoundCallbacks, resetGame, wasSuccessThisAttempt, addAttempt, useAttempt]);
+  }, [resetGame]);
 
   const handleMoveStart = useCallback((direction: 'left' | 'right' | 'forward' | 'backward') => {
     if (phase !== 'moving') return;
@@ -163,15 +181,17 @@ export default function GamePage() {
 
   return (
     <div className={styles.container}>
-      {/* 게임 HUD (시도 횟수, 쿨타임, 비로그인 안내) */}
-      <GameHUD
-        score={score}
-        remainingAttempts={remainingAttempts}
-        isOnCooldown={isOnCooldown}
-        cooldownRemaining={cooldownRemaining}
-        canPlay={canPlay}
-        phase={phase}
-      />
+      {/* 게임 HUD (시도 횟수, 쿨타임, 비로그인 안내) - 랭킹보드 표시 중에는 숨김 */}
+      {!showRanking && (
+        <GameHUD
+          score={score}
+          remainingAttempts={remainingAttempts}
+          isOnCooldown={isOnCooldown}
+          cooldownRemaining={cooldownRemaining}
+          canPlay={canPlay}
+          phase={phase}
+        />
+      )}
 
       <div className={styles.gameCanvas}>
         <ClawMachine dollCount={25} />
@@ -186,6 +206,7 @@ export default function GamePage() {
         onMoveEnd={handleMoveEnd}
         onDrop={dropClaw}
         canPlay={canPlay}
+        showRanking={showRanking}
       >
         {showRanking && (
           <div className={styles.rankingOverlay}>
@@ -203,6 +224,7 @@ export default function GamePage() {
       <SuccessEffect
         show={showSuccess}
         score={lastEarnedScore}
+        totalScore={score}
         onComplete={() => setShowSuccess(false)}
         showLoginPrompt={true}
       />

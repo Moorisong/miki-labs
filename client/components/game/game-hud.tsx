@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import Link from 'next/link';
+import { useSession, signIn } from 'next-auth/react';
 import styles from './game-hud.module.css';
 
 interface GameHUDProps {
@@ -89,9 +88,12 @@ export default function GameHUD({
                     <p className={styles.promptSubtext}>
                         로그인하면 기록을 랭킹에 저장할 수 있어요
                     </p>
-                    <Link href="/login" className={styles.loginLink}>
+                    <button
+                        className={styles.loginLink}
+                        onClick={() => signIn('kakao', { callbackUrl: '/game' })}
+                    >
                         지금 로그인하고 랭킹에 도전하세요! →
-                    </Link>
+                    </button>
                 </div>
             )}
         </div>

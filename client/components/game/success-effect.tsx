@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { useSession } from 'next-auth/react';
-import Link from 'next/link';
+import { useSession, signIn } from 'next-auth/react';
 import styles from './success-effect.module.css';
 
 interface SuccessEffectProps {
   show: boolean;
   score: number;
+  totalScore?: number; // 누적 점수 (로그인 시 저장용)
   onComplete?: () => void;
   showLoginPrompt?: boolean; // 로그인 유도 문구 표시 여부
 }
@@ -90,7 +90,7 @@ const generateSparkles = (count: number): Sparkle[] =>
     size: 10 + Math.random() * 20,
   }));
 
-export default function SuccessEffect({ show, score, onComplete, showLoginPrompt = false }: SuccessEffectProps) {
+export default function SuccessEffect({ show, score, totalScore, onComplete, showLoginPrompt = false }: SuccessEffectProps) {
   const { status } = useSession();
   const isLoggedIn = status === 'authenticated';
   const [isVisible, setIsVisible] = useState(false);
@@ -104,9 +104,12 @@ export default function SuccessEffect({ show, score, onComplete, showLoginPrompt
     if (show) {
       setIsVisible(true);
 
-      // 비로그인 시 로그인 유도를 위해 시간 연장
-      const duration = showLoginPrompt && !isLoggedIn ? 2500 : 1200;
+      // 비로그인 상태이면서 로그인 유도 문구가 켜져 있다면 자동 사라짐 방지
+      if (showLoginPrompt && !isLoggedIn) {
+        return;
+      }
 
+      const duration = 2500;
       const timer = setTimeout(() => {
         setIsVisible(false);
         onComplete?.();
@@ -198,9 +201,29 @@ export default function SuccessEffect({ show, score, onComplete, showLoginPrompt
         {showLoginPrompt && !isLoggedIn && (
           <div className={styles.loginPrompt}>
             <p>🎉 성공! 로그인하면 이 기록을 랭킹에 저장할 수 있어요</p>
-            <Link href="/login" className={styles.loginLink}>
-              로그인하기 →
-            </Link>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+              <button
+                className={styles.loginLink}
+                onClick={() => {
+                  // 로그인 전 점수 저장 (누적 점수 사용)
+                  const scoreToSave = totalScore ?? score;
+                  sessionStorage.setItem('pendingRankingScore', scoreToSave.toString());
+                  signIn('kakao', { callbackUrl: '/game' });
+                }}
+              >
+                로그인하고 랭킹 등록하기 →
+              </button>
+              <button
+                className={styles.loginLink}
+                style={{ background: 'rgba(255, 255, 255, 0.2)', border: '1px solid rgba(255,255,255,0.4)' }}
+                onClick={() => {
+                  setIsVisible(false);
+                  onComplete?.();
+                }}
+              >
+                닫기
+              </button>
+            </div>
           </div>
         )}
       </div>

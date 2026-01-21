@@ -199,8 +199,9 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
       }
 
       // ** 위치 강제 고정 **
-      // 논리적 집게 위치 기준으로 계산 (인형이 제자리에서 시작하도록)
-      const clawPos = state.claw.position;
+      // 시각적 집게 위치(스프링 물리 적용) 기준으로 계산하여 인형이 집게에 딱 붙어있게 함
+      // 이것이 "집게가 인형을 집었는데 인형이 붙지 않아" 버그의 핵심 수정사항임
+      const clawPos = visualClawPosition;
       const targetX = clawPos.x + grabbedDoll.grabOffset.x;
       const targetY = clawPos.y - 0.25 + grabbedDoll.grabOffset.y;
       const targetZ = clawPos.z + grabbedDoll.grabOffset.z;
@@ -279,6 +280,7 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
       // Y가 임계값보다 작고, 너무 깊지 않은 경우에만 성공 처리
       if (inExitZoneXZ && y < FALL_THRESHOLD_Y && y > MIN_VALID_Y) {
         holeFallReportedRef.current = true;
+        console.log(`[Hole Fall] Doll ${config.id} fell into hole at Y=${y.toFixed(2)}`);
         reportDollFellInHole(config);
       }
     }
@@ -342,6 +344,8 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
                   z: z - cz
                 };
                 const isPerfectGrab = accuracy >= PERFECT_THRESHOLD;
+
+                console.log(`[Grab] Accuracy: ${(accuracy * 100).toFixed(1)}%, Perfect: ${isPerfectGrab}`);
 
                 const [rx, ry, rz] = rotationRef.current;
                 setGrabbedDoll(config, offset, accuracy, isPerfectGrab, { x: rx, y: ry, z: rz });

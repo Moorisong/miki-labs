@@ -9,6 +9,9 @@ interface GameOverlayProps {
   onMoveStart: (direction: 'left' | 'right' | 'forward' | 'backward') => void;
   onMoveEnd: (direction: 'left' | 'right' | 'forward' | 'backward') => void;
   onDrop: () => void;
+  onStart?: () => void;
+  canPlay?: boolean;
+  showRanking?: boolean;
   children?: React.ReactNode;
 }
 
@@ -21,6 +24,7 @@ export default function GameOverlay({
   onDrop,
   onStart,
   canPlay = true,
+  showRanking = false,
   children
 }: {
   score: number;
@@ -31,6 +35,7 @@ export default function GameOverlay({
   onDrop: () => void;
   onStart: () => void;
   canPlay?: boolean;
+  showRanking?: boolean;
   children?: React.ReactNode;
 }) {
   return (
@@ -40,7 +45,7 @@ export default function GameOverlay({
       {children}
 
       {/* Start Button */}
-      {phase === 'idle' && (
+      {phase === 'idle' && !showRanking && (
         <div className={styles.startOverlay}>
           <button
             className={`${styles.startButton} ${!canPlay ? styles.disabled : ''}`}
