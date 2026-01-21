@@ -24,7 +24,7 @@ export default function GameOverlay({
 }: {
   score: number;
   attempts: number;
-  phase: 'idle' | 'moving' | 'dropping' | 'grabbing' | 'rising' | 'returning' | 'result';
+  phase: 'idle' | 'moving' | 'dropping' | 'grabbing' | 'rising' | 'returning' | 'releasing' | 'result';
   onMoveStart: (direction: 'left' | 'right' | 'forward' | 'backward') => void;
   onMoveEnd: (direction: 'left' | 'right' | 'forward' | 'backward') => void;
   onDrop: () => void;

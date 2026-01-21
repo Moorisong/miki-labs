@@ -102,7 +102,7 @@ export default function SuccessEffect({ show, score, onComplete }: SuccessEffect
       const timer = setTimeout(() => {
         setIsVisible(false);
         onComplete?.();
-      }, 2500);
+      }, 1200);
 
       return () => clearTimeout(timer);
     }
