@@ -302,33 +302,39 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     if (!grabbedDoll.id) return true;
 
-    // 완벽하게 잡은 경우 절대 떨어지지 않음
+    // 완벽하게 잡은 경우 (90% 이상) 절대 떨어지지 않음
     if (grabbedDoll.isPerfectGrab) {
       return true;
     }
 
+    // 여기서부터는 40-89% 정확도의 불완전한 잡기
     let newGripStrength = grabbedDoll.currentGripStrength;
 
     if (phase === 'rising' || phase === 'returning') {
-      const accuracyFactor = 0.5 + grabbedDoll.accuracy * 0.5;
-
-      // 걸친 경우(낮은 정확도)는 빠르게 grip 감소, 완벽하면 거의 감소 없음
-      const adjustedDecayRate = grabbedDoll.accuracy > 0.8
-        ? GRIP_CONFIG.decayRate // 완벽: 기본 decay만
-        : GRIP_CONFIG.decayRate - (1 - accuracyFactor) * 0.002; // 걸침: 더 빠른 decay (0.015 -> 0.005 -> 0.002로 완화)
+      // 정확도가 낮을수록 빠르게 감소
+      // accuracy 0.35 -> decayRate 약 0.65 (매우 빠른 감소)
+      // accuracy 0.79 -> decayRate 약 0.92 (느린 감소)
+      const normalizedAccuracy = Math.max(0, Math.min(1, (grabbedDoll.accuracy - 0.35) / 0.45)); // 0.35~0.80를 0~1로 매핑, 클램프
+      const baseDecay = 0.65; // 최저 감소율 (35% 정확도) - 매우 공격적
+      const maxDecay = 0.92; // 최고 감소율 (79% 정확도)
+      const adjustedDecayRate = baseDecay + normalizedAccuracy * (maxDecay - baseDecay);
 
       newGripStrength *= adjustedDecayRate;
 
-      // slip chance: 걸친 경우 높은 확률로 미끄러짐
-      const baseSlipChance = grabbedDoll.accuracy > 0.6
-        ? 0 // 60% 이상 정확도면 절대 미끄러지지 않음
-        : (1 - grabbedDoll.accuracy) * 0.05; // 걸침: 최대 5%
+      // 미끄러짐 확률: 정확도가 낮을수록 높음
+      // accuracy 0.35 -> slipChance 약 50%
+      // accuracy 0.55 -> slipChance 약 35%
+      // accuracy 0.79 -> slipChance 약 15%
+      const slipChance = (1 - normalizedAccuracy) * 0.4 + 0.1;
 
-      const movementSlipBonus = phase === 'returning' ? 0.02 : 0;
-      const totalSlipChance = baseSlipChance + movementSlipBonus;
+      // returning 단계에서 추가 미끄러짐
+      const totalSlipChance = slipChance + (phase === 'returning' ? 0.15 : 0);
 
       if (Math.random() < totalSlipChance) {
-        newGripStrength *= 0.8; // 미끄러지면 grip 크게 감소 (0.5 -> 0.8)
+        // 미끄러지면 그립 크게 감소
+        const slipAmount = 0.3 + normalizedAccuracy * 0.3; // 0.3~0.6
+        newGripStrength *= slipAmount;
+        console.log(`[Slip] Grip reduced to ${(newGripStrength * 100).toFixed(1)}%`);
       }
 
       set({
@@ -338,7 +344,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         },
       });
 
+      // 그립이 임계값 이하면 떨어뜨림
       if (newGripStrength < GRIP_CONFIG.releaseThreshold) {
+        console.log(`[Drop] Doll dropped! Final grip: ${(newGripStrength * 100).toFixed(1)}%`);
         return false;
       }
     }

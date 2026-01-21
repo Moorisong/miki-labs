@@ -157,22 +157,43 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
             const cz = visualClawPosition.z;
 
             const distXZ = Math.sqrt((x - cx) ** 2 + (z - cz) ** 2);
-            // 높이 판정: 범위 축소
+            // 높이 판정
             const clawBottomY = cy - 0.5;
             const dollTopY = y + config.size;
-            // 바닥(-1.0) -> -0.5로 축소, 위(+0.5) -> +0.2로 축소
-            const isUnderClaw = dollTopY >= clawBottomY - 0.5 && y < cy + 0.2;
+            const isUnderClaw = dollTopY >= clawBottomY - 0.3 && y < cy;
 
-            const CLAW_GRAB_RADIUS = 0.4; // 0.5 -> 0.4로 축소
+            // 최대 잡기 반경 (이 범위 밖은 아예 못 잡음)
+            const MAX_GRAB_RADIUS = 0.35;
+            // 완벽한 잡기 반경 (이 범위 안은 100% 정확도)
+            const PERFECT_GRAB_RADIUS = 0.08;
 
-            if (distXZ < CLAW_GRAB_RADIUS && isUnderClaw) {
-              grabCheckDoneRef.current = true; // 하나 잡으면 체크 종료
+            if (isUnderClaw && distXZ < MAX_GRAB_RADIUS) {
+              // 정확도 계산: 중심에 가까울수록 높음
+              // distXZ가 0이면 accuracy = 1.0
+              // distXZ가 MAX_GRAB_RADIUS이면 accuracy = 0
+              let accuracy: number;
+              if (distXZ <= PERFECT_GRAB_RADIUS) {
+                accuracy = 1.0; // 완벽한 중앙
+              } else {
+                // PERFECT_GRAB_RADIUS ~ MAX_GRAB_RADIUS 사이를 0.0 ~ 1.0으로 매핑
+                const normalizedDist = (distXZ - PERFECT_GRAB_RADIUS) / (MAX_GRAB_RADIUS - PERFECT_GRAB_RADIUS);
+                accuracy = 1.0 - normalizedDist;
+              }
 
-              const offset = { x: 0, y: 0, z: 0 };
-              const accuracy = 1.0;
-              const isPerfectGrab = true;
+              // 임계값 기반 판정
+              const PERFECT_THRESHOLD = 0.80;  // 80% 이상: 완벽
+              const PARTIAL_THRESHOLD = 0.35;  // 35% 이상: 불완전하게 잡힘
 
-              setGrabbedDoll(config, offset, accuracy, isPerfectGrab);
+              if (accuracy >= PARTIAL_THRESHOLD) {
+                grabCheckDoneRef.current = true;
+
+                const offset = { x: 0, y: 0, z: 0 };
+                const isPerfectGrab = accuracy >= PERFECT_THRESHOLD;
+
+                console.log(`[Grab] Accuracy: ${(accuracy * 100).toFixed(1)}%, Perfect: ${isPerfectGrab}`);
+                setGrabbedDoll(config, offset, accuracy, isPerfectGrab);
+              }
+              // accuracy < 0.4면 아예 잡히지 않음 (아무것도 하지 않음)
             }
           } else {
             // 이미 누군가 잡혔으면 나는 체크 종료
