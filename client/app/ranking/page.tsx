@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { RankingEntry } from '@/lib/api/types';
 import styles from './page.module.css';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: '랭킹 | 뽑기중독',
   description: '뽑기중독 플레이어들의 랭킹을 확인하세요. 최고의 인형뽑기 마스터가 되어보세요!',
