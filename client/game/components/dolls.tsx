@@ -140,7 +140,17 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
       api.mass.set(config.mass);
       api.collisionResponse.set(true); // 충돌 다시 활성화
 
-      api.velocity.set(0, -1, 0);
+      // 걸려서 떨어지는 효과 (랜덤 속도 및 회전)
+      const randX = (Math.random() - 0.5) * 1.0;
+      const randZ = (Math.random() - 0.5) * 1.0;
+      api.velocity.set(randX, -1, randZ);
+
+      const randAng = 5;
+      api.angularVelocity.set(
+        (Math.random() - 0.5) * randAng,
+        (Math.random() - 0.5) * randAng,
+        (Math.random() - 0.5) * randAng
+      );
       api.wakeUp();
     }
 

@@ -1,8 +1,8 @@
 'use client';
 
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Group, Mesh, Vector3 } from 'three';
+import { Group, Mesh, Vector3, QuadraticBezierCurve3, BufferGeometry, Line as ThreeLine, LineBasicMaterial, Euler } from 'three';
 import { useSphere } from '@react-three/cannon';
 import { CLAW_CONFIG, CABINET_DIMENSIONS } from '../types/game.types';
 import { useGameStore } from '../core/game-manager';
@@ -45,9 +45,90 @@ const ClawCollider = () => {
 
   return (
     <mesh ref={ref} visible={false}>
-      <sphereGeometry args={[colliderSize, 8, 8]} />
+      {/* 충돌체를 더 작게 만들어서 인형들 사이를 파고들기 쉽게 함 */}
+      <sphereGeometry args={[0.02, 8, 8]} />
       <meshBasicMaterial transparent opacity={0} />
     </mesh>
+  );
+};
+
+// 잡힌 인형을 렌더링하고 미세한 떨림(Micro-Slipping) 효과를 주는 컴포넌트
+const GrabbedDollRenderer = () => {
+  const grabbedDoll = useGameStore((state) => state.grabbedDoll);
+  const groupRef = useRef<Group>(null);
+  const noiseOffset = useRef(Math.random() * 100);
+
+  // 저장된 회전값
+  const rotation = grabbedDoll.rotation || { x: 0, y: 0, z: 0 };
+  const config = grabbedDoll.config ? (grabbedDoll.config as any as CuteDollConfig) : null;
+
+  // startDollY: 인형이 서 있을 때의 기준 Y 위치 (발바닥이 이 위치에 옴)
+  // 값을 더 올려서 바닥 뚫림 현상 완전히 방지 (-0.25 -> -0.15)
+  const startDollY = -0.15;
+
+  // 회전 보정된 Y 위치 계산
+  const basePosY = useMemo(() => {
+    if (!config) return startDollY;
+
+    // 인형의 기하학적 중심에 접근 (대략 높이의 절반)
+    const centerHeight = config.size * 0.5;
+    const localCenter = new Vector3(0, centerHeight, 0);
+
+    // 저장된 회전값 적용하여 중심점이 어떻게 이동했는지 계산
+    localCenter.applyEuler(new Euler(rotation.x, rotation.y, rotation.z));
+
+    // 목표: "회전된 인형의 중심"이 "집게의 잡는 지점"에 와야 함.
+    // 중심점을 더 위로 잡아(0.3 -> 0.6) 큰 인형도 처지지 않게 함
+    const targetCenterY = startDollY + config.size * 0.6;
+
+    // 목표 중심점 높이를 맞추기 위해 인형의 발바닥(Origin)을 어디에 둬야 하는가?
+    // OriginY + RotatedCenterY = TargetCenterY
+    // OriginY = TargetCenterY - RotatedCenterY
+    return targetCenterY - localCenter.y;
+  }, [config, rotation.x, rotation.y, rotation.z]);
+
+  useFrame((state) => {
+    if (!groupRef.current || !config) return;
+
+    // Micro-Slipping: 시간 기반 노이즈로 미세하게 떨림
+    const time = state.clock.elapsedTime;
+    const shakeAmount = 0.002;
+
+    const nx = Math.sin(time * 20 + noiseOffset.current) * shakeAmount;
+    const ny = Math.cos(time * 25 + noiseOffset.current) * shakeAmount;
+    const nz = Math.sin(time * 15 + noiseOffset.current) * shakeAmount;
+
+    // 보정된 Y 위치에 노이즈 추가하여 설정
+    groupRef.current.position.set(nx, basePosY + ny, nz);
+
+    // 회전에도 약간의 노이즈 추가
+    groupRef.current.rotation.set(
+      (Math.random() - 0.5) * 0.02,
+      (Math.random() - 0.5) * 0.02,
+      (Math.random() - 0.5) * 0.02
+    );
+  });
+
+  if (!config) return null;
+
+  const DollComponent =
+    config.cuteType === 'bunny' ? BunnyDoll :
+      config.cuteType === 'bear' ? BearDoll :
+        config.cuteType === 'cat' ? CatDoll : null;
+
+  if (!DollComponent) return null;
+
+  return (
+    // 초기 위치는 여기서 설정하나 useFrame이 덮어씀
+    <group position={[0, basePosY, 0]}>
+      {/* 미세 떨림 적용 그룹 */}
+      <group ref={groupRef}>
+        {/* 원래 회전값 적용 그룹 */}
+        <group rotation={[rotation.x, rotation.y, rotation.z]}>
+          <DollComponent config={config} />
+        </group>
+      </group>
+    </group>
   );
 };
 
@@ -172,6 +253,14 @@ const Claw = () => {
   const targetPosition = useRef(new Vector3());
   const currentVelocity = useRef(new Vector3());
 
+  // Cable & Slack refs (Added via fix)
+  const lineRef = useRef<ThreeLine>(null);
+  const slackRef = useRef(0);
+  const slackVelocityRef = useRef(0);
+  const cablePoints = useMemo(() => new Array(20).fill(0).map(() => new Vector3()), []);
+  const cableGeometry = useMemo(() => new BufferGeometry().setFromPoints(cablePoints), [cablePoints]);
+  const prevWorldY = useRef(0);
+
   // Swing physics refs
   const prevVelocity = useRef(new Vector3());
   const angularVelocity = useRef(new Vector3()); // x, y, z rotational velocity
@@ -254,9 +343,62 @@ const Claw = () => {
       // X 가속도와 Z 속도의 상호작용으로 비틀림 발생
       const twistTorque = (accelX * currentVelocity.current.z - accelZ * currentVelocity.current.x) * 0.8;
 
+      // Weight Distribution (무게 중심)
+      // 잡은 인형이 있으면 중심축이 이동하여 기울어짐
+      let weightTorqueX = 0;
+      let weightTorqueZ = 0;
+
+      if (grabbedDoll.id && grabbedDoll.rotation) { // rotation이 있다는 건 잡혀있다는 뜻
+        const offset = grabbedDoll.grabOffset;
+        // 오프셋에 비례해 토크 발생 (무거울수록 많이 기울어짐 - mass는 DollConfig에 있음)
+        // 여기서는 간단히 오프셋만 고려
+        const WEIGHT_POWER = 3.0;
+        weightTorqueZ = offset.x * WEIGHT_POWER; // X축으로 벗어나면 Z축 회전(기울기)
+        weightTorqueX = -offset.z * WEIGHT_POWER;
+      }
+
       // 복원력을 높이고(1.5), 댐핑을 크게(2.5) 하여 묵직한 느낌 부여
       const angularAccelY = twistTorque - (currentRotation.current.y * 1.5) - (angularVelocity.current.y * 2.5);
       angularVelocity.current.y += angularAccelY * delta;
+
+      // 무게 중심 토크 적용
+      angularVelocity.current.x += weightTorqueX * delta;
+      angularVelocity.current.z += weightTorqueZ * delta;
+
+      // Slack Physics (줄 느슨해짐)
+      const currentY = groupRef.current.position.y;
+      const vy = (currentY - prevWorldY.current) / delta;
+      // 위로 가속하거나(줄이 밀림), 갑자기 멈출 때 slack 발생
+      const accelY = (vy - currentVelocity.current.y) / delta; // 근사치
+
+      // 줄이 느슨해지는 힘: 위로 가속할 때
+      if (accelY > 5.0) {
+        slackVelocityRef.current += accelY * 0.02;
+      }
+
+      // Slack Spring
+      const tension = -slackRef.current * 10; // 복원력
+      const slackDamping = -slackVelocityRef.current * 2;
+      slackVelocityRef.current += (tension + slackDamping) * delta;
+      slackRef.current += slackVelocityRef.current * delta;
+      slackRef.current = Math.max(0, slackRef.current); // slack은 음수(당겨짐)가 될 수 없음
+
+      // Update Cable Geometry
+      if (lineRef.current) {
+        const start = new Vector3(0, 4, 0); // 천장
+        const end = groupRef.current.position.clone().add(new Vector3(0, cableLength, 0)); // 집게 상단
+        const mid = start.clone().add(end).multiplyScalar(0.5);
+
+        // Slack 적용: 중간점이 휘어짐
+        mid.x += Math.sin(Date.now() * 0.005) * slackRef.current;
+        mid.z += Math.cos(Date.now() * 0.005) * slackRef.current;
+
+        const curve = new QuadraticBezierCurve3(start, mid, end);
+        const points = curve.getPoints(19); // 20 points
+        lineRef.current.geometry.setFromPoints(points);
+      }
+
+      prevWorldY.current = currentY;
 
       // 각도 적분
       currentRotation.current.z += angularVelocity.current.z * delta;
@@ -275,35 +417,7 @@ const Claw = () => {
     prevVelocity.current.copy(currentVelocity.current);
   });
 
-  // 잡힌 인형 렌더링 헬퍼
-  const startDollY = -0.55; // 인형이 집게에 매달릴 시각적 위치 (조정 가능)
-
-  const renderGrabbedDoll = () => {
-    if (!grabbedDoll.config) return null;
-
-    // 타입 단언 (DollConfig -> CuteDollConfig)
-    // 실제로는 CuteDollConfig가 맞음
-    const config = grabbedDoll.config as any as CuteDollConfig;
-
-    // 인형 종류에 따라 렌더링
-    const DollComponent =
-      config.cuteType === 'bunny' ? BunnyDoll :
-        config.cuteType === 'bear' ? BearDoll :
-          config.cuteType === 'cat' ? CatDoll : null;
-
-    if (!DollComponent) return null;
-
-    // 저장된 회전값 적용 (없으면 0,0,0)
-    const rotation = grabbedDoll.rotation || { x: 0, y: 0, z: 0 };
-
-    return (
-      <group position={[0, startDollY - config.size * 0.2, 0]}>
-        <group rotation={[rotation.x, rotation.y, rotation.z]}>
-          <DollComponent config={config} />
-        </group>
-      </group>
-    );
-  };
+  // renderGrabbedDoll 함수 제거됨 (GrabbedDollRenderer 컴포넌트로 대체)
 
   return (
     <>
@@ -324,9 +438,13 @@ const Claw = () => {
           />
         ))}
 
-        {/* 잡은 인형 렌더링 - 집게의 자식으로 렌더링되어 완벽하게 따라감 */}
-        {renderGrabbedDoll()}
+        {/* 잡은 인형 렌더링 - GrabbedDollRenderer로 대체되어 미세 떨림 적용됨 */}
+        <GrabbedDollRenderer />
       </group>
+
+      {/* Slack Cable Line */}
+      <mesh visible={false}> {/* Dummy mesh to keep geometry alive if needed, but line uses its own geometry */} </mesh>
+      <primitive object={new ThreeLine(cableGeometry, new LineBasicMaterial({ color: '#333333', linewidth: 2 }))} ref={lineRef} />
     </>
   );
 };
