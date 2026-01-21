@@ -172,6 +172,11 @@ const Claw = () => {
   const targetPosition = useRef(new Vector3());
   const currentVelocity = useRef(new Vector3());
 
+  // Swing physics refs
+  const prevVelocity = useRef(new Vector3());
+  const angularVelocity = useRef(new Vector3()); // x, y, z rotational velocity
+  const currentRotation = useRef(new Vector3()); // x, y, z rotation angle
+
   // Use selectors to avoid re-rendering on every visualClawPosition update
   const clawPosition = useGameStore((state) => state.claw.position);
   const isOpen = useGameStore((state) => state.claw.isOpen);
@@ -217,15 +222,57 @@ const Claw = () => {
     // 시각적 위치를 store에 업데이트 (그랩 판정용)
     setVisualClawPosition(current.x, current.y, current.z);
 
-    const swayAmount = 0.02;
-    const swaySpeed = 3;
-    if (phase === 'moving') {
-      groupRef.current.rotation.x = Math.sin(Date.now() * 0.001 * swaySpeed) * swayAmount;
-      groupRef.current.rotation.z = Math.cos(Date.now() * 0.001 * swaySpeed * 0.7) * swayAmount;
-    } else {
-      groupRef.current.rotation.x *= 0.95;
-      groupRef.current.rotation.z *= 0.95;
+    // --- SWING PHYSICS (관성 반동) ---
+    if (delta > 0.001) {
+      // 가속도 계산 (m/s^2)
+      const accelX = (currentVelocity.current.x - prevVelocity.current.x) / delta;
+      const accelZ = (currentVelocity.current.z - prevVelocity.current.z) / delta;
+
+      // 물리 상수
+      const SWING_POWER = 0.5;      // 흔들림 강도 (관성 계수)
+      const RESTORING_FORCE = 8.0;  // 복원력 (중력) - 클수록 빨리 제자리로 돌아옴
+      const DAMPING = 2.0;          // 공기 저항 (감쇠) - 클수록 빨리 멈춤
+
+      // 토크 계산
+      // 오른쪽(+X)으로 가속 -> 하단이 왼쪽으로 쏠림 -> Z축 양의 회전 (\ 기울기)
+      // 앞(+Z)으로 가속 -> 하단이 뒤로 쏠림 -> X축 음의 회전 (뒤로 젖혀짐)
+
+      // 경험적 튜닝: 부호가 반대일 수도 있으니 테스트하며 조정
+      // +AccelX -> +Z Rotation (Left tilt) seems correct for inertia
+      const torqueZ = accelX * SWING_POWER;
+      const torqueX = -accelZ * SWING_POWER;
+
+      // 각가속도 = 토크 - 복원력 - 댐핑
+      const angularAccelZ = torqueZ - (currentRotation.current.z * RESTORING_FORCE) - (angularVelocity.current.z * DAMPING);
+      const angularAccelX = torqueX - (currentRotation.current.x * RESTORING_FORCE) - (angularVelocity.current.x * DAMPING);
+
+      // 각속도 적분
+      angularVelocity.current.z += angularAccelZ * delta;
+      angularVelocity.current.x += angularAccelX * delta;
+
+      // Twist (Y축 회전) - 이동 방향이 바뀌거나 멈출 때 줄이 꼬이는 효과
+      // X 가속도와 Z 속도의 상호작용으로 비틀림 발생
+      const twistTorque = (accelX * currentVelocity.current.z - accelZ * currentVelocity.current.x) * 0.8;
+
+      // 복원력을 높이고(1.5), 댐핑을 크게(2.5) 하여 묵직한 느낌 부여
+      const angularAccelY = twistTorque - (currentRotation.current.y * 1.5) - (angularVelocity.current.y * 2.5);
+      angularVelocity.current.y += angularAccelY * delta;
+
+      // 각도 적분
+      currentRotation.current.z += angularVelocity.current.z * delta;
+      currentRotation.current.x += angularVelocity.current.x * delta;
+      currentRotation.current.y += angularVelocity.current.y * delta;
+
+      // 실제 객체에 적용
+      groupRef.current.rotation.set(
+        currentRotation.current.x,
+        currentRotation.current.y,
+        currentRotation.current.z
+      );
     }
+
+    // 현재 속도를 다음 프레임의 이전 속도로 저장
+    prevVelocity.current.copy(currentVelocity.current);
   });
 
   // 잡힌 인형 렌더링 헬퍼
