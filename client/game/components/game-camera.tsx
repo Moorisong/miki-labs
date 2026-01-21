@@ -9,8 +9,9 @@ import { CABINET_DIMENSIONS } from '../types/game.types';
 const { width, depth, height } = CABINET_DIMENSIONS;
 
 const CAMERA_CONFIG = {
-  basePosition: new Vector3(width * 1.5, height * 0.8, depth * 1.8),
-  lookAtBase: new Vector3(0, height * 0.4, 0),
+  // 정면 뷰를 위해 X를 0으로 설정, Z를 늘려 거리 조절
+  basePosition: new Vector3(0, height * 0.7, depth * 2.5),
+  lookAtBase: new Vector3(0, height * 0.35, 0),
   fov: 50,
   near: 0.1,
   far: 100,
