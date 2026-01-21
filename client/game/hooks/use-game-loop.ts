@@ -32,7 +32,8 @@ export const useGameLoop = () => {
 
     // Calculate bottom limit to prevent claw from clipping into floor
     // Floor (0.1) + Finger Length (0.4) + Margin for tip/base (0.25)
-    const bottomY = floorHeight + CLAW_CONFIG.fingerLength + 0.35;
+    // Decreased margin to allow claw to reach smaller dolls on floor
+    const bottomY = floorHeight + CLAW_CONFIG.fingerLength - 0.05;
 
     useEffect(() => {
         // Only run loop if we are in an active automated phase

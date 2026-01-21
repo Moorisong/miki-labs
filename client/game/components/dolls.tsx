@@ -230,7 +230,7 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
 
       // 집게 위치 + 오프셋에서 시작
       const dropX = clawPos.x + grabbedDoll.grabOffset.x;
-      const dropY = clawPos.y - 0.55 + grabbedDoll.grabOffset.y; // 집게 기준점(0.55) 재적용
+      const dropY = clawPos.y - 0.65 + grabbedDoll.grabOffset.y; // 집게 기준점(0.65) 재적용
       const dropZ = clawPos.z + grabbedDoll.grabOffset.z;
 
       console.log(`[Doll ${config.id}] Released at (${dropX.toFixed(2)}, ${dropY.toFixed(2)}, ${dropZ.toFixed(2)})`);
@@ -355,7 +355,7 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
                 // 나중에 적용할 때: 시각적 집게 위치 + 오프셋 = 인형 위치 (바로 여기!)
                 const offset = {
                   x: x - cx,
-                  y: y - (cy - 0.55),  // 오프셋 기준점을 낮춰서(0.25 -> 0.55) 인형이 더 위로 붙게 함
+                  y: y - (cy - 0.65),  // 오프셋을 다시 집게 하단(0.65) 기준으로 복구하여 위치 상향
                   z: z - cz
                 };
                 const isPerfectGrab = accuracy >= PERFECT_THRESHOLD;

@@ -225,7 +225,7 @@ export default function GamePage() {
       </GameOverlay>
 
       <SuccessEffect
-        show={showSuccess}
+        show={showSuccess && !showRanking}
         score={lastEarnedScore}
         totalScore={score}
         onComplete={() => setShowSuccess(false)}

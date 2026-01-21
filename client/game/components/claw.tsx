@@ -93,9 +93,9 @@ const GrabbedDollRenderer = () => {
     // 목표: "회전된 인형의 중심"이 "집게의 잡는 지점"에 와야 함.
     let targetCenterY = startDollY + config.size * 0.6;
 
-    // 최대 높이 제한: 집게 본체를 뚫지 않도록 0.05 이하로 제한 (거의 닿을락 말락)
-    if (targetCenterY > 0.05) {
-      targetCenterY = 0.05;
+    // 최대 높이 제한: 집게 본체를 뚫지 않도록 0.03 이하로 제한
+    if (targetCenterY > 0.03) {
+      targetCenterY = 0.03;
     }
 
     // 목표 중심점 높이를 맞추기 위해 인형의 발바닥(Origin)을 어디에 둬야 하는가?

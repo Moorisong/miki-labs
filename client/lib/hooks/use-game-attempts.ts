@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const STORAGE_KEY = 'claw_game_attempts';
-const DEFAULT_ATTEMPTS = 3;
+const DEFAULT_ATTEMPTS = 5;
 const COOLDOWN_DURATION = 60 * 60 * 1000; // 1시간 (밀리초)
 
 interface AttemptData {
@@ -79,7 +79,7 @@ export function useGameAttempts(): UseGameAttemptsReturn {
             setCooldownEndAt(data.cooldownEndAt);
             setRemainingAttempts(0);
         } else if (data.cooldownEndAt && data.cooldownEndAt <= now) {
-            // 쿨타임 종료됨 - 3회 충전
+            // 쿨타임 종료됨 - 5회 충전
             setRemainingAttempts(DEFAULT_ATTEMPTS);
             setCooldownEndAt(null);
             setIsOnCooldown(false);
@@ -105,7 +105,7 @@ export function useGameAttempts(): UseGameAttemptsReturn {
             const remaining = cooldownEndAt - now;
 
             if (remaining <= 0) {
-                // 쿨타임 종료 - 시도 3회 충전
+                // 쿨타임 종료 - 5회 충전
                 setIsOnCooldown(false);
                 setCooldownEndAt(null);
                 setRemainingAttempts(DEFAULT_ATTEMPTS);

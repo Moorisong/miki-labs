@@ -138,7 +138,7 @@ export default function RankingBoard({
                                 로그인하고 랭킹 점수 넣기
                             </button>
                             <button className={styles.cancelButton} onClick={onRestart}>
-                                그냥 다시하기
+                                돌아가기
                             </button>
                         </div>
                     </div>

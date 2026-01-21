@@ -54,7 +54,7 @@ export default function GameHUD({
                             <div className={styles.attemptsDisplay}>
                                 <span className={styles.label}>남은 시도</span>
                                 <span className={`${styles.attemptsValue} ${isLastAttempt ? styles.warning : ''}`}>
-                                    {remainingAttempts} / 3
+                                    {remainingAttempts} / 5
                                 </span>
                             </div>
                         </div>
