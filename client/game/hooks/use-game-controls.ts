@@ -32,9 +32,8 @@ const useGameControls = ({
   const animationFrameId = useRef<number | null>(null);
   const lastTime = useRef<number>(0);
 
+  /* Hook State Selection - Only for rendering/return, not for event handlers */
   const phase = useGameStore((state) => state.phase);
-  const startGame = useGameStore((state) => state.startGame);
-  const dropClaw = useGameStore((state) => state.dropClaw);
 
   const { width, depth } = CABINET_DIMENSIONS;
   const halfWidth = width / 2 - 0.3;
@@ -72,6 +71,9 @@ const useGameControls = ({
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (!enabled) return;
 
+    // Access FRESH state directly from store to avoid stale closures
+    const { phase, attempts, startGame, dropClaw } = useGameStore.getState();
+
     // event.code를 사용하여 키보드 레이아웃/언어 설정과 무관하게 처리
     switch (event.code) {
       case 'KeyW':
@@ -99,14 +101,16 @@ const useGameControls = ({
         event.preventDefault();
         keyState.current.action = true;
 
-        if (phase === 'idle' || phase === 'result') {
-          startGame();
-        } else if (phase === 'moving') {
-          dropClaw();
+        if (attempts > 0) {
+          if (phase === 'idle' || phase === 'result') {
+            startGame();
+          } else if (phase === 'moving') {
+            dropClaw();
+          }
         }
         break;
     }
-  }, [enabled, phase, startGame, dropClaw]);
+  }, [enabled]); // Dependencies reduced to just enabled
 
   const handleKeyUp = useCallback((event: KeyboardEvent) => {
     switch (event.code) {
