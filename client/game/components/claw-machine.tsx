@@ -58,7 +58,16 @@ const ClawMachine = ({
   const physicsConfig = createPhysicsConfig();
 
   return (
-    <div style={{ width: '100%', height: '100vh' }}>
+    <div style={{
+      width: '100%',
+      maxWidth: '600px',
+      height: '80vh',
+      margin: '0 auto',
+      touchAction: 'none',
+      position: 'relative',
+      borderRadius: '12px',
+      overflow: 'hidden',
+    }}>
       <Canvas
         shadows
         gl={{
