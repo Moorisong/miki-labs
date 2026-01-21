@@ -96,6 +96,9 @@ const ClawMachine = ({
           </Physics>
 
           <GameCamera />
+        </Suspense>
+
+        <Suspense fallback={null}>
           <Environment preset="warehouse" />
         </Suspense>
       </Canvas>

@@ -93,24 +93,21 @@ export default function GamePage() {
         setShowRanking(true);
       },
       onAttemptUsed: (remaining) => {
-        // 시도 횟수 변경 시 (결과 단계에서)
-        // 성공 시 +1, 실패 시 -1
-        // wasSuccessThisAttempt를 직접 참조하지 않고 현재 상태를 확인
-        const wasSuccess = prevScoreRef.current > 0 && score > prevScoreRef.current;
-        if (wasSuccess) {
-          addAttempt();
-        } else {
-          useAttempt();
-        }
+        // 시도 차감 시 (실패했을 때만 실제로 차감)
+        // 성공 시에는 onSuccess에서 addAttempt를 호출하므로 여기서는 항상 차감
+        useAttempt();
       }
     });
 
     setSoundCallbacks({
       onSuccess: () => {
-        // 성공 효과는 score 변화로 감지하므로 여기서는 추가 처리 필요 없음
+        // 성공 시 시도 +1 보너스!
+        // useAttempt()가 먼저 호출되었으므로 addAttempt()로 복구
+        console.log('[GamePage] onSuccess called - adding bonus attempt');
+        addAttempt();
       },
     });
-  }, [setCallbacks, setSoundCallbacks, addAttempt, useAttempt, score]);
+  }, [setCallbacks, setSoundCallbacks, addAttempt, useAttempt]);
 
   // 컴포넌트 언마운트 시에만 게임 리셋 (점수 복구 문제 방지)
   useEffect(() => {

@@ -162,10 +162,16 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
   const wasGrabbedRef = useRef(false);
   const rotationRef = useRef<[number, number, number]>([0, 0, 0]);
   const holeFallReportedRef = useRef(false);
+  // 잡히기 전 원래 위치 저장 (놓을 때 사용)
+  const originalPositionRef = useRef<[number, number, number]>([0, 0, 0]);
 
   useEffect(() => {
     const unsubscribePos = api.position.subscribe((p: [number, number, number]) => {
       positionRef.current = p;
+      // 잡히지 않았을 때만 원래 위치 업데이트
+      if (!wasGrabbedRef.current) {
+        originalPositionRef.current = p;
+      }
     });
     const unsubscribeRot = api.rotation.subscribe((r: [number, number, number]) => {
       rotationRef.current = r;
@@ -176,6 +182,8 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
     };
   }, [api]);
 
+  // 높은 우선순위(100)로 실행하여 물리 엔진 업데이트(-1) 이후에 실행되도록 함
+  // 이렇게 하면 물리 엔진 구독이 mesh 위치를 덮어쓴 후에 우리가 다시 설정
   useFrame(() => {
     if (!ref.current) return;
 
@@ -189,31 +197,29 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
     if (isGrabbed) {
       if (!wasGrabbedRef.current) {
         wasGrabbedRef.current = true;
-        holeFallReportedRef.current = false; // Reset hole fall tracking
+        holeFallReportedRef.current = false;
 
-        // 물리 타입을 Kinematic으로 변경하여 물리 연산에서 제외하고 위치 제어만 가능하게 함
+        console.log(`[Doll ${config.id}] Grabbed! Moving physics body far away.`);
+
+        // 물리 바디를 멀리 치워버림 (충돌/간섭 방지)
+        // mesh 위치는 따로 수동 제어
         api.mass.set(0);
         api.velocity.set(0, 0, 0);
         api.angularVelocity.set(0, 0, 0);
-        api.collisionResponse.set(false); // 다른 물체완 충돌하지 않음
+        api.collisionResponse.set(false);
+        api.position.set(0, -1000, 0); // 물리 바디를 화면 밖으로
+        api.wakeUp();
       }
 
-      // ** 위치 강제 고정 **
-      // 시각적 집게 위치(스프링 물리 적용) 기준으로 계산하여 인형이 집게에 딱 붙어있게 함
-      // 이것이 "집게가 인형을 집었는데 인형이 붙지 않아" 버그의 핵심 수정사항임
+      // ** 시각적 mesh만 제어 (물리 바디는 멀리 치워둠) **
       const clawPos = visualClawPosition;
       const targetX = clawPos.x + grabbedDoll.grabOffset.x;
       const targetY = clawPos.y - 0.25 + grabbedDoll.grabOffset.y;
       const targetZ = clawPos.z + grabbedDoll.grabOffset.z;
 
-      // 저장된 회전값 사용 (갑자기 자세가 바뀌는 것 방지)
       const savedRotation = grabbedDoll.rotation || { x: 0, y: 0, z: 0 };
 
-      api.position.set(targetX, targetY, targetZ);
-      api.velocity.set(0, 0, 0);
-      api.angularVelocity.set(0, 0, 0);
-      api.rotation.set(savedRotation.x, savedRotation.y, savedRotation.z);
-
+      // Mesh 위치 직접 설정 (물리 바디와 분리됨)
       if (ref.current) {
         ref.current.position.set(targetX, targetY, targetZ);
         ref.current.rotation.set(savedRotation.x, savedRotation.y, savedRotation.z);
@@ -221,12 +227,17 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
       return;
     }
 
-    // 놓쳤을 때
+    // 놓쳤을 때: 물리 바디를 현재 mesh 위치로 복귀
     if (!isGrabbed && wasGrabbedRef.current) {
       wasGrabbedRef.current = false;
 
+      // 현재 mesh 위치를 기준으로 물리 바디 복귀
+      const releasePos = ref.current ? ref.current.position : { x: 0, y: 1, z: 0 };
+      console.log(`[Doll ${config.id}] Released at (${releasePos.x.toFixed(2)}, ${releasePos.y.toFixed(2)}, ${releasePos.z.toFixed(2)})`);
+
+      api.position.set(releasePos.x, releasePos.y, releasePos.z);
       api.mass.set(config.mass);
-      api.collisionResponse.set(true); // 충돌 다시 활성화
+      api.collisionResponse.set(true);
 
       // 성공적인 놓기인지 확인 (releasing 단계이거나, 이미 idle로 넘어갔지만 pendingDoll인 경우)
       const isSuccessDrop = phase === 'releasing' ||
@@ -297,11 +308,12 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
 
         const elapsed = Date.now() - ref.current.userData.grabTimer;
 
-        if (elapsed > 1400) { // 1.4초 후 판정 (집게가 완전히 오문라든 후)
+        if (elapsed > 800) { // 0.8초 후 판정 (집게가 올라가기 전에 판정 완료)
           if (!grabbedDoll.id) {
             const [x, y, z] = positionRef.current;
-            // 논리적 집게 위치 사용 (spring 지연 문제 해결)
-            const clawPos = state.claw.position;
+            // *** 핵심 수정: 시각적 집게 위치(visualClawPosition)를 사용 ***
+            // 오프셋 계산과 적용에서 같은 기준점을 사용해야 순간이동이 안 생김
+            const clawPos = visualClawPosition;
             const cx = clawPos.x;
             const cy = clawPos.y;
             const cz = clawPos.z;
@@ -337,7 +349,9 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
               if (accuracy >= PARTIAL_THRESHOLD) {
                 grabCheckDoneRef.current = true;
 
-                // 논리적 집게 위치 기준으로 오프셋 계산 (인형이 제자리에 있도록)
+                // *** 핵심 수정: 시각적 집게 위치 기준으로 오프셋 계산 ***
+                // 인형 현재 위치 - 시각적 집게 기준 위치 = 오프셋
+                // 나중에 적용할 때: 시각적 집게 위치 + 오프셋 = 인형 위치 (바로 여기!)
                 const offset = {
                   x: x - cx,
                   y: y - (cy - 0.25),  // Y 오프셋도 정확히 계산
@@ -345,7 +359,8 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
                 };
                 const isPerfectGrab = accuracy >= PERFECT_THRESHOLD;
 
-                console.log(`[Grab] Accuracy: ${(accuracy * 100).toFixed(1)}%, Perfect: ${isPerfectGrab}`);
+                console.log(`[Grab] Doll ${config.id}, Accuracy: ${(accuracy * 100).toFixed(1)}%, Perfect: ${isPerfectGrab}`);
+                console.log(`[Grab] Visual Claw: (${cx.toFixed(2)}, ${cy.toFixed(2)}, ${cz.toFixed(2)}), Doll: (${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)})`);
 
                 const [rx, ry, rz] = rotationRef.current;
                 setGrabbedDoll(config, offset, accuracy, isPerfectGrab, { x: rx, y: ry, z: rz });

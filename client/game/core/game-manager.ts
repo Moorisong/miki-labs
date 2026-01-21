@@ -380,34 +380,48 @@ export const useGameStore = create<GameStore>((set, get) => ({
   reportDollFellInHole: (doll: DollConfig) => {
     const { phase, soundCallbacks, pendingReleaseDoll } = get();
 
+    console.log(`[reportDollFellInHole] Called for doll: ${doll.id}`);
+    console.log(`[reportDollFellInHole] Current phase: ${phase}`);
+    console.log(`[reportDollFellInHole] Pending doll ID: ${pendingReleaseDoll.id}`);
+    console.log(`[reportDollFellInHole] Current attempts: ${get().attempts}`);
+
     // Allow success in any active phase OR idle with pending doll (async success detection)
     // Ignore if game result is showing
     if (phase === 'result') {
+      console.log(`[reportDollFellInHole] Ignored - phase is result`);
       return;
     }
 
     // idle 상태에서는 pendingReleaseDoll과 일치하는 인형만 성공 처리
     if (phase === 'idle') {
       if (!pendingReleaseDoll.id || pendingReleaseDoll.id !== doll.id) {
+        console.log(`[reportDollFellInHole] Ignored - idle phase but doll ID mismatch`);
         return;
       }
     }
 
-    console.log('Success! Doll fell into hole:', doll.id);
+    console.log('🎉 Success! Doll fell into hole:', doll.id);
 
     // Calculate and add score
     const score = get().calculateScore(doll, true);
     get().addScore(score);
     soundCallbacks.onSuccess?.();
 
+    // BONUS: 성공 시 1회 추가 (차감된 횟수 복구 or 보너스)
+    // "성공하면 +1회" 약속 이행
+    const beforeAttempts = get().attempts;
+    set((state) => ({ attempts: state.attempts + 1 }));
+    const afterAttempts = get().attempts;
+    console.log(`[reportDollFellInHole] ✅ Bonus applied! Attempts: ${beforeAttempts} → ${afterAttempts}`);
+
     // Clear pending doll
     set({ pendingReleaseDoll: initialPendingReleaseDoll });
 
-    // idle 상태에서 성공한 경우 attempt는 이미 차감되었음
+    // idle 상태에서 성공한 경우 attempt는 이미 차감되었음 (복구됨)
     if (phase === 'idle') {
       // 이미 idle 상태이므로 상태 전환 불필요
-      // 단, 시도가 0이면 result로 전환
       const remaining = get().attempts;
+      console.log(`[reportDollFellInHole] Remaining attempts after bonus: ${remaining}`);
       if (remaining <= 0) {
         get().setPhase('result');
       }
@@ -415,6 +429,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     // 다른 단계에서 성공한 경우 (기존 로직)
+    // 여기서 useAttempt를 호출하면 attempts가 깎이고, 위에서 +1 했으니 상쇄됨(본전).
     get().useAttempt();
     get().setClawOpen(true);
 
