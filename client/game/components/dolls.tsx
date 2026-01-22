@@ -229,9 +229,23 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
       const clawPos = state.visualClawPosition;
 
       // 집게 위치 + 오프셋에서 시작
-      const dropX = clawPos.x + grabbedDoll.grabOffset.x;
-      const dropY = clawPos.y - 0.65 + grabbedDoll.grabOffset.y; // 집게 기준점(0.65) 재적용
-      const dropZ = clawPos.z + grabbedDoll.grabOffset.z;
+      let dropX = clawPos.x + grabbedDoll.grabOffset.x;
+      let dropY = clawPos.y - 0.65 + grabbedDoll.grabOffset.y; // 집게 기준점(0.65) 재적용
+      let dropZ = clawPos.z + grabbedDoll.grabOffset.z;
+
+      // 인형이 기계 바깥/바닥 아래로 나가지 않도록 위치 제한
+      const { width, depth, floorHeight } = CABINET_DIMENSIONS;
+      const minY = floorHeight + config.size; // 바닥 높이 + 인형 크기 (인형이 바닥에 묻히지 않도록)
+      const halfWidth = width / 2 - 0.2; // 벽에서 약간 떨어지도록
+      const halfDepth = depth / 2 - 0.2;
+
+      // Y 위치 제한: 바닥 아래로 가지 않도록
+      if (dropY < minY) {
+        dropY = minY;
+      }
+      // X, Z 위치 제한: 기계 안쪽에 머무르도록
+      dropX = Math.max(-halfWidth, Math.min(halfWidth, dropX));
+      dropZ = Math.max(-halfDepth, Math.min(halfDepth, dropZ));
 
       console.log(`[Doll ${config.id}] Released at (${dropX.toFixed(2)}, ${dropY.toFixed(2)}, ${dropZ.toFixed(2)})`);
 

@@ -76,8 +76,8 @@ const GrabbedDollRenderer = () => {
   const config = grabbedDoll.config ? (grabbedDoll.config as any as CuteDollConfig) : null;
 
   // startDollY: 인형이 서 있을 때의 기준 Y 위치 (발바닥이 이 위치에 옴)
-  // 값을 -0.15에서 0.0으로 더 올려서 집게 안쪽에 바짝 붙게 함
-  const startDollY = 0.0;
+  // 값을 -0.35로 낮춰서 인형이 집게 안쪽에 위치하도록 함
+  const startDollY = -0.35;
 
   // 회전 보정된 Y 위치 계산
   const basePosY = useMemo(() => {
