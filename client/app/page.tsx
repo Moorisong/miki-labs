@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { getDatabase } from '@/lib/mongodb';
 import styles from './page.module.css';
 
+export const dynamic = 'force-dynamic';
+
 // 랭킹 데이터 타입 정의
 interface RankEntry {
   rank: number;
