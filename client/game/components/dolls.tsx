@@ -250,6 +250,9 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
       console.log(`[Doll ${config.id}] Released at (${dropX.toFixed(2)}, ${dropY.toFixed(2)}, ${dropZ.toFixed(2)})`);
 
       api.position.set(dropX, dropY, dropZ);
+      // 물리 바디 위치 구독이 업데이트되기 전에 positionRef를 즉시 설정
+      // 이렇게 해야 구멍 낙하 감지 로직이 올바른 위치를 참조함
+      positionRef.current = [dropX, dropY, dropZ];
       api.velocity.set(0, 0, 0); // 초기 속도 0
       api.mass.set(config.mass);
       api.collisionResponse.set(true);
