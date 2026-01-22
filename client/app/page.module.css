@@ -198,11 +198,7 @@
   transition: all var(--transition-normal);
 }
 
-.featureCard:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--color-primary);
-}
+/* Hover effect removed as per user request */
 
 .featureIcon {
   font-size: 48px;
@@ -309,48 +305,14 @@
   text-align: right;
 }
 
-/* CTA Section */
-.cta {
+.adSection {
+  width: 100%;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: var(--space-lg);
-  padding: var(--space-3xl) var(--space-md);
-  background: var(--gradient-primary);
-  border-radius: var(--radius-lg);
-  margin: 0 var(--space-md);
-}
-
-.ctaTitle {
-  font-size: var(--font-size-2xl);
-  font-weight: 700;
-  color: var(--color-text);
-}
-
-.ctaDescription {
-  font-size: var(--font-size-md);
-  color: rgba(255, 255, 255, 0.8);
-  max-width: 400px;
-}
-
-.ctaButton {
-  display: inline-flex;
-  align-items: center;
   justify-content: center;
-  padding: var(--space-md) var(--space-2xl);
-  background: var(--color-text);
-  color: var(--color-primary);
-  font-size: var(--font-size-md);
-  font-weight: 600;
-  border-radius: var(--radius-full);
-  transition: all var(--transition-normal);
+  padding: var(--space-md) 0;
 }
 
-.ctaButton:hover {
-  transform: scale(1.05);
-  color: var(--color-primary);
-}
+/* CTA Section removed */
 
 /* Responsive */
 @media (min-width: 768px) {
@@ -385,10 +347,6 @@
   .clawMachine {
     width: 350px;
     height: 400px;
-  }
-
-  .cta {
-    margin: 0 var(--space-xl);
   }
 }
 

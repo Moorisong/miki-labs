@@ -1,117 +1,20 @@
 .footer {
-  background: var(--color-surface);
-  border-top: 1px solid rgba(162, 155, 254, 0.1);
+  background: transparent;
   margin-top: auto;
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: var(--space-2xl) var(--space-lg);
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xl);
-}
-
-.brand {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  color: var(--color-text);
-  width: fit-content;
-}
-
-.logo:hover {
-  color: var(--color-text);
-}
-
-.logoIcon {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-}
-
-.logoText {
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.description {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  max-width: 300px;
-  line-height: 1.6;
-}
-
-.links {
-  display: flex;
-  gap: var(--space-2xl);
-}
-
-.linkGroup {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-}
-
-.linkTitle {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-text);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.linkList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.linkList a {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  transition: color var(--transition-fast);
-}
-
-.linkList a:hover {
-  color: var(--color-primary);
+  padding: var(--space-xl) var(--space-lg);
 }
 
 .bottom {
-  margin-top: var(--space-xl);
-  padding-top: var(--space-lg);
-  border-top: 1px solid rgba(162, 155, 254, 0.1);
+  text-align: center;
 }
 
 .copyright {
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
-  text-align: center;
-}
-
-/* Tablet and up */
-@media (min-width: 768px) {
-  .content {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
-
-  .links {
-    gap: var(--space-3xl);
-  }
+  line-height: 1.6;
 }

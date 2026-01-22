@@ -53,7 +53,6 @@ export const MESSAGES = {
     // CTA
     CTA: {
         START_NOW: '지금 바로 시작하기',
-        ABOUT: '게임 소개',
         CHALLENGE_NOW: '지금 바로 도전하세요!',
         FREE_PLAY: '무료로 즐기는 웹 인형뽑기, 당신의 실력을 보여주세요.',
         START_GAME: '게임 시작',
@@ -123,7 +122,6 @@ export const NAV_LINKS = [
     { href: '/', label: '홈' },
     { href: '/game', label: '게임' },
     { href: '/ranking', label: '랭킹' },
-    { href: '/about', label: '소개' },
 ] as const;
 
 // 메달 이모지

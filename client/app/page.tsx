@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { getDatabase } from '@/lib/mongodb';
 import { ROUTES, MESSAGES, FEATURES, MEDALS, CONFIG } from '@/constants';
+import AdBanner from '@/components/ads/ad-banner';
 
 import styles from './page.module.css';
 
@@ -60,18 +61,15 @@ export default async function HomePage() {
             <Link href={ROUTES.GAME} className={styles.primaryButton}>
               {MESSAGES.CTA.START_NOW}
             </Link>
-            <Link href={ROUTES.ABOUT} className={styles.secondaryButton}>
-              {MESSAGES.CTA.ABOUT}
-            </Link>
           </div>
         </div>
-        <div className={styles.heroVisual}>
+        <Link href={ROUTES.GAME} className={styles.heroVisual}>
           <img
             src="/hero_character.png"
             alt="Claw Machine Character"
             className={styles.heroImage}
           />
-        </div>
+        </Link>
       </section>
 
       {/* Features Section */}
@@ -129,17 +127,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className={styles.cta}>
-        <h2 className={styles.ctaTitle}>{MESSAGES.CTA.CHALLENGE_NOW}</h2>
-        <p className={styles.ctaDescription}>
-          {MESSAGES.CTA.FREE_PLAY}
-        </p>
-        <Link href={ROUTES.GAME} className={styles.ctaButton}>
-          {MESSAGES.CTA.START_GAME}
-        </Link>
-      </section>
+      {/* Ad Section */}
+      <div className={styles.adSection}>
+        <AdBanner />
+      </div>
+
     </div>
   );
 }
-

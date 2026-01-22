@@ -59,9 +59,6 @@ export default function RootLayout({
             <NavBar />
             <main style={{ paddingTop: '64px', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
               {children}
-              <div style={{ marginTop: 'auto', width: '100%' }}>
-                <AdBanner />
-              </div>
             </main>
             <Footer />
           </NicknameProvider>
