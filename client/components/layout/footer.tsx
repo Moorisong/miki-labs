@@ -10,7 +10,7 @@ export default function Footer() {
         <div className={styles.content}>
           <div className={styles.brand}>
             <Link href="/" className={styles.logo}>
-              <span className={styles.logoIcon}>🎮</span>
+              <img src="/logo.png" alt="Logo" className={styles.logoIcon} />
               <span className={styles.logoText}>뽑기중독</span>
             </Link>
             <p className={styles.description}>

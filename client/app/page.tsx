@@ -79,21 +79,11 @@ export default async function HomePage() {
           </div>
         </div>
         <div className={styles.heroVisual}>
-          <div className={styles.clawMachine}>
-            <div className={styles.machineBody}>
-              <div className={styles.machineGlass}>
-                <div className={styles.plushie} style={{ top: '60%', left: '20%' }}>🧸</div>
-                <div className={styles.plushie} style={{ top: '65%', left: '45%' }}>🐰</div>
-                <div className={styles.plushie} style={{ top: '55%', left: '70%' }}>🐻</div>
-                <div className={styles.plushie} style={{ top: '70%', left: '35%' }}>🐱</div>
-                <div className={styles.plushie} style={{ top: '60%', left: '60%' }}>🐶</div>
-              </div>
-              <div className={styles.claw}>
-                <div className={styles.clawArm}></div>
-                <div className={styles.clawGripper}></div>
-              </div>
-            </div>
-          </div>
+          <img
+            src="/hero_character.png"
+            alt="Claw Machine Character"
+            className={styles.heroImage}
+          />
         </div>
       </section>
 
