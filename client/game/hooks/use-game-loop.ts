@@ -182,15 +182,11 @@ export const useGameLoop = () => {
                                     setClawOpen(true);
                                     releaseDoll();
 
-                                    // 즉시 attempt 사용하고 idle로 전환 (스타트 버튼 바로 표시)
-                                    useGameStore.getState().useAttempt();
-                                    const remaining = useGameStore.getState().attempts;
-                                    if (remaining > 0) {
-                                        setPhase('idle');
-                                    } else {
-                                        setPhase('result');
-                                    }
-                                    // 집게 위치는 별도로 초기화하지 않음 (spring physics가 자연스럽게 처리)
+                                    // [FIX] 성공 시 바로 종료하지 않고 releasing 단계로 넘겨서 낙하 감지 대기
+                                    // 이렇게 해야 dolls.tsx에서 reportDollFellInHole이 호출되어 점수가 오르고 attempt가 처리됨
+                                    setPhase('releasing');
+
+                                    // useAttempt나 페이즈 전환은 reportDollFellInHole(성공) 또는 releasing timeout(실패)에서 처리됨
                                 }
                             }
                         } else {
