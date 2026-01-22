@@ -16,31 +16,33 @@ export default function KakaoAdfit({ unit, width, height, className }: KakaoAdfi
     useEffect(() => {
         if (!adRef.current) return;
 
+        // 이미 광고 영역이 생성되어 있다면 스킵 (Strict Mode 등에서의 중복 실행 방지)
+        if (adRef.current.querySelector('ins.kakao_ad_area')) {
+            return;
+        }
+
         // 광고 영역 생성
         const ins = document.createElement('ins');
         ins.className = 'kakao_ad_area';
         ins.style.display = 'none';
+        ins.style.width = '100%';
         ins.setAttribute('data-ad-unit', unit);
         ins.setAttribute('data-ad-width', String(width));
         ins.setAttribute('data-ad-height', String(height));
 
-        adRef.current.innerHTML = '';
         adRef.current.appendChild(ins);
 
-        // 광고 스크립트가 이미 로드되어 있으면 바로 호출
+        // 광고 스크립트가 이미 로드되어 있으면 렌더링 시도
+        // 약간의 지연을 주어 DOM이 확실히 적용된 후 실행
         if ((window as any).adfit) {
-            try {
-                (window as any).adfit.render();
-            } catch (e) {
-                console.error('AdFit render error:', e);
-            }
+            setTimeout(() => {
+                try {
+                    (window as any).adfit.render();
+                } catch (e) {
+                    // ignore
+                }
+            }, 50);
         }
-
-        return () => {
-            if (adRef.current) {
-                adRef.current.innerHTML = '';
-            }
-        };
     }, [unit, width, height]);
 
     return (
@@ -54,7 +56,7 @@ export default function KakaoAdfit({ unit, width, height, className }: KakaoAdfi
                         try {
                             (window as any).adfit.render();
                         } catch (e) {
-                            console.error('AdFit render error details:', e);
+                            // console.error('AdFit render error on load:', e);
                         }
                     }
                 }}
