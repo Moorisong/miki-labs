@@ -76,8 +76,9 @@ const GrabbedDollRenderer = () => {
   const config = grabbedDoll.config ? (grabbedDoll.config as any as CuteDollConfig) : null;
 
   // startDollY: 인형이 서 있을 때의 기준 Y 위치 (발바닥이 이 위치에 옴)
-  // 값을 -0.4로 설정 (적절한 중간값: 손가락 끝보다 약간 위)
-  const startDollY = -0.4;
+  // [New Rule] 손가락 길이의 정확히 중간 아래 지점에 위치시킴
+  // fingerLength(0.4) + 여유분을 고려하여, 손가락 끝보다 살짝 위, 본체보다 아래인 '명당' 위치 자동 계산
+  const startDollY = -(fingerLength * 0.85);
 
   // 회전 보정된 Y 위치 계산
   const basePosY = useMemo(() => {
