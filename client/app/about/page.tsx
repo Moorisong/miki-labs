@@ -32,14 +32,7 @@ const howToPlay = [
   },
 ];
 
-const techStack = [
-  { name: 'Next.js', description: 'React 프레임워크', icon: '⚛️' },
-  { name: 'Three.js', description: '3D 그래픽 렌더링', icon: '🎨' },
-  { name: 'Rapier', description: '물리 엔진', icon: '⚙️' },
-  { name: 'TypeScript', description: '타입 안전성', icon: '📘' },
-  { name: 'Express', description: '백엔드 서버', icon: '🖥️' },
-  { name: 'WebSocket', description: '실시간 통신', icon: '🔌' },
-];
+
 
 export default function AboutPage() {
   return (
@@ -119,19 +112,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Tech Stack Section */}
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>기술 스택</h2>
-        <div className={styles.techGrid}>
-          {techStack.map((tech) => (
-            <div key={tech.name} className={styles.techCard}>
-              <span className={styles.techIcon}>{tech.icon}</span>
-              <h3 className={styles.techName}>{tech.name}</h3>
-              <p className={styles.techDescription}>{tech.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+
 
       {/* CTA Section */}
       <section className={styles.cta}>

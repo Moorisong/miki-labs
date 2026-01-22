@@ -36,8 +36,8 @@ ssh $REMOTE_USER@$REMOTE_HOST "
   cd $REMOTE_DIR && \
   npm install && \
   npm run build && \
-  # PM2 실행 (기존 프로세스가 있으면 유지하고 재시작, 없으면 새로 시작)
-  pm2 restart ecosystem.config.js --only claw-addict-fe || pm2 start ecosystem.config.js --only claw-addict-fe
+  # PM2 실행 (기존 프로세스가 있으면 유지하고 리로드, 없으면 새로 시작)
+  pm2 reload claw-addict-fe --update-env || pm2 start ecosystem.config.js
 "
 
 echo "✅ 배포 완료! https://claw-addict-web.haroo.site 주소를 확인하세요."

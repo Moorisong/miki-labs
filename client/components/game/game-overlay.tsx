@@ -45,14 +45,14 @@ export default function GameOverlay({
       {children}
 
       {/* Start Button */}
-      {phase === 'idle' && !showRanking && (
+      {(phase === 'idle' || phase === 'result') && !showRanking && (
         <div className={styles.startOverlay}>
           <button
             className={`${styles.startButton} ${!canPlay ? styles.disabled : ''}`}
             onClick={onStart}
             disabled={!canPlay}
           >
-            {canPlay ? 'Game Start' : '쿨타임 중...'}
+            {!canPlay ? '쿨타임 중...' : phase === 'result' ? '다시 도전!' : 'Game Start'}
           </button>
         </div>
       )}

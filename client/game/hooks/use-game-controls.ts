@@ -71,6 +71,14 @@ const useGameControls = ({
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (!enabled) return;
 
+    // 입력 필드에 포커스가 있을 때는 게임 컨트롤 비활성화
+    const activeElement = document.activeElement;
+    const isInputFocused = activeElement instanceof HTMLInputElement ||
+      activeElement instanceof HTMLTextAreaElement ||
+      activeElement?.getAttribute('contenteditable') === 'true';
+
+    if (isInputFocused) return;
+
     // Access FRESH state directly from store to avoid stale closures
     const { phase, attempts, startGame, dropClaw } = useGameStore.getState();
 

@@ -235,6 +235,72 @@
 
 
 
+/* Start Button */
+.startOverlay {
+  position: absolute;
+  bottom: 20%;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 var(--space-lg);
+  pointer-events: auto;
+  z-index: 20;
+}
+
+.startButton {
+  padding: var(--space-md) var(--space-xl);
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: var(--radius-full);
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
+  transition: all var(--transition-medium);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  animation: pulse-button 2s infinite;
+}
+
+.startButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(108, 92, 231, 0.5);
+}
+
+.startButton:active {
+  transform: translateY(1px);
+}
+
+.startButton.disabled {
+  background: linear-gradient(135deg, #4a4a4a, #666);
+  cursor: not-allowed;
+  animation: none;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+.startButton.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+@keyframes pulse-button {
+  0% {
+    box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.7);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(108, 92, 231, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(108, 92, 231, 0);
+  }
+}
+
 /* Adjust for smaller screens */
 @media (max-width: 768px) {
   .dPad {
@@ -260,74 +326,6 @@
   .dropIcon svg {
     width: 24px;
     height: 24px;
-  }
-
-
-
-  /* Start Button */
-  .startOverlay {
-    position: absolute;
-    bottom: 20%;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0 var(--space-lg);
-    pointer-events: auto;
-    z-index: 20;
-  }
-
-  .startButton {
-    padding: var(--space-md) var(--space-xl);
-    background: var(--gradient-primary);
-    border: none;
-    border-radius: var(--radius-full);
-    color: var(--color-text);
-    font-size: var(--font-size-lg);
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
-    transition: all var(--transition-medium);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    animation: pulse-button 2s infinite;
-  }
-
-  .startButton:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(108, 92, 231, 0.5);
-  }
-
-  .startButton:active {
-    transform: translateY(1px);
-  }
-
-  .startButton.disabled {
-    background: linear-gradient(135deg, #4a4a4a, #666);
-    cursor: not-allowed;
-    animation: none;
-    box-shadow: none;
-    opacity: 0.7;
-  }
-
-  .startButton.disabled:hover {
-    transform: none;
-    box-shadow: none;
-  }
-
-  @keyframes pulse-button {
-    0% {
-      box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.7);
-    }
-
-    70% {
-      box-shadow: 0 0 0 10px rgba(108, 92, 231, 0);
-    }
-
-    100% {
-      box-shadow: 0 0 0 0 rgba(108, 92, 231, 0);
-    }
   }
 }
 
