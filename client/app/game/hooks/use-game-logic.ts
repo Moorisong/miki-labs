@@ -158,6 +158,11 @@ export function useGameLogic({
         }
     };
 
+    const handleContinueGame = () => {
+        setScoreModalData(null);
+        // 점수나 게임 상태를 리셋하지 않고 모달만 닫음 (계속하기)
+    };
+
     const handleRestart = () => {
         sessionStorage.removeItem(STORAGE_KEY.PENDING_RANKING_SCORE);
         setShowRanking(false);
@@ -191,6 +196,7 @@ export function useGameLogic({
         setShowSuccess,
         handleRankingSubmit,
         handleRestart,
+        handleContinueGame,
         handleStartGame,
     };
 }

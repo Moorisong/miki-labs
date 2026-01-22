@@ -48,6 +48,7 @@ export default function GamePage() {
     setShowSuccess,
     handleRankingSubmit,
     handleRestart,
+    handleContinueGame,
     handleStartGame,
   } = useGameLogic({
     score,
@@ -125,7 +126,7 @@ export default function GamePage() {
                 score={scoreModalData.score}
                 totalScore={scoreModalData.totalScore}
                 totalCaught={scoreModalData.totalCaught}
-                onRestart={handleRestart}
+                onRestart={handleContinueGame}
               />
             </div>
           )}
