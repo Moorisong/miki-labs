@@ -45,9 +45,17 @@ export const createGameFlowSlice: StateCreator<GameStore, [], [], Partial<GameSt
     },
 
     startGame: () => {
-        const { phase, attempts, config } = get();
+        const { phase, attempts, config, visualClawPosition } = get(); // claw 대신 visualClawPosition 사용
         if (attempts <= 0) return;
         if (phase !== 'idle' && phase !== 'result') return;
+
+        // [FIX] 집게가 천장으로 완전히 복귀하지 않았으면 게임 시작 금지
+        // 논리적 위치(claw.position)는 idle 전환 시 즉시 리셋되므로,
+        // 실제 물리적/시각적 위치(visualClawPosition)를 확인해야 함
+        const CLAW_READY_Y = 3.8; // 3.9 -> 3.8 (스프링 출렁임 고려 약간 완화)
+        if (visualClawPosition.y < CLAW_READY_Y) {
+            return;
+        }
 
         set({
             phase: 'moving',
@@ -57,14 +65,22 @@ export const createGameFlowSlice: StateCreator<GameStore, [], [], Partial<GameSt
             },
             velocity: initialVelocity,
             grabbedDoll: initialGrabbedDollState,
+            // visualClawPosition은 초기화하지 않고 현재 위치에서 자연스럽게 이어지게 함
+            // 단, 너무 튈 수 있으니 start 시점에는 맞춰주는 게 좋을 수도 있지만,
+            // 일단은 부드러운 연결을 위해 유지하거나, 필요 시 여기서 재설정
             visualClawPosition: { ...initialClawPosition },
         });
         get().callbacks.onPhaseChange?.('moving');
     },
 
     dropClaw: () => {
-        const { phase, attempts, soundCallbacks } = get();
+        const { phase, attempts, soundCallbacks, visualClawPosition } = get();
         if (attempts <= 0 || phase !== 'moving') return;
+
+        // [FIX] 최후의 방어선: moving 상태여도 집게가 아직 복귀 중이면 drop 금지
+        // startGame 검증이 뚫렸더라도 여기서 막으면 "하강해버리는" 문제는 막을 수 있음
+        const CLAW_READY_Y = 3.8;
+        if (visualClawPosition.y < CLAW_READY_Y) return;
 
         soundCallbacks.onClawDrop?.();
         get().setPhase('dropping');

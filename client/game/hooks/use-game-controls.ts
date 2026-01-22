@@ -111,6 +111,17 @@ const useGameControls = ({
 
         if (attempts > 0) {
           if (phase === 'idle' || phase === 'result') {
+            // [FIX] 집게가 완전히 위로 올라가서 복귀한 상태인지 확인
+            // 집게가 아직 올라가는 중(복귀 중)일 때 시작하면 버그 발생 가능
+            // topY = 4.5(height) - 0.5 = 4.0
+            const CLAW_READY_Y = 3.9; // 4.0이 목표지만 약간의 오차 허용
+            const { claw } = useGameStore.getState();
+
+            if (claw.position.y < CLAW_READY_Y) {
+              console.log('Claw is still returning, reset wait...');
+              return; // 아직 복귀 안 했으면 무시
+            }
+
             startGame();
           } else if (phase === 'moving') {
             dropClaw();

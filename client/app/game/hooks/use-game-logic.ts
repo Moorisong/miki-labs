@@ -168,6 +168,15 @@ export function useGameLogic({
 
     const handleStartGame = useCallback(() => {
         if (!canPlay) return;
+
+        // [FIX] 집게 완전 복귀 확인 (UI/키보드 공통)
+        const checkClaw = useGameStore.getState().claw;
+        const CLAW_READY_Y = 3.9;
+
+        if (checkClaw.position.y < CLAW_READY_Y) {
+            return; // 아직 올라가는 중이면 무시
+        }
+
         if (phase === 'result') resetGame();
         startGame();
     }, [canPlay, startGame, phase, resetGame]);
