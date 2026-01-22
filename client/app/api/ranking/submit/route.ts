@@ -63,15 +63,37 @@ export async function POST(request: NextRequest) {
     }
 
     // 점수 저장 (nickname을 직접 저장하여 조회 성능 향상)
-    const result = await scores.insertOne({
-      oderId: user._id,
-      kakaoId: session.user.kakaoId,
-      nickname: session.user.nickname,
-      score,
-      attempts,
-      dollsCaught,
-      createdAt: new Date(),
-    });
+    // 기존 점수가 있으면 누적, 없으면 새로 생성
+    const existingScore = await scores.findOne({ kakaoId: session.user.kakaoId });
+    let result;
+
+    if (existingScore) {
+      await scores.updateOne(
+        { kakaoId: session.user.kakaoId },
+        {
+          $inc: {
+            score: score,
+            attempts: attempts,
+            dollsCaught: dollsCaught,
+          },
+          $set: {
+            nickname: session.user.nickname, // 닉네임 변경 시 반영
+            updatedAt: new Date(),
+          },
+        }
+      );
+      result = { insertedId: existingScore._id };
+    } else {
+      result = await scores.insertOne({
+        oderId: user._id,
+        kakaoId: session.user.kakaoId,
+        nickname: session.user.nickname,
+        score,
+        attempts,
+        dollsCaught,
+        createdAt: new Date(),
+      });
+    }
 
     // 사용자의 최고 점수 업데이트
     if (user.highScore === undefined || score > user.highScore) {

@@ -13,21 +13,31 @@ export const metadata: Metadata = {
   },
 };
 
-// 서버 컴포넌트에서 내부 API 호출
+import { getDatabase } from '@/lib/mongodb';
+
+// 서버 컴포넌트에서 직접 DB 조회
 async function getRankings(): Promise<RankingEntry[]> {
   try {
-    // 서버 컴포넌트에서는 절대 URL 필요
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    const response = await fetch(
-      `${baseUrl}/api/ranking/top?limit=100`,
-      {
-        cache: 'no-store', // 항상 최신 데이터 조회
-      }
-    );
-    const data = await response.json();
-    return data.success ? data.data : [];
+    const db = await getDatabase();
+    const scores = db.collection('scores');
+
+    // 점수 높은 순, 같은 점수면 먼저 달성한 순
+    const rankings = await scores
+      .find({})
+      .sort({ score: -1, createdAt: 1 })
+      .limit(100)
+      .toArray();
+
+    return rankings.map((entry, index) => ({
+      rank: index + 1,
+      oderId: entry.userId?.toString() || entry._id.toString(),
+      nickname: entry.nickname || 'Unknown',
+      score: entry.score,
+      catches: entry.dollsCaught,
+      createdAt: entry.createdAt ? new Date(entry.createdAt).toISOString() : new Date().toISOString(),
+    }));
   } catch (error) {
-    console.error('Failed to fetch rankings:', error);
+    console.error('Failed to fetch rankings from DB:', error);
     return [];
   }
 }
