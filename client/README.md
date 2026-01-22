@@ -34,3 +34,14 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Game Features
+
+### Ranking System
+- **Logged-in Users**: 
+  - Scores are automatically submitted and accumulated to your profile after each game.
+  - A modal displays the points earned in the current game along with your total accumulated score and success count.
+  - No need to enter a nickname every time.
+- **Guest Users**: 
+  - After each game, a Ranking Board is displayed.
+  - You can view top scores and submit your current score with a nickname.
