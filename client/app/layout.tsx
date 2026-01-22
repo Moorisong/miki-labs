@@ -4,6 +4,7 @@ import NavBar from '@/components/layout/nav-bar';
 import Footer from '@/components/layout/footer';
 import SessionProvider from '@/components/providers/session-provider';
 import NicknameProvider from '@/components/providers/nickname-provider';
+import AdBanner from '@/components/ads/ad-banner';
 import './globals.css';
 
 const geistSans = Geist({
@@ -48,6 +49,9 @@ export default function RootLayout({
             <NavBar />
             <main style={{ paddingTop: '64px', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
               {children}
+              <div style={{ marginTop: 'auto', width: '100%' }}>
+                <AdBanner />
+              </div>
             </main>
             <Footer />
           </NicknameProvider>

@@ -12,36 +12,34 @@ interface KakaoAdfitProps {
 
 export default function KakaoAdfit({ unit, width, height, className }: KakaoAdfitProps) {
     const adRef = useRef<HTMLDivElement>(null);
-    const isLoaded = useRef(false);
 
     useEffect(() => {
-        // 광고가 이미 로드되었으면 중복 로드 방지
-        if (isLoaded.current) return;
+        if (!adRef.current) return;
 
-        const timer = setTimeout(() => {
-            if (adRef.current && !isLoaded.current) {
-                // 광고 영역 생성
-                const ins = document.createElement('ins');
-                ins.className = 'kakao_ad_area';
-                ins.style.display = 'none';
-                ins.setAttribute('data-ad-unit', unit);
-                ins.setAttribute('data-ad-width', String(width));
-                ins.setAttribute('data-ad-height', String(height));
+        // 광고 영역 생성
+        const ins = document.createElement('ins');
+        ins.className = 'kakao_ad_area';
+        ins.style.display = 'none';
+        ins.setAttribute('data-ad-unit', unit);
+        ins.setAttribute('data-ad-width', String(width));
+        ins.setAttribute('data-ad-height', String(height));
 
-                adRef.current.innerHTML = '';
-                adRef.current.appendChild(ins);
+        adRef.current.innerHTML = '';
+        adRef.current.appendChild(ins);
 
-                // 광고 스크립트가 로드되어 있으면 광고 호출
-                if (typeof window !== 'undefined' && (window as unknown as { adfit?: { render: () => void } }).adfit) {
-                    (window as unknown as { adfit: { render: () => void } }).adfit.render();
-                }
-
-                isLoaded.current = true;
+        // 광고 스크립트가 이미 로드되어 있으면 바로 호출
+        if ((window as any).adfit) {
+            try {
+                (window as any).adfit.render();
+            } catch (e) {
+                console.error('AdFit render error:', e);
             }
-        }, 100);
+        }
 
         return () => {
-            clearTimeout(timer);
+            if (adRef.current) {
+                adRef.current.innerHTML = '';
+            }
         };
     }, [unit, width, height]);
 
@@ -50,6 +48,16 @@ export default function KakaoAdfit({ unit, width, height, className }: KakaoAdfi
             <Script
                 src="//t1.daumcdn.net/kas/static/ba.min.js"
                 strategy="lazyOnload"
+                onLoad={() => {
+                    // 스크립트 로드 완료 시 render 호출
+                    if ((window as any).adfit) {
+                        try {
+                            (window as any).adfit.render();
+                        } catch (e) {
+                            console.error('AdFit render error details:', e);
+                        }
+                    }
+                }}
             />
             <div
                 ref={adRef}
