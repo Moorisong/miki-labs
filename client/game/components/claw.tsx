@@ -330,8 +330,8 @@ const Claw = () => {
     const current = groupRef.current.position;
     const target = targetPosition.current;
 
-    const dampingFactor = phase === 'dropping' || phase === 'rising' ? 0.15 : 0.1;
-    const springStrength = phase === 'dropping' || phase === 'rising' ? 8 : 12;
+    const dampingFactor = phase === 'dropping' ? 0.25 : phase === 'rising' ? 0.15 : 0.1;
+    const springStrength = phase === 'dropping' ? 20 : phase === 'rising' ? 8 : 12;
 
     const dx = target.x - current.x;
     const dy = target.y - current.y;
