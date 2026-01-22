@@ -60,6 +60,12 @@
   color: var(--color-primary);
 }
 
+@media (max-width: 768px) {
+  .aboutContent br {
+    display: none;
+  }
+}
+
 /* How to Play */
 .howToPlay {
   display: grid;

@@ -65,3 +65,9 @@
   padding: var(--space-md);
   pointer-events: auto;
 }
+
+@media (max-width: 768px) {
+  .placeholderIcon {
+    font-size: 2.5rem;
+  }
+}

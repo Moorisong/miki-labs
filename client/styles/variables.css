@@ -67,3 +67,24 @@
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
 }
+
+@media (max-width: 768px) {
+  :root {
+    /* Spacing - Reduced for mobile */
+    --space-md: 12px;
+    --space-lg: 20px;
+    --space-xl: 24px;
+    --space-2xl: 32px;
+    --space-3xl: 48px;
+
+    /* Typography - Humanized/Reduced for mobile */
+    --font-size-xs: 11px;
+    --font-size-sm: 13px;
+    --font-size-md: 15px;
+    --font-size-lg: 17px;
+    --font-size-xl: 20px;
+    --font-size-2xl: 24px;
+    --font-size-3xl: 32px;
+    --font-size-4xl: 40px;
+  }
+}
