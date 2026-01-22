@@ -424,7 +424,8 @@ const Claw = () => {
 
       // Update Cable Geometry
       if (lineRef.current) {
-        const start = new Vector3(0, 4, 0); // 천장
+        // Update cable start position to follow the claw (gantry system effect)
+        const start = new Vector3(groupRef.current.position.x, 4.5, groupRef.current.position.z);
         const end = groupRef.current.position.clone().add(new Vector3(0, cableLength, 0)); // 집게 상단
         const mid = start.clone().add(end).multiplyScalar(0.5);
 
