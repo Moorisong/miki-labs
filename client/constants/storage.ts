@@ -10,6 +10,7 @@ export const STORAGE_KEY = {
     // LocalStorage - 게임 시도 관련
     GAME_ATTEMPTS: 'gameAttempts',
     GAME_ATTEMPTS_COOLDOWN_END: 'gameAttemptsCooldownEnd',
+    TUTORIAL_SEEN: 'claw_tutorial_seen',
 } as const;
 
 export type StorageKey = keyof typeof STORAGE_KEY;

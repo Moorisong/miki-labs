@@ -14,9 +14,11 @@ import GameHUD from '@/components/game/game-hud';
 import RankingBoard from '@/components/game/ranking-board';
 import SuccessEffect from '@/components/game/success-effect';
 import ScoreAddedModal from '@/components/game/score-added-modal';
+import TutorialModal from '@/components/game/tutorial-modal';
 import AdBanner from '@/components/ads/ad-banner';
 
 import { useGameLogic } from './hooks/use-game-logic';
+import { useTutorial } from '@/lib/hooks/use-tutorial';
 import styles from './page.module.css';
 
 const ClawMachine = dynamic(() => import('@/game/components/claw-machine'), {
@@ -58,6 +60,8 @@ export default function GamePage() {
     addAttempt,
   });
 
+  const { showTutorial, closeTutorial, openTutorial } = useTutorial();
+
   useGameLoop();
   const { setInputState } = useGameControls({ enabled: canPlay });
 
@@ -91,6 +95,7 @@ export default function GamePage() {
             cooldownRemaining={cooldownRemaining}
             canPlay={canPlay}
             phase={phase}
+            onHelpClick={openTutorial}
           />
         )}
 
@@ -139,6 +144,8 @@ export default function GamePage() {
           onComplete={() => setShowSuccess(false)}
           showLoginPrompt={true}
         />
+
+        <TutorialModal isOpen={showTutorial} onClose={closeTutorial} />
       </div>
 
       {/* Ad Section - Now completely separate from the game container */}

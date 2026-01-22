@@ -64,10 +64,14 @@
   left: 0;
   right: 0;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: flex-end;
   padding: 0 var(--space-lg);
   pointer-events: auto;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  gap: var(--space-xl);
 }
 
 /* D-Pad */

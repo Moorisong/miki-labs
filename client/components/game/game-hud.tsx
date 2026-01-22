@@ -14,6 +14,7 @@ interface GameHUDProps {
     cooldownRemaining: string;
     canPlay: boolean;
     phase: 'idle' | 'moving' | 'dropping' | 'grabbing' | 'rising' | 'returning' | 'releasing' | 'result';
+    onHelpClick?: () => void;
 }
 
 export default function GameHUD({
@@ -23,6 +24,7 @@ export default function GameHUD({
     cooldownRemaining,
     canPlay,
     phase,
+    onHelpClick,
 }: GameHUDProps) {
     const { status } = useSession();
     const isLoggedIn = status === 'authenticated';
@@ -71,6 +73,15 @@ export default function GameHUD({
                         <span className={styles.value}>{score.toLocaleString()}</span>
                     </div>
                 </div>
+
+                {/* 도움말 버튼 */}
+                <button
+                    className={styles.helpButton}
+                    onClick={onHelpClick}
+                    aria-label="게임 방법"
+                >
+                    ?
+                </button>
             </div>
 
             {/* 경고 메시지 (상단 바 아래 중앙) */}
