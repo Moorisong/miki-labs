@@ -1,4 +1,7 @@
 import Link from 'next/link';
+
+import { NAV_LINKS, MESSAGES, ROUTES } from '@/constants';
+
 import styles from './footer.module.css';
 
 export default function Footer() {
@@ -9,12 +12,12 @@ export default function Footer() {
       <div className={styles.container}>
         <div className={styles.content}>
           <div className={styles.brand}>
-            <Link href="/" className={styles.logo}>
+            <Link href={ROUTES.HOME} className={styles.logo}>
               <img src="/logo.png" alt="Logo" className={styles.logoIcon} />
-              <span className={styles.logoText}>뽑기중독</span>
+              <span className={styles.logoText}>{MESSAGES.META.SITE_NAME}</span>
             </Link>
             <p className={styles.description}>
-              리얼한 물리 엔진으로 즐기는 웹 인형뽑기 게임
+              {MESSAGES.META.OG_DESCRIPTION}
             </p>
           </div>
 
@@ -22,10 +25,11 @@ export default function Footer() {
             <div className={styles.linkGroup}>
               <h4 className={styles.linkTitle}>메뉴</h4>
               <ul className={styles.linkList}>
-                <li><Link href="/">홈</Link></li>
-                <li><Link href="/game">게임</Link></li>
-                <li><Link href="/ranking">랭킹</Link></li>
-                <li><Link href="/about">소개</Link></li>
+                {NAV_LINKS.map((link) => (
+                  <li key={link.href}>
+                    <Link href={link.href}>{link.label}</Link>
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -48,7 +52,7 @@ export default function Footer() {
 
         <div className={styles.bottom}>
           <p className={styles.copyright}>
-            &copy; {currentYear} 뽑기중독. All rights reserved.
+            &copy; {currentYear} {MESSAGES.META.SITE_NAME}. All rights reserved.
           </p>
         </div>
       </div>

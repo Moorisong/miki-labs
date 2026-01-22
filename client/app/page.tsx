@@ -1,5 +1,8 @@
 import Link from 'next/link';
+
 import { getDatabase } from '@/lib/mongodb';
+import { ROUTES, MESSAGES, FEATURES, MEDALS, CONFIG } from '@/constants';
+
 import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -21,7 +24,7 @@ async function getTopRankings(): Promise<RankEntry[]> {
     const rankings = await scores
       .find({})
       .sort({ score: -1, createdAt: 1 })
-      .limit(5)
+      .limit(CONFIG.PAGINATION.TOP_RANKINGS)
       .toArray();
 
     return rankings.map((entry, index) => ({
@@ -35,24 +38,6 @@ async function getTopRankings(): Promise<RankEntry[]> {
     return [];
   }
 }
-
-const features = [
-  {
-    icon: '🎯',
-    title: '리얼한 물리 엔진',
-    description: '실제 인형뽑기처럼 정교한 물리 시뮬레이션으로 진짜 손맛을 느껴보세요.',
-  },
-  {
-    icon: '🏆',
-    title: '랭킹 시스템',
-    description: '전국의 플레이어들과 점수를 겨루고 최고의 자리에 도전하세요.',
-  },
-  {
-    icon: '🧸',
-    title: '다양한 인형',
-    description: '귀여운 동물부터 캐릭터까지, 다양한 인형들을 뽑아보세요.',
-  },
-];
 
 export default async function HomePage() {
   const topRankings = await getTopRankings();
@@ -72,11 +57,11 @@ export default async function HomePage() {
             물리 엔진 기반의 리얼한 크레인 게임을 즐겨보세요.
           </p>
           <div className={styles.heroCta}>
-            <Link href="/game" className={styles.primaryButton}>
-              지금 바로 시작하기
+            <Link href={ROUTES.GAME} className={styles.primaryButton}>
+              {MESSAGES.CTA.START_NOW}
             </Link>
-            <Link href="/about" className={styles.secondaryButton}>
-              게임 소개
+            <Link href={ROUTES.ABOUT} className={styles.secondaryButton}>
+              {MESSAGES.CTA.ABOUT}
             </Link>
           </div>
         </div>
@@ -93,7 +78,7 @@ export default async function HomePage() {
       <section className={styles.features}>
         <h2 className={styles.sectionTitle}>게임 특징</h2>
         <div className={styles.featureGrid}>
-          {features.map((feature, index) => (
+          {FEATURES.map((feature, index) => (
             <div key={index} className={styles.featureCard}>
               <div className={styles.featureIcon}>{feature.icon}</div>
               <h3 className={styles.featureTitle}>{feature.title}</h3>
@@ -107,15 +92,15 @@ export default async function HomePage() {
       <section className={styles.ranking}>
         <div className={styles.rankingHeader}>
           <h2 className={styles.sectionTitle}>TOP 5 랭킹</h2>
-          <Link href="/ranking" className={styles.viewAllLink}>
-            전체 보기 →
+          <Link href={ROUTES.RANKING} className={styles.viewAllLink}>
+            {MESSAGES.RANKING.VIEW_ALL}
           </Link>
         </div>
         <div className={styles.rankingTable}>
           <div className={styles.rankingHeader}>
-            <span>순위</span>
-            <span>닉네임</span>
-            <span>점수</span>
+            <span>{MESSAGES.TABLE.RANK}</span>
+            <span>{MESSAGES.TABLE.NICKNAME}</span>
+            <span>{MESSAGES.TABLE.SCORE}</span>
           </div>
           {topRankings.length > 0 ? (
             topRankings.map((player) => (
@@ -126,7 +111,7 @@ export default async function HomePage() {
                 <span className={styles.rankNumber}>
                   {player.rank <= 3 ? (
                     <span className={styles.medal}>
-                      {player.rank === 1 ? '🥇' : player.rank === 2 ? '🥈' : '🥉'}
+                      {MEDALS[player.rank]}
                     </span>
                   ) : (
                     player.rank
@@ -138,7 +123,7 @@ export default async function HomePage() {
             ))
           ) : (
             <div className={styles.noData}>
-              아직 랭킹 정보가 없습니다. 첫 1등의 주인공이 되어보세요!
+              {MESSAGES.RANKING.EMPTY} {MESSAGES.RANKING.EMPTY_CTA}
             </div>
           )}
         </div>
@@ -146,14 +131,15 @@ export default async function HomePage() {
 
       {/* CTA Section */}
       <section className={styles.cta}>
-        <h2 className={styles.ctaTitle}>지금 바로 도전하세요!</h2>
+        <h2 className={styles.ctaTitle}>{MESSAGES.CTA.CHALLENGE_NOW}</h2>
         <p className={styles.ctaDescription}>
-          무료로 즐기는 웹 인형뽑기, 당신의 실력을 보여주세요.
+          {MESSAGES.CTA.FREE_PLAY}
         </p>
-        <Link href="/game" className={styles.ctaButton}>
-          게임 시작
+        <Link href={ROUTES.GAME} className={styles.ctaButton}>
+          {MESSAGES.CTA.START_GAME}
         </Link>
       </section>
     </div>
   );
 }
+

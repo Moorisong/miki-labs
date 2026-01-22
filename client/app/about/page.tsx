@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
+import { ROUTES, MESSAGES, HOW_TO_PLAY } from '@/constants';
+
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
@@ -11,37 +14,14 @@ export const metadata: Metadata = {
   },
 };
 
-const howToPlay = [
-  {
-    step: 1,
-    title: '위치 선정',
-    description: '방향키 또는 화면 버튼으로 크레인을 원하는 위치로 이동시킵니다.',
-    icon: '🕹️',
-  },
-  {
-    step: 2,
-    title: '크레인 하강',
-    description: '하강 버튼을 누르면 크레인이 아래로 내려가 인형을 잡습니다.',
-    icon: '⬇️',
-  },
-  {
-    step: 3,
-    title: '인형 획득',
-    description: '인형을 성공적으로 잡아 출구까지 옮기면 점수를 획득합니다!',
-    icon: '🎉',
-  },
-];
-
-
-
 export default function AboutPage() {
   return (
     <div className={styles.container}>
       {/* Hero Section */}
       <section className={styles.hero}>
-        <h1 className={styles.title}>뽑기중독</h1>
+        <h1 className={styles.title}>{MESSAGES.META.SITE_NAME}</h1>
         <p className={styles.subtitle}>
-          리얼한 물리 엔진으로 즐기는 웹 인형뽑기 게임
+          {MESSAGES.META.OG_DESCRIPTION}
         </p>
       </section>
 
@@ -50,7 +30,7 @@ export default function AboutPage() {
         <h2 className={styles.sectionTitle}>게임 소개</h2>
         <div className={styles.aboutContent}>
           <p>
-            <strong>뽑기중독</strong>은 실제 인형뽑기 기계의 경험을 웹에서 그대로 재현한 게임입니다.
+            <strong>{MESSAGES.META.SITE_NAME}</strong>은 실제 인형뽑기 기계의 경험을 웹에서 그대로 재현한 게임입니다.
             <br />
             물리 엔진을 기반으로 한 리얼한 크레인 동작과 인형의 움직임을 경험해보세요.
           </p>
@@ -71,7 +51,7 @@ export default function AboutPage() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>플레이 방법</h2>
         <div className={styles.howToPlay}>
-          {howToPlay.map((item) => (
+          {HOW_TO_PLAY.map((item) => (
             <div key={item.step} className={styles.stepCard}>
               <div className={styles.stepIcon}>{item.icon}</div>
               <div className={styles.stepNumber}>STEP {item.step}</div>
@@ -112,15 +92,14 @@ export default function AboutPage() {
         </div>
       </section>
 
-
-
       {/* CTA Section */}
       <section className={styles.cta}>
-        <h2 className={styles.ctaTitle}>지금 바로 플레이하세요!</h2>
-        <Link href="/game" className={styles.ctaButton}>
-          게임 시작
+        <h2 className={styles.ctaTitle}>{MESSAGES.CTA.PLAY_NOW}</h2>
+        <Link href={ROUTES.GAME} className={styles.ctaButton}>
+          {MESSAGES.CTA.START_GAME}
         </Link>
       </section>
     </div>
   );
 }
+

@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useSession, signIn } from 'next-auth/react';
+
+import { ROUTES, MESSAGES, CONFIG } from '@/constants';
+
 import styles from './game-hud.module.css';
 
 interface GameHUDProps {
@@ -21,7 +24,7 @@ export default function GameHUD({
     canPlay,
     phase,
 }: GameHUDProps) {
-    const { data: session, status } = useSession();
+    const { status } = useSession();
     const isLoggedIn = status === 'authenticated';
     const isLastAttempt = remainingAttempts === 1 && !isOnCooldown;
     const [hasGameStarted, setHasGameStarted] = useState(false);
@@ -52,9 +55,9 @@ export default function GameHUD({
                     ) : (
                         <div className={styles.attemptsContainer}>
                             <div className={styles.attemptsDisplay}>
-                                <span className={styles.label}>남은 시도</span>
+                                <span className={styles.label}>{MESSAGES.GAME.REMAINING_ATTEMPTS}</span>
                                 <span className={`${styles.attemptsValue} ${isLastAttempt ? styles.warning : ''}`}>
-                                    {remainingAttempts} / 5
+                                    {remainingAttempts} / {CONFIG.GAME.MAX_ATTEMPTS}
                                 </span>
                             </div>
                         </div>
@@ -64,7 +67,7 @@ export default function GameHUD({
                 {/* 점수 표시 */}
                 <div className={styles.scoreSection}>
                     <div className={styles.scoreItem}>
-                        <span className={styles.label}>점수</span>
+                        <span className={styles.label}>{MESSAGES.TABLE.SCORE}</span>
                         <span className={styles.value}>{score.toLocaleString()}</span>
                     </div>
                 </div>
@@ -74,7 +77,7 @@ export default function GameHUD({
             {!isOnCooldown && isLastAttempt && (
                 <div className={styles.warningMessage}>
                     <span className={styles.warningIcon}>⚠️</span>
-                    <span>마지막 기회예요! 성공하면 +1회!</span>
+                    <span>{MESSAGES.GAME.LAST_CHANCE_WARNING}</span>
                 </div>
             )}
 
@@ -83,19 +86,20 @@ export default function GameHUD({
                 <div className={styles.loginPrompt}>
                     <p className={styles.promptText}>
                         <span className={styles.infoIcon}>ℹ️</span>
-                        로그인 없이도 플레이할 수 있어요
+                        {MESSAGES.AUTH.LOGIN_PROMPT}
                     </p>
                     <p className={styles.promptSubtext}>
-                        로그인하면 기록을 랭킹에 저장할 수 있어요
+                        {MESSAGES.AUTH.LOGIN_BENEFIT}
                     </p>
                     <button
                         className={styles.loginLink}
-                        onClick={() => signIn('kakao', { callbackUrl: '/game' })}
+                        onClick={() => signIn('kakao', { callbackUrl: ROUTES.GAME })}
                     >
-                        지금 로그인하고 랭킹에 도전하세요! →
+                        {MESSAGES.AUTH.LOGIN_CTA}
                     </button>
                 </div>
             )}
         </div>
     );
 }
+

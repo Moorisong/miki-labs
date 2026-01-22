@@ -1,6 +1,6 @@
-import { ApiResponse } from './types';
+import type { ApiResponse } from './types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+import { API_BASE_URL, MESSAGES } from '@/constants';
 
 export const apiClient = {
   async get<T>(endpoint: string): Promise<ApiResponse<T>> {
@@ -14,10 +14,10 @@ export const apiClient = {
       });
       return response.json();
     } catch (error) {
-      console.error('API GET Error:', error);
+      console.error(MESSAGES.ERROR.API_GET_ERROR, error);
       return {
         success: false,
-        error: 'Network error occurred',
+        error: MESSAGES.ERROR.NETWORK,
       };
     }
   },
@@ -34,11 +34,12 @@ export const apiClient = {
       });
       return response.json();
     } catch (error) {
-      console.error('API POST Error:', error);
+      console.error(MESSAGES.ERROR.API_POST_ERROR, error);
       return {
         success: false,
-        error: 'Network error occurred',
+        error: MESSAGES.ERROR.NETWORK,
       };
     }
   },
 };
+

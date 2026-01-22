@@ -1,5 +1,9 @@
 import type { Metadata } from 'next';
-import { RankingEntry } from '@/lib/api/types';
+
+import type { RankingEntry } from '@/lib/api/types';
+import { getDatabase } from '@/lib/mongodb';
+import { MESSAGES, MEDALS, CONFIG } from '@/constants';
+
 import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -13,8 +17,6 @@ export const metadata: Metadata = {
   },
 };
 
-import { getDatabase } from '@/lib/mongodb';
-
 // 서버 컴포넌트에서 직접 DB 조회
 async function getRankings(): Promise<RankingEntry[]> {
   try {
@@ -25,7 +27,7 @@ async function getRankings(): Promise<RankingEntry[]> {
     const rankings = await scores
       .find({})
       .sort({ score: -1, createdAt: 1 })
-      .limit(100)
+      .limit(CONFIG.GAME.RANKING_MAX_DISPLAY)
       .toArray();
 
     return rankings.map((entry, index) => ({
@@ -42,19 +44,6 @@ async function getRankings(): Promise<RankingEntry[]> {
   }
 }
 
-function getRankMedal(rank: number): string | null {
-  switch (rank) {
-    case 1:
-      return '🥇';
-    case 2:
-      return '🥈';
-    case 3:
-      return '🥉';
-    default:
-      return null;
-  }
-}
-
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
   const year = date.getFullYear().toString().slice(-2);
@@ -66,23 +55,23 @@ function formatDate(dateString: string): string {
 export default async function RankingPage() {
   const rankings = await getRankings();
   const hasData = rankings.length > 0;
-  const totalPages = Math.ceil(rankings.length / 10);
+  const totalPages = Math.ceil(rankings.length / CONFIG.PAGINATION.PAGE_SIZE);
   const currentPage = 1; // 서버 컴포넌트이므로 첫 페이지만 표시 (추후 클라이언트 컴포넌트로 전환 시 페이지네이션 구현)
-  const displayRankings = rankings.slice(0, 10);
+  const displayRankings = rankings.slice(0, CONFIG.PAGINATION.PAGE_SIZE);
 
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <h1 className={styles.title}>랭킹</h1>
+        <h1 className={styles.title}>{MESSAGES.RANKING.TITLE}</h1>
         <p className={styles.subtitle}>
-          전국 최고의 인형뽑기 마스터들을 확인하세요!
+          {MESSAGES.RANKING.SUBTITLE}
         </p>
       </header>
 
       {!hasData ? (
         <section className={styles.emptyState}>
-          <p className={styles.emptyText}>아직 등록된 랭킹이 없습니다.</p>
-          <p className={styles.emptySubtext}>첫 번째 랭킹의 주인공이 되어보세요!</p>
+          <p className={styles.emptyText}>{MESSAGES.RANKING.EMPTY}</p>
+          <p className={styles.emptySubtext}>{MESSAGES.RANKING.EMPTY_CTA}</p>
         </section>
       ) : (
         <>
@@ -94,7 +83,7 @@ export default async function RankingPage() {
                 className={`${styles.topCard} ${styles[`rank${player.rank}`]}`}
                 style={{ order: index === 0 ? 1 : index === 1 ? 0 : 2 }}
               >
-                <span className={styles.topMedal}>{getRankMedal(player.rank)}</span>
+                <span className={styles.topMedal}>{MEDALS[player.rank]}</span>
                 <span className={styles.topRank}>#{player.rank}</span>
                 <h3 className={styles.topNickname}>{player.nickname}</h3>
                 <p className={styles.topScore}>{player.score.toLocaleString()} pts</p>
@@ -107,11 +96,11 @@ export default async function RankingPage() {
           <section className={styles.tableSection}>
             <div className={styles.table}>
               <div className={styles.tableHeader}>
-                <span className={styles.colRank}>순위</span>
-                <span className={styles.colNickname}>닉네임</span>
-                <span className={styles.colScore}>점수</span>
-                <span className={styles.colCatches}>성공</span>
-                <span className={styles.colDate}>날짜</span>
+                <span className={styles.colRank}>{MESSAGES.TABLE.RANK}</span>
+                <span className={styles.colNickname}>{MESSAGES.TABLE.NICKNAME}</span>
+                <span className={styles.colScore}>{MESSAGES.TABLE.SCORE}</span>
+                <span className={styles.colCatches}>{MESSAGES.TABLE.CATCHES}</span>
+                <span className={styles.colDate}>{MESSAGES.TABLE.DATE}</span>
               </div>
               <div className={styles.tableBody}>
                 {displayRankings.map((player, index) => (
@@ -120,7 +109,7 @@ export default async function RankingPage() {
                     className={`${styles.tableRow} ${player.rank <= 3 ? styles.highlight : ''}`}
                   >
                     <span className={styles.colRank}>
-                      {getRankMedal(player.rank) || player.rank}
+                      {MEDALS[player.rank] || player.rank}
                     </span>
                     <span className={styles.colNickname}>{player.nickname}</span>
                     <span className={styles.colScore}>{player.score.toLocaleString()}</span>
@@ -135,10 +124,10 @@ export default async function RankingPage() {
             {totalPages > 1 && (
               <div className={styles.pagination}>
                 <button className={styles.pageButton} disabled={currentPage === 1}>
-                  이전
+                  {MESSAGES.RANKING.PREV}
                 </button>
                 <div className={styles.pageNumbers}>
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((page) => (
+                  {Array.from({ length: Math.min(totalPages, CONFIG.PAGINATION.MAX_PAGE_BUTTONS) }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
                       className={`${styles.pageNumber} ${page === currentPage ? styles.active : ''}`}
@@ -146,7 +135,7 @@ export default async function RankingPage() {
                       {page}
                     </button>
                   ))}
-                  {totalPages > 5 && (
+                  {totalPages > CONFIG.PAGINATION.MAX_PAGE_BUTTONS && (
                     <>
                       <span className={styles.pageDots}>...</span>
                       <button className={styles.pageNumber}>{totalPages}</button>
@@ -154,7 +143,7 @@ export default async function RankingPage() {
                   )}
                 </div>
                 <button className={styles.pageButton} disabled={currentPage === totalPages}>
-                  다음
+                  {MESSAGES.RANKING.NEXT}
                 </button>
               </div>
             )}
@@ -164,3 +153,4 @@ export default async function RankingPage() {
     </div>
   );
 }
+

@@ -1,4 +1,6 @@
-import { RankingEntry, SubmitScoreRequest, ApiResponse } from './types';
+import type { RankingEntry, SubmitScoreRequest, ApiResponse } from './types';
+
+import { API, MESSAGES } from '@/constants';
 
 // 클라이언트 내부 API 사용 (NextAuth 세션 활용)
 const internalFetch = async <T>(
@@ -16,21 +18,40 @@ const internalFetch = async <T>(
     return await response.json();
   } catch (error) {
     console.error('API 요청 실패:', error);
-    return { success: false, error: '네트워크 오류' };
+    return { success: false, error: MESSAGES.ERROR.NETWORK };
   }
 };
 
+interface SubmitScoreResponse {
+  scoreId: string;
+  totalScore: number;
+  totalAttempts: number;
+  totalDollsCaught: number;
+}
+
+interface SubmitResult {
+  success: boolean;
+  error?: string;
+  data?: {
+    totalScore: number;
+    totalAttempts: number;
+    totalDollsCaught: number;
+  };
+}
+
 export const rankingApi = {
   async getTopRanking(limit: number = 10): Promise<RankingEntry[]> {
-    const response = await internalFetch<RankingEntry[]>(`/api/ranking/top?limit=${limit}`);
+    const response = await internalFetch<RankingEntry[]>(API.RANKING.TOP(limit));
     if (response.success && response.data) {
       return response.data;
     }
     return [];
   },
 
-  async submitScore(data: Omit<SubmitScoreRequest, 'tempUserId' | 'nickname'>): Promise<{ success: boolean; error?: string; data?: { totalScore: number; totalAttempts: number; totalDollsCaught: number } }> {
-    const response = await internalFetch<{ scoreId: string; totalScore: number; totalAttempts: number; totalDollsCaught: number }>('/api/ranking/submit', {
+  async submitScore(
+    data: Omit<SubmitScoreRequest, 'tempUserId' | 'nickname'>
+  ): Promise<SubmitResult> {
+    const response = await internalFetch<SubmitScoreResponse>(API.RANKING.SUBMIT, {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -42,3 +63,4 @@ export const rankingApi = {
     return null;
   },
 };
+

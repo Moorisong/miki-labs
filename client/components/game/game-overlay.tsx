@@ -1,18 +1,23 @@
 'use client';
 
+import type { ReactNode } from 'react';
+
+import { MESSAGES } from '@/constants';
+import type { GamePhase } from '@/game/types/game.types';
+
 import styles from './game-overlay.module.css';
 
 interface GameOverlayProps {
   score: number;
   attempts: number;
-  isPlaying: boolean;
+  phase: GamePhase;
   onMoveStart: (direction: 'left' | 'right' | 'forward' | 'backward') => void;
   onMoveEnd: (direction: 'left' | 'right' | 'forward' | 'backward') => void;
   onDrop: () => void;
-  onStart?: () => void;
+  onStart: () => void;
   canPlay?: boolean;
   showRanking?: boolean;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 export default function GameOverlay({
@@ -25,19 +30,14 @@ export default function GameOverlay({
   onStart,
   canPlay = true,
   showRanking = false,
-  children
-}: {
-  score: number;
-  attempts: number;
-  phase: 'idle' | 'moving' | 'dropping' | 'grabbing' | 'rising' | 'returning' | 'releasing' | 'result';
-  onMoveStart: (direction: 'left' | 'right' | 'forward' | 'backward') => void;
-  onMoveEnd: (direction: 'left' | 'right' | 'forward' | 'backward') => void;
-  onDrop: () => void;
-  onStart: () => void;
-  canPlay?: boolean;
-  showRanking?: boolean;
-  children?: React.ReactNode;
-}) {
+  children,
+}: GameOverlayProps) {
+  const getStartButtonText = () => {
+    if (!canPlay) return MESSAGES.GAME.COOLDOWN;
+    if (phase === 'result') return MESSAGES.GAME.RESTART;
+    return MESSAGES.GAME.START;
+  };
+
   return (
     <div className={styles.overlay}>
       {/* Score Panel - 기존 HUD는 GameHUD로 대체됨, 여기서는 제거 또는 간소화 */}
@@ -52,7 +52,7 @@ export default function GameOverlay({
             onClick={onStart}
             disabled={!canPlay}
           >
-            {!canPlay ? '쿨타임 중...' : phase === 'result' ? '다시 도전!' : 'Game Start'}
+            {getStartButtonText()}
           </button>
         </div>
       )}
@@ -137,10 +137,11 @@ export default function GameOverlay({
       {/* Game Status Messages */}
       {phase === 'result' && attempts === 0 && (
         <div className={styles.gameOver}>
-          <h2 className={styles.gameOverTitle}>게임 종료!</h2>
-          <p className={styles.gameOverScore}>최종 점수: {score.toLocaleString()}</p>
+          <h2 className={styles.gameOverTitle}>{MESSAGES.GAME.GAME_OVER}</h2>
+          <p className={styles.gameOverScore}>{MESSAGES.GAME.FINAL_SCORE}: {score.toLocaleString()}</p>
         </div>
       )}
     </div>
   );
 }
+
