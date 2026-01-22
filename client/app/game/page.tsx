@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import { useSession } from 'next-auth/react';
 import { useGameStore } from '@/game/core/game-manager';
 import useGameControls from '@/game/hooks/use-game-controls';
 import { useGameLoop } from '@/game/hooks/use-game-loop';
@@ -9,6 +10,7 @@ import GameOverlay from '@/components/game/game-overlay';
 import GameHUD from '@/components/game/game-hud';
 import RankingBoard from '@/components/game/ranking-board';
 import SuccessEffect from '@/components/game/success-effect';
+import ScoreAddedModal from '@/components/game/score-added-modal';
 import { useGameAttempts } from '@/lib/hooks/use-game-attempts';
 import { rankingApi } from '@/lib/api/ranking';
 import type { RankingEntry } from '@/lib/api/types';
@@ -22,6 +24,7 @@ const ClawMachine = dynamic(
 );
 
 export default function GamePage() {
+  const { data: session } = useSession();
   const score = useGameStore((state) => state.score);
   const attempts = useGameStore((state) => state.attempts);
   const phase = useGameStore((state) => state.phase);
@@ -50,6 +53,8 @@ export default function GamePage() {
   const [showRanking, setShowRanking] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [lastEarnedScore, setLastEarnedScore] = useState(0);
+  const [scoreModalData, setScoreModalData] = useState<{ score: number; totalScore: number; totalCaught: number } | null>(null);
+  const [successCount, setSuccessCount] = useState(0); // 현재 게임에서의 성공 횟수
   const prevScoreRef = useRef(score);
 
   // Sync persistent attempts state to game store to ensure consistency
@@ -70,7 +75,9 @@ export default function GamePage() {
         useGameStore.setState({ score: scoreNum });
         setShowRanking(true);
       }
-      sessionStorage.removeItem('pendingRankingScore');
+      // 주의: 여기서 sessionStorage를 지우지 않음!
+      // 지우면 Strict Mode에서 언마운트 시 resetGame()이 실행되어 점수가 0이 되는 문제가 발생함.
+      // 대신 handleRestart나 handleRankingSubmit 완료 시 지우도록 처리.
     }
   }, []);
 
@@ -93,10 +100,13 @@ export default function GamePage() {
         // console.log('Score changed:', newScore);
       },
       onGameEnd: async (finalScore) => {
-        // Game ended, show ranking board
-        const freshRankings = await rankingApi.getTopRanking(10);
-        setRankings(freshRankings);
-        setShowRanking(true);
+        // 비로그인 상태면 랭킹보드 표시 (기존 동작)
+        // 로그인 상태에서는 onSuccess에서 이미 점수 제출을 처리함
+        if (!session?.user) {
+          const freshRankings = await rankingApi.getTopRanking(10);
+          setRankings(freshRankings);
+          setShowRanking(true);
+        }
       },
       onAttemptUsed: (remaining) => {
         // 시도 차감 시 (실패했을 때만 실제로 차감)
@@ -106,14 +116,47 @@ export default function GamePage() {
     });
 
     setSoundCallbacks({
-      onSuccess: () => {
+      onSuccess: async () => {
         // 성공 시 시도 +1 보너스!
         // useAttempt()가 먼저 호출되었으므로 addAttempt()로 복구
         console.log('[GamePage] onSuccess called - adding bonus attempt');
         addAttempt();
+
+        // 성공 횟수 증가
+        setSuccessCount(prev => prev + 1);
+
+        // 로그인 상태면 즉시 점수 제출
+        if (session?.user) {
+          try {
+            // 현재 게임에서 얻은 점수 (마지막 성공에서 얻은 점수)
+            const currentScore = useGameStore.getState().score;
+            const earnedScore = lastEarnedScore > 0 ? lastEarnedScore : currentScore;
+
+            console.log('[GamePage] Submitting score:', earnedScore);
+
+            const result = await rankingApi.submitScore({
+              score: earnedScore,
+              attempts: 1,
+              dollsCaught: 1, // 성공했으므로 1
+            });
+
+            if (result.success && result.data) {
+              console.log('[GamePage] Score submitted successfully:', result.data);
+              setScoreModalData({
+                score: earnedScore,
+                totalScore: result.data.totalScore,
+                totalCaught: result.data.totalDollsCaught
+              });
+            } else {
+              console.error('[GamePage] Score submission failed:', result.error);
+            }
+          } catch (e) {
+            console.error('[GamePage] Auto submit failed:', e);
+          }
+        }
       },
     });
-  }, [setCallbacks, setSoundCallbacks, addAttempt, useAttempt]);
+  }, [setCallbacks, setSoundCallbacks, addAttempt, useAttempt, session, lastEarnedScore]);
 
   // 컴포넌트 언마운트 시에만 게임 리셋 (점수 복구 문제 방지)
   useEffect(() => {
@@ -151,8 +194,8 @@ export default function GamePage() {
     try {
       const result = await rankingApi.submitScore({
         score,
-        attempts: config.maxAttempts,
-        dollsCaught: Math.floor(score / 100), // 점수 기반으로 계산
+        attempts: 1,
+        dollsCaught: successCount > 0 ? successCount : (score > 0 ? 1 : 0), // 실제 성공 횟수 사용
       });
 
       if (!result.success) {
@@ -162,6 +205,9 @@ export default function GamePage() {
       // Refresh rankings
       const newRankings = await rankingApi.getTopRanking(10);
       setRankings(newRankings);
+
+      // 점수 제출 완료 후 저장된 점수 삭제
+      sessionStorage.removeItem('pendingRankingScore');
       return { success: true };
     } catch (e) {
       console.error('Failed to submit score:', e);
@@ -172,20 +218,29 @@ export default function GamePage() {
   };
 
   const handleRestart = () => {
+    sessionStorage.removeItem('pendingRankingScore'); // 게임 재시작 시 저장된 점수 삭제
     setShowRanking(false);
+    setScoreModalData(null);
+    setSuccessCount(0); // 성공 횟수 초기화
     resetGame();
   };
 
   // 게임 시작 핸들러 (쿨타임 체크)
   const handleStartGame = useCallback(() => {
     if (!canPlay) return;
+
+    // 게임 오버(result) 상태에서 시작하면 게임 상태(점수 등) 리셋
+    if (phase === 'result') {
+      resetGame();
+    }
+
     startGame();
-  }, [canPlay, startGame]);
+  }, [canPlay, startGame, phase, resetGame]);
 
   return (
     <div className={styles.container}>
       {/* 게임 HUD (시도 횟수, 쿨타임, 비로그인 안내) - 랭킹보드 표시 중에는 숨김 */}
-      {!showRanking && (
+      {!showRanking && !scoreModalData && (
         <GameHUD
           score={score}
           remainingAttempts={remainingAttempts}
@@ -209,7 +264,7 @@ export default function GamePage() {
         onMoveEnd={handleMoveEnd}
         onDrop={dropClaw}
         canPlay={canPlay}
-        showRanking={showRanking}
+        showRanking={showRanking || !!scoreModalData}
       >
         {showRanking && (
           <div className={styles.rankingOverlay}>
@@ -222,10 +277,20 @@ export default function GamePage() {
             />
           </div>
         )}
+        {scoreModalData && (
+          <div className={styles.rankingOverlay}>
+            <ScoreAddedModal
+              score={scoreModalData.score}
+              totalScore={scoreModalData.totalScore}
+              totalCaught={scoreModalData.totalCaught}
+              onRestart={handleRestart}
+            />
+          </div>
+        )}
       </GameOverlay>
 
       <SuccessEffect
-        show={showSuccess && !showRanking}
+        show={showSuccess && !showRanking && !scoreModalData}
         score={lastEarnedScore}
         totalScore={score}
         onComplete={() => setShowSuccess(false)}
