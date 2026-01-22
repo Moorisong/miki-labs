@@ -140,13 +140,15 @@ export const GRIP_CONFIG = {
   slipChanceMax: 0.15, // Reduced max slip chance
 };
 
+import type { FailReason } from '@/constants/toast-messages';
+
 // Sound callback types
 export interface SoundCallbacks {
   onClawMove?: () => void;
   onClawDrop?: () => void;
   onGrab?: () => void;
   onSuccess?: () => void;
-  onFail?: () => void;
+  onFail?: (reason: FailReason) => void;
 }
 
 // Extended doll config with grab state

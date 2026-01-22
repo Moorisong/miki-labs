@@ -106,7 +106,7 @@ export const createGameFlowSlice: StateCreator<GameStore, [], [], Partial<GameSt
         get().setPhase('returning');
     },
 
-    endAttempt: (success, dollConfig) => {
+    endAttempt: (success, dollConfig, failReason) => {
         const { grabbedDoll, soundCallbacks, attempts } = get();
         const targetDoll = dollConfig || grabbedDoll.config;
 
@@ -115,7 +115,9 @@ export const createGameFlowSlice: StateCreator<GameStore, [], [], Partial<GameSt
             get().addScore(score);
             soundCallbacks.onSuccess?.();
         } else {
-            soundCallbacks.onFail?.();
+            // failReason이 있으면 전달, 없으면 기본값
+            const reason = failReason || { type: 'no_doll' as const };
+            soundCallbacks.onFail?.(reason);
         }
 
         get().releaseDoll();

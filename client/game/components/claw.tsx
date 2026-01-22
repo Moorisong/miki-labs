@@ -238,7 +238,7 @@ const ClawFinger = ({ index, isOpen, strengthVariance, clawPosition }: ClawFinge
         </mesh>
 
         <mesh
-          /* castShadow */
+          // castShadow
           position={[fingerWidth / 2, -fingerLength - fingerLength * 0.3, fingerWidth * 0.3]}
           rotation={[Math.PI / 6, 0, 0]}
         >

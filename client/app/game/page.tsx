@@ -16,6 +16,7 @@ import SuccessEffect from '@/components/game/success-effect';
 import ScoreAddedModal from '@/components/game/score-added-modal';
 import TutorialModal from '@/components/game/tutorial-modal';
 import AdBanner from '@/components/ads/ad-banner';
+import Toast from '@/components/ui/toast';
 
 import { useGameLogic } from './hooks/use-game-logic';
 import { useTutorial } from '@/lib/hooks/use-tutorial';
@@ -52,6 +53,8 @@ export default function GamePage() {
     handleRestart,
     handleContinueGame,
     handleStartGame,
+    toast,
+    hideToast,
   } = useGameLogic({
     score,
     remainingAttempts,
@@ -146,6 +149,7 @@ export default function GamePage() {
         />
 
         <TutorialModal isOpen={showTutorial} onClose={closeTutorial} />
+        <Toast toast={toast} onHide={hideToast} />
       </div>
 
       {/* Ad Section - Now completely separate from the game container */}

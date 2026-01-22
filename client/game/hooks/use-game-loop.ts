@@ -133,9 +133,11 @@ export const useGameLoop = () => {
                     gripCheckTimer.current += dt;
                     if (gripCheckTimer.current > 0.1 && state.grabbedDoll.id) {
                         gripCheckTimer.current = 0;
+                        const accuracy = state.grabbedDoll.accuracy;
                         const stillHolding = updateGrabbedDollGrip();
                         if (!stillHolding) {
-                            // 인형 떨어뜨림!
+                            // 인형 떨어뜨림! - 그립 실패 토스트 표시
+                            state.soundCallbacks.onFail?.({ type: 'grip_fail', accuracy });
                             releaseDoll();
                         }
                     }
@@ -193,7 +195,7 @@ export const useGameLoop = () => {
                             // 인형이 없으면 대기 없이 바로 시도 종료 (실패)
                             arrivalTimer.current = 0;
                             setClawOpen(true);
-                            endAttempt(false);
+                            endAttempt(false, undefined, { type: 'no_doll' });
                         }
                     } else {
                         // 아직 이동 중이면 타이머 초기화
@@ -246,8 +248,8 @@ export const useGameLoop = () => {
                         // Clear pending doll
                         useGameStore.getState().setPendingReleaseDoll(null);
 
-                        // End attempt as failure
-                        endAttempt(false);
+                        // End attempt as failure with timeout reason
+                        endAttempt(false, undefined, { type: 'timeout' });
                     }
                     break;
                 }

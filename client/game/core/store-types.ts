@@ -10,6 +10,7 @@ import {
     DEFAULT_GAME_CONFIG,
     CABINET_DIMENSIONS,
 } from '../types/game.types';
+import type { FailReason } from '@/constants/toast-messages';
 
 export interface GrabbedDollState {
     id: string | null;
@@ -53,7 +54,7 @@ export interface GameStore extends GameState {
     grabDoll: () => void;
     riseClaw: () => void;
     returnClaw: () => void;
-    endAttempt: (success: boolean, dollConfig?: DollConfig) => void;
+    endAttempt: (success: boolean, dollConfig?: DollConfig, failReason?: FailReason) => void;
     setGrabbedDoll: (doll: DollConfig | null, offset?: Position3D, accuracy?: number, isPerfectGrab?: boolean, rotation?: { x: number; y: number; z: number }) => void;
     updateGrabbedDollGrip: () => boolean;
     releaseDoll: () => void;

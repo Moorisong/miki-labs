@@ -6,6 +6,8 @@ import { useSession } from 'next-auth/react';
 import { useGameStore } from '@/game/core/game-manager';
 import { rankingApi } from '@/lib/api/ranking';
 import { STORAGE_KEY, CONFIG } from '@/constants';
+import { getFailMessage } from '@/constants/toast-messages';
+import { useToast } from '@/lib/hooks/use-toast';
 import type { RankingEntry } from '@/lib/api/types';
 
 interface UseGameLogicProps {
@@ -42,6 +44,7 @@ export function useGameLogic({
     } | null>(null);
     const [successCount, setSuccessCount] = useState(0);
     const prevScoreRef = useRef(score);
+    const { toast, showToast, hideToast } = useToast();
 
     // Sync persistent attempts state to game store
     useEffect(() => {
@@ -115,6 +118,10 @@ export function useGameLogic({
                     }
                 }
             },
+            onFail: (reason) => {
+                const message = getFailMessage(reason);
+                showToast(message, 'error');
+            },
         });
     }, [
         setCallbacks,
@@ -123,6 +130,7 @@ export function useGameLogic({
         useAttempt,
         session,
         lastEarnedScore,
+        showToast,
     ]);
 
     // Game cleanup on unmount
@@ -198,5 +206,7 @@ export function useGameLogic({
         handleRestart,
         handleContinueGame,
         handleStartGame,
+        toast,
+        hideToast,
     };
 }

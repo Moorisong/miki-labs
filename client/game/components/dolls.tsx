@@ -424,7 +424,24 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
                 const vx = Math.cos(angle) * bumpStrength;
                 const vz = Math.sin(angle) * bumpStrength;
 
-                console.log(`[Bump] Doll ${config.id} bumped away. Accuracy: ${accuracy}`);
+                // 방향 분석: 집게 중심과 인형 위치 차이
+                const offsetX = x - cx; // 양수: 인형이 집게 오른쪽, 음수: 왼쪽
+                const offsetZ = z - cz; // 양수: 인형이 집게 앞쪽, 음수: 뒤쪽
+
+                // 더 큰 방향이 주요 실패 원인 (인형이 있는 쪽으로 더 갔어야 함)
+                let direction: 'left' | 'right' | 'forward' | 'backward' | 'too_far';
+                if (Math.abs(offsetX) > Math.abs(offsetZ)) {
+                  // 인형이 오른쪽에 있으면 -> 오른쪽으로 더 갔어야 함
+                  direction = offsetX > 0 ? 'right' : 'left';
+                } else {
+                  // 인형이 앞에 있으면 -> 앞으로 더 갔어야 함
+                  direction = offsetZ > 0 ? 'forward' : 'backward';
+                }
+
+                console.log(`[Bump] Doll ${config.id} bumped away. Accuracy: ${accuracy}, Direction: ${direction}`);
+
+                // 잡기 실패 토스트 표시
+                state.soundCallbacks.onFail?.({ type: 'grab_miss', direction });
 
                 // 옆으로 밀면서 살짝 튀어오르게 함
                 api.velocity.set(vx, 0.5, vz);
