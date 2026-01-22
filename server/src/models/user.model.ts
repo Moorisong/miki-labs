@@ -24,7 +24,8 @@ const userSchema = new Schema<IUser>(
     },
     nickname: {
       type: String,
-      required: true
+      required: true,
+      unique: true
     },
     profileImage: {
       type: String

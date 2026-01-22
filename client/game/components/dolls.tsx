@@ -229,13 +229,30 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
       const clawPos = state.visualClawPosition;
 
       // 집게 위치 + 오프셋에서 시작
-      const dropX = clawPos.x + grabbedDoll.grabOffset.x;
-      const dropY = clawPos.y - 0.65 + grabbedDoll.grabOffset.y; // 집게 기준점(0.65) 재적용
-      const dropZ = clawPos.z + grabbedDoll.grabOffset.z;
+      let dropX = clawPos.x + grabbedDoll.grabOffset.x;
+      let dropY = clawPos.y - 0.65 + grabbedDoll.grabOffset.y; // 집게 기준점(0.65) 재적용
+      let dropZ = clawPos.z + grabbedDoll.grabOffset.z;
+
+      // 인형이 기계 바깥/바닥 아래로 나가지 않도록 위치 제한
+      const { width, depth, floorHeight } = CABINET_DIMENSIONS;
+      const minY = floorHeight + config.size; // 바닥 높이 + 인형 크기 (인형이 바닥에 묻히지 않도록)
+      const halfWidth = width / 2 - 0.2; // 벽에서 약간 떨어지도록
+      const halfDepth = depth / 2 - 0.2;
+
+      // Y 위치 제한: 바닥 아래로 가지 않도록
+      if (dropY < minY) {
+        dropY = minY;
+      }
+      // X, Z 위치 제한: 기계 안쪽에 머무르도록
+      dropX = Math.max(-halfWidth, Math.min(halfWidth, dropX));
+      dropZ = Math.max(-halfDepth, Math.min(halfDepth, dropZ));
 
       console.log(`[Doll ${config.id}] Released at (${dropX.toFixed(2)}, ${dropY.toFixed(2)}, ${dropZ.toFixed(2)})`);
 
       api.position.set(dropX, dropY, dropZ);
+      // 물리 바디 위치 구독이 업데이트되기 전에 positionRef를 즉시 설정
+      // 이렇게 해야 구멍 낙하 감지 로직이 올바른 위치를 참조함
+      positionRef.current = [dropX, dropY, dropZ];
       api.velocity.set(0, 0, 0); // 초기 속도 0
       api.mass.set(config.mass);
       api.collisionResponse.set(true);
@@ -320,17 +337,35 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
             const cz = clawPos.z;
 
             const distXZ = Math.sqrt((x - cx) ** 2 + (z - cz) ** 2);
-            // 높이 판정
-            const clawBottomY = cy - 0.5;
-            const dollTopY = y + config.size;
-            const isUnderClaw = dollTopY >= clawBottomY - 0.3 && y < cy;
+            // 높이 판정 (정확한 Sweet Spot 계산)
+            // 집게 구조: 본체(Body) -> 손가락 시작점 -> 손가락 끝(Tip)
+            // 인형은 이 "손가락 길이" 사이에 위치해야만 잡을 수 있음.
+            const FINGER_LENGTH = 0.4; // CLAW_CONFIG.fingerLength와 동일해야 함
 
+            // 유효 잡기 범위 (Y축)
+            const clawBodyY = cy;               // 집게 본체 높이
+            const clawFingerTipY = cy - FINGER_LENGTH - 0.1; // 손가락 끝 높이 (약간의 여유 -0.1)
+
+            // 인형의 상단/하단
+            const dollTopY = y + config.size;
+            const dollBottomY = y - config.size;
+
+            // 조건 1: 인형이 집게 본체(천장)를 뚫고 위에 있지 않아야 함
+            const notTooHigh = dollTopY < clawBodyY + 0.1;
+
+            // 조건 2: 인형이 손가락 끝보다 너무 아래에 있지 않아야 함 (최소한 절반은 걸쳐야 함)
+            const notTooLow = y > clawFingerTipY;
+
+            // 조건 3: 수평 거리 (기존 유지)
             // 최대 잡기 반경 (이 범위 밖은 아예 못 잡음)
             const MAX_GRAB_RADIUS = 0.35;
             // 완벽한 잡기 반경 (이 범위 안은 100% 정확도)
             const PERFECT_GRAB_RADIUS = 0.08;
 
-            if (isUnderClaw && distXZ < MAX_GRAB_RADIUS) {
+            // 종합 판정: 높이가 손가락 범위 안이고, 반경 내에 있어야 함
+            const isInsideClawZone = notTooHigh && notTooLow && distXZ < MAX_GRAB_RADIUS;
+
+            if (isInsideClawZone) {
               // 정확도 계산: 중심에 가까울수록 높음
               // distXZ가 0이면 accuracy = 1.0
               // distXZ가 MAX_GRAB_RADIUS이면 accuracy = 0
@@ -343,30 +378,75 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
                 accuracy = 1.0 - normalizedDist;
               }
 
-              // 임계값 기반 판정
-              const PERFECT_THRESHOLD = 0.80;  // 80% 이상: 완벽
-              const PARTIAL_THRESHOLD = 0.35;  // 35% 이상: 불완전하게 잡힘
+              // 임계값 기반 판정 (엄격하게 적용)
+              const PERFECT_THRESHOLD = 0.70;  // 70% 이상이면 잡기 성공 (안정권)
+              const MIN_GRAB_THRESHOLD = 0.50; // 50% ~ 70%: 잡힐 수도 있고 미끄러질 수도 있음 (운)
 
-              if (accuracy >= PARTIAL_THRESHOLD) {
+              // 50% 미만이면 무조건 튕겨나감 (옆에 붙거나 위에 얹혀지는 비현실적 상황 방지)
+
+              const roll = Math.random();
+              const isLuckyGrab = accuracy >= MIN_GRAB_THRESHOLD && accuracy < PERFECT_THRESHOLD && roll > 0.6; // 운 좋게 잡힘
+              const isGuaranteedGrab = accuracy >= PERFECT_THRESHOLD;
+
+              if (isGuaranteedGrab || isLuckyGrab) {
                 grabCheckDoneRef.current = true;
 
-                // *** 핵심 수정: 시각적 집게 위치 기준으로 오프셋 계산 ***
-                // 인형 현재 위치 - 시각적 집게 기준 위치 = 오프셋
-                // 나중에 적용할 때: 시각적 집게 위치 + 오프셋 = 인형 위치 (바로 여기!)
-                const offset = {
-                  x: x - cx,
-                  y: y - (cy - 0.65),  // 오프셋을 다시 집게 하단(0.65) 기준으로 복구하여 위치 상향
-                  z: z - cz
-                };
-                const isPerfectGrab = accuracy >= PERFECT_THRESHOLD;
+                // *** 핵심 수정: 잡힌 위치 오프셋 계산 ***
+                // 중요: 물리적 위치 그대로 잡지 않고, 살짝 보정하여 "예쁘게" 잡히도록 함
+                // 하지만 너무 인위적이지 않게 XZ 오프셋은 50%만 반영 (중앙으로 살짝 당김)
 
-                console.log(`[Grab] Doll ${config.id}, Accuracy: ${(accuracy * 100).toFixed(1)}%, Perfect: ${isPerfectGrab}`);
-                console.log(`[Grab] Visual Claw: (${cx.toFixed(2)}, ${cy.toFixed(2)}, ${cz.toFixed(2)}), Doll: (${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)})`);
+                const pullToCenter = 0.5;
+                const finalOffsetX = (x - cx) * pullToCenter;
+                const finalOffsetZ = (z - cz) * pullToCenter;
+
+                // Y 오프셋만 나중에 렌더러(claw.tsx)에서 일괄 적용하므로 여기선 0으로 둠 (상대 위치 무시)
+                // 대신 grabbedDoll 저장 시에는 원본 오프셋을 저장하되 사용처에서 무시하게 됨
+
+                const offset = {
+                  x: finalOffsetX,
+                  y: 0, // Y는 claw.tsx에서 startDollY로 강제 고정하므로 의미 없음
+                  z: finalOffsetZ
+                };
+
+                const isPerfectGrabFlag = accuracy >= 0.9;
+
+                console.log(`[Grab] Doll ${config.id} CAUGHT! Accuracy: ${(accuracy * 100).toFixed(1)}%, Perfect: ${isPerfectGrabFlag}`);
 
                 const [rx, ry, rz] = rotationRef.current;
-                setGrabbedDoll(config, offset, accuracy, isPerfectGrab, { x: rx, y: ry, z: rz });
+                setGrabbedDoll(config, offset, accuracy, isPerfectGrabFlag, { x: rx, y: ry, z: rz });
+              } else {
+                // [New] 잡기 실패(살짝 닿음): 순간이동(Grab State 진입) 대신 물리적으로 튕겨 나가게 처리
+                // 집게 중심으로부터 바깥쪽으로 밀어냄
+                grabCheckDoneRef.current = true;
+
+                const bumpStrength = 1.0 * (1.0 - accuracy); // 가까울수록(중심에 깊게 박힐수록) 더 세게 밀려남
+                const angle = Math.atan2(z - cz, x - cx);
+                const vx = Math.cos(angle) * bumpStrength;
+                const vz = Math.sin(angle) * bumpStrength;
+
+                // 방향 분석: 집게 중심과 인형 위치 차이
+                const offsetX = x - cx; // 양수: 인형이 집게 오른쪽, 음수: 왼쪽
+                const offsetZ = z - cz; // 양수: 인형이 집게 앞쪽, 음수: 뒤쪽
+
+                // 더 큰 방향이 주요 실패 원인 (인형이 있는 쪽으로 더 갔어야 함)
+                let direction: 'left' | 'right' | 'forward' | 'backward' | 'too_far';
+                if (Math.abs(offsetX) > Math.abs(offsetZ)) {
+                  // 인형이 오른쪽에 있으면 -> 오른쪽으로 더 갔어야 함
+                  direction = offsetX > 0 ? 'right' : 'left';
+                } else {
+                  // 인형이 앞에 있으면 -> 앞으로 더 갔어야 함
+                  direction = offsetZ > 0 ? 'forward' : 'backward';
+                }
+
+                console.log(`[Bump] Doll ${config.id} bumped away. Accuracy: ${accuracy}, Direction: ${direction}`);
+
+                // 잡기 실패 토스트 표시
+                state.soundCallbacks.onFail?.({ type: 'grab_miss', direction });
+
+                // 옆으로 밀면서 살짝 튀어오르게 함
+                api.velocity.set(vx, 0.5, vz);
+                api.angularVelocity.set(Math.random(), Math.random(), Math.random());
               }
-              // accuracy < 0.4면 아예 잡히지 않음 (아무것도 하지 않음)
             }
           } else {
             // 이미 누군가 잡혔으면 나는 체크 종료

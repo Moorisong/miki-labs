@@ -78,9 +78,9 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    // 닉네임 중복 검사
+    // 닉네임 중복 검사 (대소문자 구분 없이)
     const existingUser = await users.findOne({
-      nickname: trimmedNickname,
+      nickname: { $regex: new RegExp(`^${trimmedNickname}$`, 'i') },
       kakaoId: { $ne: session.user.kakaoId },
     });
 
@@ -101,6 +101,13 @@ export async function PATCH(request: NextRequest) {
           updatedAt: new Date(),
         },
       }
+    );
+
+    // 랭킹 보드(Scores)의 닉네임도 동기화
+    const scores = db.collection('scores');
+    await scores.updateMany(
+      { kakaoId: session.user.kakaoId },
+      { $set: { nickname: trimmedNickname } }
     );
 
     if (result.matchedCount === 0) {

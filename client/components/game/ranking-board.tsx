@@ -108,13 +108,20 @@ export default function RankingBoard({
                     rankings.map((entry, index) => (
                         <div
                             key={`${entry.oderId || index}-${index}`}
-                            className={`${styles.item} ${hasNickname && entry.score === currentScore && hasSubmitted && entry.nickname === session?.user?.nickname ? styles.highlight : ''}`}
+                            className={`${styles.item} ${hasNickname && entry.nickname === session?.user?.nickname ? styles.highlight : ''}`}
                         >
                             <span className={`${styles.rank} ${index < 3 ? styles.topRank : ''}`}>
                                 #{index + 1}
                             </span>
                             <span className={styles.name}>{entry.nickname || 'Unknown'}</span>
-                            <span className={styles.score}>{entry.score.toLocaleString()}</span>
+                            <span className={styles.score}>
+                                {entry.score.toLocaleString()}
+                                {hasNickname && hasSubmitted && entry.nickname === session?.user?.nickname && (
+                                    <span style={{ fontSize: '0.8em', color: '#4ade80', marginLeft: '6px' }}>
+                                        (+{currentScore.toLocaleString()})
+                                    </span>
+                                )}
+                            </span>
                         </div>
                     ))
                 ) : (

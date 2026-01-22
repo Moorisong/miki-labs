@@ -46,7 +46,15 @@ export const createGuestUser = async (nickname: string, tempId: string): Promise
   }
 
   // Check if guest with this tempId already exists (unlikely given timestamp, but good for idempotency)
+  // Check if guest with this tempId already exists
   const existingUser = await User.findOne({ providerId: tempId });
+
+  // Check if nickname is already taken by ANOTHER user
+  const nicknameUser = await User.findOne({ nickname });
+  if (nicknameUser && nicknameUser.providerId !== tempId) {
+    throw new Error('Username already taken');
+  }
+
   if (existingUser) {
     existingUser.nickname = nickname; // Update nickname if they changed it
     return existingUser.save();

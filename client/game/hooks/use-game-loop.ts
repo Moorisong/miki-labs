@@ -31,9 +31,9 @@ export const useGameLoop = () => {
     const topY = height - 0.5;
 
     // Calculate bottom limit to prevent claw from clipping into floor
-    // Floor (0.1) + Finger Length (0.4) + Margin for tip/base (0.25)
-    // Decreased margin to allow claw to reach smaller dolls on floor
-    const bottomY = floorHeight + CLAW_CONFIG.fingerLength - 0.05;
+    // Floor (0.1) + Finger Length (0.4) + Extra Margin (0.25)
+    // 인형을 잡기 위해 조금 더 내려오되, 바닥과는 아슬아슬하게 닿지 않는 높이
+    const bottomY = floorHeight + CLAW_CONFIG.fingerLength + 0.25;
 
     useEffect(() => {
         // Only run loop if we are in an active automated phase
@@ -102,8 +102,16 @@ export const useGameLoop = () => {
                     }
 
                     if (newY <= bottomY) {
-                        // Reached bottom
-                        grabDoll();
+                        // [FIX] 시각적 씽크 맞추기: 로직상 도착했더라도, 시각적 줄(스프링)이 따라올 때까지 대기
+                        // 화면에서 집게가 인형에 닿기도 전에 잡는 판정이 나오는 것을 방지
+                        const visualY = state.visualClawPosition.y;
+                        const syncThreshold = 0.2; // 허용 오차 (스프링 장력/오버슈팅 고려)
+
+                        // 시각적 위치가 목표지점 근처(혹은 더 아래)에 도달했는지 확인
+                        // (visualY가 더 작아지는 것이 아래로 내려가는 것임)
+                        if (visualY <= bottomY + syncThreshold) {
+                            grabDoll();
+                        }
                     }
                     break;
                 }
@@ -125,9 +133,11 @@ export const useGameLoop = () => {
                     gripCheckTimer.current += dt;
                     if (gripCheckTimer.current > 0.1 && state.grabbedDoll.id) {
                         gripCheckTimer.current = 0;
+                        const accuracy = state.grabbedDoll.accuracy;
                         const stillHolding = updateGrabbedDollGrip();
                         if (!stillHolding) {
-                            // 인형 떨어뜨림!
+                            // 인형 떨어뜨림! - 그립 실패 토스트 표시
+                            state.soundCallbacks.onFail?.({ type: 'grip_fail', accuracy });
                             releaseDoll();
                         }
                     }
@@ -174,22 +184,18 @@ export const useGameLoop = () => {
                                     setClawOpen(true);
                                     releaseDoll();
 
-                                    // 즉시 attempt 사용하고 idle로 전환 (스타트 버튼 바로 표시)
-                                    useGameStore.getState().useAttempt();
-                                    const remaining = useGameStore.getState().attempts;
-                                    if (remaining > 0) {
-                                        setPhase('idle');
-                                    } else {
-                                        setPhase('result');
-                                    }
-                                    // 집게 위치는 별도로 초기화하지 않음 (spring physics가 자연스럽게 처리)
+                                    // [FIX] 성공 시 바로 종료하지 않고 releasing 단계로 넘겨서 낙하 감지 대기
+                                    // 이렇게 해야 dolls.tsx에서 reportDollFellInHole이 호출되어 점수가 오르고 attempt가 처리됨
+                                    setPhase('releasing');
+
+                                    // useAttempt나 페이즈 전환은 reportDollFellInHole(성공) 또는 releasing timeout(실패)에서 처리됨
                                 }
                             }
                         } else {
                             // 인형이 없으면 대기 없이 바로 시도 종료 (실패)
                             arrivalTimer.current = 0;
                             setClawOpen(true);
-                            endAttempt(false);
+                            endAttempt(false, undefined, { type: 'no_doll' });
                         }
                     } else {
                         // 아직 이동 중이면 타이머 초기화
@@ -242,8 +248,8 @@ export const useGameLoop = () => {
                         // Clear pending doll
                         useGameStore.getState().setPendingReleaseDoll(null);
 
-                        // End attempt as failure
-                        endAttempt(false);
+                        // End attempt as failure with timeout reason
+                        endAttempt(false, undefined, { type: 'timeout' });
                     }
                     break;
                 }

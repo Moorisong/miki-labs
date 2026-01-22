@@ -64,10 +64,14 @@
   left: 0;
   right: 0;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: flex-end;
   padding: 0 var(--space-lg);
   pointer-events: auto;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  gap: var(--space-xl);
 }
 
 /* D-Pad */
@@ -235,34 +239,6 @@
 
 
 
-/* Adjust for smaller screens */
-@media (max-width: 400px) {
-  .dPad {
-    width: 120px;
-    height: 120px;
-  }
-
-  .dPadButton {
-    width: 40px;
-    height: 40px;
-  }
-
-  .dPadButton svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .dropButton {
-    width: 70px;
-    height: 70px;
-  }
-
-  .dropIcon svg {
-    width: 24px;
-    height: 24px;
-  }
-}
-
 /* Start Button */
 .startOverlay {
   position: absolute;
@@ -326,5 +302,45 @@
 
   100% {
     box-shadow: 0 0 0 0 rgba(108, 92, 231, 0);
+  }
+}
+
+/* Adjust for smaller screens */
+@media (max-width: 768px) {
+  .dPad {
+    width: 120px;
+    height: 120px;
+  }
+
+  .dPadButton {
+    width: 40px;
+    height: 40px;
+  }
+
+  .dPadButton svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .dropButton {
+    width: 70px;
+    height: 70px;
+  }
+
+  .dropIcon svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .startOverlay {
+    bottom: 110px;
+    /* Ad banner height + padding */
+  }
+
+  .mobileControls {
+    bottom: 110px;
+    /* Lift controls above ad banner */
   }
 }

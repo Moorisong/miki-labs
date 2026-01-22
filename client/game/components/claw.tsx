@@ -76,8 +76,9 @@ const GrabbedDollRenderer = () => {
   const config = grabbedDoll.config ? (grabbedDoll.config as any as CuteDollConfig) : null;
 
   // startDollY: 인형이 서 있을 때의 기준 Y 위치 (발바닥이 이 위치에 옴)
-  // 값을 -0.15에서 0.0으로 더 올려서 집게 안쪽에 바짝 붙게 함
-  const startDollY = 0.0;
+  // [New Rule] 손가락 길이의 정확히 중간 아래 지점에 위치시킴
+  // fingerLength(0.4) + 여유분을 고려하여, 손가락 끝보다 살짝 위, 본체보다 아래인 '명당' 위치 자동 계산
+  const startDollY = -(fingerLength * 0.85);
 
   // 회전 보정된 Y 위치 계산
   const basePosY = useMemo(() => {
@@ -237,7 +238,7 @@ const ClawFinger = ({ index, isOpen, strengthVariance, clawPosition }: ClawFinge
         </mesh>
 
         <mesh
-          /* castShadow */
+          // castShadow
           position={[fingerWidth / 2, -fingerLength - fingerLength * 0.3, fingerWidth * 0.3]}
           rotation={[Math.PI / 6, 0, 0]}
         >
@@ -423,7 +424,8 @@ const Claw = () => {
 
       // Update Cable Geometry
       if (lineRef.current) {
-        const start = new Vector3(0, 4, 0); // 천장
+        // Update cable start position to follow the claw (gantry system effect)
+        const start = new Vector3(groupRef.current.position.x, 4.5, groupRef.current.position.z);
         const end = groupRef.current.position.clone().add(new Vector3(0, cableLength, 0)); // 집게 상단
         const mid = start.clone().add(end).multiplyScalar(0.5);
 

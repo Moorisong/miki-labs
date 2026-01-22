@@ -18,46 +18,46 @@
 /* 상단 바 레이아웃 */
 .topBar {
     display: flex;
-    justify-content: flex-start;
-    /* 좌측 정렬 */
-    align-items: flex-start;
+    justify-content: center;
+    align-items: center;
+    /* 세로 길이 동일하게 맞춤 */
     width: 100%;
     gap: var(--space-md);
-    /* 요소 간 간격 */
 }
 
-/* 점수 섹션 */
-.scoreSection {
-    display: flex;
-    justify-content: flex-start;
-}
-
-.scoreItem {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: rgba(26, 26, 46, 0.8);
-    backdrop-filter: blur(8px);
-    padding: var(--space-sm) var(--space-md);
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(162, 155, 254, 0.2);
-    min-width: 100px;
-}
-
-/* ... 중략 ... */
-
+/* 박스 공통 스타일 */
+.scoreItem,
 .attemptsDisplay {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     background: rgba(26, 26, 46, 0.8);
     backdrop-filter: blur(8px);
     padding: var(--space-sm) var(--space-md);
     border-radius: var(--radius-md);
     border: 1px solid rgba(162, 155, 254, 0.2);
+}
+
+.scoreItem {
+    min-width: 100px;
+}
+
+.attemptsDisplay {
     min-width: 120px;
 }
 
+/* 텍스트 스타일 */
+.label {
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.value,
 .attemptsValue {
     font-size: var(--font-size-lg);
     font-weight: 700;
@@ -212,16 +212,45 @@
     color: var(--color-secondary);
 }
 
+
+.helpButton {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(26, 26, 46, 0.8);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(162, 155, 254, 0.4);
+    color: var(--color-text);
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.helpButton:hover {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    transform: scale(1.1);
+}
+
+.helpButton:active {
+    transform: scale(0.95);
+}
+
 /* 반응형 */
 @media (max-width: 768px) {
     .hud {
-        padding: var(--space-sm);
+        padding: var(--space-md);
     }
 
-    .value {
-        font-size: var(--font-size-xl);
+    .topBar {
+        gap: var(--space-md);
     }
 
+    .value,
     .attemptsValue {
         font-size: var(--font-size-lg);
     }

@@ -1,10 +1,9 @@
-'use client';
-
 import { useState, useEffect, useCallback } from 'react';
 
-const STORAGE_KEY = 'claw_game_attempts';
-const DEFAULT_ATTEMPTS = 5;
-const COOLDOWN_DURATION = 60 * 60 * 1000; // 1시간 (밀리초)
+import { STORAGE_KEY, CONFIG } from '@/constants';
+
+const DEFAULT_ATTEMPTS = CONFIG.GAME.MAX_ATTEMPTS;
+const COOLDOWN_DURATION = CONFIG.TIMEOUT.COOLDOWN_HOURS * 60 * 60 * 1000; // 밀리초 변환
 
 interface AttemptData {
     remainingAttempts: number;
@@ -28,7 +27,7 @@ function getStoredData(): AttemptData {
     }
 
     try {
-        const stored = localStorage.getItem(STORAGE_KEY);
+        const stored = localStorage.getItem(STORAGE_KEY.GAME_ATTEMPTS);
         if (stored) {
             const data = JSON.parse(stored) as AttemptData;
             return data;
@@ -44,7 +43,7 @@ function saveData(data: AttemptData) {
     if (typeof window === 'undefined') return;
 
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        localStorage.setItem(STORAGE_KEY.GAME_ATTEMPTS, JSON.stringify(data));
     } catch (e) {
         console.error('Failed to save attempt data:', e);
     }
@@ -62,7 +61,7 @@ function formatTimeRemaining(ms: number): string {
 }
 
 export function useGameAttempts(): UseGameAttemptsReturn {
-    const [remainingAttempts, setRemainingAttempts] = useState(DEFAULT_ATTEMPTS);
+    const [remainingAttempts, setRemainingAttempts] = useState<number>(DEFAULT_ATTEMPTS);
     const [cooldownEndAt, setCooldownEndAt] = useState<number | null>(null);
     const [cooldownRemaining, setCooldownRemaining] = useState('00:00:00');
     const [isOnCooldown, setIsOnCooldown] = useState(false);
@@ -79,7 +78,7 @@ export function useGameAttempts(): UseGameAttemptsReturn {
             setCooldownEndAt(data.cooldownEndAt);
             setRemainingAttempts(0);
         } else if (data.cooldownEndAt && data.cooldownEndAt <= now) {
-            // 쿨타임 종료됨 - 5회 충전
+            // 쿨타임 종료됨 - 충전
             setRemainingAttempts(DEFAULT_ATTEMPTS);
             setCooldownEndAt(null);
             setIsOnCooldown(false);
@@ -105,7 +104,7 @@ export function useGameAttempts(): UseGameAttemptsReturn {
             const remaining = cooldownEndAt - now;
 
             if (remaining <= 0) {
-                // 쿨타임 종료 - 5회 충전
+                // 쿨타임 종료 - 충전
                 setIsOnCooldown(false);
                 setCooldownEndAt(null);
                 setRemainingAttempts(DEFAULT_ATTEMPTS);
@@ -176,3 +175,4 @@ export function useGameAttempts(): UseGameAttemptsReturn {
 }
 
 export default useGameAttempts;
+

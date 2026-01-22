@@ -45,6 +45,15 @@ export const submitScore = async (
     throw new Error('DB not connected, cannot submit score');
   }
 
+  const existingScore = await Score.findOne({ userId: new Types.ObjectId(userId) });
+
+  if (existingScore) {
+    existingScore.score += score;
+    existingScore.attempts += attempts;
+    existingScore.dollsCaught += dollsCaught;
+    return existingScore.save();
+  }
+
   const newScore = new Score({
     userId: new Types.ObjectId(userId),
     score,

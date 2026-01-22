@@ -4,15 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import NicknameModal from '@/components/modals/nickname-modal';
-import styles from './nav-bar.module.css';
 
-const navLinks = [
-  { href: '/', label: '홈' },
-  { href: '/game', label: '게임' },
-  { href: '/ranking', label: '랭킹' },
-  { href: '/about', label: '소개' },
-];
+import NicknameModal from '@/components/modals/nickname-modal';
+import { NAV_LINKS, API, MESSAGES, CONFIG } from '@/constants';
+
+import styles from './nav-bar.module.css';
 
 export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -29,7 +25,7 @@ export default function NavBar() {
     const fetchNicknameInfo = async () => {
       if (status === 'authenticated' && session?.user?.nickname) {
         try {
-          const response = await fetch('/api/user/nickname');
+          const response = await fetch(API.USER.NICKNAME);
           const data = await response.json();
           if (data.success) {
             setNicknameInfo({
@@ -77,7 +73,7 @@ export default function NavBar() {
       <header className={styles.header}>
         <nav className={styles.nav}>
           <Link href="/" className={styles.logo} onClick={closeMenu}>
-            <span className={styles.logoIcon}>🎮</span>
+            <img src="/logo.png" alt="Logo" className={styles.logoIcon} />
             <span className={styles.logoText}>뽑기중독</span>
           </Link>
 
@@ -93,7 +89,7 @@ export default function NavBar() {
           </button>
 
           <ul className={`${styles.navLinks} ${isMenuOpen ? styles.open : ''}`}>
-            {navLinks.map((link) => (
+            {NAV_LINKS.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}

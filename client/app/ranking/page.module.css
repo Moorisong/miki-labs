@@ -143,12 +143,14 @@
 
 .tableHeader {
   display: grid;
-  grid-template-columns: 80px 1fr 100px 80px 120px;
+  grid-template-columns: 60px minmax(100px, 1fr) 100px 60px 100px;
+  column-gap: var(--space-md);
   padding: var(--space-md) var(--space-lg);
   background: rgba(108, 92, 231, 0.1);
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text-muted);
+  text-align: center;
 }
 
 .tableBody {
@@ -158,10 +160,13 @@
 
 .tableRow {
   display: grid;
-  grid-template-columns: 80px 1fr 100px 80px 120px;
+  grid-template-columns: 60px minmax(100px, 1fr) 100px 60px 100px;
+  column-gap: var(--space-md);
   padding: var(--space-md) var(--space-lg);
   border-bottom: 1px solid rgba(162, 155, 254, 0.05);
   transition: background var(--transition-fast);
+  align-items: center;
+  text-align: center;
 }
 
 .tableRow:last-child {
@@ -185,6 +190,10 @@
 .colNickname {
   font-weight: 500;
   color: var(--color-text);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .colScore {
@@ -272,6 +281,10 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .container {
+    padding: var(--space-lg) var(--space-sm);
+  }
+
   .topThree {
     flex-direction: column;
     align-items: center;
@@ -287,14 +300,46 @@
     order: -1 !important;
   }
 
-  .tableHeader,
-  .tableRow {
-    grid-template-columns: 60px 1fr 80px;
+  .tableSection {
+    overflow-x: auto;
   }
 
-  .colCatches,
+  .table {
+    min-width: 100%;
+  }
+
+  .tableHeader,
+  .tableRow {
+    grid-template-columns: 35px minmax(70px, 1fr) 60px 35px 65px;
+    column-gap: 4px;
+    padding: var(--space-sm) var(--space-xs);
+  }
+
+  .tableHeader {
+    font-size: var(--font-size-xs);
+  }
+
+  .colRank {
+    font-size: var(--font-size-sm);
+  }
+
+  .colNickname {
+    font-size: var(--font-size-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .colScore {
+    font-size: var(--font-size-sm);
+  }
+
+  .colCatches {
+    font-size: var(--font-size-xs);
+  }
+
   .colDate {
-    display: none;
+    font-size: var(--font-size-xs);
   }
 
   .pagination {

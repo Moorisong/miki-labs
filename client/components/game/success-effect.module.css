@@ -478,17 +478,20 @@
 
 @media (max-width: 480px) {
   .successText {
-    font-size: 2.5rem;
-    letter-spacing: 3px;
+    font-size: var(--font-size-3xl);
+    /* Was 2.5rem */
+    letter-spacing: 2px;
   }
 
   .scoreText {
-    font-size: 1.8rem;
+    font-size: var(--font-size-2xl);
+    /* Was 1.8rem */
   }
 
   .perfectBadge {
-    font-size: 1rem;
-    padding: 4px 14px;
+    font-size: var(--font-size-sm);
+    /* Was 1rem */
+    padding: 4px 12px;
   }
 
   .burstStar {
