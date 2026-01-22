@@ -362,28 +362,39 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
 
               // 임계값 기반 판정
               const PERFECT_THRESHOLD = 0.80;  // 80% 이상: 완벽
-              const PARTIAL_THRESHOLD = 0.35;  // 35% 이상: 불완전하게 잡힘
+              const PARTIAL_THRESHOLD = 0.55;  // 55% 이상: 불완전하게 잡힘 (낮으면 순간이동 현상 발생하므로 상향)
 
               if (accuracy >= PARTIAL_THRESHOLD) {
                 grabCheckDoneRef.current = true;
 
                 // *** 핵심 수정: 시각적 집게 위치 기준으로 오프셋 계산 ***
-                // 인형 현재 위치 - 시각적 집게 기준 위치 = 오프셋
-                // 나중에 적용할 때: 시각적 집게 위치 + 오프셋 = 인형 위치 (바로 여기!)
                 const offset = {
                   x: x - cx,
-                  y: y - (cy - 0.65),  // 오프셋을 다시 집게 하단(0.65) 기준으로 복구하여 위치 상향
+                  y: y - (cy - 0.65),
                   z: z - cz
                 };
                 const isPerfectGrab = accuracy >= PERFECT_THRESHOLD;
 
                 console.log(`[Grab] Doll ${config.id}, Accuracy: ${(accuracy * 100).toFixed(1)}%, Perfect: ${isPerfectGrab}`);
-                console.log(`[Grab] Visual Claw: (${cx.toFixed(2)}, ${cy.toFixed(2)}, ${cz.toFixed(2)}), Doll: (${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)})`);
 
                 const [rx, ry, rz] = rotationRef.current;
                 setGrabbedDoll(config, offset, accuracy, isPerfectGrab, { x: rx, y: ry, z: rz });
+              } else {
+                // [New] 잡기 실패(살짝 닿음): 순간이동(Grab State 진입) 대신 물리적으로 튕겨 나가게 처리
+                // 집게 중심으로부터 바깥쪽으로 밀어냄
+                grabCheckDoneRef.current = true;
+
+                const bumpStrength = 1.0 * (1.0 - accuracy); // 가까울수록(중심에 깊게 박힐수록) 더 세게 밀려남
+                const angle = Math.atan2(z - cz, x - cx);
+                const vx = Math.cos(angle) * bumpStrength;
+                const vz = Math.sin(angle) * bumpStrength;
+
+                console.log(`[Bump] Doll ${config.id} bumped away. Accuracy: ${accuracy}`);
+
+                // 옆으로 밀면서 살짝 튀어오르게 함
+                api.velocity.set(vx, 0.5, vz);
+                api.angularVelocity.set(Math.random(), Math.random(), Math.random());
               }
-              // accuracy < 0.4면 아예 잡히지 않음 (아무것도 하지 않음)
             }
           } else {
             // 이미 누군가 잡혔으면 나는 체크 종료
