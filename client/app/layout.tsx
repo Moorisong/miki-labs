@@ -18,6 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://claw-addict-web.haroo.site'),
   title: '뽑기중독 | 리얼한 웹 인형뽑기 게임',
   description: '리얼한 물리 엔진으로 즐기는 웹 인형뽑기 게임. 실제 인형뽑기의 손맛을 느껴보세요!',
   keywords: ['인형뽑기', '뽑기', '게임', '웹게임', 'claw machine', 'crane game'],
