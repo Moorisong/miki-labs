@@ -64,12 +64,23 @@ export async function POST(request: NextRequest) {
 
     // 점수 저장 (nickname을 직접 저장하여 조회 성능 향상)
     // 기존 점수가 있으면 누적, 없으면 새로 생성
-    const existingScore = await scores.findOne({ kakaoId: session.user.kakaoId });
+    // kakaoId 또는 userId로 기존 점수 찾기 (구 데이터 호환성 및 중복 방지)
+    const existingScore = await scores.findOne({
+      $or: [
+        { kakaoId: session.user.kakaoId },
+        { userId: user._id }
+      ]
+    });
+
     let result;
+    let currentTotalScore = score;
+    let currentTotalAttempts = attempts;
+    let currentTotalDollsCaught = dollsCaught;
 
     if (existingScore) {
+      // 기존 점수 업데이트
       await scores.updateOne(
-        { kakaoId: session.user.kakaoId },
+        { _id: existingScore._id },
         {
           $inc: {
             score: score,
@@ -78,14 +89,22 @@ export async function POST(request: NextRequest) {
           },
           $set: {
             nickname: session.user.nickname, // 닉네임 변경 시 반영
+            kakaoId: session.user.kakaoId, // 구 데이터에 kakaoId가 없으면 추가
             updatedAt: new Date(),
           },
         }
       );
-      result = { insertedId: existingScore._id };
+
+      const updatedScore = await scores.findOne({ _id: existingScore._id });
+      if (updatedScore) {
+        currentTotalScore = updatedScore.score;
+        currentTotalAttempts = updatedScore.attempts;
+        currentTotalDollsCaught = updatedScore.dollsCaught;
+        result = { insertedId: existingScore._id };
+      }
     } else {
       result = await scores.insertOne({
-        oderId: user._id,
+        userId: user._id,
         kakaoId: session.user.kakaoId,
         nickname: session.user.nickname,
         score,
@@ -93,33 +112,29 @@ export async function POST(request: NextRequest) {
         dollsCaught,
         createdAt: new Date(),
       });
+      // Initial values are already set above
     }
 
-    // 사용자의 최고 점수 업데이트
-    if (user.highScore === undefined || score > user.highScore) {
-      await users.updateOne(
-        { kakaoId: session.user.kakaoId },
-        {
-          $set: {
-            highScore: score,
-            updatedAt: new Date(),
-          },
-          $inc: { totalGames: 1 },
-        }
-      );
-    } else {
-      await users.updateOne(
-        { kakaoId: session.user.kakaoId },
-        {
-          $inc: { totalGames: 1 },
-          $set: { updatedAt: new Date() },
-        }
-      );
-    }
+    // 사용자의 누적 점수 업데이트 (highScore 필드를 누적 점수로 사용)
+    await users.updateOne(
+      { kakaoId: session.user.kakaoId },
+      {
+        $inc: {
+          highScore: score, // 기존 점수에 이번 게임 점수 누적
+          totalGames: 1
+        },
+        $set: { updatedAt: new Date() },
+      }
+    );
 
     return NextResponse.json({
       success: true,
-      data: { scoreId: result.insertedId.toString() },
+      data: {
+        scoreId: result?.insertedId?.toString() || existingScore?._id.toString(),
+        totalScore: currentTotalScore,
+        totalAttempts: currentTotalAttempts,
+        totalDollsCaught: currentTotalDollsCaught
+      },
       message: '점수가 저장되었습니다.',
     });
   } catch (error) {

@@ -29,12 +29,12 @@ export const rankingApi = {
     return [];
   },
 
-  async submitScore(data: Omit<SubmitScoreRequest, 'tempUserId' | 'nickname'>): Promise<{ success: boolean; error?: string }> {
-    const response = await internalFetch<{ scoreId: string }>('/api/ranking/submit', {
+  async submitScore(data: Omit<SubmitScoreRequest, 'tempUserId' | 'nickname'>): Promise<{ success: boolean; error?: string; data?: { totalScore: number; totalAttempts: number; totalDollsCaught: number } }> {
+    const response = await internalFetch<{ scoreId: string; totalScore: number; totalAttempts: number; totalDollsCaught: number }>('/api/ranking/submit', {
       method: 'POST',
       body: JSON.stringify(data),
     });
-    return { success: response.success, error: response.error };
+    return { success: response.success, error: response.error, data: response.data };
   },
 
   async getMyRanking(): Promise<RankingEntry | null> {
