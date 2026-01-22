@@ -1,14 +1,32 @@
 .container {
   position: relative;
-  width: 100vw;
+  width: 100%;
   min-height: 100vh;
-  /* overflow: hidden; 제거하여 스크롤 허용 */
+  display: flex;
+  flex-direction: column;
   background-color: #1a1a2e;
+  padding-top: 64px;
+  /* Default margin for HUD */
 }
 
 .gameCanvas {
   width: 100%;
-  height: 100%;
+  flex: 1;
+  /* 남은 공간을 차지하도록 변경 */
+  min-height: 500px;
+}
+
+.adSection {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: var(--space-md) 0;
+  background-color: #1a1a2e;
+  z-index: 5;
+  flex: none;
+  /* 크기 유지 */
+  min-height: 100px;
+  /* 광고 기본 높이 확보 */
 }
 
 .placeholder {
@@ -67,6 +85,11 @@
 }
 
 @media (max-width: 768px) {
+  .gameCanvas {
+    margin-top: 20px;
+    /* 상단 HUD와의 여백 확보 */
+  }
+
   .placeholderIcon {
     font-size: 2.5rem;
   }

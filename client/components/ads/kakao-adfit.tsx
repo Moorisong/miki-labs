@@ -16,7 +16,7 @@ export default function KakaoAdfit({ unit, width, height, className }: KakaoAdfi
     useEffect(() => {
         if (!adRef.current) return;
 
-        // 이미 광고 영역이 생성되어 있다면 스킵 (Strict Mode 등에서의 중복 실행 방지)
+        // 이미 광고 영역이 생성되어 있다면 스킵
         if (adRef.current.querySelector('ins.kakao_ad_area')) {
             return;
         }
@@ -32,32 +32,46 @@ export default function KakaoAdfit({ unit, width, height, className }: KakaoAdfi
 
         adRef.current.appendChild(ins);
 
-        // 광고 스크립트가 이미 로드되어 있으면 렌더링 시도
-        // 약간의 지연을 주어 DOM이 확실히 적용된 후 실행
-        if ((window as any).adfit) {
-            setTimeout(() => {
+        const tryRender = () => {
+            if ((window as any).adfit) {
                 try {
                     (window as any).adfit.render();
+                    return true;
                 } catch (e) {
-                    // ignore
+                    console.error('AdFit render error:', e);
                 }
-            }, 50);
-        }
+            }
+            return false;
+        };
+
+        // 지연 로딩 및 반복 시도 (스크립트 로드 대기)
+        let timer: NodeJS.Timeout;
+        let attempts = 0;
+
+        const checkAndRender = () => {
+            attempts++;
+            if (tryRender() || attempts > 30) {
+                return;
+            }
+            timer = setTimeout(checkAndRender, 200);
+        };
+
+        checkAndRender();
+
+        return () => {
+            if (timer) clearTimeout(timer);
+        };
     }, [unit, width, height]);
 
     return (
         <>
             <Script
+                id="kakao-adfit-script"
                 src="//t1.daumcdn.net/kas/static/ba.min.js"
                 strategy="lazyOnload"
                 onLoad={() => {
-                    // 스크립트 로드 완료 시 render 호출
                     if ((window as any).adfit) {
-                        try {
-                            (window as any).adfit.render();
-                        } catch (e) {
-                            // console.error('AdFit render error on load:', e);
-                        }
+                        try { (window as any).adfit.render(); } catch (e) { }
                     }
                 }}
             />
@@ -68,7 +82,8 @@ export default function KakaoAdfit({ unit, width, height, className }: KakaoAdfi
                     width: `${width}px`,
                     height: `${height}px`,
                     margin: '0 auto',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                    minHeight: `${height}px`
                 }}
             />
         </>

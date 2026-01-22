@@ -14,6 +14,7 @@ import GameHUD from '@/components/game/game-hud';
 import RankingBoard from '@/components/game/ranking-board';
 import SuccessEffect from '@/components/game/success-effect';
 import ScoreAddedModal from '@/components/game/score-added-modal';
+import AdBanner from '@/components/ads/ad-banner';
 
 import { useGameLogic } from './hooks/use-game-logic';
 import styles from './page.module.css';
@@ -79,64 +80,70 @@ export default function GamePage() {
   const showOverlayUI = showRanking || !!scoreModalData;
 
   return (
-    <div className={styles.container}>
-      {!showOverlayUI && (
-        <GameHUD
-          score={score}
-          remainingAttempts={remainingAttempts}
-          isOnCooldown={isOnCooldown}
-          cooldownRemaining={cooldownRemaining}
-          canPlay={canPlay}
-          phase={phase}
-        />
-      )}
+    <>
+      <div className={styles.container}>
+        {!showOverlayUI && (
+          <GameHUD
+            score={score}
+            remainingAttempts={remainingAttempts}
+            isOnCooldown={isOnCooldown}
+            cooldownRemaining={cooldownRemaining}
+            canPlay={canPlay}
+            phase={phase}
+          />
+        )}
 
-      <div className={styles.gameCanvas}>
-        <ClawMachine dollCount={CONFIG.GAME.DEFAULT_DOLL_COUNT} />
+        <div className={styles.gameCanvas}>
+          <ClawMachine dollCount={CONFIG.GAME.DEFAULT_DOLL_COUNT} />
+        </div>
+
+        <GameOverlay
+          score={score}
+          attempts={attempts}
+          phase={phase}
+          onStart={handleStartGame}
+          onMoveStart={handleMoveStart}
+          onMoveEnd={handleMoveEnd}
+          onDrop={dropClaw}
+          canPlay={canPlay}
+          showRanking={showOverlayUI}
+        >
+          {showRanking && (
+            <div className={styles.rankingOverlay}>
+              <RankingBoard
+                rankings={rankings}
+                currentScore={score}
+                onRestart={handleRestart}
+                onSubmit={handleRankingSubmit}
+                isSubmitting={isSubmitting}
+              />
+            </div>
+          )}
+          {scoreModalData && (
+            <div className={styles.rankingOverlay}>
+              <ScoreAddedModal
+                score={scoreModalData.score}
+                totalScore={scoreModalData.totalScore}
+                totalCaught={scoreModalData.totalCaught}
+                onRestart={handleRestart}
+              />
+            </div>
+          )}
+        </GameOverlay>
+
+        <SuccessEffect
+          show={showSuccess && !showOverlayUI}
+          score={lastEarnedScore}
+          totalScore={score}
+          onComplete={() => setShowSuccess(false)}
+          showLoginPrompt={true}
+        />
       </div>
 
-      <GameOverlay
-        score={score}
-        attempts={attempts}
-        phase={phase}
-        onStart={handleStartGame}
-        onMoveStart={handleMoveStart}
-        onMoveEnd={handleMoveEnd}
-        onDrop={dropClaw}
-        canPlay={canPlay}
-        showRanking={showOverlayUI}
-      >
-        {showRanking && (
-          <div className={styles.rankingOverlay}>
-            <RankingBoard
-              rankings={rankings}
-              currentScore={score}
-              onRestart={handleRestart}
-              onSubmit={handleRankingSubmit}
-              isSubmitting={isSubmitting}
-            />
-          </div>
-        )}
-        {scoreModalData && (
-          <div className={styles.rankingOverlay}>
-            <ScoreAddedModal
-              score={scoreModalData.score}
-              totalScore={scoreModalData.totalScore}
-              totalCaught={scoreModalData.totalCaught}
-              onRestart={handleRestart}
-            />
-          </div>
-        )}
-      </GameOverlay>
-
-      <SuccessEffect
-        show={showSuccess && !showOverlayUI}
-        score={lastEarnedScore}
-        totalScore={score}
-        onComplete={() => setShowSuccess(false)}
-        showLoginPrompt={true}
-      />
-    </div>
+      {/* Ad Section - Now completely separate from the game container */}
+      <div className={styles.adSection}>
+        <AdBanner />
+      </div>
+    </>
   );
 }
-
