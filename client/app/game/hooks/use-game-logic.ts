@@ -10,6 +10,9 @@ import { getFailMessage } from '@/constants/toast-messages';
 import { useToast } from '@/lib/hooks/use-toast';
 import type { RankingEntry } from '@/lib/api/types';
 
+// 게임 세션 준비 중인지 상태
+let isPreparingSession = false;
+
 interface UseGameLogicProps {
     score: number;
     remainingAttempts: number;
@@ -100,6 +103,13 @@ export function useGameLogic({
                         const currentScore = useGameStore.getState().score;
                         const earnedScore = lastEarnedScore > 0 ? lastEarnedScore : currentScore;
 
+                        // 세션이 없으면 새로 발급 (안전장치)
+                        if (!rankingApi.hasValidSession() && !isPreparingSession) {
+                            isPreparingSession = true;
+                            await rankingApi.startGameSession();
+                            isPreparingSession = false;
+                        }
+
                         const result = await rankingApi.submitScore({
                             score: earnedScore,
                             attempts: 1,
@@ -112,6 +122,12 @@ export function useGameLogic({
                                 totalScore: result.data.totalScore,
                                 totalCaught: result.data.totalDollsCaught,
                             });
+
+                            // 다음 성공을 위해 새 세션 미리 발급 (비동기)
+                            rankingApi.startGameSession().catch(console.error);
+                        } else if (result.error) {
+                            console.error('[GamePage] Submit failed:', result.error);
+                            showToast(result.error, 'error');
                         }
                     } catch (e) {
                         console.error('[GamePage] Auto submit failed:', e);
@@ -179,7 +195,7 @@ export function useGameLogic({
         resetGame();
     };
 
-    const handleStartGame = useCallback(() => {
+    const handleStartGame = useCallback(async () => {
         if (!canPlay) return;
 
         // [FIX] 집게 완전 복귀 확인 (UI/키보드 공통)
@@ -190,9 +206,21 @@ export function useGameLogic({
             return; // 아직 올라가는 중이면 무시
         }
 
+        // 로그인 사용자는 게임 시작 전 세션 토큰 발급
+        if (session?.user && !rankingApi.hasValidSession() && !isPreparingSession) {
+            isPreparingSession = true;
+            const sessionResult = await rankingApi.startGameSession();
+            isPreparingSession = false;
+
+            if (!sessionResult.success) {
+                console.error('[GamePage] Failed to start game session:', sessionResult.error);
+                // 세션 발급 실패해도 게임은 진행 (점수 저장만 안됨)
+            }
+        }
+
         if (phase === 'result') resetGame();
         startGame();
-    }, [canPlay, startGame, phase, resetGame]);
+    }, [canPlay, startGame, phase, resetGame, session]);
 
     return {
         rankings,

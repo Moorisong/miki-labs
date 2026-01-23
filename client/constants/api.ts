@@ -9,6 +9,10 @@ export const API = {
         TOP: (limit: number = 10) => `/api/ranking/top?limit=${limit}`,
         SUBMIT: '/api/ranking/submit',
     },
+    // 게임 API
+    GAME: {
+        SESSION: '/api/game/session',
+    },
     // 사용자 API
     USER: {
         NICKNAME: '/api/user/nickname',

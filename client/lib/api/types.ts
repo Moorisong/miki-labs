@@ -23,6 +23,13 @@ export interface SubmitScoreRequest {
   };
   signature?: string;
   timestamp?: number;
+  gameSessionToken?: string; // 게임 세션 토큰 (어뷰징 방지)
+}
+
+export interface GameSession {
+  sessionToken: string;
+  startTime: number;
+  expiresAt: number;
 }
 
 export interface User {
