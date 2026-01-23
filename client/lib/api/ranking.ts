@@ -49,7 +49,7 @@ export const rankingApi = {
   },
 
   async submitScore(
-    data: Omit<SubmitScoreRequest, 'tempUserId' | 'nickname' | 'fingerprint' | 'signature' | 'timestamp'>
+    data: Omit<SubmitScoreRequest, 'fingerprint' | 'signature' | 'timestamp'>
   ): Promise<SubmitResult> {
     try {
       const { getFingerprintData } = await import('@/lib/utils/fingerprint');
@@ -58,12 +58,15 @@ export const rankingApi = {
       const fingerprint = await getFingerprintData();
       const timestamp = Date.now();
 
-      // 서명 생성
+      // 서명 생성 (닉네임, 유저ID 포함)
       const signature = generateSignature({
         score: data.score,
         attempts: data.attempts,
         dollsCaught: data.dollsCaught,
-        timestamp
+        timestamp,
+        nickname: data.nickname,
+        tempUserId: data.tempUserId,
+        fingerprintHash: fingerprint.hash
       });
 
       const response = await internalFetch<SubmitScoreResponse>(API.RANKING.SUBMIT, {
@@ -78,12 +81,8 @@ export const rankingApi = {
       return { success: response.success, error: response.error, data: response.data };
     } catch (e) {
       console.error('Failed to get fingerprint or submit score:', e);
-      // Fallback submission without fingerprint if something goes wrong with FP collection
-      const response = await internalFetch<SubmitScoreResponse>(API.RANKING.SUBMIT, {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
-      return { success: response.success, error: response.error, data: response.data };
+      // Fallback
+      return { success: false, error: 'Failed to submit score' };
     }
   },
 

@@ -1,13 +1,17 @@
 import crypto from 'crypto';
 
 // 실제 운영 환경에서는 환경 변수에서 가져와야 함
-const SIGNATURE_SECRET = process.env.SIGNATURE_SECRET || 'claw-addict-super-secret-key-2024';
+const SIGNATURE_SECRET = process.env.SIGNATURE_SECRET || 'v2_secure_plz_dont_hack_me_s3cret_k3y_9981';
 
 export interface ScoreData {
     score: number;
     attempts: number;
     dollsCaught: number;
     timestamp: number;
+    nickname?: string;
+    tempUserId?: string;
+    userId?: string;
+    fingerprintHash?: string;
 }
 
 /**
@@ -15,8 +19,19 @@ export interface ScoreData {
  * HMAC-SHA256 알고리즘 사용
  */
 export function generateSignature(data: ScoreData): string {
-    // 데이터 순서가 중요함: score, attempts, dollsCaught, timestamp
-    const payload = `${data.score}:${data.attempts}:${data.dollsCaught}:${data.timestamp}`;
+    // 데이터 순서가 중요함: score, attempts, dollsCaught, timestamp, nickname, tempUserId, userId, fingerprintHash
+    // 없는 값은 빈 문자열로 처리하여 일관성 유지
+    const payload = [
+        data.score,
+        data.attempts,
+        data.dollsCaught,
+        data.timestamp,
+        data.nickname || '',
+        data.tempUserId || '',
+        data.userId || '',
+        data.fingerprintHash || ''
+    ].join(':');
+
     return crypto
         .createHmac('sha256', SIGNATURE_SECRET)
         .update(payload)

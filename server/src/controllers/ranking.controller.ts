@@ -41,10 +41,22 @@ export const submitScore = async (
       throw new AppError(403, 'Request expired');
     }
 
-    // 서명 검증
+    // Check for authenticated user first
+    let userId = req.user?._id?.toString();
+
+    // 서명 검증 (업데이트됨: 식별자 포함)
     const { verifySignature } = await import('../utils/signature');
     const isValidSignature = verifySignature(
-      { score, attempts, dollsCaught, timestamp },
+      {
+        score,
+        attempts,
+        dollsCaught,
+        timestamp,
+        nickname,
+        tempUserId,
+        userId, // 로그인한 경우 ID 포함
+        fingerprintHash: fingerprint?.hash
+      },
       signature
     );
 
@@ -52,20 +64,10 @@ export const submitScore = async (
       throw new AppError(403, 'Invalid signature');
     }
 
-    // Check for authenticated user first
-    let userId = req.user?._id?.toString();
-
-    // If no authenticated user, handle guest flow
+    // 1. 비로그인 유저 차단 (기획서 준수 + 봇 공격 방지)
     if (!userId) {
-      if (!tempUserId) {
-        throw new AppError(400, 'User ID or Temp ID is required');
-      }
-
-      // Create or update guest user
-      const guestName = nickname || `Guest-${tempUserId.slice(-4)}`;
-      const authService = await import('../services/auth.service');
-      const guestUser = await authService.createGuestUser(guestName, tempUserId);
-      userId = guestUser._id.toString();
+      // 더 이상 게스트 유저를 자동 생성하지 않음 -> 공격 원천 차단
+      throw new AppError(401, '랭킹 등록을 위해서는 로그인이 필요합니다.');
     }
 
     // Get IP address
