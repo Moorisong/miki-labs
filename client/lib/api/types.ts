@@ -13,6 +13,14 @@ export interface SubmitScoreRequest {
   dollsCaught: number;
   tempUserId?: string; // MVP용 임시 ID
   nickname?: string;
+  fingerprint?: {
+    hash: string;
+    userAgent: string;
+    screenResolution?: string;
+    timezone?: string;
+    language?: string;
+    platform?: string;
+  };
 }
 
 export interface User {

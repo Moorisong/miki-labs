@@ -23,11 +23,11 @@ export const getTopRanking = async (
 
 export const submitScore = async (
   req: Request,
-  res: Response<ApiResponse<{ scoreId: string }>>,
+  res: Response<ApiResponse<{ scoreId: string; warnings?: string[] }>>,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { score, attempts, dollsCaught, tempUserId, nickname } = req.body;
+    const { score, attempts, dollsCaught, tempUserId, nickname, fingerprint } = req.body;
 
     // Check for authenticated user first
     let userId = req.user?._id?.toString();
@@ -40,10 +40,32 @@ export const submitScore = async (
 
       // Create or update guest user
       const guestName = nickname || `Guest-${tempUserId.slice(-4)}`;
-      // Dynamic import to avoid circular dependency if any (though unlikely here, structure seems fine)
       const authService = await import('../services/auth.service');
       const guestUser = await authService.createGuestUser(guestName, tempUserId);
       userId = guestUser._id.toString();
+    }
+
+    // Get IP address
+    const ipAddress = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() || req.ip || 'unknown';
+
+    // Anti-abuse check
+    const antiAbuseService = await import('../services/anti-abuse.service');
+    const abuseCheck = await antiAbuseService.performFullAbuseCheck(
+      userId,
+      nickname,
+      score,
+      fingerprint, // Client should send this object { hash, userAgent, ... }
+      ipAddress
+    );
+
+    if (!abuseCheck.allowed) {
+      // Return 403 Forbidden with specific reason
+      res.status(403).json({
+        success: false,
+        message: abuseCheck.reason || 'Score submission rejected due to suspicious activity.',
+        data: null
+      } as any); // Type assertion needed because ApiResponse structure might differ slightly
+      return;
     }
 
     const newScore = await rankingService.submitScore(
@@ -53,9 +75,12 @@ export const submitScore = async (
       dollsCaught
     );
 
+    // Update daily score stats
+    await antiAbuseService.updateDailyScore(userId, score);
+
     res.json({
       success: true,
-      data: { scoreId: newScore._id.toString() },
+      data: { scoreId: newScore._id.toString(), warnings: abuseCheck.warnings },
       message: 'Score submitted successfully'
     });
   } catch (error) {

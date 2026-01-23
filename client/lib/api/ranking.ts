@@ -49,13 +49,26 @@ export const rankingApi = {
   },
 
   async submitScore(
-    data: Omit<SubmitScoreRequest, 'tempUserId' | 'nickname'>
+    data: Omit<SubmitScoreRequest, 'tempUserId' | 'nickname' | 'fingerprint'>
   ): Promise<SubmitResult> {
-    const response = await internalFetch<SubmitScoreResponse>(API.RANKING.SUBMIT, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-    return { success: response.success, error: response.error, data: response.data };
+    try {
+      const { getFingerprintData } = await import('@/lib/utils/fingerprint');
+      const fingerprint = await getFingerprintData();
+
+      const response = await internalFetch<SubmitScoreResponse>(API.RANKING.SUBMIT, {
+        method: 'POST',
+        body: JSON.stringify({ ...data, fingerprint }),
+      });
+      return { success: response.success, error: response.error, data: response.data };
+    } catch (e) {
+      console.error('Failed to get fingerprint or submit score:', e);
+      // Fallback submission without fingerprint if something goes wrong with FP collection
+      const response = await internalFetch<SubmitScoreResponse>(API.RANKING.SUBMIT, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      return { success: response.success, error: response.error, data: response.data };
+    }
   },
 
   async getMyRanking(): Promise<RankingEntry | null> {
