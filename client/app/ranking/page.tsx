@@ -4,6 +4,7 @@ import type { RankingEntry } from '@/lib/api/types';
 import { getDatabase } from '@/lib/mongodb';
 import { MESSAGES, MEDALS, CONFIG } from '@/constants';
 
+import AdBanner from '@/components/ads/ad-banner';
 import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -150,6 +151,7 @@ export default async function RankingPage() {
           </section>
         </>
       )}
+      <AdBanner />
     </div>
   );
 }
