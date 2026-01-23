@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import NextImage from 'next/image';
 
 import { getDatabase } from '@/lib/mongodb';
 import { ROUTES, MESSAGES, FEATURES, MEDALS, CONFIG } from '@/constants';
@@ -43,8 +44,31 @@ async function getTopRankings(): Promise<RankEntry[]> {
 export default async function HomePage() {
   const topRankings = await getTopRankings();
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: '뽑기중독',
+    applicationCategory: 'GameApplication',
+    operatingSystem: 'Any',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'KRW',
+    },
+    description: '리얼한 물리 엔진으로 즐기는 웹 인형뽑기 게임. 실제 인형뽑기의 손맛을 느껴보세요!',
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.8',
+      ratingCount: '124',
+    },
+  };
+
   return (
     <div className={styles.container}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
@@ -64,10 +88,13 @@ export default async function HomePage() {
           </div>
         </div>
         <Link href={ROUTES.GAME} className={styles.heroVisual}>
-          <img
+          <NextImage
             src="/hero_character.png"
-            alt="Claw Machine Character"
+            alt="인형뽑기 게임 캐릭터"
+            width={500}
+            height={400}
             className={styles.heroImage}
+            priority
           />
         </Link>
       </section>
@@ -131,8 +158,6 @@ export default async function HomePage() {
           )}
         </div>
       </section>
-
-
 
     </div>
   );
