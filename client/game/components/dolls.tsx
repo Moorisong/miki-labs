@@ -15,6 +15,7 @@ import { useFrame } from '@react-three/fiber';
 
 // 귀여운 인형 색상 팔레트
 const DOLL_PALETTES = [
+  // 기본 동물 색상 (0-14)
   { body: '#FFB6C1', accent: '#FF69B4', cheek: '#FF1493' }, // 핑크 토끼
   { body: '#8B4513', accent: '#D2691E', cheek: '#FF6B6B' }, // 갈색 곰
   { body: '#FFA500', accent: '#FF8C00', cheek: '#FF6B6B' }, // 주황 고양이
@@ -30,7 +31,8 @@ const DOLL_PALETTES = [
   { body: '#FFEFD5', accent: '#F4A460', cheek: '#FF6B6B' }, // 크림 햄스터
   { body: '#F4A460', accent: '#8B4513', cheek: '#FF6B6B' }, // 강아지
   { body: '#D3D3D3', accent: '#FFFFFF', cheek: '#FF69B4' }, // 회색 강아지
-  // New Additions:
+
+  // 파스텔 톤 (15-24)
   { body: '#957DAD', accent: '#845EC2', cheek: '#FF9EAA' }, // 라벤더
   { body: '#FF9EAA', accent: '#FFD3E0', cheek: '#FF6F91' }, // 소프트 핑크
   { body: '#D6E5FA', accent: '#B4D7FA', cheek: '#F3C5FF' }, // 베이비 블루
@@ -41,15 +43,58 @@ const DOLL_PALETTES = [
   { body: '#FFE4E1', accent: '#FA8072', cheek: '#DC143C' }, // 미스티 로즈
   { body: '#B0E0E6', accent: '#4682B4', cheek: '#FF69B4' }, // 파우더 블루
   { body: '#C8A2C8', accent: '#800080', cheek: '#FFC0CB' }, // 라일락
+
+  // 생동감 있는 색상 (25-34)
   { body: '#98FF98', accent: '#32CD32', cheek: '#FF4500' }, // 민트 그린
   { body: '#FFDAB9', accent: '#FF8C00', cheek: '#CD5C5C' }, // 피치 퍼프
   { body: '#D8BFD8', accent: '#9932CC', cheek: '#8B008B' }, // 엉겅퀴
   { body: '#F5FFFA', accent: '#00FA9A', cheek: '#FF1493' }, // 민트 크림
   { body: '#778899', accent: '#2F4F4F', cheek: '#FFA500' }, // 쿨 그레이
+  { body: '#FF6B6B', accent: '#EE5A5A', cheek: '#FF1744' }, // 코랄 레드
+  { body: '#4ECDC4', accent: '#26A69A', cheek: '#FF6B6B' }, // 틸 그린
+  { body: '#45B7D1', accent: '#2196F3', cheek: '#FF80AB' }, // 스카이 블루
+  { body: '#96CEB4', accent: '#88D8B0', cheek: '#FFAB91' }, // 세이지 그린
+  { body: '#FFEAA7', accent: '#FDCB6E', cheek: '#E17055' }, // 버터 옐로우
+
+  // 네온/비비드 색상 (35-44)
+  { body: '#A29BFE', accent: '#6C5CE7', cheek: '#FD79A8' }, // 일렉트릭 퍼플
+  { body: '#74B9FF', accent: '#0984E3', cheek: '#FF7675' }, // 브라이트 블루
+  { body: '#55EFC4', accent: '#00B894', cheek: '#FDCB6E' }, // 네온 민트
+  { body: '#FD79A8', accent: '#E84393', cheek: '#A29BFE' }, // 핫 핑크
+  { body: '#FDCB6E', accent: '#F39C12', cheek: '#E74C3C' }, // 선샤인 옐로우
+  { body: '#E17055', accent: '#D63031', cheek: '#FDCB6E' }, // 웜 오렌지
+  { body: '#81ECEC', accent: '#00CEC9', cheek: '#FD79A8' }, // 아쿠아 블루
+  { body: '#FAB1A0', accent: '#E17055', cheek: '#FD79A8' }, // 살몬 핑크
+  { body: '#00B894', accent: '#00A085', cheek: '#FD79A8' }, // 에메랄드
+  { body: '#E84393', accent: '#C2185B', cheek: '#A29BFE' }, // 매젠타
+
+  // 따뜻한 톤 (45-54)
+  { body: '#FFCCBC', accent: '#FF8A65', cheek: '#FF5252' }, // 피치
+  { body: '#D7CCC8', accent: '#A1887F', cheek: '#FF8A80' }, // 모카
+  { body: '#FFE0B2', accent: '#FFB74D', cheek: '#FF6E40' }, // 아프리콧
+  { body: '#FFAB91', accent: '#FF7043', cheek: '#FF1744' }, // 딥 오렌지
+  { body: '#BCAAA4', accent: '#8D6E63', cheek: '#FF8A80' }, // 토프
+  { body: '#F8BBD9', accent: '#F06292', cheek: '#AD1457' }, // 로즈
+  { body: '#CE93D8', accent: '#AB47BC', cheek: '#FF4081' }, // 오키드
+  { body: '#B39DDB', accent: '#7E57C2', cheek: '#FF80AB' }, // 바이올렛
+  { body: '#9FA8DA', accent: '#5C6BC0', cheek: '#FF8A80' }, // 인디고
+  { body: '#90CAF9', accent: '#42A5F5', cheek: '#FF80AB' }, // 소프트 블루
+
+  // 차가운 톤 (55-64)
+  { body: '#80DEEA', accent: '#26C6DA', cheek: '#FFAB91' }, // 시안
+  { body: '#80CBC4', accent: '#26A69A', cheek: '#FFCC80' }, // 씨 그린
+  { body: '#A5D6A7', accent: '#66BB6A', cheek: '#FFAB91' }, // 라이트 그린
+  { body: '#C5E1A5', accent: '#9CCC65', cheek: '#FF8A65' }, // 라임
+  { body: '#E6EE9C', accent: '#D4E157', cheek: '#FF7043' }, // 라임 옐로우
+  { body: '#FFF59D', accent: '#FFEE58', cheek: '#FF5722' }, // 레몬
+  { body: '#FFE082', accent: '#FFCA28', cheek: '#FF6E40' }, // 앰버
+  { body: '#FFCC80', accent: '#FFA726', cheek: '#FF5252' }, // 오렌지
+  { body: '#FFAB91', accent: '#FF8A65', cheek: '#D32F2F' }, // 딥 오렌지 2
+  { body: '#EF9A9A', accent: '#EF5350', cheek: '#C62828' }, // 레드
 ];
 
-// 인형 타입 (토끼, 곰, 고양이, 햄스터, 강아지)
-type CuteDollType = 'bunny' | 'bear' | 'cat' | 'hamster' | 'dog';
+// 인형 타입 (토끼, 곰, 고양이, 햄스터, 강아지, 펭귄, 팬더, 양, 병아리, 여우, 개구리, 사자, 돼지, 코알라)
+type CuteDollType = 'bunny' | 'bear' | 'cat' | 'hamster' | 'dog' | 'penguin' | 'panda' | 'sheep' | 'chick' | 'fox' | 'frog' | 'lion' | 'pig' | 'koala';
 
 export interface CuteDollConfig extends DollConfig {
   cuteType: CuteDollType;
@@ -72,7 +117,7 @@ const generateDollConfigs = (count: number): CuteDollConfig[] => {
     return x > 1.2 && z > 0.8;
   };
 
-  const cuteTypes: CuteDollType[] = ['bunny', 'bear', 'cat', 'hamster', 'dog'];
+  const cuteTypes: CuteDollType[] = ['bunny', 'bear', 'cat', 'hamster', 'dog', 'penguin', 'panda', 'sheep', 'chick', 'fox', 'frog', 'lion', 'pig', 'koala'];
 
   // 햄스터 전용 팔레트 인덱스 (10, 11, 12)
   const hamsterPalettes = [10, 11, 12];
@@ -121,18 +166,22 @@ const generateDollConfigs = (count: number): CuteDollConfig[] => {
 
     const y = floorHeight + size + Math.random() * 0.5;
 
-    // 햄스터면 햄스터 팔레트, 강아지면 강아지 팔레트 (13, 14), 나머지는 랜덤
+    // 햄스터면 햄스터 팔레트, 강아지면 강아지 팔레트 (13, 14), 나머지는 전체 팔레트에서 랜덤
     let paletteIndex: number;
     if (cuteType === 'hamster') {
       paletteIndex = hamsterPalettes[Math.floor(Math.random() * hamsterPalettes.length)];
     } else if (cuteType === 'dog') {
       paletteIndex = 13 + Math.floor(Math.random() * 2);
     } else {
-      // 기존 팔레트(0-9) + 새로운 파스텔 팔레트(15-29) 중 랜덤 선택
-      // 햄스터/강아지 전용 제외하고 모든 색상 사용
+      // 65개 팔레트 전체에서 랜덤 선택 (햄스터/강아지 전용 제외)
+      // 0-9: 기본, 15-64: 파스텔/네온/따뜻한톤/차가운톤
       const availableIndices = [
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-        15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29
+        15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+        25, 26, 27, 28, 29, 30, 31, 32, 33, 34,
+        35, 36, 37, 38, 39, 40, 41, 42, 43, 44,
+        45, 46, 47, 48, 49, 50, 51, 52, 53, 54,
+        55, 56, 57, 58, 59, 60, 61, 62, 63, 64
       ];
       paletteIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
     }
@@ -877,6 +926,841 @@ export const DogDoll = ({ config, physicsRef }: DollRenderProps) => {
   );
 };
 
+// 펭귄 인형 (뚜둥한 몸, 흰 배, 주황색 부리와 발)
+export const PenguinDoll = ({ config, physicsRef }: DollRenderProps) => {
+  const s = config.size;
+  const { body, accent, cheek } = config.palette;
+  // 펭귄은 검은 바디, 흰 배가 기본
+  const blackBody = '#1a1a2e';
+  const whiteBelly = '#f8f8ff';
+  const orangeAccent = '#FF6B35';
+
+  return (
+    <group>
+      {/* 몸통 */}
+      <mesh castShadow position={[0, -s * 0.25, 0]}>
+        <sphereGeometry args={[s * 0.85, 16, 16]} />
+        <meshStandardMaterial color={blackBody} roughness={0.85} />
+      </mesh>
+      {/* 흰 배 */}
+      <mesh position={[0, -s * 0.2, s * 0.35]}>
+        <sphereGeometry args={[s * 0.55, 16, 16]} />
+        <meshStandardMaterial color={whiteBelly} roughness={0.8} />
+      </mesh>
+      {/* 머리 */}
+      <mesh castShadow position={[0, s * 0.45, 0]}>
+        <sphereGeometry args={[s * 0.6, 16, 16]} />
+        <meshStandardMaterial color={blackBody} roughness={0.85} />
+      </mesh>
+      {/* 흰 얼굴 */}
+      <mesh position={[0, s * 0.4, s * 0.25]}>
+        <sphereGeometry args={[s * 0.4, 12, 12]} />
+        <meshStandardMaterial color={whiteBelly} roughness={0.8} />
+      </mesh>
+      {/* 왼쪽 눈 */}
+      <mesh position={[-s * 0.18, s * 0.5, s * 0.45]}>
+        <sphereGeometry args={[s * 0.08, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.3} />
+      </mesh>
+      {/* 오른쪽 눈 */}
+      <mesh position={[s * 0.18, s * 0.5, s * 0.45]}>
+        <sphereGeometry args={[s * 0.08, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.3} />
+      </mesh>
+      {/* 부리 */}
+      <mesh position={[0, s * 0.35, s * 0.6]} rotation={[Math.PI / 4, 0, 0]}>
+        <coneGeometry args={[s * 0.08, s * 0.15, 8]} />
+        <meshStandardMaterial color={orangeAccent} roughness={0.6} />
+      </mesh>
+      {/* 왼쪽 날개 */}
+      <mesh castShadow position={[-s * 0.65, s * 0.0, 0]} rotation={[0, 0, 0.3]}>
+        <capsuleGeometry args={[s * 0.12, s * 0.4, 4, 8]} />
+        <meshStandardMaterial color={blackBody} roughness={0.85} />
+      </mesh>
+      {/* 오른쪽 날개 */}
+      <mesh castShadow position={[s * 0.65, s * 0.0, 0]} rotation={[0, 0, -0.3]}>
+        <capsuleGeometry args={[s * 0.12, s * 0.4, 4, 8]} />
+        <meshStandardMaterial color={blackBody} roughness={0.85} />
+      </mesh>
+      {/* 왼발 */}
+      <mesh castShadow position={[-s * 0.2, -s * 0.9, s * 0.2]}>
+        <boxGeometry args={[s * 0.2, s * 0.08, s * 0.25]} />
+        <meshStandardMaterial color={orangeAccent} roughness={0.7} />
+      </mesh>
+      {/* 오른발 */}
+      <mesh castShadow position={[s * 0.2, -s * 0.9, s * 0.2]}>
+        <boxGeometry args={[s * 0.2, s * 0.08, s * 0.25]} />
+        <meshStandardMaterial color={orangeAccent} roughness={0.7} />
+      </mesh>
+      {/* 볼터치 */}
+      <mesh position={[-s * 0.28, s * 0.35, s * 0.45]}>
+        <sphereGeometry args={[s * 0.08, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+      <mesh position={[s * 0.28, s * 0.35, s * 0.45]}>
+        <sphereGeometry args={[s * 0.08, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+    </group>
+  );
+};
+
+// 팬더 인형 (흑백, 눈 주위 검은 패치)
+export const PandaDoll = ({ config, physicsRef }: DollRenderProps) => {
+  const s = config.size;
+  const { cheek } = config.palette;
+  const whiteBody = '#f5f5f5';
+  const blackPatch = '#1a1a1a';
+
+  return (
+    <group>
+      {/* 몸통 (흰색) */}
+      <mesh castShadow position={[0, -s * 0.3, 0]}>
+        <sphereGeometry args={[s * 0.85, 16, 16]} />
+        <meshStandardMaterial color={whiteBody} roughness={0.85} />
+      </mesh>
+      {/* 머리 (흰색) */}
+      <mesh castShadow position={[0, s * 0.45, 0]}>
+        <sphereGeometry args={[s * 0.7, 16, 16]} />
+        <meshStandardMaterial color={whiteBody} roughness={0.85} />
+      </mesh>
+      {/* 왼쪽 귀 (검은색) */}
+      <mesh castShadow position={[-s * 0.45, s * 0.9, 0]}>
+        <sphereGeometry args={[s * 0.2, 12, 12]} />
+        <meshStandardMaterial color={blackPatch} roughness={0.85} />
+      </mesh>
+      {/* 오른쪽 귀 (검은색) */}
+      <mesh castShadow position={[s * 0.45, s * 0.9, 0]}>
+        <sphereGeometry args={[s * 0.2, 12, 12]} />
+        <meshStandardMaterial color={blackPatch} roughness={0.85} />
+      </mesh>
+      {/* 왼쪽 눈 패치 (검은색 타원) */}
+      <mesh position={[-s * 0.22, s * 0.55, s * 0.4]}>
+        <sphereGeometry args={[s * 0.18, 12, 12]} />
+        <meshStandardMaterial color={blackPatch} roughness={0.8} />
+      </mesh>
+      {/* 오른쪽 눈 패치 (검은색 타원) */}
+      <mesh position={[s * 0.22, s * 0.55, s * 0.4]}>
+        <sphereGeometry args={[s * 0.18, 12, 12]} />
+        <meshStandardMaterial color={blackPatch} roughness={0.8} />
+      </mesh>
+      {/* 왼쪽 눈동자 (흰색) */}
+      <mesh position={[-s * 0.22, s * 0.55, s * 0.55]}>
+        <sphereGeometry args={[s * 0.06, 8, 8]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.3} />
+      </mesh>
+      {/* 오른쪽 눈동자 (흰색) */}
+      <mesh position={[s * 0.22, s * 0.55, s * 0.55]}>
+        <sphereGeometry args={[s * 0.06, 8, 8]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.3} />
+      </mesh>
+      {/* 코 */}
+      <mesh position={[0, s * 0.35, s * 0.65]}>
+        <sphereGeometry args={[s * 0.08, 8, 8]} />
+        <meshStandardMaterial color={blackPatch} roughness={0.5} />
+      </mesh>
+      {/* 왼쪽 팔 (검은색) */}
+      <mesh castShadow position={[-s * 0.6, -s * 0.1, s * 0.2]} rotation={[0, 0, 0.4]}>
+        <capsuleGeometry args={[s * 0.15, s * 0.25, 4, 8]} />
+        <meshStandardMaterial color={blackPatch} roughness={0.85} />
+      </mesh>
+      {/* 오른쪽 팔 (검은색) */}
+      <mesh castShadow position={[s * 0.6, -s * 0.1, s * 0.2]} rotation={[0, 0, -0.4]}>
+        <capsuleGeometry args={[s * 0.15, s * 0.25, 4, 8]} />
+        <meshStandardMaterial color={blackPatch} roughness={0.85} />
+      </mesh>
+      {/* 왼쪽 다리 (검은색) */}
+      <mesh castShadow position={[-s * 0.35, -s * 0.85, s * 0.1]}>
+        <sphereGeometry args={[s * 0.2, 10, 10]} />
+        <meshStandardMaterial color={blackPatch} roughness={0.85} />
+      </mesh>
+      {/* 오른쪽 다리 (검은색) */}
+      <mesh castShadow position={[s * 0.35, -s * 0.85, s * 0.1]}>
+        <sphereGeometry args={[s * 0.2, 10, 10]} />
+        <meshStandardMaterial color={blackPatch} roughness={0.85} />
+      </mesh>
+      {/* 볼터치 */}
+      <mesh position={[-s * 0.4, s * 0.35, s * 0.45]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.4} />
+      </mesh>
+      <mesh position={[s * 0.4, s * 0.35, s * 0.45]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.4} />
+      </mesh>
+    </group>
+  );
+};
+
+// 양 인형 (곱슬곱슬한 털, 통통한 몸)
+export const SheepDoll = ({ config, physicsRef }: DollRenderProps) => {
+  const s = config.size;
+  const { body, cheek } = config.palette;
+  const woolColor = '#fefefa';
+  const faceColor = '#2d2d2d';
+
+  return (
+    <group>
+      {/* 털 몸통 (여러 개의 구로 곱슬 표현) */}
+      <mesh castShadow position={[0, -s * 0.2, 0]}>
+        <sphereGeometry args={[s * 0.85, 16, 16]} />
+        <meshStandardMaterial color={woolColor} roughness={1} />
+      </mesh>
+      {/* 곱슬 털 디테일 */}
+      <mesh castShadow position={[-s * 0.4, s * 0.1, s * 0.3]}>
+        <sphereGeometry args={[s * 0.25, 10, 10]} />
+        <meshStandardMaterial color={woolColor} roughness={1} />
+      </mesh>
+      <mesh castShadow position={[s * 0.4, s * 0.1, s * 0.3]}>
+        <sphereGeometry args={[s * 0.25, 10, 10]} />
+        <meshStandardMaterial color={woolColor} roughness={1} />
+      </mesh>
+      <mesh castShadow position={[0, s * 0.25, -s * 0.35]}>
+        <sphereGeometry args={[s * 0.28, 10, 10]} />
+        <meshStandardMaterial color={woolColor} roughness={1} />
+      </mesh>
+      <mesh castShadow position={[-s * 0.35, -s * 0.35, -s * 0.2]}>
+        <sphereGeometry args={[s * 0.22, 10, 10]} />
+        <meshStandardMaterial color={woolColor} roughness={1} />
+      </mesh>
+      <mesh castShadow position={[s * 0.35, -s * 0.35, -s * 0.2]}>
+        <sphereGeometry args={[s * 0.22, 10, 10]} />
+        <meshStandardMaterial color={woolColor} roughness={1} />
+      </mesh>
+      {/* 머리 털 */}
+      <mesh castShadow position={[0, s * 0.7, 0]}>
+        <sphereGeometry args={[s * 0.45, 12, 12]} />
+        <meshStandardMaterial color={woolColor} roughness={1} />
+      </mesh>
+      <mesh castShadow position={[-s * 0.2, s * 0.9, 0]}>
+        <sphereGeometry args={[s * 0.18, 10, 10]} />
+        <meshStandardMaterial color={woolColor} roughness={1} />
+      </mesh>
+      <mesh castShadow position={[s * 0.2, s * 0.9, 0]}>
+        <sphereGeometry args={[s * 0.18, 10, 10]} />
+        <meshStandardMaterial color={woolColor} roughness={1} />
+      </mesh>
+      <mesh castShadow position={[0, s * 0.95, 0]}>
+        <sphereGeometry args={[s * 0.15, 10, 10]} />
+        <meshStandardMaterial color={woolColor} roughness={1} />
+      </mesh>
+      {/* 얼굴 (검은색/회색) */}
+      <mesh position={[0, s * 0.5, s * 0.35]}>
+        <sphereGeometry args={[s * 0.35, 12, 12]} />
+        <meshStandardMaterial color={faceColor} roughness={0.9} />
+      </mesh>
+      {/* 왼쪽 귀 */}
+      <mesh castShadow position={[-s * 0.45, s * 0.55, 0]} rotation={[0, 0, -0.5]}>
+        <capsuleGeometry args={[s * 0.08, s * 0.15, 4, 8]} />
+        <meshStandardMaterial color={faceColor} roughness={0.9} />
+      </mesh>
+      {/* 오른쪽 귀 */}
+      <mesh castShadow position={[s * 0.45, s * 0.55, 0]} rotation={[0, 0, 0.5]}>
+        <capsuleGeometry args={[s * 0.08, s * 0.15, 4, 8]} />
+        <meshStandardMaterial color={faceColor} roughness={0.9} />
+      </mesh>
+      {/* 왼쪽 눈 */}
+      <mesh position={[-s * 0.12, s * 0.55, s * 0.6]}>
+        <sphereGeometry args={[s * 0.06, 8, 8]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.3} />
+      </mesh>
+      {/* 오른쪽 눈 */}
+      <mesh position={[s * 0.12, s * 0.55, s * 0.6]}>
+        <sphereGeometry args={[s * 0.06, 8, 8]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.3} />
+      </mesh>
+      {/* 코 */}
+      <mesh position={[0, s * 0.42, s * 0.68]}>
+        <sphereGeometry args={[s * 0.05, 8, 8]} />
+        <meshStandardMaterial color="#333333" roughness={0.5} />
+      </mesh>
+      {/* 다리 */}
+      <mesh castShadow position={[-s * 0.35, -s * 0.8, s * 0.2]}>
+        <capsuleGeometry args={[s * 0.08, s * 0.2, 4, 8]} />
+        <meshStandardMaterial color={faceColor} roughness={0.9} />
+      </mesh>
+      <mesh castShadow position={[s * 0.35, -s * 0.8, s * 0.2]}>
+        <capsuleGeometry args={[s * 0.08, s * 0.2, 4, 8]} />
+        <meshStandardMaterial color={faceColor} roughness={0.9} />
+      </mesh>
+      <mesh castShadow position={[-s * 0.35, -s * 0.8, -s * 0.2]}>
+        <capsuleGeometry args={[s * 0.08, s * 0.2, 4, 8]} />
+        <meshStandardMaterial color={faceColor} roughness={0.9} />
+      </mesh>
+      <mesh castShadow position={[s * 0.35, -s * 0.8, -s * 0.2]}>
+        <capsuleGeometry args={[s * 0.08, s * 0.2, 4, 8]} />
+        <meshStandardMaterial color={faceColor} roughness={0.9} />
+      </mesh>
+      {/* 볼터치 */}
+      <mesh position={[-s * 0.25, s * 0.42, s * 0.55]}>
+        <sphereGeometry args={[s * 0.08, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+      <mesh position={[s * 0.25, s * 0.42, s * 0.55]}>
+        <sphereGeometry args={[s * 0.08, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+    </group>
+  );
+};
+
+// 병아리 인형 (노란색, 작은 부리와 날개)
+export const ChickDoll = ({ config, physicsRef }: DollRenderProps) => {
+  const s = config.size;
+  const { cheek } = config.palette;
+  const yellowBody = '#FFD93D';
+  const orangeBeak = '#FF8C00';
+
+  return (
+    <group>
+      {/* 몸통 (통통한 노란색) */}
+      <mesh castShadow position={[0, -s * 0.15, 0]}>
+        <sphereGeometry args={[s * 0.8, 16, 16]} />
+        <meshStandardMaterial color={yellowBody} roughness={0.85} />
+      </mesh>
+      {/* 머리 */}
+      <mesh castShadow position={[0, s * 0.5, 0]}>
+        <sphereGeometry args={[s * 0.55, 16, 16]} />
+        <meshStandardMaterial color={yellowBody} roughness={0.85} />
+      </mesh>
+      {/* 머리 깃털 */}
+      <mesh castShadow position={[0, s * 0.95, 0]} rotation={[0.2, 0, 0]}>
+        <coneGeometry args={[s * 0.08, s * 0.2, 6]} />
+        <meshStandardMaterial color={orangeBeak} roughness={0.7} />
+      </mesh>
+      <mesh castShadow position={[-s * 0.08, s * 0.9, 0]} rotation={[0.2, 0, 0.3]}>
+        <coneGeometry args={[s * 0.06, s * 0.15, 6]} />
+        <meshStandardMaterial color={orangeBeak} roughness={0.7} />
+      </mesh>
+      <mesh castShadow position={[s * 0.08, s * 0.9, 0]} rotation={[0.2, 0, -0.3]}>
+        <coneGeometry args={[s * 0.06, s * 0.15, 6]} />
+        <meshStandardMaterial color={orangeBeak} roughness={0.7} />
+      </mesh>
+      {/* 왼쪽 눈 */}
+      <mesh position={[-s * 0.15, s * 0.6, s * 0.4]}>
+        <sphereGeometry args={[s * 0.09, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.3} />
+      </mesh>
+      {/* 눈 하이라이트 왼쪽 */}
+      <mesh position={[-s * 0.12, s * 0.63, s * 0.47]}>
+        <sphereGeometry args={[s * 0.03, 6, 6]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.2} />
+      </mesh>
+      {/* 오른쪽 눈 */}
+      <mesh position={[s * 0.15, s * 0.6, s * 0.4]}>
+        <sphereGeometry args={[s * 0.09, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.3} />
+      </mesh>
+      {/* 눈 하이라이트 오른쪽 */}
+      <mesh position={[s * 0.18, s * 0.63, s * 0.47]}>
+        <sphereGeometry args={[s * 0.03, 6, 6]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.2} />
+      </mesh>
+      {/* 부리 */}
+      <mesh position={[0, s * 0.42, s * 0.55]} rotation={[Math.PI / 3, 0, 0]}>
+        <coneGeometry args={[s * 0.1, s * 0.15, 8]} />
+        <meshStandardMaterial color={orangeBeak} roughness={0.6} />
+      </mesh>
+      {/* 왼쪽 날개 */}
+      <mesh castShadow position={[-s * 0.55, s * 0.0, 0]} rotation={[0, 0, 0.4]}>
+        <sphereGeometry args={[s * 0.2, 10, 10]} />
+        <meshStandardMaterial color={yellowBody} roughness={0.85} />
+      </mesh>
+      {/* 오른쪽 날개 */}
+      <mesh castShadow position={[s * 0.55, s * 0.0, 0]} rotation={[0, 0, -0.4]}>
+        <sphereGeometry args={[s * 0.2, 10, 10]} />
+        <meshStandardMaterial color={yellowBody} roughness={0.85} />
+      </mesh>
+      {/* 왼발 */}
+      <mesh castShadow position={[-s * 0.2, -s * 0.75, s * 0.15]}>
+        <boxGeometry args={[s * 0.15, s * 0.06, s * 0.2]} />
+        <meshStandardMaterial color={orangeBeak} roughness={0.7} />
+      </mesh>
+      {/* 오른발 */}
+      <mesh castShadow position={[s * 0.2, -s * 0.75, s * 0.15]}>
+        <boxGeometry args={[s * 0.15, s * 0.06, s * 0.2]} />
+        <meshStandardMaterial color={orangeBeak} roughness={0.7} />
+      </mesh>
+      {/* 볼터치 */}
+      <mesh position={[-s * 0.28, s * 0.45, s * 0.4]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+      <mesh position={[s * 0.28, s * 0.45, s * 0.4]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+    </group>
+  );
+};
+
+// 여우 인형 (뾰족한 귀, 큰 꼬리)
+export const FoxDoll = ({ config, physicsRef }: DollRenderProps) => {
+  const s = config.size;
+  const { cheek } = config.palette;
+  const orangeBody = '#FF6B35';
+  const whiteFur = '#FFF8F0';
+  const darkTip = '#8B4513';
+
+  return (
+    <group>
+      {/* 몸통 */}
+      <mesh castShadow position={[0, -s * 0.3, 0]}>
+        <sphereGeometry args={[s * 0.8, 16, 16]} />
+        <meshStandardMaterial color={orangeBody} roughness={0.85} />
+      </mesh>
+      {/* 흰 배 */}
+      <mesh position={[0, -s * 0.25, s * 0.3]}>
+        <sphereGeometry args={[s * 0.5, 12, 12]} />
+        <meshStandardMaterial color={whiteFur} roughness={0.8} />
+      </mesh>
+      {/* 머리 */}
+      <mesh castShadow position={[0, s * 0.4, 0]}>
+        <sphereGeometry args={[s * 0.6, 16, 16]} />
+        <meshStandardMaterial color={orangeBody} roughness={0.85} />
+      </mesh>
+      {/* 주둥이 */}
+      <mesh castShadow position={[0, s * 0.3, s * 0.45]}>
+        <sphereGeometry args={[s * 0.25, 12, 12]} />
+        <meshStandardMaterial color={whiteFur} roughness={0.8} />
+      </mesh>
+      {/* 왼쪽 귀 (뾰족) */}
+      <mesh castShadow position={[-s * 0.35, s * 0.9, 0]} rotation={[0, 0, 0.2]}>
+        <coneGeometry args={[s * 0.15, s * 0.35, 4]} />
+        <meshStandardMaterial color={orangeBody} roughness={0.85} />
+      </mesh>
+      {/* 왼쪽 귀 안쪽 */}
+      <mesh position={[-s * 0.35, s * 0.85, s * 0.03]} rotation={[0, 0, 0.2]}>
+        <coneGeometry args={[s * 0.08, s * 0.2, 4]} />
+        <meshStandardMaterial color={whiteFur} roughness={0.8} />
+      </mesh>
+      {/* 오른쪽 귀 (뾰족) */}
+      <mesh castShadow position={[s * 0.35, s * 0.9, 0]} rotation={[0, 0, -0.2]}>
+        <coneGeometry args={[s * 0.15, s * 0.35, 4]} />
+        <meshStandardMaterial color={orangeBody} roughness={0.85} />
+      </mesh>
+      {/* 오른쪽 귀 안쪽 */}
+      <mesh position={[s * 0.35, s * 0.85, s * 0.03]} rotation={[0, 0, -0.2]}>
+        <coneGeometry args={[s * 0.08, s * 0.2, 4]} />
+        <meshStandardMaterial color={whiteFur} roughness={0.8} />
+      </mesh>
+      {/* 왼쪽 눈 */}
+      <mesh position={[-s * 0.18, s * 0.5, s * 0.45]}>
+        <sphereGeometry args={[s * 0.08, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.3} />
+      </mesh>
+      {/* 오른쪽 눈 */}
+      <mesh position={[s * 0.18, s * 0.5, s * 0.45]}>
+        <sphereGeometry args={[s * 0.08, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.3} />
+      </mesh>
+      {/* 코 */}
+      <mesh position={[0, s * 0.32, s * 0.68]}>
+        <sphereGeometry args={[s * 0.06, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.4} />
+      </mesh>
+      {/* 큰 꼬리 */}
+      <mesh castShadow position={[0, -s * 0.2, -s * 0.7]} rotation={[-0.5, 0, 0]}>
+        <capsuleGeometry args={[s * 0.2, s * 0.5, 6, 10]} />
+        <meshStandardMaterial color={orangeBody} roughness={0.85} />
+      </mesh>
+      {/* 꼬리 끝 (흰색) */}
+      <mesh castShadow position={[0, s * 0.1, -s * 1.0]} rotation={[-0.5, 0, 0]}>
+        <sphereGeometry args={[s * 0.18, 10, 10]} />
+        <meshStandardMaterial color={whiteFur} roughness={0.8} />
+      </mesh>
+      {/* 볼터치 */}
+      <mesh position={[-s * 0.32, s * 0.35, s * 0.4]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+      <mesh position={[s * 0.32, s * 0.35, s * 0.4]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+    </group>
+  );
+};
+
+// 개구리 인형 (큰 눈, 넓은 입)
+export const FrogDoll = ({ config, physicsRef }: DollRenderProps) => {
+  const s = config.size;
+  const { cheek } = config.palette;
+  const greenBody = '#4CAF50';
+  const lightGreen = '#A5D6A7';
+  const yellowBelly = '#FFF9C4';
+
+  return (
+    <group>
+      {/* 몸통 */}
+      <mesh castShadow position={[0, -s * 0.25, 0]}>
+        <sphereGeometry args={[s * 0.85, 16, 16]} />
+        <meshStandardMaterial color={greenBody} roughness={0.85} />
+      </mesh>
+      {/* 노란 배 */}
+      <mesh position={[0, -s * 0.2, s * 0.35]}>
+        <sphereGeometry args={[s * 0.55, 12, 12]} />
+        <meshStandardMaterial color={yellowBelly} roughness={0.8} />
+      </mesh>
+      {/* 머리 */}
+      <mesh castShadow position={[0, s * 0.35, 0]}>
+        <sphereGeometry args={[s * 0.65, 16, 16]} />
+        <meshStandardMaterial color={greenBody} roughness={0.85} />
+      </mesh>
+      {/* 왼쪽 눈 튀어나온 부분 */}
+      <mesh castShadow position={[-s * 0.3, s * 0.7, s * 0.15]}>
+        <sphereGeometry args={[s * 0.2, 12, 12]} />
+        <meshStandardMaterial color={greenBody} roughness={0.85} />
+      </mesh>
+      {/* 왼쪽 눈 (흰자) */}
+      <mesh position={[-s * 0.3, s * 0.7, s * 0.32]}>
+        <sphereGeometry args={[s * 0.15, 10, 10]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.3} />
+      </mesh>
+      {/* 왼쪽 눈동자 */}
+      <mesh position={[-s * 0.3, s * 0.7, s * 0.45]}>
+        <sphereGeometry args={[s * 0.08, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.2} />
+      </mesh>
+      {/* 오른쪽 눈 튀어나온 부분 */}
+      <mesh castShadow position={[s * 0.3, s * 0.7, s * 0.15]}>
+        <sphereGeometry args={[s * 0.2, 12, 12]} />
+        <meshStandardMaterial color={greenBody} roughness={0.85} />
+      </mesh>
+      {/* 오른쪽 눈 (흰자) */}
+      <mesh position={[s * 0.3, s * 0.7, s * 0.32]}>
+        <sphereGeometry args={[s * 0.15, 10, 10]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.3} />
+      </mesh>
+      {/* 오른쪽 눈동자 */}
+      <mesh position={[s * 0.3, s * 0.7, s * 0.45]}>
+        <sphereGeometry args={[s * 0.08, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.2} />
+      </mesh>
+      {/* 입 (웃는 표정) */}
+      <mesh position={[0, s * 0.15, s * 0.6]} rotation={[0.2, 0, 0]}>
+        <torusGeometry args={[s * 0.2, s * 0.03, 8, 16, Math.PI]} />
+        <meshStandardMaterial color="#E91E63" roughness={0.5} />
+      </mesh>
+      {/* 왼쪽 앞발 */}
+      <mesh castShadow position={[-s * 0.55, -s * 0.6, s * 0.3]}>
+        <sphereGeometry args={[s * 0.15, 10, 10]} />
+        <meshStandardMaterial color={lightGreen} roughness={0.85} />
+      </mesh>
+      {/* 오른쪽 앞발 */}
+      <mesh castShadow position={[s * 0.55, -s * 0.6, s * 0.3]}>
+        <sphereGeometry args={[s * 0.15, 10, 10]} />
+        <meshStandardMaterial color={lightGreen} roughness={0.85} />
+      </mesh>
+      {/* 왼쪽 뒷다리 */}
+      <mesh castShadow position={[-s * 0.45, -s * 0.8, -s * 0.1]} rotation={[0, 0, 0.3]}>
+        <capsuleGeometry args={[s * 0.12, s * 0.25, 4, 8]} />
+        <meshStandardMaterial color={greenBody} roughness={0.85} />
+      </mesh>
+      {/* 오른쪽 뒷다리 */}
+      <mesh castShadow position={[s * 0.45, -s * 0.8, -s * 0.1]} rotation={[0, 0, -0.3]}>
+        <capsuleGeometry args={[s * 0.12, s * 0.25, 4, 8]} />
+        <meshStandardMaterial color={greenBody} roughness={0.85} />
+      </mesh>
+      {/* 볼터치 */}
+      <mesh position={[-s * 0.4, s * 0.25, s * 0.45]}>
+        <sphereGeometry args={[s * 0.12, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+      <mesh position={[s * 0.4, s * 0.25, s * 0.45]}>
+        <sphereGeometry args={[s * 0.12, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+    </group>
+  );
+};
+
+// 사자 인형 (갈기)
+export const LionDoll = ({ config, physicsRef }: DollRenderProps) => {
+  const s = config.size;
+  const { cheek } = config.palette;
+  const bodyColor = '#DEB887';
+  const maneColor = '#CD853F';
+  const noseColor = '#8B4513';
+
+  return (
+    <group>
+      {/* 몸통 */}
+      <mesh castShadow position={[0, -s * 0.3, 0]}>
+        <sphereGeometry args={[s * 0.8, 16, 16]} />
+        <meshStandardMaterial color={bodyColor} roughness={0.85} />
+      </mesh>
+      {/* 갈기 (여러 개의 구로 표현) */}
+      <mesh castShadow position={[0, s * 0.4, -s * 0.15]}>
+        <sphereGeometry args={[s * 0.75, 16, 16]} />
+        <meshStandardMaterial color={maneColor} roughness={0.9} />
+      </mesh>
+      <mesh castShadow position={[-s * 0.4, s * 0.5, 0]}>
+        <sphereGeometry args={[s * 0.3, 12, 12]} />
+        <meshStandardMaterial color={maneColor} roughness={0.9} />
+      </mesh>
+      <mesh castShadow position={[s * 0.4, s * 0.5, 0]}>
+        <sphereGeometry args={[s * 0.3, 12, 12]} />
+        <meshStandardMaterial color={maneColor} roughness={0.9} />
+      </mesh>
+      <mesh castShadow position={[-s * 0.5, s * 0.3, 0]}>
+        <sphereGeometry args={[s * 0.25, 12, 12]} />
+        <meshStandardMaterial color={maneColor} roughness={0.9} />
+      </mesh>
+      <mesh castShadow position={[s * 0.5, s * 0.3, 0]}>
+        <sphereGeometry args={[s * 0.25, 12, 12]} />
+        <meshStandardMaterial color={maneColor} roughness={0.9} />
+      </mesh>
+      <mesh castShadow position={[0, s * 0.85, 0]}>
+        <sphereGeometry args={[s * 0.25, 12, 12]} />
+        <meshStandardMaterial color={maneColor} roughness={0.9} />
+      </mesh>
+      {/* 얼굴 */}
+      <mesh castShadow position={[0, s * 0.45, s * 0.25]}>
+        <sphereGeometry args={[s * 0.5, 16, 16]} />
+        <meshStandardMaterial color={bodyColor} roughness={0.85} />
+      </mesh>
+      {/* 왼쪽 귀 */}
+      <mesh castShadow position={[-s * 0.38, s * 0.8, s * 0.1]}>
+        <sphereGeometry args={[s * 0.12, 10, 10]} />
+        <meshStandardMaterial color={bodyColor} roughness={0.85} />
+      </mesh>
+      {/* 오른쪽 귀 */}
+      <mesh castShadow position={[s * 0.38, s * 0.8, s * 0.1]}>
+        <sphereGeometry args={[s * 0.12, 10, 10]} />
+        <meshStandardMaterial color={bodyColor} roughness={0.85} />
+      </mesh>
+      {/* 주둥이 */}
+      <mesh position={[0, s * 0.35, s * 0.6]}>
+        <sphereGeometry args={[s * 0.2, 12, 12]} />
+        <meshStandardMaterial color="#FFF8DC" roughness={0.8} />
+      </mesh>
+      {/* 왼쪽 눈 */}
+      <mesh position={[-s * 0.18, s * 0.55, s * 0.55]}>
+        <sphereGeometry args={[s * 0.08, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.3} />
+      </mesh>
+      {/* 오른쪽 눈 */}
+      <mesh position={[s * 0.18, s * 0.55, s * 0.55]}>
+        <sphereGeometry args={[s * 0.08, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.3} />
+      </mesh>
+      {/* 코 */}
+      <mesh position={[0, s * 0.38, s * 0.78]}>
+        <sphereGeometry args={[s * 0.07, 8, 8]} />
+        <meshStandardMaterial color={noseColor} roughness={0.5} />
+      </mesh>
+      {/* 볼터치 */}
+      <mesh position={[-s * 0.32, s * 0.4, s * 0.5]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+      <mesh position={[s * 0.32, s * 0.4, s * 0.5]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+      {/* 꼬리 */}
+      <mesh castShadow position={[0, -s * 0.2, -s * 0.7]} rotation={[-0.3, 0, 0]}>
+        <capsuleGeometry args={[s * 0.06, s * 0.35, 4, 8]} />
+        <meshStandardMaterial color={bodyColor} roughness={0.85} />
+      </mesh>
+      {/* 꼬리 끝 털 */}
+      <mesh castShadow position={[0, s * 0.0, -s * 0.9]}>
+        <sphereGeometry args={[s * 0.1, 10, 10]} />
+        <meshStandardMaterial color={maneColor} roughness={0.9} />
+      </mesh>
+    </group>
+  );
+};
+
+// 돼지 인형 (둥근 코, 꼬불꼬불 꼬리)
+export const PigDoll = ({ config, physicsRef }: DollRenderProps) => {
+  const s = config.size;
+  const { cheek } = config.palette;
+  const pinkBody = '#FFB6C1';
+  const darkPink = '#FF69B4';
+
+  return (
+    <group>
+      {/* 몸통 (통통) */}
+      <mesh castShadow position={[0, -s * 0.2, 0]}>
+        <sphereGeometry args={[s * 0.9, 16, 16]} />
+        <meshStandardMaterial color={pinkBody} roughness={0.85} />
+      </mesh>
+      {/* 머리 */}
+      <mesh castShadow position={[0, s * 0.5, 0]}>
+        <sphereGeometry args={[s * 0.65, 16, 16]} />
+        <meshStandardMaterial color={pinkBody} roughness={0.85} />
+      </mesh>
+      {/* 왼쪽 귀 */}
+      <mesh castShadow position={[-s * 0.4, s * 0.9, 0]} rotation={[0.3, 0, -0.4]}>
+        <coneGeometry args={[s * 0.15, s * 0.25, 4]} />
+        <meshStandardMaterial color={pinkBody} roughness={0.85} />
+      </mesh>
+      {/* 오른쪽 귀 */}
+      <mesh castShadow position={[s * 0.4, s * 0.9, 0]} rotation={[0.3, 0, 0.4]}>
+        <coneGeometry args={[s * 0.15, s * 0.25, 4]} />
+        <meshStandardMaterial color={pinkBody} roughness={0.85} />
+      </mesh>
+      {/* 코 (둥글고 큰) */}
+      <mesh castShadow position={[0, s * 0.4, s * 0.55]}>
+        <cylinderGeometry args={[s * 0.18, s * 0.18, s * 0.12, 16]} />
+        <meshStandardMaterial color={darkPink} roughness={0.7} />
+      </mesh>
+      {/* 코구멍 왼쪽 */}
+      <mesh position={[-s * 0.06, s * 0.4, s * 0.62]}>
+        <sphereGeometry args={[s * 0.04, 8, 8]} />
+        <meshStandardMaterial color="#333333" roughness={0.5} />
+      </mesh>
+      {/* 코구멍 오른쪽 */}
+      <mesh position={[s * 0.06, s * 0.4, s * 0.62]}>
+        <sphereGeometry args={[s * 0.04, 8, 8]} />
+        <meshStandardMaterial color="#333333" roughness={0.5} />
+      </mesh>
+      {/* 왼쪽 눈 */}
+      <mesh position={[-s * 0.2, s * 0.6, s * 0.45]}>
+        <sphereGeometry args={[s * 0.08, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.3} />
+      </mesh>
+      {/* 눈 하이라이트 왼쪽 */}
+      <mesh position={[-s * 0.17, s * 0.63, s * 0.52]}>
+        <sphereGeometry args={[s * 0.03, 6, 6]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.2} />
+      </mesh>
+      {/* 오른쪽 눈 */}
+      <mesh position={[s * 0.2, s * 0.6, s * 0.45]}>
+        <sphereGeometry args={[s * 0.08, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.3} />
+      </mesh>
+      {/* 눈 하이라이트 오른쪽 */}
+      <mesh position={[s * 0.23, s * 0.63, s * 0.52]}>
+        <sphereGeometry args={[s * 0.03, 6, 6]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.2} />
+      </mesh>
+      {/* 볼터치 */}
+      <mesh position={[-s * 0.38, s * 0.45, s * 0.35]}>
+        <sphereGeometry args={[s * 0.12, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+      <mesh position={[s * 0.38, s * 0.45, s * 0.35]}>
+        <sphereGeometry args={[s * 0.12, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+      {/* 앞발 */}
+      <mesh castShadow position={[-s * 0.4, -s * 0.85, s * 0.2]}>
+        <sphereGeometry args={[s * 0.15, 10, 10]} />
+        <meshStandardMaterial color={pinkBody} roughness={0.85} />
+      </mesh>
+      <mesh castShadow position={[s * 0.4, -s * 0.85, s * 0.2]}>
+        <sphereGeometry args={[s * 0.15, 10, 10]} />
+        <meshStandardMaterial color={pinkBody} roughness={0.85} />
+      </mesh>
+      {/* 꼬불꼬불 꼬리 */}
+      <mesh castShadow position={[0, -s * 0.1, -s * 0.75]} rotation={[0, 0, 0]}>
+        <torusGeometry args={[s * 0.1, s * 0.04, 8, 16, Math.PI * 1.5]} />
+        <meshStandardMaterial color={darkPink} roughness={0.7} />
+      </mesh>
+    </group>
+  );
+};
+
+// 코알라 인형 (큰 솜털 귀, 둥근 코)
+export const KoalaDoll = ({ config, physicsRef }: DollRenderProps) => {
+  const s = config.size;
+  const { cheek } = config.palette;
+  const grayBody = '#808080';
+  const lightGray = '#C0C0C0';
+  const whiteFluff = '#F5F5F5';
+
+  return (
+    <group>
+      {/* 몸통 */}
+      <mesh castShadow position={[0, -s * 0.25, 0]}>
+        <sphereGeometry args={[s * 0.85, 16, 16]} />
+        <meshStandardMaterial color={grayBody} roughness={0.9} />
+      </mesh>
+      {/* 흰 배 */}
+      <mesh position={[0, -s * 0.2, s * 0.35]}>
+        <sphereGeometry args={[s * 0.55, 12, 12]} />
+        <meshStandardMaterial color={whiteFluff} roughness={0.85} />
+      </mesh>
+      {/* 머리 */}
+      <mesh castShadow position={[0, s * 0.45, 0]}>
+        <sphereGeometry args={[s * 0.65, 16, 16]} />
+        <meshStandardMaterial color={grayBody} roughness={0.9} />
+      </mesh>
+      {/* 왼쪽 귀 (큰 솜털) */}
+      <mesh castShadow position={[-s * 0.55, s * 0.65, 0]}>
+        <sphereGeometry args={[s * 0.28, 12, 12]} />
+        <meshStandardMaterial color={grayBody} roughness={0.9} />
+      </mesh>
+      {/* 왼쪽 귀 안쪽 (흰 솜털) */}
+      <mesh position={[-s * 0.55, s * 0.65, s * 0.08]}>
+        <sphereGeometry args={[s * 0.18, 10, 10]} />
+        <meshStandardMaterial color={whiteFluff} roughness={0.9} />
+      </mesh>
+      {/* 오른쪽 귀 (큰 솜털) */}
+      <mesh castShadow position={[s * 0.55, s * 0.65, 0]}>
+        <sphereGeometry args={[s * 0.28, 12, 12]} />
+        <meshStandardMaterial color={grayBody} roughness={0.9} />
+      </mesh>
+      {/* 오른쪽 귀 안쪽 (흰 솜털) */}
+      <mesh position={[s * 0.55, s * 0.65, s * 0.08]}>
+        <sphereGeometry args={[s * 0.18, 10, 10]} />
+        <meshStandardMaterial color={whiteFluff} roughness={0.9} />
+      </mesh>
+      {/* 흰 얼굴 패치 */}
+      <mesh position={[0, s * 0.35, s * 0.35]}>
+        <sphereGeometry args={[s * 0.4, 12, 12]} />
+        <meshStandardMaterial color={whiteFluff} roughness={0.85} />
+      </mesh>
+      {/* 큰 코 */}
+      <mesh castShadow position={[0, s * 0.35, s * 0.65]}>
+        <sphereGeometry args={[s * 0.15, 10, 10]} />
+        <meshStandardMaterial color="#2F2F2F" roughness={0.6} />
+      </mesh>
+      {/* 왼쪽 눈 */}
+      <mesh position={[-s * 0.18, s * 0.5, s * 0.5]}>
+        <sphereGeometry args={[s * 0.08, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.3} />
+      </mesh>
+      {/* 눈 하이라이트 왼쪽 */}
+      <mesh position={[-s * 0.15, s * 0.53, s * 0.56]}>
+        <sphereGeometry args={[s * 0.025, 6, 6]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.2} />
+      </mesh>
+      {/* 오른쪽 눈 */}
+      <mesh position={[s * 0.18, s * 0.5, s * 0.5]}>
+        <sphereGeometry args={[s * 0.08, 8, 8]} />
+        <meshStandardMaterial color="#111111" roughness={0.3} />
+      </mesh>
+      {/* 눈 하이라이트 오른쪽 */}
+      <mesh position={[s * 0.21, s * 0.53, s * 0.56]}>
+        <sphereGeometry args={[s * 0.025, 6, 6]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.2} />
+      </mesh>
+      {/* 볼터치 */}
+      <mesh position={[-s * 0.32, s * 0.32, s * 0.45]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+      <mesh position={[s * 0.32, s * 0.32, s * 0.45]}>
+        <sphereGeometry args={[s * 0.1, 8, 8]} />
+        <meshStandardMaterial color={cheek} roughness={0.9} transparent opacity={0.5} />
+      </mesh>
+      {/* 팔 */}
+      <mesh castShadow position={[-s * 0.6, -s * 0.1, s * 0.2]} rotation={[0, 0, 0.5]}>
+        <capsuleGeometry args={[s * 0.12, s * 0.25, 4, 8]} />
+        <meshStandardMaterial color={grayBody} roughness={0.9} />
+      </mesh>
+      <mesh castShadow position={[s * 0.6, -s * 0.1, s * 0.2]} rotation={[0, 0, -0.5]}>
+        <capsuleGeometry args={[s * 0.12, s * 0.25, 4, 8]} />
+        <meshStandardMaterial color={grayBody} roughness={0.9} />
+      </mesh>
+    </group>
+  );
+};
+
 // 물리 + 렌더링을 합친 통합 인형 컴포넌트
 const CuteDoll = ({ config }: CuteDollProps) => {
   const grabbedDollId = useGameStore((state) => state.grabbedDoll.id);
@@ -908,6 +1792,24 @@ const CuteDoll = ({ config }: CuteDollProps) => {
         return <HamsterDoll config={config} physicsRef={ref} />;
       case 'dog':
         return <DogDoll config={config} physicsRef={ref} />;
+      case 'penguin':
+        return <PenguinDoll config={config} physicsRef={ref} />;
+      case 'panda':
+        return <PandaDoll config={config} physicsRef={ref} />;
+      case 'sheep':
+        return <SheepDoll config={config} physicsRef={ref} />;
+      case 'chick':
+        return <ChickDoll config={config} physicsRef={ref} />;
+      case 'fox':
+        return <FoxDoll config={config} physicsRef={ref} />;
+      case 'frog':
+        return <FrogDoll config={config} physicsRef={ref} />;
+      case 'lion':
+        return <LionDoll config={config} physicsRef={ref} />;
+      case 'pig':
+        return <PigDoll config={config} physicsRef={ref} />;
+      case 'koala':
+        return <KoalaDoll config={config} physicsRef={ref} />;
       default:
         // 혹시라도 타입이 없거나 잘못된 경우 기본값으로 곰인형 렌더링 (동그라미 구체만 나오는 문제 방지)
         // 팔레트가 없을 경우를 대비해 기본 팔레트 사용
