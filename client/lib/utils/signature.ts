@@ -2,7 +2,7 @@ import CryptoJS from 'crypto-js';
 
 // 주의: 클라이언트 사이드에 키가 노출되는 것은 불가피함.
 // 하지만 난독화(Obfuscation)와 결합하면 스크립트 키디들의 공격을 효과적으로 지연시킬 수 있음.
-const SIGNATURE_SECRET = 'v2_secure_plz_dont_hack_me_s3cret_k3y_9981';
+const SIGNATURE_SECRET = process.env.NEXT_PUBLIC_SIGNATURE_SECRET || 'fallback_secret_for_dev';
 
 export interface ScoreData {
     score: number;
