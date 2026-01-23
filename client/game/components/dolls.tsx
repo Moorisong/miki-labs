@@ -15,6 +15,7 @@ import { useFrame } from '@react-three/fiber';
 
 // 귀여운 인형 색상 팔레트
 const DOLL_PALETTES = [
+  // 기본 동물 색상 (0-14)
   { body: '#FFB6C1', accent: '#FF69B4', cheek: '#FF1493' }, // 핑크 토끼
   { body: '#8B4513', accent: '#D2691E', cheek: '#FF6B6B' }, // 갈색 곰
   { body: '#FFA500', accent: '#FF8C00', cheek: '#FF6B6B' }, // 주황 고양이
@@ -30,7 +31,8 @@ const DOLL_PALETTES = [
   { body: '#FFEFD5', accent: '#F4A460', cheek: '#FF6B6B' }, // 크림 햄스터
   { body: '#F4A460', accent: '#8B4513', cheek: '#FF6B6B' }, // 강아지
   { body: '#D3D3D3', accent: '#FFFFFF', cheek: '#FF69B4' }, // 회색 강아지
-  // New Additions:
+
+  // 파스텔 톤 (15-24)
   { body: '#957DAD', accent: '#845EC2', cheek: '#FF9EAA' }, // 라벤더
   { body: '#FF9EAA', accent: '#FFD3E0', cheek: '#FF6F91' }, // 소프트 핑크
   { body: '#D6E5FA', accent: '#B4D7FA', cheek: '#F3C5FF' }, // 베이비 블루
@@ -41,11 +43,54 @@ const DOLL_PALETTES = [
   { body: '#FFE4E1', accent: '#FA8072', cheek: '#DC143C' }, // 미스티 로즈
   { body: '#B0E0E6', accent: '#4682B4', cheek: '#FF69B4' }, // 파우더 블루
   { body: '#C8A2C8', accent: '#800080', cheek: '#FFC0CB' }, // 라일락
+
+  // 생동감 있는 색상 (25-34)
   { body: '#98FF98', accent: '#32CD32', cheek: '#FF4500' }, // 민트 그린
   { body: '#FFDAB9', accent: '#FF8C00', cheek: '#CD5C5C' }, // 피치 퍼프
   { body: '#D8BFD8', accent: '#9932CC', cheek: '#8B008B' }, // 엉겅퀴
   { body: '#F5FFFA', accent: '#00FA9A', cheek: '#FF1493' }, // 민트 크림
   { body: '#778899', accent: '#2F4F4F', cheek: '#FFA500' }, // 쿨 그레이
+  { body: '#FF6B6B', accent: '#EE5A5A', cheek: '#FF1744' }, // 코랄 레드
+  { body: '#4ECDC4', accent: '#26A69A', cheek: '#FF6B6B' }, // 틸 그린
+  { body: '#45B7D1', accent: '#2196F3', cheek: '#FF80AB' }, // 스카이 블루
+  { body: '#96CEB4', accent: '#88D8B0', cheek: '#FFAB91' }, // 세이지 그린
+  { body: '#FFEAA7', accent: '#FDCB6E', cheek: '#E17055' }, // 버터 옐로우
+
+  // 네온/비비드 색상 (35-44)
+  { body: '#A29BFE', accent: '#6C5CE7', cheek: '#FD79A8' }, // 일렉트릭 퍼플
+  { body: '#74B9FF', accent: '#0984E3', cheek: '#FF7675' }, // 브라이트 블루
+  { body: '#55EFC4', accent: '#00B894', cheek: '#FDCB6E' }, // 네온 민트
+  { body: '#FD79A8', accent: '#E84393', cheek: '#A29BFE' }, // 핫 핑크
+  { body: '#FDCB6E', accent: '#F39C12', cheek: '#E74C3C' }, // 선샤인 옐로우
+  { body: '#E17055', accent: '#D63031', cheek: '#FDCB6E' }, // 웜 오렌지
+  { body: '#81ECEC', accent: '#00CEC9', cheek: '#FD79A8' }, // 아쿠아 블루
+  { body: '#FAB1A0', accent: '#E17055', cheek: '#FD79A8' }, // 살몬 핑크
+  { body: '#00B894', accent: '#00A085', cheek: '#FD79A8' }, // 에메랄드
+  { body: '#E84393', accent: '#C2185B', cheek: '#A29BFE' }, // 매젠타
+
+  // 따뜻한 톤 (45-54)
+  { body: '#FFCCBC', accent: '#FF8A65', cheek: '#FF5252' }, // 피치
+  { body: '#D7CCC8', accent: '#A1887F', cheek: '#FF8A80' }, // 모카
+  { body: '#FFE0B2', accent: '#FFB74D', cheek: '#FF6E40' }, // 아프리콧
+  { body: '#FFAB91', accent: '#FF7043', cheek: '#FF1744' }, // 딥 오렌지
+  { body: '#BCAAA4', accent: '#8D6E63', cheek: '#FF8A80' }, // 토프
+  { body: '#F8BBD9', accent: '#F06292', cheek: '#AD1457' }, // 로즈
+  { body: '#CE93D8', accent: '#AB47BC', cheek: '#FF4081' }, // 오키드
+  { body: '#B39DDB', accent: '#7E57C2', cheek: '#FF80AB' }, // 바이올렛
+  { body: '#9FA8DA', accent: '#5C6BC0', cheek: '#FF8A80' }, // 인디고
+  { body: '#90CAF9', accent: '#42A5F5', cheek: '#FF80AB' }, // 소프트 블루
+
+  // 차가운 톤 (55-64)
+  { body: '#80DEEA', accent: '#26C6DA', cheek: '#FFAB91' }, // 시안
+  { body: '#80CBC4', accent: '#26A69A', cheek: '#FFCC80' }, // 씨 그린
+  { body: '#A5D6A7', accent: '#66BB6A', cheek: '#FFAB91' }, // 라이트 그린
+  { body: '#C5E1A5', accent: '#9CCC65', cheek: '#FF8A65' }, // 라임
+  { body: '#E6EE9C', accent: '#D4E157', cheek: '#FF7043' }, // 라임 옐로우
+  { body: '#FFF59D', accent: '#FFEE58', cheek: '#FF5722' }, // 레몬
+  { body: '#FFE082', accent: '#FFCA28', cheek: '#FF6E40' }, // 앰버
+  { body: '#FFCC80', accent: '#FFA726', cheek: '#FF5252' }, // 오렌지
+  { body: '#FFAB91', accent: '#FF8A65', cheek: '#D32F2F' }, // 딥 오렌지 2
+  { body: '#EF9A9A', accent: '#EF5350', cheek: '#C62828' }, // 레드
 ];
 
 // 인형 타입 (토끼, 곰, 고양이, 햄스터, 강아지, 펭귄, 팬더, 양, 병아리, 여우, 개구리, 사자, 돼지, 코알라)
@@ -121,18 +166,22 @@ const generateDollConfigs = (count: number): CuteDollConfig[] => {
 
     const y = floorHeight + size + Math.random() * 0.5;
 
-    // 햄스터면 햄스터 팔레트, 강아지면 강아지 팔레트 (13, 14), 나머지는 랜덤
+    // 햄스터면 햄스터 팔레트, 강아지면 강아지 팔레트 (13, 14), 나머지는 전체 팔레트에서 랜덤
     let paletteIndex: number;
     if (cuteType === 'hamster') {
       paletteIndex = hamsterPalettes[Math.floor(Math.random() * hamsterPalettes.length)];
     } else if (cuteType === 'dog') {
       paletteIndex = 13 + Math.floor(Math.random() * 2);
     } else {
-      // 기존 팔레트(0-9) + 새로운 파스텔 팔레트(15-29) 중 랜덤 선택
-      // 햄스터/강아지 전용 제외하고 모든 색상 사용
+      // 65개 팔레트 전체에서 랜덤 선택 (햄스터/강아지 전용 제외)
+      // 0-9: 기본, 15-64: 파스텔/네온/따뜻한톤/차가운톤
       const availableIndices = [
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-        15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29
+        15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+        25, 26, 27, 28, 29, 30, 31, 32, 33, 34,
+        35, 36, 37, 38, 39, 40, 41, 42, 43, 44,
+        45, 46, 47, 48, 49, 50, 51, 52, 53, 54,
+        55, 56, 57, 58, 59, 60, 61, 62, 63, 64
       ];
       paletteIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
     }
