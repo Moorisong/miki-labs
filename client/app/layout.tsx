@@ -4,7 +4,7 @@ import NavBar from '@/components/layout/nav-bar';
 import Footer from '@/components/layout/footer';
 import SessionProvider from '@/components/providers/session-provider';
 import NicknameProvider from '@/components/providers/nickname-provider';
-import AntiDebugProvider from '@/components/common/anti-debug-provider';
+
 import AdBanner from '@/components/ads/ad-banner';
 import './globals.css';
 
@@ -82,15 +82,13 @@ export default function RootLayout({
     <html lang="ko">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <SessionProvider>
-          <AntiDebugProvider>
-            <NicknameProvider>
-              <NavBar />
-              <main style={{ paddingTop: '64px', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-                {children}
-              </main>
-              <Footer />
-            </NicknameProvider>
-          </AntiDebugProvider>
+          <NicknameProvider>
+            <NavBar />
+            <main style={{ paddingTop: '64px', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+              {children}
+            </main>
+            <Footer />
+          </NicknameProvider>
         </SessionProvider>
       </body>
     </html>
