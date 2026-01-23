@@ -1,4 +1,4 @@
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
 // 랭킹 제출용 rate limiter - IP 기반
 // 1분에 최대 3회 제출 가능
@@ -11,14 +11,7 @@ export const rankingSubmitLimiter = rateLimit({
   },
   standardHeaders: true, // RateLimit-* 헤더 포함
   legacyHeaders: false, // X-RateLimit-* 헤더 제외
-  keyGenerator: (req) => {
-    // X-Forwarded-For 헤더 또는 IP 사용
-    const forwarded = req.headers['x-forwarded-for'];
-    if (typeof forwarded === 'string') {
-      return forwarded.split(',')[0].trim();
-    }
-    return req.ip || 'unknown';
-  }
+
 });
 
 // 랭킹 제출용 rate limiter - 닉네임 기반
@@ -32,18 +25,14 @@ export const nicknameSubmitLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
+  keyGenerator: (req, res) => {
     // 닉네임으로 rate limit 적용
     const nickname = req.body?.nickname;
     if (nickname && typeof nickname === 'string') {
       return `nickname:${nickname.toLowerCase().trim()}`;
     }
     // 닉네임이 없으면 IP로 fallback
-    const forwarded = req.headers['x-forwarded-for'];
-    if (typeof forwarded === 'string') {
-      return forwarded.split(',')[0].trim();
-    }
-    return req.ip || 'unknown';
+    return (ipKeyGenerator as any)(req, res);
   }
 });
 
@@ -58,9 +47,9 @@ export const userIdSubmitLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
+  keyGenerator: (req, res) => {
     // 인증된 사용자 (카카오 로그인)
-    const authenticatedUserId = req.user?._id?.toString();
+    const authenticatedUserId = (req as any).user?._id?.toString();
     if (authenticatedUserId) {
       return `userId:${authenticatedUserId}`;
     }
@@ -70,10 +59,6 @@ export const userIdSubmitLimiter = rateLimit({
       return `tempUserId:${tempUserId}`;
     }
     // fallback to IP
-    const forwarded = req.headers['x-forwarded-for'];
-    if (typeof forwarded === 'string') {
-      return forwarded.split(',')[0].trim();
-    }
-    return req.ip || 'unknown';
+    return (ipKeyGenerator as any)(req, res);
   }
 });
