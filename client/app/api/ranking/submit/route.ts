@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getDatabase } from '@/lib/mongodb';
 
+// 중복 제출 방지: 최소 제출 간격 (밀리초)
+const MIN_SUBMIT_INTERVAL_MS = 5000; // 5초
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -51,6 +54,28 @@ export async function POST(request: NextRequest) {
     const db = await getDatabase();
     const scores = db.collection('scores');
     const users = db.collection('users');
+
+    // 중복 제출 방지: 마지막 제출 시간 체크
+    const existingScoreForRateLimit = await scores.findOne({
+      $or: [
+        { kakaoId: session.user.kakaoId },
+        { kakaoId: session.user.kakaoId }
+      ]
+    });
+
+    if (existingScoreForRateLimit?.updatedAt) {
+      const lastSubmitTime = new Date(existingScoreForRateLimit.updatedAt).getTime();
+      const now = Date.now();
+      const timeSinceLastSubmit = now - lastSubmitTime;
+
+      if (timeSinceLastSubmit < MIN_SUBMIT_INTERVAL_MS) {
+        const remainingSeconds = Math.ceil((MIN_SUBMIT_INTERVAL_MS - timeSinceLastSubmit) / 1000);
+        return NextResponse.json(
+          { success: false, error: `너무 빠른 제출입니다. ${remainingSeconds}초 후에 다시 시도해주세요.` },
+          { status: 429 }
+        );
+      }
+    }
 
     // 사용자 정보 가져오기
     const user = await users.findOne({ kakaoId: session.user.kakaoId });
