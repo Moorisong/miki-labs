@@ -2,6 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getDatabase } from '@/lib/mongodb';
+import { Filter } from 'bad-words';
+
+// 비속어 필터 설정
+const filter = new Filter();
+// 한국어 비속어 추가
+filter.addWords(
+  '시발', '씨발', '씨팔', '시팔', '씹', '병신', '븅신', '빙신',
+  '개새끼', '새끼', '썅', '좆', '존나', '졸라', '지랄', '꺼져',
+  '닥쳐', '미친', '또라이', '놈', '년', '창녀', '보지', '자지',
+  '니미', '느금마', '엠창', '애미', '애비', '호구', '찐따'
+);
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -39,6 +50,14 @@ export async function PATCH(request: NextRequest) {
     if (invalidPattern.test(trimmedNickname)) {
       return NextResponse.json(
         { success: false, error: '사용할 수 없는 문자가 포함되어 있습니다.' },
+        { status: 400 }
+      );
+    }
+
+    // 비속어 검사
+    if (filter.isProfane(trimmedNickname)) {
+      return NextResponse.json(
+        { success: false, error: '사용할 수 없는 닉네임입니다.' },
         { status: 400 }
       );
     }
