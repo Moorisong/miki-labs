@@ -70,10 +70,15 @@ export default async function RankingPage() {
       </header>
 
       {!hasData ? (
-        <section className={styles.emptyState}>
-          <p className={styles.emptyText}>{MESSAGES.RANKING.EMPTY}</p>
-          <p className={styles.emptySubtext}>{MESSAGES.RANKING.EMPTY_CTA}</p>
-        </section>
+        <>
+          <section className={styles.emptyState}>
+            <p className={styles.emptyText}>{MESSAGES.RANKING.EMPTY}</p>
+            <p className={styles.emptySubtext}>{MESSAGES.RANKING.EMPTY_CTA}</p>
+          </section>
+          <div className={styles.adSection}>
+            <AdBanner />
+          </div>
+        </>
       ) : (
         <>
           {/* 상위 3명 하이라이트 */}
@@ -92,6 +97,10 @@ export default async function RankingPage() {
               </div>
             ))}
           </section>
+
+          <div className={styles.adSection}>
+            <AdBanner />
+          </div>
 
           {/* 랭킹 테이블 */}
           <section className={styles.tableSection}>
@@ -151,7 +160,6 @@ export default async function RankingPage() {
           </section>
         </>
       )}
-      <AdBanner />
     </div>
   );
 }

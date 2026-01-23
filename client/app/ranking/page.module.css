@@ -346,3 +346,10 @@
     flex-wrap: wrap;
   }
 }
+
+.adSection {
+  margin-bottom: var(--space-3xl);
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}

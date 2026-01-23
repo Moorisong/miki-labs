@@ -72,6 +72,11 @@ export default async function HomePage() {
         </Link>
       </section>
 
+      {/* Ad Section */}
+      <div className={styles.adSection}>
+        <AdBanner />
+      </div>
+
       {/* Features Section */}
       <section className={styles.features}>
         <h2 className={styles.sectionTitle}>게임 특징</h2>
@@ -127,10 +132,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Ad Section */}
-      <div className={styles.adSection}>
-        <AdBanner />
-      </div>
+
 
     </div>
   );
