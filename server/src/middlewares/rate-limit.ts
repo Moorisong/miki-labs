@@ -46,3 +46,34 @@ export const nicknameSubmitLimiter = rateLimit({
     return req.ip || 'unknown';
   }
 });
+
+// 랭킹 제출용 rate limiter - 유저 ID 기반 (카카오 ID 또는 tempUserId)
+// 같은 유저 ID로 1분에 최대 3회 제출 가능
+export const userIdSubmitLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1분
+  max: 3, // 최대 3회
+  message: {
+    success: false,
+    error: '너무 많은 요청입니다. 1분 후에 다시 시도해주세요.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    // 인증된 사용자 (카카오 로그인)
+    const authenticatedUserId = req.user?._id?.toString();
+    if (authenticatedUserId) {
+      return `userId:${authenticatedUserId}`;
+    }
+    // 게스트 사용자 (tempUserId)
+    const tempUserId = req.body?.tempUserId;
+    if (tempUserId && typeof tempUserId === 'string') {
+      return `tempUserId:${tempUserId}`;
+    }
+    // fallback to IP
+    const forwarded = req.headers['x-forwarded-for'];
+    if (typeof forwarded === 'string') {
+      return forwarded.split(',')[0].trim();
+    }
+    return req.ip || 'unknown';
+  }
+});
