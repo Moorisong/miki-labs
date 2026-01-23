@@ -21,6 +21,8 @@ export interface SubmitScoreRequest {
     language?: string;
     platform?: string;
   };
+  signature?: string;
+  timestamp?: number;
 }
 
 export interface User {

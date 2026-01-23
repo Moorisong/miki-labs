@@ -49,15 +49,31 @@ export const rankingApi = {
   },
 
   async submitScore(
-    data: Omit<SubmitScoreRequest, 'tempUserId' | 'nickname' | 'fingerprint'>
+    data: Omit<SubmitScoreRequest, 'tempUserId' | 'nickname' | 'fingerprint' | 'signature' | 'timestamp'>
   ): Promise<SubmitResult> {
     try {
       const { getFingerprintData } = await import('@/lib/utils/fingerprint');
+      const { generateSignature } = await import('@/lib/utils/signature');
+
       const fingerprint = await getFingerprintData();
+      const timestamp = Date.now();
+
+      // 서명 생성
+      const signature = generateSignature({
+        score: data.score,
+        attempts: data.attempts,
+        dollsCaught: data.dollsCaught,
+        timestamp
+      });
 
       const response = await internalFetch<SubmitScoreResponse>(API.RANKING.SUBMIT, {
         method: 'POST',
-        body: JSON.stringify({ ...data, fingerprint }),
+        body: JSON.stringify({
+          ...data,
+          fingerprint,
+          timestamp,
+          signature
+        }),
       });
       return { success: response.success, error: response.error, data: response.data };
     } catch (e) {

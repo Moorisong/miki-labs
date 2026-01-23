@@ -27,7 +27,30 @@ export const submitScore = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { score, attempts, dollsCaught, tempUserId, nickname, fingerprint } = req.body;
+    const { score, attempts, dollsCaught, tempUserId, nickname, fingerprint, signature, timestamp } = req.body;
+
+    // 0. 데이터 무결성 검증 (HMAC Signature Check)
+    // 봇/스크립트 공격 방지용
+    if (!signature || !timestamp) {
+      throw new AppError(400, 'Invalid request format (Missing signature)');
+    }
+
+    // 타임스탬프 유효성 검사 (5분 이내 요청만 허용 - Replay Attack 방지)
+    const now = Date.now();
+    if (Math.abs(now - timestamp) > 5 * 60 * 1000) {
+      throw new AppError(403, 'Request expired');
+    }
+
+    // 서명 검증
+    const { verifySignature } = await import('../utils/signature');
+    const isValidSignature = verifySignature(
+      { score, attempts, dollsCaught, timestamp },
+      signature
+    );
+
+    if (!isValidSignature) {
+      throw new AppError(403, 'Invalid signature');
+    }
 
     // Check for authenticated user first
     let userId = req.user?._id?.toString();
@@ -54,7 +77,7 @@ export const submitScore = async (
       userId,
       nickname,
       score,
-      fingerprint, // Client should send this object { hash, userAgent, ... }
+      fingerprint,
       ipAddress
     );
 

@@ -342,8 +342,16 @@ export async function performFullAbuseCheck(
         return newUserCheck;
     }
 
-    // 2. 핑거프린트 체크 (데이터가 있으면)
-    if (fingerprintData && ipAddress) {
+    // 2. 핑거프린트 체크 (필수)
+    if (!fingerprintData || !fingerprintData.hash) {
+        return {
+            allowed: false,
+            reason: '보안 검증 데이터가 누락되었습니다. (Fingerprint required)',
+            suspicionScore: 100
+        };
+    }
+
+    if (ipAddress) {
         await registerFingerprint(userId, fingerprintData, ipAddress);
 
         const multiAccountCheck = await checkMultipleAccounts(fingerprintData.hash);
