@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import Script from 'next/script';
 
 interface KakaoAdfitProps {
     unit: string;
@@ -11,82 +10,68 @@ interface KakaoAdfitProps {
 }
 
 export default function KakaoAdfit({ unit, width, height, className }: KakaoAdfitProps) {
-    const adRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (!adRef.current) return;
+        if (!containerRef.current) return;
 
-        // 이미 광고 영역이 생성되어 있다면 스킵
-        if (adRef.current.querySelector('ins.kakao_ad_area')) {
-            return;
+        const container = containerRef.current;
+        container.innerHTML = '';
+
+        // iframe 생성
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.style.overflow = 'hidden';
+        iframe.width = String(width);
+        iframe.height = String(height);
+
+        container.appendChild(iframe);
+
+        // iframe 내부 문서에 광고 코드 주입
+        const doc = iframe.contentWindow?.document;
+        if (doc) {
+            doc.open();
+            doc.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <style>
+                        body { margin: 0; padding: 0; width: ${width}px; height: ${height}px; background: transparent; }
+                        .kakao_ad_area { display: block; width: 100%; height: 100%; }
+                    </style>
+                </head>
+                <body>
+                    <ins class="kakao_ad_area" 
+                         style="display:none;" 
+                         data-ad-unit="${unit}" 
+                         data-ad-width="${width}" 
+                         data-ad-height="${height}"></ins>
+                    <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+                </body>
+                </html>
+            `);
+            doc.close();
         }
 
-        // 광고 영역 생성
-        const ins = document.createElement('ins');
-        ins.className = 'kakao_ad_area';
-        ins.style.display = 'none';
-        ins.style.width = '100%';
-        ins.setAttribute('data-ad-unit', unit);
-        ins.setAttribute('data-ad-width', String(width));
-        ins.setAttribute('data-ad-height', String(height));
-
-        adRef.current.appendChild(ins);
-
-        const tryRender = () => {
-            if ((window as any).adfit) {
-                try {
-                    (window as any).adfit.render();
-                    return true;
-                } catch (e) {
-                    console.error('AdFit render error:', e);
-                }
-            }
-            return false;
-        };
-
-        // 지연 로딩 및 반복 시도 (스크립트 로드 대기)
-        let timer: NodeJS.Timeout;
-        let attempts = 0;
-
-        const checkAndRender = () => {
-            attempts++;
-            if (tryRender() || attempts > 30) {
-                return;
-            }
-            timer = setTimeout(checkAndRender, 200);
-        };
-
-        checkAndRender();
-
         return () => {
-            if (timer) clearTimeout(timer);
+            container.innerHTML = '';
         };
     }, [unit, width, height]);
 
     return (
-        <>
-            <Script
-                id="kakao-adfit-script"
-                src="//t1.daumcdn.net/kas/static/ba.min.js"
-                strategy="lazyOnload"
-                onLoad={() => {
-                    if ((window as any).adfit) {
-                        try { (window as any).adfit.render(); } catch (e) { }
-                    }
-                }}
-            />
-            <div
-                ref={adRef}
-                className={className}
-                style={{
-                    width: `${width}px`,
-                    height: `${height}px`,
-                    margin: '0 auto',
-                    overflow: 'hidden',
-                    minHeight: `${height}px`
-                }}
-            />
-        </>
+        <div
+            ref={containerRef}
+            className={className}
+            style={{
+                width: `${width}px`,
+                height: `${height}px`,
+                margin: '0 auto',
+                overflow: 'hidden'
+            }}
+        />
     );
 }
 
