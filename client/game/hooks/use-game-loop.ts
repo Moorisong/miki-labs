@@ -11,6 +11,7 @@ export const useGameLoop = () => {
     // Refs for releasing phase
     const releaseTimer = useRef<number>(0);
     const arrivalTimer = useRef<number>(0); // 도착 후 안정화 대기 타이머
+    const dropSettlingTimer = useRef<number>(0); // 바닥 도착 후 물리 안정화 대기 타이머
 
     // Use individual selectors to avoid full re-renders, or just access via getState in loop
     const phase = useGameStore((state) => state.phase);
@@ -102,16 +103,24 @@ export const useGameLoop = () => {
                     }
 
                     if (newY <= bottomY) {
+                        // 바닥 도착: 물리적 안정화 시간 측정 시작
+                        dropSettlingTimer.current += dt;
+
                         // [FIX] 시각적 씽크 맞추기: 로직상 도착했더라도, 시각적 줄(스프링)이 따라올 때까지 대기
                         // 화면에서 집게가 인형에 닿기도 전에 잡는 판정이 나오는 것을 방지
                         const visualY = state.visualClawPosition.y;
                         const syncThreshold = 0.2; // 허용 오차 (스프링 장력/오버슈팅 고려)
 
                         // 시각적 위치가 목표지점 근처(혹은 더 아래)에 도달했는지 확인
-                        // (visualY가 더 작아지는 것이 아래로 내려가는 것임)
-                        if (visualY <= bottomY + syncThreshold) {
+                        // + 안정화 시간(0.3s)을 확보하여 집게가 인형들 사이로 파고들 시간을 줌
+                        // 시각적 스프링 속도가 빨라져도 물리적 상호작용은 보장됨 (기능 분리)
+                        if (visualY <= bottomY + syncThreshold && dropSettlingTimer.current > 0.3) {
                             grabDoll();
+                            dropSettlingTimer.current = 0;
                         }
+                    } else {
+                        // 아직 내려가는 중이면 타이머 초기화
+                        dropSettlingTimer.current = 0;
                     }
                     break;
                 }
@@ -272,7 +281,7 @@ export const useGameLoop = () => {
         if (phase === 'grabbing') {
             grabTimer.current = setTimeout(() => {
                 riseClaw();
-            }, 1200); // 1.2s 대기 (0.8s 판정 후 약간의 여유)
+            }, 600); // 1.2s -> 0.6s 대기 (지루함 방지)
         }
 
         return () => {
