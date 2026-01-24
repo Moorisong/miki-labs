@@ -1,4 +1,5 @@
 import { PHYSICS_CONFIG } from '../types/game.types';
+import { WORLD_STEP_CONFIG } from '../constants/collision';
 
 export interface PhysicsWorldConfig {
   gravity: [number, number, number];
@@ -8,6 +9,8 @@ export interface PhysicsWorldConfig {
   };
   allowSleep: boolean;
   iterations: number;
+  stepSize: number;
+  maxSubSteps: number;
 }
 
 export const createPhysicsConfig = (): PhysicsWorldConfig => {
@@ -19,6 +22,8 @@ export const createPhysicsConfig = (): PhysicsWorldConfig => {
     },
     allowSleep: true,
     iterations: 10,
+    stepSize: WORLD_STEP_CONFIG.fixedTimeStep,
+    maxSubSteps: WORLD_STEP_CONFIG.maxSubSteps,
   };
 };
 
