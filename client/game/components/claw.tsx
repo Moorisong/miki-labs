@@ -7,6 +7,7 @@ import { useSphere } from '@react-three/cannon';
 import { CLAW_CONFIG, CABINET_DIMENSIONS } from '../types/game.types';
 import { useGameStore } from '../core/game-manager';
 import { generateFingerStrengths } from '../core/physics-world';
+import { COLLIDER_CONFIG } from '../constants/collision';
 
 const {
   fingerCount,
@@ -138,7 +139,16 @@ const GrabbedDollRenderer = () => {
       config.cuteType === 'bear' ? BearDoll :
         config.cuteType === 'cat' ? CatDoll :
           config.cuteType === 'hamster' ? HamsterDoll :
-            config.cuteType === 'dog' ? DogDoll : null;
+            config.cuteType === 'dog' ? DogDoll :
+              config.cuteType === 'penguin' ? PenguinDoll :
+                config.cuteType === 'panda' ? PandaDoll :
+                  config.cuteType === 'sheep' ? SheepDoll :
+                    config.cuteType === 'chick' ? ChickDoll :
+                      config.cuteType === 'fox' ? FoxDoll :
+                        config.cuteType === 'frog' ? FrogDoll :
+                          config.cuteType === 'lion' ? LionDoll :
+                            config.cuteType === 'pig' ? PigDoll :
+                              config.cuteType === 'koala' ? KoalaDoll : null;
 
   if (!DollComponent) return null;
 
@@ -173,16 +183,15 @@ const ClawFinger = ({ index, isOpen, strengthVariance, clawPosition }: ClawFinge
   // 현재 게임 단계 가져오기
   const phase = useGameStore((state) => state.phase);
 
-  // 손가락 끝 위치에 물리 충돌체 (작게, 부드럽게)
   const [fingerRef, fingerApi] = useSphere<Mesh>(() => ({
     type: 'Kinematic',
-    args: [fingerWidth * 0.5],
+    args: [COLLIDER_CONFIG.prong.minRadius],
     position: [0, 0, 0],
     material: {
-      friction: 0.2,
-      restitution: 0.02, // 거의 튕기지 않음
+      friction: COLLIDER_CONFIG.prong.friction,
+      restitution: COLLIDER_CONFIG.prong.restitution,
     },
-    collisionResponse: true, // 초기값
+    collisionResponse: true,
   }));
 
   useFrame((_, delta) => {
@@ -282,7 +291,12 @@ const ClawBase = () => {
 
 
 // Import doll components
-import { BunnyDoll, BearDoll, CatDoll, HamsterDoll, DogDoll, CuteDollConfig } from './dolls';
+import {
+  BunnyDoll, BearDoll, CatDoll, HamsterDoll, DogDoll,
+  PenguinDoll, PandaDoll, SheepDoll, ChickDoll, FoxDoll,
+  FrogDoll, LionDoll, PigDoll, KoalaDoll,
+  CuteDollConfig
+} from './dolls';
 import { DollConfig } from '../types/game.types';
 
 // ... (ClawCollider and ClawFinger components remain unchanged)
