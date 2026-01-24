@@ -56,12 +56,14 @@ export function useGameLogic({
 
     // Load initial rankings & Restore score from login
     useEffect(() => {
+        rankingApi.restoreSession();
         rankingApi.getTopRanking(CONFIG.GAME.RANKING_TOP_LIMIT).then(setRankings);
 
-        const savedScore = sessionStorage.getItem(STORAGE_KEY.PENDING_RANKING_SCORE);
+        const savedScore = localStorage.getItem(STORAGE_KEY.PENDING_RANKING_SCORE);
         if (savedScore) {
             const scoreNum = parseInt(savedScore, 10);
             if (!isNaN(scoreNum)) {
+                console.log('[useGameLogic] Restoring score from localStorage:', scoreNum);
                 useGameStore.setState({ score: scoreNum });
                 setShowRanking(true);
             }
@@ -152,7 +154,7 @@ export function useGameLogic({
     // Game cleanup on unmount
     useEffect(() => {
         return () => {
-            const hasPendingScore = sessionStorage.getItem(STORAGE_KEY.PENDING_RANKING_SCORE);
+            const hasPendingScore = localStorage.getItem(STORAGE_KEY.PENDING_RANKING_SCORE);
             if (!hasPendingScore) {
                 resetGame();
             }
@@ -162,6 +164,7 @@ export function useGameLogic({
     const handleRankingSubmit = async () => {
         setIsSubmitting(true);
         try {
+            console.log('[useGameLogic] Submitting ranking with score:', score);
             const result = await rankingApi.submitScore({
                 score,
                 attempts: 1,
@@ -172,7 +175,8 @@ export function useGameLogic({
 
             const newRankings = await rankingApi.getTopRanking(CONFIG.GAME.RANKING_TOP_LIMIT);
             setRankings(newRankings);
-            sessionStorage.removeItem(STORAGE_KEY.PENDING_RANKING_SCORE);
+            localStorage.removeItem(STORAGE_KEY.PENDING_RANKING_SCORE);
+            console.log('[useGameLogic] Ranking submitted and score cleared from localStorage');
             return { success: true };
         } catch (e) {
             console.error('Failed to submit score:', e);
@@ -188,7 +192,7 @@ export function useGameLogic({
     };
 
     const handleRestart = () => {
-        sessionStorage.removeItem(STORAGE_KEY.PENDING_RANKING_SCORE);
+        localStorage.removeItem(STORAGE_KEY.PENDING_RANKING_SCORE);
         setShowRanking(false);
         setScoreModalData(null);
         setSuccessCount(0);
@@ -206,8 +210,8 @@ export function useGameLogic({
             return; // 아직 올라가는 중이면 무시
         }
 
-        // 로그인 사용자는 게임 시작 전 세션 토큰 발급
-        if (session?.user && !rankingApi.hasValidSession() && !isPreparingSession) {
+        // 게임 세션 토큰 발급 (로그인/비로그인 모두)
+        if (!rankingApi.hasValidSession() && !isPreparingSession) {
             isPreparingSession = true;
             const sessionResult = await rankingApi.startGameSession();
             isPreparingSession = false;

@@ -47,7 +47,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 세션의 kakaoId와 현재 사용자 일치 확인
-    if (sessionVerification.kakaoId !== session.user.kakaoId) {
+    // 세션이 guest인 경우, 현재 로그인한 사용자의 제출 허용 (게스트 플레이 후 로그인 시나리오)
+    if (sessionVerification.kakaoId !== 'guest' && sessionVerification.kakaoId !== session.user.kakaoId) {
       return NextResponse.json(
         { success: false, error: '게임 세션과 사용자가 일치하지 않습니다.' },
         { status: 403 }
@@ -55,9 +56,10 @@ export async function POST(request: NextRequest) {
     }
 
     // 세션 소비 (1회용) - 재사용 방지
-    if (!consumeSession(gameSessionToken)) {
+    const consumed = await consumeSession(gameSessionToken);
+    if (!consumed) {
       return NextResponse.json(
-        { success: false, error: '이미 사용된 게임 세션입니다.' },
+        { success: false, error: '이미 사용된 게임 세션이거나 유효하지 않은 세션입니다.' },
         { status: 403 }
       );
     }

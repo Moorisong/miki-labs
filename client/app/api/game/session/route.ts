@@ -103,16 +103,12 @@ export async function consumeSession(token: string): Promise<boolean> {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
+    const kakaoId = session?.user?.kakaoId || 'guest';
 
-    // 로그인한 사용자만 게임 세션 발급 가능
-    if (!session?.user?.kakaoId) {
-      return NextResponse.json(
-        { success: false, error: '로그인이 필요합니다.' },
-        { status: 401 }
-      );
-    }
+    // 로그인 확인 로직 제거 (게스트 플레이 지원)
+    // if (!session?.user?.kakaoId) { ... }
 
-    const kakaoId = session.user.kakaoId;
+
     const startTime = new Date();
     const expiresAt = new Date(startTime.getTime() + SESSION_EXPIRY_MS);
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useSession, signIn } from 'next-auth/react';
+import { STORAGE_KEY } from '@/constants';
 import styles from './success-effect.module.css';
 
 interface SuccessEffectProps {
@@ -207,7 +208,8 @@ export default function SuccessEffect({ show, score, totalScore, onComplete, sho
                 onClick={() => {
                   // 로그인 전 점수 저장 (누적 점수 사용)
                   const scoreToSave = totalScore ?? score;
-                  sessionStorage.setItem('pendingRankingScore', scoreToSave.toString());
+                  localStorage.setItem(STORAGE_KEY.PENDING_RANKING_SCORE, scoreToSave.toString());
+                  console.log('[SuccessEffect] Score saved to localStorage, redirecting to login');
                   signIn('kakao', { callbackUrl: '/game' });
                 }}
               >

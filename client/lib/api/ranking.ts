@@ -1,6 +1,6 @@
 import type { RankingEntry, SubmitScoreRequest, ApiResponse, GameSession } from './types';
 
-import { API, MESSAGES } from '@/constants';
+import { API, MESSAGES, STORAGE_KEY } from '@/constants';
 
 // 현재 활성 게임 세션 저장
 let currentGameSession: GameSession | null = null;
@@ -63,6 +63,13 @@ export const rankingApi = {
 
       if (response.success && response.data) {
         currentGameSession = response.data;
+        // localStorage에 백업 (새로고침/로그인 등 페이지 이동 대응)
+        try {
+          localStorage.setItem(STORAGE_KEY.GAME_SESSION_DATA, JSON.stringify(currentGameSession));
+          console.log('[rankingApi] Game session saved to localStorage');
+        } catch (e) {
+          console.warn('Failed to save session to storage', e);
+        }
         return { success: true };
       }
 
@@ -70,6 +77,29 @@ export const rankingApi = {
     } catch (e) {
       console.error('Failed to start game session:', e);
       return { success: false, error: '게임 세션 생성 중 오류' };
+    }
+  },
+
+  /**
+   * 저장된 게임 세션 복구 (페이지 로드 시)
+   */
+  restoreSession(): void {
+    try {
+      if (typeof window === 'undefined') return;
+
+      const data = localStorage.getItem(STORAGE_KEY.GAME_SESSION_DATA);
+      if (data) {
+        const session: GameSession = JSON.parse(data);
+        if (session.expiresAt > Date.now()) {
+          currentGameSession = session;
+          console.log('[rankingApi] Session restored from localStorage');
+        } else {
+          console.warn('[rankingApi] Stored session expired');
+          this.clearSession();
+        }
+      }
+    } catch (e) {
+      console.error("Failed to restore session", e);
     }
   },
 
@@ -82,12 +112,22 @@ export const rankingApi = {
   },
 
   /**
-   * 현재 게임 세션 토큰 반환
+   * 현재 게임 세션 및 토큰 확인 로직
    */
   getSessionToken(): string | null {
-    if (!currentGameSession) return null;
+    // 메모리에 없으면 스토리지에서 복구 시도 (JIT)
+    if (!currentGameSession && typeof window !== 'undefined') {
+      this.restoreSession();
+    }
+
+    if (!currentGameSession) {
+      console.warn('[rankingApi] No current game session found');
+      return null;
+    }
+
     if (currentGameSession.expiresAt <= Date.now()) {
-      currentGameSession = null;
+      console.warn('[rankingApi] Game session expired at:', new Date(currentGameSession.expiresAt).toLocaleString());
+      this.clearSession(); // 만료된 세션 정리 (스토리지 포함)
       return null;
     }
     return currentGameSession.sessionToken;
@@ -97,13 +137,23 @@ export const rankingApi = {
    * 게임 세션 초기화 (게임 종료 또는 제출 후)
    */
   clearSession(): void {
+    console.log('[rankingApi] Clearing game session');
     currentGameSession = null;
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(STORAGE_KEY.GAME_SESSION_DATA);
+        console.log('[rankingApi] Session removed from localStorage');
+      }
+    } catch (e) {
+      // ignore
+    }
   },
 
   async submitScore(
     data: Omit<SubmitScoreRequest, 'fingerprint' | 'signature' | 'timestamp' | 'gameSessionToken'>
   ): Promise<SubmitResult> {
     try {
+      console.log('[rankingApi] Submitting score...', data.score);
       // 게임 세션 토큰 확인
       const gameSessionToken = this.getSessionToken();
       if (!gameSessionToken) {
