@@ -25,7 +25,7 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
 
                 <div className={styles.content}>
                     <section className={styles.section}>
-                        <h3 className={styles.subtitle}>🕹️ 조작 가이드</h3>
+                        <h3 className={styles.subtitle}>조작 가이드</h3>
                         <ul className={styles.list}>
                             <li>
                                 <span className={styles.badge}>이동/DROP</span> 방향키, 스페이스바 / 버튼 터치
@@ -40,7 +40,7 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
                     </section>
 
                     <section className={styles.section}>
-                        <h3 className={styles.subtitle}>🎯 게임 규칙</h3>
+                        <h3 className={styles.subtitle}>게임 규칙</h3>
                         <ul className={styles.list}>
                             <li>기본 <span className={styles.highlight}>{CONFIG.GAME.MAX_ATTEMPTS}회</span> 시도 (성공 시 <span className={styles.highlight}>+1</span>)</li>
                             <li>인형의 <span className={styles.highlight}>크기와 무게</span>에 따라 점수가 달라져요</li>
