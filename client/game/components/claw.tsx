@@ -232,6 +232,9 @@ const ClawFinger = ({ index, isOpen, strengthVariance, clawPosition }: ClawFinge
     const cosOffset = Math.cos(angleOffset);
     const sinOffset = Math.sin(angleOffset);
 
+    // Use visual position for physics colliders to match the swinging visual claw
+    const visualPos = useGameStore.getState().visualClawPosition;
+
     // 1. Tip Calculation (Bottom of finger)
     const tipLocalY = -fingerLength - fingerLength * 0.3;
     const tipLocalX = baseRadius * 0.8 + fingerWidth / 2; // Radial offset from claw center
@@ -244,9 +247,9 @@ const ClawFinger = ({ index, isOpen, strengthVariance, clawPosition }: ClawFinge
     // X = Radial * cos - Tangential_Component * sin
     // Z = Radial * sin + Tangential_Component * cos
     // Here 'Tangential_Component' maps to tipRotatedZ (since X-axis rotation maps Y->Z)
-    const tipWorldX = clawPosition.x + tipLocalX * cosOffset - tipRotatedZ * sinOffset;
-    const tipWorldZ = clawPosition.z + tipLocalX * sinOffset + tipRotatedZ * cosOffset;
-    const tipWorldY = clawPosition.y + tipRotatedY - baseRadius * 0.5;
+    const tipWorldX = visualPos.x + tipLocalX * cosOffset - tipRotatedZ * sinOffset;
+    const tipWorldZ = visualPos.z + tipLocalX * sinOffset + tipRotatedZ * cosOffset;
+    const tipWorldY = visualPos.y + tipRotatedY - baseRadius * 0.5;
 
     // 2. Shaft Calculation (Middle of finger)
     const shaftLocalY = -fingerLength * 0.5;
@@ -257,9 +260,9 @@ const ClawFinger = ({ index, isOpen, strengthVariance, clawPosition }: ClawFinge
     const shaftRotatedZ = shaftLocalY * sinAngle;
 
     // RotateY & Translate
-    const shaftWorldX = clawPosition.x + shaftLocalX * cosOffset - shaftRotatedZ * sinOffset;
-    const shaftWorldZ = clawPosition.z + shaftLocalX * sinOffset + shaftRotatedZ * cosOffset;
-    const shaftWorldY = clawPosition.y + shaftRotatedY - baseRadius * 0.5;
+    const shaftWorldX = visualPos.x + shaftLocalX * cosOffset - shaftRotatedZ * sinOffset;
+    const shaftWorldZ = visualPos.z + shaftLocalX * sinOffset + shaftRotatedZ * cosOffset;
+    const shaftWorldY = visualPos.y + shaftRotatedY - baseRadius * 0.5;
 
     // Shaft Orientation (Quaternion Composition)
     // q = RotateY(angleOffset) * RotateX(newAngle)
@@ -393,15 +396,19 @@ const Claw = () => {
     const target = targetPosition.current;
 
     const dampingFactor = phase === 'dropping' ? 0.3 : phase === 'rising' ? 0.15 : 0.1;
-    const springStrength = phase === 'dropping' ? 60 : phase === 'rising' ? 8 : 12;
+    // Separate spring strengths:
+    // Y-axis: High stiffness during dropping for fast descent
+    // XZ-axis: Low stiffness always to preserve swing/momentum and avoid snapping
+    const springStrengthY = phase === 'dropping' ? 60 : phase === 'rising' ? 8 : 12;
+    const springStrengthXZ = 12;
 
     const dx = target.x - current.x;
     const dy = target.y - current.y;
     const dz = target.z - current.z;
 
-    currentVelocity.current.x += dx * springStrength * delta;
-    currentVelocity.current.y += dy * springStrength * delta;
-    currentVelocity.current.z += dz * springStrength * delta;
+    currentVelocity.current.x += dx * springStrengthXZ * delta;
+    currentVelocity.current.y += dy * springStrengthY * delta;
+    currentVelocity.current.z += dz * springStrengthXZ * delta;
 
     currentVelocity.current.multiplyScalar(1 - dampingFactor);
 

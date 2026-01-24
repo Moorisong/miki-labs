@@ -502,8 +502,12 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
                 // 잡기 실패 토스트 표시
                 console.log(`[Bump] Doll ${config.id} bumped away. Accuracy: ${accuracy}, Direction: ${direction}`);
 
-                // 잡기 실패 토스트 표시 (성공한 인형이 있어도 표시되는 버그 수정 - 제거)
-                // state.soundCallbacks.onFail?.({ type: 'grab_miss', direction });
+                // 잡기 실패 토스트 표시
+                // [FIX] 성공한 인형이 없을 때만 실패 메시지 표시
+                // 여러 인형을 동시에 체크할 때 하나는 잡고 하나는 놓친 경우, 성공 메시지가 우선되어야 함
+                if (!state.grabbedDoll.id) {
+                  state.soundCallbacks.onFail?.({ type: 'grab_miss', direction });
+                }
 
                 // 옆으로 밀면서 살짝 튀어오르게 함
                 api.velocity.set(vx, 0.5, vz);
