@@ -128,18 +128,22 @@ export function useGameAttempts(): UseGameAttemptsReturn {
             return false;
         }
 
-        const newAttempts = remainingAttempts - 1;
-        setRemainingAttempts(newAttempts);
+        // 함수형 업데이트로 stale closure 문제 방지
+        setRemainingAttempts((prev) => {
+            const newAttempts = prev - 1;
 
-        if (newAttempts === 0) {
-            // 쿨타임 시작
-            const endAt = Date.now() + COOLDOWN_DURATION;
-            setCooldownEndAt(endAt);
-            setIsOnCooldown(true);
-            saveData({ remainingAttempts: 0, cooldownEndAt: endAt });
-        } else {
-            saveData({ remainingAttempts: newAttempts, cooldownEndAt: null });
-        }
+            if (newAttempts === 0) {
+                // 쿨타임 시작
+                const endAt = Date.now() + COOLDOWN_DURATION;
+                setCooldownEndAt(endAt);
+                setIsOnCooldown(true);
+                saveData({ remainingAttempts: 0, cooldownEndAt: endAt });
+            } else {
+                saveData({ remainingAttempts: newAttempts, cooldownEndAt: null });
+            }
+
+            return newAttempts;
+        });
 
         return true;
     }, [remainingAttempts, isOnCooldown]);
@@ -148,10 +152,13 @@ export function useGameAttempts(): UseGameAttemptsReturn {
     const addAttempt = useCallback(() => {
         if (isOnCooldown) return;
 
-        const newAttempts = remainingAttempts + 1;
-        setRemainingAttempts(newAttempts);
-        saveData({ remainingAttempts: newAttempts, cooldownEndAt: null });
-    }, [remainingAttempts, isOnCooldown]);
+        // 함수형 업데이트로 stale closure 문제 방지
+        setRemainingAttempts((prev) => {
+            const newAttempts = prev + 1;
+            saveData({ remainingAttempts: newAttempts, cooldownEndAt: null });
+            return newAttempts;
+        });
+    }, [isOnCooldown]);
 
     // 쿨타임 리셋 (디버그/테스트용)
     const resetCooldown = useCallback(() => {
