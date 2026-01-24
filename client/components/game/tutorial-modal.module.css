@@ -6,7 +6,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 2000;
     padding: var(--space-md);
     animation: fadeIn 0.3s ease-out;
 }
@@ -92,6 +92,49 @@
 .highlight {
     color: var(--color-accent);
     font-weight: 600;
+}
+
+.loginInfo {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.infoText {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.infoIcon {
+    font-size: 14px;
+}
+
+.loginCTA {
+    margin-top: 4px;
+    background: transparent;
+    border: none;
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.loginCTA:hover {
+    color: var(--color-secondary);
+    text-decoration: underline;
 }
 
 .accent {

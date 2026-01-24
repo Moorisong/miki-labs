@@ -98,7 +98,7 @@ export default function GamePage() {
             cooldownRemaining={cooldownRemaining}
             canPlay={canPlay}
             phase={phase}
-            onHelpClick={openTutorial}
+            onHelpClick={showTutorial ? closeTutorial : openTutorial}
           />
         )}
 
