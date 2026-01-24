@@ -11,6 +11,8 @@ import {
 import { generateRandomFriction, generateRandomMass } from '../core/physics-world';
 import { useGameStore } from '../core/game-manager';
 import { useFrame } from '@react-three/fiber';
+import { COLLIDER_CONFIG, DAMPING_CONFIG, VELOCITY_CONFIG } from '../constants/collision';
+import { calculateClampedVelocity } from '../collision/velocity-clamper';
 
 
 // 귀여운 인형 색상 팔레트
@@ -135,7 +137,8 @@ const generateDollConfigs = (count: number): CuteDollConfig[] => {
       z = -Math.abs(z);
     }
 
-    const y = floorHeight + size + Math.random() * 0.5;
+    // Lower spawn height to minimize initial bouncing
+    const y = floorHeight + size + 0.1 + Math.random() * 0.1;
 
     dolls.push({
       id: `doll-${i}`,
@@ -164,7 +167,8 @@ const generateDollConfigs = (count: number): CuteDollConfig[] => {
       z = -Math.abs(z);
     }
 
-    const y = floorHeight + size + Math.random() * 0.5;
+    // Lower spawn height but allowing enough variance for 65 dolls to stack safely
+    const y = floorHeight + size + 0.1 + Math.random() * 0.5;
 
     // 햄스터면 햄스터 팔레트, 강아지면 강아지 팔레트 (13, 14), 나머지는 전체 팔레트에서 랜덤
     let paletteIndex: number;
@@ -174,7 +178,6 @@ const generateDollConfigs = (count: number): CuteDollConfig[] => {
       paletteIndex = 13 + Math.floor(Math.random() * 2);
     } else {
       // 65개 팔레트 전체에서 랜덤 선택 (햄스터/강아지 전용 제외)
-      // 0-9: 기본, 15-64: 파스텔/네온/따뜻한톤/차가운톤
       const availableIndices = [
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
         15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
@@ -211,13 +214,12 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
   const wasGrabbedRef = useRef(false);
   const rotationRef = useRef<[number, number, number]>([0, 0, 0]);
   const holeFallReportedRef = useRef(false);
-  // 잡히기 전 원래 위치 저장 (놓을 때 사용)
   const originalPositionRef = useRef<[number, number, number]>([0, 0, 0]);
+  const velocityRef = useRef<[number, number, number]>([0, 0, 0]);
 
   useEffect(() => {
     const unsubscribePos = api.position.subscribe((p: [number, number, number]) => {
       positionRef.current = p;
-      // 잡히지 않았을 때만 원래 위치 업데이트
       if (!wasGrabbedRef.current) {
         originalPositionRef.current = p;
       }
@@ -225,9 +227,17 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
     const unsubscribeRot = api.rotation.subscribe((r: [number, number, number]) => {
       rotationRef.current = r;
     });
+    const unsubscribeVel = api.velocity.subscribe((v: [number, number, number]) => {
+      velocityRef.current = v;
+      const clamped = calculateClampedVelocity(v);
+      if (clamped[0] !== v[0] || clamped[1] !== v[1] || clamped[2] !== v[2]) {
+        api.velocity.set(clamped[0], clamped[1], clamped[2]);
+      }
+    });
     return () => {
       unsubscribePos();
       unsubscribeRot();
+      unsubscribeVel();
     };
   }, [api]);
 
@@ -1771,11 +1781,17 @@ const CuteDoll = ({ config }: CuteDollProps) => {
     position: config.position,
     args: [config.size],
     material: {
-      friction: config.friction,
-      restitution: 0.1, // 반발력 낮춤
+      friction: COLLIDER_CONFIG.doll.friction,
+      restitution: COLLIDER_CONFIG.doll.restitution,
     },
-    linearDamping: PHYSICS_CONFIG.dollLinearDamping,
-    angularDamping: PHYSICS_CONFIG.dollAngularDamping,
+    // Adjusted physics for stability without air-freezing
+    linearDamping: 0.2,   // Reduced air resistance so they fall down
+    angularDamping: 0.8,  // Keep high rotation resistance to stop rolling
+
+    // Balanced sleep settings
+    allowSleep: true,
+    sleepSpeedLimit: 0.2, // Sleep only when almost stopped
+    sleepTimeLimit: 0.5,  // Wait 0.5s before sleeping
   }));
 
   useDollLogic(api, ref, config);
