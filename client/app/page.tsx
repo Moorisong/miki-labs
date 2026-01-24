@@ -61,6 +61,7 @@ export default async function HomePage() {
       ratingValue: '4.8',
       ratingCount: '124',
     },
+    keywords: '인형뽑기, 인형뽑기 게임, 캐주얼 게임, 웹 게임, 뽑기, 게임',
   };
 
   return (
@@ -74,7 +75,7 @@ export default async function HomePage() {
         <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>
             <span className={styles.titleLine}>리얼한 손맛의</span>
-            <span className={styles.titleHighlight}>웹 인형뽑기</span>
+            <span className={styles.titleHighlight}>웹 인형뽑기 게임</span>
           </h1>
           <p className={styles.heroDescription}>
             진짜 인형뽑기의 짜릿함을 웹에서 그대로!
