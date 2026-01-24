@@ -385,7 +385,7 @@ const useDollLogic = (api: any, ref: any, config: DollConfig) => {
 
         const elapsed = Date.now() - ref.current.userData.grabTimer;
 
-        if (elapsed > 800) { // 0.8초 후 판정 (집게가 올라가기 전에 판정 완료)
+        if (elapsed > 100) { // 0.1초 후 판정 (이미 물리적 안정화는 dropping 단계에서 0.3s 확보됨)
           if (!grabbedDoll.id) {
             const [x, y, z] = positionRef.current;
             // *** 핵심 수정: 시각적 집게 위치(visualClawPosition)를 사용 ***
