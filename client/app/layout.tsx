@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     template: '%s | 뽑기중독',
   },
   description: '리얼한 물리 엔진으로 즐기는 웹 인형뽑기 게임. 실제 인형뽑기의 손맛을 느껴보세요!',
-  keywords: ['인형뽑기', '인형뽑기 게임', '캐주얼 게임', '웹 게임', '뽑기', '게임', 'claw machine', 'crane game', 'arcadegame'],
+  keywords: ['뽑기중독', '인형뽑기', '인형뽑기 게임', '캐주얼 게임', '웹 게임', '뽑기', '게임', 'claw machine', 'crane game', 'arcadegame'],
   authors: [{ name: '뽑기중독' }],
   alternates: {
     canonical: '/',

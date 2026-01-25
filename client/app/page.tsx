@@ -61,7 +61,7 @@ export default async function HomePage() {
       ratingValue: '4.8',
       ratingCount: '124',
     },
-    keywords: '인형뽑기, 인형뽑기 게임, 캐주얼 게임, 웹 게임, 뽑기, 게임',
+    keywords: '뽑기중독, 인형뽑기, 인형뽑기 게임, 캐주얼 게임, 웹 게임, 뽑기, 게임',
   };
 
   return (
