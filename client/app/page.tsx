@@ -61,7 +61,7 @@ export default async function HomePage() {
       ratingValue: '4.8',
       ratingCount: '124',
     },
-    keywords: '뽑기중독, 인형뽑기, 인형뽑기 게임, 캐주얼 게임, 웹 게임, 미니게임, 감성 콘텐츠, 놀이형 서비스, 뽑기, 게임',
+    keywords: '인형뽑기, 인형뽑기 게임, 캐주얼 게임, 웹 게임, 미니게임, 감성 콘텐츠, 놀이형 서비스, 뽑기, 게임',
   };
 
   return (

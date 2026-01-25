@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     template: '%s | 뽑기중독',
   },
   description: '뽑기중독은 실제 인형뽑기 기계의 조작감을 웹에서 구현한 3D 인형뽑기 게임입니다. 물리엔진 기반 집게 조작으로 위치와 타이밍에 따라 결과가 달라집니다.',
-  keywords: ['뽑기중독', '인형뽑기', '인형뽑기 게임', '캐주얼 게임', '웹 게임', '미니게임', '감성 콘텐츠', '놀이형 서비스', '뽑기', '게임', 'claw machine', 'crane game', 'arcadegame'],
+  keywords: ['인형뽑기', '인형뽑기 게임', '캐주얼 게임', '웹 게임', '미니게임', '감성 콘텐츠', '놀이형 서비스', '뽑기', '게임', 'claw machine', 'crane game', 'arcadegame'],
   authors: [{ name: '뽑기중독' }],
   alternates: {
     canonical: '/',
