@@ -13,11 +13,12 @@
 .nav {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--space-md) var(--space-lg);
   height: 64px;
+  gap: var(--space-xl);
 }
 
 .logo {
@@ -97,6 +98,7 @@
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background var(--transition-fast);
+  margin-left: auto;
 }
 
 .hamburger:hover {

@@ -6,6 +6,7 @@ import SessionProvider from '@/components/providers/session-provider';
 import NicknameProvider from '@/components/providers/nickname-provider';
 
 import AdBanner from '@/components/ads/ad-banner';
+import Script from 'next/script';
 import './globals.css';
 
 const geistSans = Geist({
@@ -81,6 +82,13 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <Script
+          src="https://quge5.com/88/tag.min.js"
+          data-zone="205626"
+          async
+          data-cfasync="false"
+          strategy="afterInteractive"
+        />
         <SessionProvider>
           <NicknameProvider>
             <NavBar />
