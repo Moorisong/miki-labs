@@ -6,6 +6,7 @@
 export const STORAGE_KEY = {
     // SessionStorage
     PENDING_RANKING_SCORE: 'pendingRankingScore',
+    GAME_SESSION_DATA: 'gameSessionData',
 
     // LocalStorage - 게임 시도 관련
     GAME_ATTEMPTS: 'gameAttempts',

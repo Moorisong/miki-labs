@@ -7,7 +7,7 @@ export const CONFIG = {
     // 게임 설정
     GAME: {
         MAX_ATTEMPTS: 5,
-        DEFAULT_DOLL_COUNT: 45,
+        DEFAULT_DOLL_COUNT: 55,
         RANKING_TOP_LIMIT: 10,
         RANKING_PAGE_SIZE: 10,
         RANKING_MAX_DISPLAY: 100,

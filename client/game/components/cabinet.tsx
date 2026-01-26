@@ -172,12 +172,58 @@ const Walls = () => {
   );
 };
 
+const HoleBarrier = () => {
+  const { floorHeight } = CABINET_DIMENSIONS;
+  const barrierHeight = 0.3; // Increased height (30cm) to prevent falling
+  const thickness = 0.04;
+
+  // 1. Side Barrier (X=1.5)
+  // Located between Main Floor and Hole
+  // Z range: 1.0 to 2.0 (Length 1.0)
+  const sidePos: [number, number, number] = [1.5, floorHeight + barrierHeight / 2, 1.5];
+  const sideSize: [number, number, number] = [thickness, barrierHeight, 1.0];
+
+  // 2. Front Barrier (Z=1.0)
+  // Located between Right Floor and Hole
+  // X range: 1.5 to 2.5 (Length 1.0)
+  const frontPos: [number, number, number] = [2.0, floorHeight + barrierHeight / 2, 1.0];
+  const frontSize: [number, number, number] = [1.0 + thickness, barrierHeight, thickness]; // Slightly longer to cover corner
+
+  useBox(() => ({
+    args: sideSize,
+    position: sidePos,
+    type: 'Static',
+    material: { friction: 0.1, restitution: 0.2 }
+  }));
+
+  useBox(() => ({
+    args: frontSize,
+    position: frontPos,
+    type: 'Static',
+    material: { friction: 0.1, restitution: 0.2 }
+  }));
+
+  return (
+    <group>
+      <mesh position={sidePos} castShadow receiveShadow>
+        <boxGeometry args={sideSize} />
+        <meshStandardMaterial color="#FFB6C1" roughness={0.4} metalness={0.1} transparent opacity={0.8} />
+      </mesh>
+      <mesh position={frontPos} castShadow receiveShadow>
+        <boxGeometry args={frontSize} />
+        <meshStandardMaterial color="#FFB6C1" roughness={0.4} metalness={0.1} transparent opacity={0.8} />
+      </mesh>
+    </group>
+  );
+};
+
 const Cabinet = () => {
   return (
     <group>
       <Floor />
       <Frame />
       <Walls />
+      <HoleBarrier />
 
       <GlassPanel
         position={[-width / 2, height / 2, 0]}

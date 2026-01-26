@@ -52,7 +52,7 @@ export default function NavBar() {
 
   const handleSignOut = () => {
     closeMenu();
-    signOut({ callbackUrl: '/' });
+    signOut({ callbackUrl: pathname });
   };
 
   const handleNicknameClick = () => {
@@ -133,7 +133,7 @@ export default function NavBar() {
                 </div>
               ) : (
                 <Link
-                  href="/login"
+                  href={`/login?callbackUrl=${encodeURIComponent(pathname)}`}
                   className={styles.loginButton}
                   onClick={closeMenu}
                 >

@@ -10,6 +10,9 @@ import { getFailMessage } from '@/constants/toast-messages';
 import { useToast } from '@/lib/hooks/use-toast';
 import type { RankingEntry } from '@/lib/api/types';
 
+// 게임 세션 준비 중인지 상태
+let isPreparingSession = false;
+
 interface UseGameLogicProps {
     score: number;
     remainingAttempts: number;
@@ -53,12 +56,14 @@ export function useGameLogic({
 
     // Load initial rankings & Restore score from login
     useEffect(() => {
+        rankingApi.restoreSession();
         rankingApi.getTopRanking(CONFIG.GAME.RANKING_TOP_LIMIT).then(setRankings);
 
-        const savedScore = sessionStorage.getItem(STORAGE_KEY.PENDING_RANKING_SCORE);
+        const savedScore = localStorage.getItem(STORAGE_KEY.PENDING_RANKING_SCORE);
         if (savedScore) {
             const scoreNum = parseInt(savedScore, 10);
             if (!isNaN(scoreNum)) {
+                console.log('[useGameLogic] Restoring score from localStorage:', scoreNum);
                 useGameStore.setState({ score: scoreNum });
                 setShowRanking(true);
             }
@@ -100,6 +105,13 @@ export function useGameLogic({
                         const currentScore = useGameStore.getState().score;
                         const earnedScore = lastEarnedScore > 0 ? lastEarnedScore : currentScore;
 
+                        // 세션이 없으면 새로 발급 (안전장치)
+                        if (!rankingApi.hasValidSession() && !isPreparingSession) {
+                            isPreparingSession = true;
+                            await rankingApi.startGameSession();
+                            isPreparingSession = false;
+                        }
+
                         const result = await rankingApi.submitScore({
                             score: earnedScore,
                             attempts: 1,
@@ -112,6 +124,12 @@ export function useGameLogic({
                                 totalScore: result.data.totalScore,
                                 totalCaught: result.data.totalDollsCaught,
                             });
+
+                            // 다음 성공을 위해 새 세션 미리 발급 (비동기)
+                            rankingApi.startGameSession().catch(console.error);
+                        } else if (result.error) {
+                            console.error('[GamePage] Submit failed:', result.error);
+                            showToast(result.error, 'error');
                         }
                     } catch (e) {
                         console.error('[GamePage] Auto submit failed:', e);
@@ -136,7 +154,7 @@ export function useGameLogic({
     // Game cleanup on unmount
     useEffect(() => {
         return () => {
-            const hasPendingScore = sessionStorage.getItem(STORAGE_KEY.PENDING_RANKING_SCORE);
+            const hasPendingScore = localStorage.getItem(STORAGE_KEY.PENDING_RANKING_SCORE);
             if (!hasPendingScore) {
                 resetGame();
             }
@@ -146,6 +164,7 @@ export function useGameLogic({
     const handleRankingSubmit = async () => {
         setIsSubmitting(true);
         try {
+            console.log('[useGameLogic] Submitting ranking with score:', score);
             const result = await rankingApi.submitScore({
                 score,
                 attempts: 1,
@@ -156,7 +175,8 @@ export function useGameLogic({
 
             const newRankings = await rankingApi.getTopRanking(CONFIG.GAME.RANKING_TOP_LIMIT);
             setRankings(newRankings);
-            sessionStorage.removeItem(STORAGE_KEY.PENDING_RANKING_SCORE);
+            localStorage.removeItem(STORAGE_KEY.PENDING_RANKING_SCORE);
+            console.log('[useGameLogic] Ranking submitted and score cleared from localStorage');
             return { success: true };
         } catch (e) {
             console.error('Failed to submit score:', e);
@@ -172,14 +192,14 @@ export function useGameLogic({
     };
 
     const handleRestart = () => {
-        sessionStorage.removeItem(STORAGE_KEY.PENDING_RANKING_SCORE);
+        localStorage.removeItem(STORAGE_KEY.PENDING_RANKING_SCORE);
         setShowRanking(false);
         setScoreModalData(null);
         setSuccessCount(0);
         resetGame();
     };
 
-    const handleStartGame = useCallback(() => {
+    const handleStartGame = useCallback(async () => {
         if (!canPlay) return;
 
         // [FIX] 집게 완전 복귀 확인 (UI/키보드 공통)
@@ -190,9 +210,21 @@ export function useGameLogic({
             return; // 아직 올라가는 중이면 무시
         }
 
+        // 게임 세션 토큰 발급 (로그인/비로그인 모두)
+        if (!rankingApi.hasValidSession() && !isPreparingSession) {
+            isPreparingSession = true;
+            const sessionResult = await rankingApi.startGameSession();
+            isPreparingSession = false;
+
+            if (!sessionResult.success) {
+                console.error('[GamePage] Failed to start game session:', sessionResult.error);
+                // 세션 발급 실패해도 게임은 진행 (점수 저장만 안됨)
+            }
+        }
+
         if (phase === 'result') resetGame();
         startGame();
-    }, [canPlay, startGame, phase, resetGame]);
+    }, [canPlay, startGame, phase, resetGame, session]);
 
     return {
         rankings,

@@ -2,11 +2,12 @@
 
 import { useRef, useMemo, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Group, Mesh, Vector3, QuadraticBezierCurve3, BufferGeometry, Line as ThreeLine, LineBasicMaterial, Euler } from 'three';
-import { useSphere } from '@react-three/cannon';
+import { Group, Mesh, Vector3, QuadraticBezierCurve3, BufferGeometry, Line as ThreeLine, LineBasicMaterial, Euler, Quaternion } from 'three';
+import { useSphere, useBox } from '@react-three/cannon';
 import { CLAW_CONFIG, CABINET_DIMENSIONS } from '../types/game.types';
 import { useGameStore } from '../core/game-manager';
 import { generateFingerStrengths } from '../core/physics-world';
+import { COLLIDER_CONFIG } from '../constants/collision';
 
 const {
   fingerCount,
@@ -138,7 +139,16 @@ const GrabbedDollRenderer = () => {
       config.cuteType === 'bear' ? BearDoll :
         config.cuteType === 'cat' ? CatDoll :
           config.cuteType === 'hamster' ? HamsterDoll :
-            config.cuteType === 'dog' ? DogDoll : null;
+            config.cuteType === 'dog' ? DogDoll :
+              config.cuteType === 'penguin' ? PenguinDoll :
+                config.cuteType === 'panda' ? PandaDoll :
+                  config.cuteType === 'sheep' ? SheepDoll :
+                    config.cuteType === 'chick' ? ChickDoll :
+                      config.cuteType === 'fox' ? FoxDoll :
+                        config.cuteType === 'frog' ? FrogDoll :
+                          config.cuteType === 'lion' ? LionDoll :
+                            config.cuteType === 'pig' ? PigDoll :
+                              config.cuteType === 'koala' ? KoalaDoll : null;
 
   if (!DollComponent) return null;
 
@@ -164,35 +174,48 @@ interface ClawFingerProps {
 }
 
 const ClawFinger = ({ index, isOpen, strengthVariance, clawPosition }: ClawFingerProps) => {
-  // ... (implementation same as before)
   const groupRef = useRef<Group>(null);
   const angleOffset = (index / fingerCount) * Math.PI * 2;
   const targetAngle = isOpen ? openAngle : closedAngle;
   const currentAngleRef = useRef(openAngle);
-
-  // 현재 게임 단계 가져오기
   const phase = useGameStore((state) => state.phase);
 
-  // 손가락 끝 위치에 물리 충돌체 (작게, 부드럽게)
+  // Tip Collider (Sphere)
   const [fingerRef, fingerApi] = useSphere<Mesh>(() => ({
     type: 'Kinematic',
-    args: [fingerWidth * 0.5],
+    args: [COLLIDER_CONFIG.prong.minRadius],
     position: [0, 0, 0],
     material: {
-      friction: 0.2,
-      restitution: 0.02, // 거의 튕기지 않음
+      friction: COLLIDER_CONFIG.prong.friction,
+      restitution: COLLIDER_CONFIG.prong.restitution,
     },
-    collisionResponse: true, // 초기값
+    collisionResponse: true,
+  }));
+
+  // Shaft Collider (Box - New)
+  // Dimensions match visual finger: 0.08 x 0.4 x 0.08
+  // Cannon useBox args are HALF-extents: [0.04, 0.2, 0.04]
+  // We use slightly larger 0.05 (10cm width) for robust collision
+  const [shaftRef, shaftApi] = useBox(() => ({
+    type: 'Kinematic',
+    args: [0.05, 0.2, 0.05],
+    position: [0, 0, 0],
+    material: {
+      friction: COLLIDER_CONFIG.prong.friction,
+      restitution: COLLIDER_CONFIG.prong.restitution,
+    },
+    collisionResponse: true,
   }));
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
 
     // 인형을 잡고 이동 중일 때는 손가락 충돌 비활성화 (벽과 충돌 방지)
-    // 또한 구멍 구역(x > 1.0)에 있을 때도 충돌 비활성화 (떨어지는 인형을 쳐내지 않도록)
     const isInHoleZone = clawPosition.x > 1.0;
     const disableCollision = phase === 'rising' || phase === 'returning' || phase === 'releasing' || isInHoleZone;
+
     fingerApi.collisionResponse.set(!disableCollision);
+    shaftApi.collisionResponse.set(!disableCollision);
 
     const currentAngle = currentAngleRef.current;
     const adjustedTarget = targetAngle * (1 + (strengthVariance - 1) * 0.1);
@@ -200,28 +223,60 @@ const ClawFinger = ({ index, isOpen, strengthVariance, clawPosition }: ClawFinge
     currentAngleRef.current = newAngle;
     groupRef.current.rotation.x = newAngle;
 
-    // 손가락 끝 위치 계산 (월드 좌표)
-    const fingerTipLocalY = -fingerLength - fingerLength * 0.3;
-    const fingerTipLocalX = baseRadius * 0.8 + fingerWidth / 2;
+    // --- Physics Transform Calculation ---
+    // Replicating the Visual Hierarchy:
+    // World <- ClawPos <- RotateY(angleOffset) <- PivotOffset <- RotateX(newAngle) <- LocalPos
 
-    // 회전 적용
     const cosAngle = Math.cos(newAngle);
     const sinAngle = Math.sin(newAngle);
-    const rotatedY = fingerTipLocalY * cosAngle;
-    const rotatedZ = fingerTipLocalY * sinAngle;
-
-    // angleOffset에 따른 회전
     const cosOffset = Math.cos(angleOffset);
     const sinOffset = Math.sin(angleOffset);
-    const worldX = clawPosition.x + fingerTipLocalX * cosOffset;
-    const worldZ = clawPosition.z + fingerTipLocalX * sinOffset + rotatedZ * cosOffset;
-    const worldY = clawPosition.y + rotatedY - baseRadius * 0.5;
+
+    // Use visual position for physics colliders to match the swinging visual claw
+    const visualPos = useGameStore.getState().visualClawPosition;
+
+    // 1. Tip Calculation (Bottom of finger)
+    const tipLocalY = -fingerLength - fingerLength * 0.3;
+    const tipLocalX = baseRadius * 0.8 + fingerWidth / 2; // Radial offset from claw center
+
+    // RotateX (Tangential)
+    const tipRotatedY = tipLocalY * cosAngle;
+    const tipRotatedZ = tipLocalY * sinAngle;
+
+    // RotateY (Radial) & Translate
+    // X = Radial * cos - Tangential_Component * sin
+    // Z = Radial * sin + Tangential_Component * cos
+    // Here 'Tangential_Component' maps to tipRotatedZ (since X-axis rotation maps Y->Z)
+    const tipWorldX = visualPos.x + tipLocalX * cosOffset - tipRotatedZ * sinOffset;
+    const tipWorldZ = visualPos.z + tipLocalX * sinOffset + tipRotatedZ * cosOffset;
+    const tipWorldY = visualPos.y + tipRotatedY - baseRadius * 0.5;
+
+    // 2. Shaft Calculation (Middle of finger)
+    const shaftLocalY = -fingerLength * 0.5;
+    const shaftLocalX = tipLocalX; // Same radial offset
+
+    // RotateX
+    const shaftRotatedY = shaftLocalY * cosAngle;
+    const shaftRotatedZ = shaftLocalY * sinAngle;
+
+    // RotateY & Translate
+    const shaftWorldX = visualPos.x + shaftLocalX * cosOffset - shaftRotatedZ * sinOffset;
+    const shaftWorldZ = visualPos.z + shaftLocalX * sinOffset + shaftRotatedZ * cosOffset;
+    const shaftWorldY = visualPos.y + shaftRotatedY - baseRadius * 0.5;
+
+    // Shaft Orientation (Quaternion Composition)
+    // q = RotateY(angleOffset) * RotateX(newAngle)
+    const q = new Quaternion();
+    q.setFromAxisAngle(new Vector3(0, 1, 0), angleOffset);
+    q.multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), newAngle));
 
     if (disableCollision) {
-      // 충돌체를 멀리 치워버림
       fingerApi.position.set(0, 1000, 0);
+      shaftApi.position.set(0, 1000, 0);
     } else {
-      fingerApi.position.set(worldX, worldY, worldZ);
+      fingerApi.position.set(tipWorldX, tipWorldY, tipWorldZ);
+      shaftApi.position.set(shaftWorldX, shaftWorldY, shaftWorldZ);
+      shaftApi.quaternion.set(q.x, q.y, q.z, q.w);
     }
   });
 
@@ -250,9 +305,14 @@ const ClawFinger = ({ index, isOpen, strengthVariance, clawPosition }: ClawFinge
           />
         </mesh>
       </group>
-      {/* 손가락 물리 충돌체 (보이지 않음) */}
+      {/* Tip Collider */}
       <mesh ref={fingerRef} visible={false}>
         <sphereGeometry args={[fingerWidth * 0.8, 4, 4]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
+      {/* Shaft Collider */}
+      <mesh ref={shaftRef} visible={false}>
+        <boxGeometry args={[0.1, 0.4, 0.1]} />
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
     </group>
@@ -282,7 +342,12 @@ const ClawBase = () => {
 
 
 // Import doll components
-import { BunnyDoll, BearDoll, CatDoll, HamsterDoll, DogDoll, CuteDollConfig } from './dolls';
+import {
+  BunnyDoll, BearDoll, CatDoll, HamsterDoll, DogDoll,
+  PenguinDoll, PandaDoll, SheepDoll, ChickDoll, FoxDoll,
+  FrogDoll, LionDoll, PigDoll, KoalaDoll,
+  CuteDollConfig
+} from './dolls';
 import { DollConfig } from '../types/game.types';
 
 // ... (ClawCollider and ClawFinger components remain unchanged)
@@ -330,16 +395,20 @@ const Claw = () => {
     const current = groupRef.current.position;
     const target = targetPosition.current;
 
-    const dampingFactor = phase === 'dropping' ? 0.25 : phase === 'rising' ? 0.15 : 0.1;
-    const springStrength = phase === 'dropping' ? 20 : phase === 'rising' ? 8 : 12;
+    const dampingFactor = phase === 'dropping' ? 0.3 : phase === 'rising' ? 0.15 : 0.1;
+    // Separate spring strengths:
+    // Y-axis: High stiffness during dropping for fast descent
+    // XZ-axis: Low stiffness always to preserve swing/momentum and avoid snapping
+    const springStrengthY = phase === 'dropping' ? 60 : phase === 'rising' ? 8 : 12;
+    const springStrengthXZ = 12;
 
     const dx = target.x - current.x;
     const dy = target.y - current.y;
     const dz = target.z - current.z;
 
-    currentVelocity.current.x += dx * springStrength * delta;
-    currentVelocity.current.y += dy * springStrength * delta;
-    currentVelocity.current.z += dz * springStrength * delta;
+    currentVelocity.current.x += dx * springStrengthXZ * delta;
+    currentVelocity.current.y += dy * springStrengthY * delta;
+    currentVelocity.current.z += dz * springStrengthXZ * delta;
 
     currentVelocity.current.multiplyScalar(1 - dampingFactor);
 

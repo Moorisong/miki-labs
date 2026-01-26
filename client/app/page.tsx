@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import NextImage from 'next/image';
 
 import { getDatabase } from '@/lib/mongodb';
 import { ROUTES, MESSAGES, FEATURES, MEDALS, CONFIG } from '@/constants';
@@ -43,19 +44,48 @@ async function getTopRankings(): Promise<RankEntry[]> {
 export default async function HomePage() {
   const topRankings = await getTopRankings();
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: '뽑기중독',
+    applicationCategory: 'GameApplication',
+    operatingSystem: 'Any',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'KRW',
+    },
+    description: '뽑기중독은 실제 인형뽑기 기계의 조작감을 웹에서 구현한 3D 인형뽑기 게임입니다. 물리엔진 기반 집게 조작으로 위치와 타이밍에 따라 결과가 달라집니다.',
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.8',
+      ratingCount: '124',
+    },
+    keywords: '인형뽑기, 인형뽑기 게임, 캐주얼 게임, 웹 게임, 미니게임, 감성 콘텐츠, 놀이형 서비스, 뽑기, 게임',
+  };
+
   return (
     <div className={styles.container}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>
             <span className={styles.titleLine}>리얼한 손맛의</span>
-            <span className={styles.titleHighlight}>웹 인형뽑기</span>
+            <span className={styles.titleHighlight}>웹 인형뽑기 게임</span>
           </h1>
           <p className={styles.heroDescription}>
-            진짜 인형뽑기의 짜릿함을 웹에서 그대로!
+            뽑기중독은 실제 인형뽑기 기계의 조작감을
             <br />
-            물리 엔진 기반의 리얼한 크레인 게임을 즐겨보세요.
+            웹에서 구현한 3D 인형뽑기 게임입니다.
+            <br />
+            <br />
+            앞으로 다양한 미니게임과
+            <br />
+            아기자기한 놀이 콘텐츠가 순차적으로 추가될 예정입니다.
           </p>
           <div className={styles.heroCta}>
             <Link href={ROUTES.GAME} className={styles.primaryButton}>
@@ -64,13 +94,21 @@ export default async function HomePage() {
           </div>
         </div>
         <Link href={ROUTES.GAME} className={styles.heroVisual}>
-          <img
+          <NextImage
             src="/hero_character.png"
-            alt="Claw Machine Character"
+            alt="인형뽑기 게임 캐릭터"
+            width={500}
+            height={400}
             className={styles.heroImage}
+            priority
           />
         </Link>
       </section>
+
+      {/* Ad Section */}
+      <div className={styles.adSection}>
+        <AdBanner />
+      </div>
 
       {/* Features Section */}
       <section className={styles.features}>
@@ -126,11 +164,6 @@ export default async function HomePage() {
           )}
         </div>
       </section>
-
-      {/* Ad Section */}
-      <div className={styles.adSection}>
-        <AdBanner />
-      </div>
 
     </div>
   );

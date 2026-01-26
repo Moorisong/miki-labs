@@ -4,6 +4,7 @@ import type { RankingEntry } from '@/lib/api/types';
 import { getDatabase } from '@/lib/mongodb';
 import { MESSAGES, MEDALS, CONFIG } from '@/constants';
 
+import AdBanner from '@/components/ads/ad-banner';
 import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -69,10 +70,15 @@ export default async function RankingPage() {
       </header>
 
       {!hasData ? (
-        <section className={styles.emptyState}>
-          <p className={styles.emptyText}>{MESSAGES.RANKING.EMPTY}</p>
-          <p className={styles.emptySubtext}>{MESSAGES.RANKING.EMPTY_CTA}</p>
-        </section>
+        <>
+          <section className={styles.emptyState}>
+            <p className={styles.emptyText}>{MESSAGES.RANKING.EMPTY}</p>
+            <p className={styles.emptySubtext}>{MESSAGES.RANKING.EMPTY_CTA}</p>
+          </section>
+          <div className={styles.adSection}>
+            <AdBanner />
+          </div>
+        </>
       ) : (
         <>
           {/* 상위 3명 하이라이트 */}
@@ -91,6 +97,10 @@ export default async function RankingPage() {
               </div>
             ))}
           </section>
+
+          <div className={styles.adSection}>
+            <AdBanner />
+          </div>
 
           {/* 랭킹 테이블 */}
           <section className={styles.tableSection}>

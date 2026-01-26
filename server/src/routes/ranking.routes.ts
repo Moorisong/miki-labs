@@ -5,14 +5,15 @@ import {
   getMyRanking
 } from '../controllers/ranking.controller';
 import { validateScoreSubmission, validatePagination } from '../middlewares/validate';
+import { rankingSubmitLimiter, nicknameSubmitLimiter, userIdSubmitLimiter } from '../middlewares/rate-limit';
 
 const router = Router();
 
 // GET /ranking/top?limit=10
 router.get('/top', validatePagination, getTopRanking);
 
-// POST /ranking/submit
-router.post('/submit', validateScoreSubmission, submitScore);
+// POST /ranking/submit - IP + 닉네임 + 유저ID 기반 rate limit 적용 (각각 1분에 3회)
+router.post('/submit', rankingSubmitLimiter, nicknameSubmitLimiter, userIdSubmitLimiter, validateScoreSubmission, submitScore);
 
 // GET /ranking/me
 router.get('/me', getMyRanking);

@@ -1,6 +1,7 @@
 'use client';
 
-import { CONFIG, MESSAGES } from '@/constants';
+import { useSession, signIn } from 'next-auth/react';
+import { CONFIG, ROUTES } from '@/constants';
 import styles from './tutorial-modal.module.css';
 
 interface TutorialModalProps {
@@ -9,6 +10,9 @@ interface TutorialModalProps {
 }
 
 export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
+    const { status } = useSession();
+    const isLoggedIn = status === 'authenticated';
+
     if (!isOpen) return null;
 
     return (
@@ -21,39 +25,45 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
 
                 <div className={styles.content}>
                     <section className={styles.section}>
-                        <h3 className={styles.subtitle}>🕹️ 조작법</h3>
+                        <h3 className={styles.subtitle}>조작 가이드</h3>
                         <ul className={styles.list}>
                             <li>
-                                <span className={styles.badge}>PC</span> 방향키(이동) + 스페이스바(DROP)
+                                <span className={styles.badge}>이동/DROP</span> 방향키, 스페이스바 / 버튼 터치
                             </li>
                             <li>
-                                <span className={styles.badge}>Mobile</span> 화면 버튼 터치
+                                <span className={styles.badge}>확대/축소</span> 마우스 휠 / 두 손가락 줌
+                            </li>
+                            <li>
+                                <span className={styles.badge}>시점 회전</span> 드래그 (꾹 누르고 이동)
                             </li>
                         </ul>
                     </section>
 
                     <section className={styles.section}>
-                        <h3 className={styles.subtitle}>🎯 게임 규칙</h3>
+                        <h3 className={styles.subtitle}>게임 규칙</h3>
                         <ul className={styles.list}>
-                            <li>한 판당 기본 <span className={styles.highlight}>{CONFIG.GAME.MAX_ATTEMPTS}회</span> 시도</li>
-                            <li>성공 시 남은 횟수 <span className={styles.highlight}>+1</span></li>
-                            <li>시도 횟수 0 → {CONFIG.TIMEOUT.COOLDOWN_HOURS}시간 후 <span className={styles.highlight}>{CONFIG.GAME.MAX_ATTEMPTS}회</span> 충전</li>
+                            <li>기본 <span className={styles.highlight}>{CONFIG.GAME.MAX_ATTEMPTS}회</span> 시도 (성공 시 <span className={styles.highlight}>+1</span>)</li>
+                            <li>인형의 <span className={styles.highlight}>크기와 무게</span>에 따라 점수가 달라져요</li>
+                            <li>횟수 소진 시 <span className={styles.highlight}>{CONFIG.TIMEOUT.COOLDOWN_HOURS}시간</span> 후 자동 충전</li>
                         </ul>
                     </section>
 
                     <section className={styles.section}>
-                        <h3 className={styles.subtitle}>🕒 쿨타임 규칙</h3>
-                        <p className={styles.text}>
-                            횟수가 <strong>0이 될 때만</strong> 쿨타임이 시작됩니다.
-                        </p>
-                    </section>
-
-                    <section className={styles.section}>
-                        <h3 className={styles.subtitle}>👤 로그인 안내</h3>
-                        <ul className={styles.list}>
-                            <li>로그인 없이도 플레이 가능</li>
-                            <li className={styles.accent}>로그인하면 기록을 랭킹에 저장할 수 있어요!</li>
-                        </ul>
+                        <div className={styles.loginInfo}>
+                            <p className={styles.infoText}>
+                                <span className={styles.infoIcon}>ℹ️</span>
+                                로그인 없이도 플레이할 수 있어요
+                            </p>
+                            <p className={styles.infoText}>로그인하면 기록을 랭킹에 저장할 수 있어요</p>
+                            {!isLoggedIn && (
+                                <button
+                                    className={styles.loginCTA}
+                                    onClick={() => signIn('kakao', { callbackUrl: ROUTES.GAME })}
+                                >
+                                    지금 로그인하고 랭킹에 도전하세요! →
+                                </button>
+                            )}
+                        </div>
                     </section>
                 </div>
 

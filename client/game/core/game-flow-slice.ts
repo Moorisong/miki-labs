@@ -120,6 +120,9 @@ export const createGameFlowSlice: StateCreator<GameStore, [], [], Partial<GameSt
             soundCallbacks.onFail?.(reason);
         }
 
+        if (grabbedDoll.config) {
+            get().setPendingReleaseDoll(grabbedDoll.config);
+        }
         get().releaseDoll();
         get().useAttempt();
         get().setClawOpen(true);
