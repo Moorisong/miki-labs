@@ -83,11 +83,12 @@ export default function RootLayout({
     <html lang="ko">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Script
-          src="https://quge5.com/88/tag.min.js"
-          data-zone="205626"
-          async
-          data-cfasync="false"
-          strategy="afterInteractive"
+          src="https://nap5k.com/tag.min.js"
+          data-zone="10521391"
+        />
+        <Script
+          src="https://gizokraijaw.net/vignette.min.js"
+          data-zone="10521394"
         />
         <SessionProvider>
           <NicknameProvider>
