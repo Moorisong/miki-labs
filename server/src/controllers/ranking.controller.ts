@@ -37,7 +37,7 @@ export const submitScore = async (
 
     // 타임스탬프 유효성 검사 (5분 이내 요청만 허용 - Replay Attack 방지)
     const now = Date.now();
-    if (Math.abs(now - timestamp) > 5 * 60 * 1000) {
+    if (Math.abs(now - timestamp) > 10 * 60 * 1000) {
       throw new AppError(403, 'Request expired');
     }
 

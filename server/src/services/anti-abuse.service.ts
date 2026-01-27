@@ -14,10 +14,10 @@ import { isSimilarNickname, containsBannedPattern, normalizeNickname } from '../
 const CONFIG = {
     DAILY_SCORE_LIMIT: 10000,              // 하루 최대 획득 점수
     DAILY_SUBMISSION_LIMIT: 50,            // 하루 최대 제출 횟수
-    NEW_USER_WAIT_MINUTES: 5,              // 신규 유저 랭킹 등록 대기 시간 (분)
+    NEW_USER_WAIT_MINUTES: 10,              // 신규 유저 랭킹 등록 대기 시간 (분)
     NICKNAME_SIMILARITY_THRESHOLD: 0.7,    // 닉네임 유사도 임계값
     MAX_ACCOUNTS_PER_FINGERPRINT: 2,       // 핑거프린트당 최대 계정 수
-    SUSPICIOUS_SCORE_STREAK: 5,            // 연속 고득점 의심 기준
+    SUSPICIOUS_SCORE_STREAK: 10,            // 연속 고득점 의심 기준
     SUSPICIOUS_SCORE_THRESHOLD: 1000,      // 고득점 기준
     MAX_SUSPICION_SCORE: 100,              // 최대 의심 점수
     BAN_SUSPICION_THRESHOLD: 80,           // 자동 차단 의심 점수 임계값

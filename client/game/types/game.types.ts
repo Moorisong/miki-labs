@@ -54,7 +54,7 @@ export interface GameEventCallbacks {
 }
 
 export const DEFAULT_GAME_CONFIG: GameConfig = {
-  maxAttempts: 5,
+  maxAttempts: 10,
   clawSpeed: 3,
   dropSpeed: 2,
   riseSpeed: 1.5,

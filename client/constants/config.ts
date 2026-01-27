@@ -6,7 +6,7 @@
 export const CONFIG = {
     // 게임 설정
     GAME: {
-        MAX_ATTEMPTS: 5,
+        MAX_ATTEMPTS: 10,
         DEFAULT_DOLL_COUNT: 55,
         RANKING_TOP_LIMIT: 10,
         RANKING_PAGE_SIZE: 10,
@@ -21,8 +21,8 @@ export const CONFIG = {
 
     // 페이지네이션
     PAGINATION: {
-        TOP_RANKINGS: 5,
+        TOP_RANKINGS: 10,
         PAGE_SIZE: 10,
-        MAX_PAGE_BUTTONS: 5,
+        MAX_PAGE_BUTTONS: 10,
     },
 } as const;

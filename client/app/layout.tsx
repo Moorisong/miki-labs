@@ -22,11 +22,22 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL('https://claw-addict-web.haroo.site'),
   title: {
-    default: '하루상자 | 리얼한 웹 인형뽑기 게임',
+    default: '하루상자 | 즐거움이 가득한 일일 콘텐츠 플랫폼',
     template: '%s | 하루상자',
   },
-  description: '하루상자는 실제 인형뽑기 기계의 조작감을 웹에서 구현한 3D 인형뽑기 게임입니다. 물리엔진 기반 집게 조작으로 위치와 타이밍에 따라 결과가 달라집니다.',
-  keywords: ['인형뽑기', '인형뽑기 게임', '캐주얼 게임', '웹 게임', '미니게임', '감성 콘텐츠', '놀이형 서비스', '뽑기', '게임', 'claw machine', 'crane game', 'arcadegame'],
+  description: '하루상자는 인형뽑기를 비롯해 다양한 미니콘텐츠를 즐길 수 있는 웹 플랫폼입니다. 매일 새로운 즐거움을 하루상자에서 만나보세요.',
+  keywords: [
+    // Brand
+    '하루상자', 'Haroo Box', 'Haroo App',
+    // Content
+    '인형뽑기', '온라인 인형뽑기', 'Claw Machine', 'UFO Catcher', '랜덤 게임', '운세', '뽑기',
+    // Genre
+    '미니게임', '웹게임', '캐주얼 게임', '하이퍼 캐주얼', '아케이드', '무료 게임', '종합 게임', '플랫폼',
+    // Vibe
+    '심심풀이', '킬링타임', '힐링 게임', '감성 게임', '레트로', '뉴트로', '놀이형 서비스', '감성 콘텐츠',
+    // Tech
+    '3D 웹 게임', '모바일 웹 게임', '브라우저 게임', 'HTML5 게임'
+  ],
   authors: [{ name: '하루상자' }],
   alternates: {
     canonical: '/',
@@ -43,8 +54,8 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: '하루상자 | 리얼한 웹 인형뽑기 게임',
-    description: '리얼한 물리 엔진으로 즐기는 웹 인형뽑기 게임',
+    title: '하루상자 | 즐거움이 가득한 일일 콘텐츠 플랫폼',
+    description: '하루상자는 인형뽑기를 비롯해 다양한 미니콘텐츠를 즐길 수 있는 웹 플랫폼입니다.',
     url: 'https://claw-addict-web.haroo.site',
     type: 'website',
     locale: 'ko_KR',
@@ -60,8 +71,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: '하루상자 | 리얼한 웹 인형뽑기 게임',
-    description: '리얼한 물리 엔진으로 즐기는 웹 인형뽑기 게임',
+    title: '하루상자 | 즐거움이 가득한 일일 콘텐츠 플랫폼',
+    description: '하루상자는 인형뽑기를 비롯해 다양한 미니콘텐츠를 즐길 수 있는 웹 플랫폼입니다.',
     images: ['/og-image.png'],
   },
   verification: {
