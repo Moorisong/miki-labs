@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 
 import { MESSAGES } from '@/constants';
-import type { GamePhase } from '@/game/types/game.types';
+import type { GamePhase } from '@contents/claw/game/types/game.types';
 
 import styles from './game-overlay.module.css';
 

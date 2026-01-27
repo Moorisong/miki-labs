@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import ClawGame from './components/claw-game';
+import ClawGame from '@contents/claw/app/claw-game';
 
-import RankingSection from './components/ranking-section';
-import styles from './page.module.css';
+import RankingSection from '@contents/claw/app/ranking-section';
+import styles from '@contents/claw/app/page.module.css';
 
 export const metadata: Metadata = {
   title: '하루상자 - 리얼 3D 인형뽑기 게임',

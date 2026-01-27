@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 
-import { useGameStore } from '@/game/core/game-manager';
+import { useGameStore } from '../core/game-manager';
 import { rankingApi } from '@/lib/api/ranking';
 import { STORAGE_KEY, CONFIG } from '@/constants';
 import { getFailMessage } from '@/constants/toast-messages';

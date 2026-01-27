@@ -3,26 +3,26 @@
 import { useCallback } from 'react';
 import dynamic from 'next/dynamic';
 
-import { useGameStore } from '@/game/core/game-manager';
-import useGameControls from '@/game/hooks/use-game-controls';
-import { useGameLoop } from '@/game/hooks/use-game-loop';
+import { useGameStore } from '@contents/claw/game/core/game-manager';
+import useGameControls from '@contents/claw/game/hooks/use-game-controls';
+import { useGameLoop } from '@contents/claw/game/hooks/use-game-loop';
 import { useGameAttempts } from '@/lib/hooks/use-game-attempts';
 import { CONFIG } from '@/constants';
 
-import GameOverlay from '@/components/game/game-overlay';
-import GameHUD from '@/components/game/game-hud';
-import RankingBoard from '@/components/game/ranking-board';
-import SuccessEffect from '@/components/game/success-effect';
-import ScoreAddedModal from '@/components/game/score-added-modal';
-import TutorialModal from '@/components/game/tutorial-modal';
+import GameOverlay from '@contents/claw/ui/game-overlay';
+import GameHUD from '@contents/claw/ui/game-hud';
+import RankingBoard from '@contents/claw/ui/ranking-board';
+import SuccessEffect from '@contents/claw/ui/success-effect';
+import ScoreAddedModal from '@contents/claw/ui/score-added-modal';
+import TutorialModal from '@contents/claw/ui/tutorial-modal';
 import AdBanner from '@/components/ads/ad-banner';
 import Toast from '@/components/ui/toast';
 
-import { useGameLogic } from '@/game/hooks/use-game-logic';
+import { useGameLogic } from '@contents/claw/game/hooks/use-game-logic';
 import { useTutorial } from '@/lib/hooks/use-tutorial';
 import styles from './claw-game.module.css';
 
-const ClawMachine = dynamic(() => import('@/game/components/claw-machine'), {
+const ClawMachine = dynamic(() => import('@contents/claw/game/components/claw-machine'), {
     ssr: false,
 });
 
