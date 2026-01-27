@@ -4,6 +4,7 @@ import { useRef } from 'react';
 import { Mesh, DoubleSide } from 'three';
 import { useBox, usePlane } from '@react-three/cannon';
 import { CABINET_DIMENSIONS, PHYSICS_CONFIG } from '../types/game.types';
+import { useGameStore } from '../core/game-manager';
 
 const { width, depth, height, glassThickness, floorHeight, exitHoleSize } = CABINET_DIMENSIONS;
 
@@ -218,8 +219,13 @@ const HoleBarrier = () => {
 };
 
 const Cabinet = () => {
+  const setIsHoveringMachine = useGameStore((state) => state.setIsHoveringMachine);
+
   return (
-    <group>
+    <group
+      onPointerOver={() => setIsHoveringMachine(true)}
+      onPointerOut={() => setIsHoveringMachine(false)}
+    >
       <Floor />
       <Frame />
       <Walls />
@@ -241,6 +247,14 @@ const Cabinet = () => {
         position={[0, height / 2, -depth / 2]}
         size={[width, height]}
       />
+
+      {/* Front hit area for better detection since there's no front glass but machine is there */}
+      <mesh
+        position={[0, height / 2, depth / 2]}
+        visible={false}
+      >
+        <planeGeometry args={[width, height]} />
+      </mesh>
 
       <mesh position={[0, height + 0.1, 0]}>
         <boxGeometry args={[width + 0.2, 0.2, depth + 0.2]} />

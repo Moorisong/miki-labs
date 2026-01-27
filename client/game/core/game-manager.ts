@@ -7,6 +7,7 @@ import { createGameFlowSlice } from './game-flow-slice';
 
 export const useGameStore = create<GameStore>((set, get, api) => ({
   ...initialGameState,
+  ...initialInteractionState,
   config: DEFAULT_GAME_CONFIG,
   callbacks: {},
   soundCallbacks: {},

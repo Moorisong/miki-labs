@@ -168,4 +168,8 @@ export const createGameFlowSlice: StateCreator<GameStore, [], [], Partial<GameSt
             get().setPhase('result');
         }
     },
+
+    setIsHoveringMachine: (isHoveringMachine) => {
+        set({ isHoveringMachine });
+    },
 });

@@ -22,9 +22,11 @@ const GameCamera = () => {
   const { camera } = useThree();
   const controlsRef = useRef<any>(null);
   const phase = useGameStore((state) => state.phase);
+  const isHoveringMachine = useGameStore((state) => state.isHoveringMachine);
 
-  // 게임이 진행 중일 때만 카메라 컨트롤 활성화 (줌/회전 차단 -> 페이지 스크롤 허용)
-  const isPlaying = phase !== 'idle' && phase !== 'result';
+  // 게임이 진행 중이고 마우스가 기계 위에 있을 때만 카메라 컨트롤 활성화
+  // 기계 밖을 스크롤하면 OrbitControls가 꺼지면서 페이지 스크롤이 가능해짐
+  const canInteract = (phase !== 'idle' && phase !== 'result') && isHoveringMachine;
 
   useEffect(() => {
     if (camera instanceof PerspectiveCamera) {
@@ -41,7 +43,7 @@ const GameCamera = () => {
   return (
     <OrbitControls
       ref={controlsRef}
-      enabled={isPlaying}
+      enabled={canInteract}
       target={[0, height * 0.4, 0]}
       minDistance={2}
       maxDistance={10}

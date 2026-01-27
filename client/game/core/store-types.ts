@@ -28,6 +28,7 @@ export interface PendingReleaseDoll {
 }
 
 export interface GameStore extends GameState {
+    isHoveringMachine: boolean;
     config: GameConfig;
     callbacks: GameEventCallbacks;
     soundCallbacks: SoundCallbacks;
@@ -62,6 +63,7 @@ export interface GameStore extends GameState {
     reportDollFellInHole: (doll: DollConfig) => void;
     checkSuccess: (dollPosition: Position3D) => boolean;
     calculateScore: (doll: DollConfig | null, wasSuccessful: boolean) => number;
+    setIsHoveringMachine: (isHovering: boolean) => void;
 }
 
 export const initialClawPosition: Position3D = {
@@ -98,4 +100,8 @@ export const initialGameState: GameState = {
     score: 0,
     attempts: DEFAULT_GAME_CONFIG.maxAttempts,
     claw: initialClawState,
+};
+
+export const initialInteractionState = {
+    isHoveringMachine: false,
 };
