@@ -210,7 +210,7 @@ export default function SuccessEffect({ show, score, totalScore, onComplete, sho
                   const scoreToSave = totalScore ?? score;
                   localStorage.setItem(STORAGE_KEY.PENDING_RANKING_SCORE, scoreToSave.toString());
                   console.log('[SuccessEffect] Score saved to localStorage, redirecting to login');
-                  signIn('kakao', { callbackUrl: '/game' });
+                  signIn('kakao', { callbackUrl: '/claw' });
                 }}
               >
                 로그인하고 랭킹 등록하기 →

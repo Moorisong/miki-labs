@@ -11,7 +11,7 @@
 
 @media (min-width: 769px) {
     .container {
-        margin-top: 8rem;
+        margin-top: 13rem;
         /* PC에서만 광고 피킹 방지를 위해 여백 확대 */
         scroll-margin-top: 120px;
     }
@@ -84,9 +84,7 @@
     border-bottom: none;
 }
 
-.row:hover {
-    background: rgba(162, 155, 254, 0.05);
-}
+
 
 .topThree {
     background: linear-gradient(90deg, rgba(255, 215, 0, 0.05), transparent);

@@ -173,9 +173,7 @@
   border-bottom: none;
 }
 
-.tableRow:hover {
-  background: rgba(108, 92, 231, 0.05);
-}
+
 
 .tableRow.highlight {
   background: rgba(108, 92, 231, 0.05);
