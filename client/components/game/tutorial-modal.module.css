@@ -15,7 +15,7 @@
 
 @media (max-width: 768px) {
     .overlay {
-        padding-top: 160px;
+        padding-top: 200px;
         align-items: flex-start;
         overflow-y: auto;
     }
@@ -168,7 +168,7 @@
 .confirmButton {
     width: 100%;
     padding: var(--space-md);
-    background: var(--gradient-primary);
+    background: var(--color-primary);
     border: none;
     border-radius: var(--radius-md);
     color: white;

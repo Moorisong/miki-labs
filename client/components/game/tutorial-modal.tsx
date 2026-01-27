@@ -26,7 +26,7 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
             <div className={styles.modal}>
                 <h2 className={styles.title}>
                     <span className={styles.icon}>🎮</span>
-                    게임 방법
+                    설명서
                 </h2>
 
                 <div className={styles.content}>
