@@ -10,6 +10,7 @@ import Dolls from './dolls';
 import GameCamera from './game-camera';
 import { createPhysicsConfig } from '../core/physics-world';
 import { PHYSICS_CONFIG } from '../types/game.types';
+import { useGameStore } from '../core/game-manager';
 
 const Lights = () => {
   return (
@@ -56,13 +57,15 @@ const ClawMachine = ({
   dollCount = 12,
 }: ClawMachineProps) => {
   const physicsConfig = createPhysicsConfig();
+  const phase = useGameStore((state) => state.phase);
+  const isPlaying = phase !== 'idle' && phase !== 'result';
 
   return (
     <div style={{
       width: '100%',
       height: '80vh',
       margin: '0 auto',
-      touchAction: 'none',
+      touchAction: isPlaying ? 'none' : 'auto',
       position: 'relative',
       overflow: 'hidden',
     }}>

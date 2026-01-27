@@ -86,22 +86,22 @@ const useGameControls = ({
     switch (event.code) {
       case 'KeyW':
       case 'ArrowUp':
-        event.preventDefault();
+        if (phase === 'moving') event.preventDefault();
         keyState.current.up = true;
         break;
       case 'KeyS':
       case 'ArrowDown':
-        event.preventDefault();
+        if (phase === 'moving') event.preventDefault();
         keyState.current.down = true;
         break;
       case 'KeyA':
       case 'ArrowLeft':
-        event.preventDefault();
+        if (phase === 'moving') event.preventDefault();
         keyState.current.left = true;
         break;
       case 'KeyD':
       case 'ArrowRight':
-        event.preventDefault();
+        if (phase === 'moving') event.preventDefault();
         keyState.current.right = true;
         break;
       case 'Space':
