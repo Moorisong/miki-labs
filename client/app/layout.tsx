@@ -93,7 +93,7 @@ export default function RootLayout({
         <SessionProvider>
           <NicknameProvider>
             <NavBar />
-            <main style={{ paddingTop: '64px', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            <main className="main-content">
               {children}
             </main>
             <Footer />

@@ -244,8 +244,7 @@
 @media (max-width: 768px) {
     .hud {
         padding: var(--space-md);
-        top: 120px;
-        /* Ad space margin */
+        top: 10px;
     }
 
     .topBar {

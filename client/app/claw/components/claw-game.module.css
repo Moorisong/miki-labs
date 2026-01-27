@@ -18,8 +18,7 @@
     .container {
         height: auto;
         min-height: 85vh;
-        padding-top: 150px;
-        /* Ad(120) + HUD(~60) + Margin(100) */
+        padding-top: 30px;
     }
 
     .gameCanvas {

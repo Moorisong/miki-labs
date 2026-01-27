@@ -254,9 +254,17 @@
     display: flex;
   }
 
+  /* 모바일에서 네비게이션 바 위치 조정 */
+  /* 광고 배너 높이에 따라 이 값(100px)을 조정하세요 */
+  .header {
+    top: 200px;
+  }
+
   .navLinks {
     position: fixed;
-    top: 64px;
+    /* 헤더 높이(64px) + 상단 여백(200px) = 264px */
+    /* 위 .header의 top 값을 변경하면 이 값도 (새로운 top값 + 64px)로 변경헤야 합니다 */
+    top: 264px;
     left: 0;
     right: 0;
     bottom: 0;

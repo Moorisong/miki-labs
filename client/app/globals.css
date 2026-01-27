@@ -110,3 +110,17 @@ h6 {
     padding: 0 var(--space-xl);
   }
 }
+
+.main-content {
+  padding-top: 64px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    /* 200px (Ads) + 64px (Header) = 264px */
+    padding-top: 264px;
+  }
+}
