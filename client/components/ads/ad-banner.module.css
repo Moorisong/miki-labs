@@ -14,23 +14,27 @@
     /* 패딩 포함 크기 계산 */
     overflow: hidden;
     /* 자식 요소(광고)가 넘치면 잘리도록 하여 가로 스크롤 방지 */
+    text-align: center;
+    /* 인라인 요소 강제 중앙 정렬 */
 }
 
 @media (max-width: 420px) {
     .adContainer>div {
         transform: scale(0.9);
-        transform-origin: center;
+        transform-origin: center center;
     }
 }
 
 @media (max-width: 360px) {
     .adContainer>div {
         transform: scale(0.85);
+        transform-origin: center center;
     }
 }
 
 @media (max-width: 330px) {
     .adContainer>div {
         transform: scale(0.75);
+        transform-origin: center center;
     }
 }
