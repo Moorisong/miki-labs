@@ -8,7 +8,7 @@ export default function Footer() {
       <div className={styles.container}>
         <div className={styles.bottom}>
           <p className={styles.copyright}>
-            &copy; {currentYear} 하루상자. All rights reserved.
+            &copy; {currentYear} KSH. All rights reserved.
           </p>
         </div>
       </div>

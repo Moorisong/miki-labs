@@ -17,13 +17,13 @@ export default function Home() {
             active: true,
         },
         {
-            id: 'mini-game',
-            title: '미니게임',
-            description: '간단하게 즐기는 다양한 미니게임들이 준비 중입니다.',
-            image: '/logo.png', // Placeholder
-            link: '#',
-            badge: 'Coming Soon',
-            active: false,
+            id: 'rolling-paper',
+            title: '롤링페이퍼',
+            description: '친구들과 추억을 나누는 롤링페이퍼',
+            image: '/sample/r-paper-logo.png',
+            link: 'https://r-paper-web.haroo.site',
+            badge: 'New',
+            active: true,
         },
         {
             id: 'letter',
@@ -86,7 +86,7 @@ export default function Home() {
                 ))}
             </div>
 
-            <footer style={{ marginTop: 'auto', paddingTop: '4rem', color: '#718096', fontSize: '0.875rem', textAlign: 'center' }}>
+            <footer style={{ marginTop: 'auto', paddingTop: '4rem', color: 'var(--color-text-muted)', fontSize: '0.875rem', textAlign: 'center' }}>
                 <p>하루상자는 하루의 소소한 재미를 담아두는 작은 놀이 상자입니다.</p>
             </footer>
         </div>
