@@ -222,39 +222,51 @@ const Cabinet = () => {
   const setIsHoveringMachine = useGameStore((state) => state.setIsHoveringMachine);
 
   return (
-    <group
-      onPointerOver={() => setIsHoveringMachine(true)}
-      onPointerOut={() => setIsHoveringMachine(false)}
-    >
-      <Floor />
-      <Frame />
-      <Walls />
-      <HoleBarrier />
-
-      <GlassPanel
-        position={[-width / 2, height / 2, 0]}
-        rotation={[0, Math.PI / 2, 0]}
-        size={[depth, height]}
-      />
-
-      <GlassPanel
-        position={[width / 2, height / 2, 0]}
-        rotation={[0, Math.PI / 2, 0]}
-        size={[depth, height]}
-      />
-
-      <GlassPanel
-        position={[0, height / 2, -depth / 2]}
-        size={[width, height]}
-      />
-
-      {/* Front hit area for better detection since there's no front glass but machine is there */}
+    <group>
+      {/* Background hit area to detect when we're NOT on the machine */}
       <mesh
-        position={[0, height / 2, depth / 2]}
+        position={[0, height / 2, -5]}
+        onPointerOver={() => setIsHoveringMachine(false)}
         visible={false}
       >
-        <planeGeometry args={[width, height]} />
+        <planeGeometry args={[width * 10, height * 10]} />
       </mesh>
+
+      <group
+        onPointerOver={() => setIsHoveringMachine(true)}
+        onPointerOut={() => setIsHoveringMachine(false)}
+        onPointerDown={() => setIsHoveringMachine(true)}
+      >
+        <Floor />
+        <Frame />
+        <Walls />
+        <HoleBarrier />
+
+        <GlassPanel
+          position={[-width / 2, height / 2, 0]}
+          rotation={[0, Math.PI / 2, 0]}
+          size={[depth, height]}
+        />
+
+        <GlassPanel
+          position={[width / 2, height / 2, 0]}
+          rotation={[0, Math.PI / 2, 0]}
+          size={[depth, height]}
+        />
+
+        <GlassPanel
+          position={[0, height / 2, -depth / 2]}
+          size={[width, height]}
+        />
+
+        {/* Front hit area for better detection since there's no front glass but machine is there */}
+        <mesh
+          position={[0, height / 2, depth / 2]}
+          visible={false}
+        >
+          <planeGeometry args={[width, height]} />
+        </mesh>
+      </group>
 
       <mesh position={[0, height + 0.1, 0]}>
         <boxGeometry args={[width + 0.2, 0.2, depth + 0.2]} />

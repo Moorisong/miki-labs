@@ -11,6 +11,7 @@ import GameCamera from './game-camera';
 import { createPhysicsConfig } from '../core/physics-world';
 import { PHYSICS_CONFIG } from '../types/game.types';
 import { useGameStore } from '../core/game-manager';
+import { useRef, useEffect } from 'react';
 
 const Lights = () => {
   return (
@@ -56,19 +57,49 @@ interface ClawMachineProps {
 const ClawMachine = ({
   dollCount = 12,
 }: ClawMachineProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const physicsConfig = createPhysicsConfig();
   const phase = useGameStore((state) => state.phase);
-  const isPlaying = phase !== 'idle' && phase !== 'result';
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleTouch = (e: TouchEvent) => {
+      const { phase, isHoveringMachine } = useGameStore.getState();
+      const isPlaying = phase !== 'idle' && phase !== 'result';
+
+      // 기계 영역 위에 있고 게임 중일 때만 브라우저 기본 스크롤을 막음
+      // 그래야 OrbitControls가 핀치 줌 등을 정상적으로 가로챌 수 있음
+      if (isPlaying && isHoveringMachine) {
+        if (e.cancelable) {
+          e.preventDefault();
+        }
+      }
+    };
+
+    // passive: false로 설정해야 e.preventDefault() 호출이 가능함
+    container.addEventListener('touchstart', handleTouch, { passive: false });
+    container.addEventListener('touchmove', handleTouch, { passive: false });
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouch);
+      container.removeEventListener('touchmove', handleTouch);
+    };
+  }, []);
 
   return (
-    <div style={{
-      width: '100%',
-      height: '80vh',
-      margin: '0 auto',
-      touchAction: isPlaying ? 'none' : 'auto',
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
+    <div
+      ref={containerRef}
+      style={{
+        width: '100%',
+        height: '80vh',
+        margin: '0 auto',
+        touchAction: 'auto', // 기본적으로는 auto로 두어 스크롤 허용
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
       <Canvas
         shadows
         gl={{
