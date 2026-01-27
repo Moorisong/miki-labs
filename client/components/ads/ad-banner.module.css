@@ -12,6 +12,8 @@
     /* 중앙 정렬 */
     box-sizing: border-box;
     /* 패딩 포함 크기 계산 */
+    overflow: hidden;
+    /* 자식 요소(광고)가 넘치면 잘리도록 하여 가로 스크롤 방지 */
 }
 
 @media (max-width: 420px) {
