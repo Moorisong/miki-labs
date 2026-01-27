@@ -6,8 +6,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
+    z-index: 9999;
     padding: var(--space-md);
+    padding-top: 120px;
+    align-items: flex-start;
     animation: fadeIn 0.3s ease-out;
 }
 
