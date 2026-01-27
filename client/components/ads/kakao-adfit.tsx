@@ -69,7 +69,8 @@ export default function KakaoAdfit({ unit, width, height, className }: KakaoAdfi
                 width: `${width}px`,
                 height: `${height}px`,
                 margin: '0 auto',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                maxWidth: '100%',
             }}
         />
     );
