@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { DEFAULT_GAME_CONFIG } from '../types/game.types';
-import { GameStore, initialGameState, initialGrabbedDollState, initialPendingReleaseDoll, initialVelocity, initialClawPosition } from './store-types';
+import { GameStore, initialGameState, initialInteractionState, initialGrabbedDollState, initialPendingReleaseDoll, initialVelocity, initialClawPosition } from './store-types';
 import { createClawSlice } from './claw-slice';
 import { createDollSlice } from './doll-slice';
 import { createGameFlowSlice } from './game-flow-slice';

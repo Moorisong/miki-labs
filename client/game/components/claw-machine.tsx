@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Physics } from '@react-three/cannon';
 import { Environment } from '@react-three/drei';
+import { Vector2 } from 'three';
 import Cabinet from './cabinet';
 import Claw from './claw';
 import Dolls from './dolls';
@@ -34,8 +35,9 @@ const InteractionManager = () => {
       // Normalize touch coordinates for raycasting
       const x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
       const y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+      const coords = new Vector2(x, y);
 
-      raycaster.setFromCamera({ x, y }, camera);
+      raycaster.setFromCamera(coords, camera);
       const intersects = raycaster.intersectObjects(scene.children, true);
 
       // Check if we hit the machine or background
