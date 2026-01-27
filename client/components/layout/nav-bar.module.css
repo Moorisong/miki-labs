@@ -283,9 +283,11 @@
     background: rgba(26, 26, 46, 0.98);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    transform: translateX(100%);
+    transform: translateY(-20px);
+    opacity: 0;
     visibility: hidden;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.3s;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
     overflow-y: visible;
     /* 내부 스크롤 대신 전체 페이지 스크롤 사용 */
     border-bottom: 1px solid rgba(162, 155, 254, 0.1);
@@ -295,9 +297,11 @@
   }
 
   .navLinks.open {
-    transform: translateX(0);
+    transform: translateY(0);
+    opacity: 1;
     visibility: visible;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s;
+    pointer-events: auto;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s;
   }
 
   .navLink {
