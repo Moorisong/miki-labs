@@ -1,5 +1,5 @@
-'use client';
-
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useSession, signIn } from 'next-auth/react';
 import { CONFIG, ROUTES } from '@/constants';
 import styles from './tutorial-modal.module.css';
@@ -12,10 +12,16 @@ interface TutorialModalProps {
 export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
     const { status } = useSession();
     const isLoggedIn = status === 'authenticated';
+    const [mounted, setMounted] = useState(false);
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
 
-    return (
+    if (!isOpen || !mounted) return null;
+
+    return createPortal(
         <div className={styles.overlay}>
             <div className={styles.modal}>
                 <h2 className={styles.title}>
@@ -55,6 +61,7 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
                     확인했습니다
                 </button>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
