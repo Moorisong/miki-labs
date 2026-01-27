@@ -5,6 +5,7 @@ import { useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { Vector3, PerspectiveCamera } from 'three';
 import { CABINET_DIMENSIONS } from '../types/game.types';
+import { useGameStore } from '../core/game-manager';
 
 const { width, depth, height } = CABINET_DIMENSIONS;
 
@@ -20,6 +21,10 @@ const CAMERA_CONFIG = {
 const GameCamera = () => {
   const { camera } = useThree();
   const controlsRef = useRef<any>(null);
+  const phase = useGameStore((state) => state.phase);
+
+  // 게임이 진행 중일 때만 카메라 컨트롤 활성화 (줌/회전 차단 -> 페이지 스크롤 허용)
+  const isPlaying = phase !== 'idle' && phase !== 'result';
 
   useEffect(() => {
     if (camera instanceof PerspectiveCamera) {
@@ -36,6 +41,7 @@ const GameCamera = () => {
   return (
     <OrbitControls
       ref={controlsRef}
+      enabled={isPlaying}
       target={[0, height * 0.4, 0]}
       minDistance={2}
       maxDistance={10}
