@@ -22,19 +22,29 @@ const InteractionManager = () => {
   useEffect(() => {
     const domElement = gl.domElement;
 
-    const handleTouch = (e: TouchEvent) => {
-      if (e.touches.length === 0) return;
-
+    const handlePointerMove = (e: MouseEvent | TouchEvent) => {
       const { phase } = useGameStore.getState();
       const isPlaying = phase !== 'idle' && phase !== 'result';
+      // Always run raycaster if isPlaying, or even if not playing if we want consistent hover state
       if (!isPlaying) return;
 
-      const touch = e.touches[0];
+      let clientX: number;
+      let clientY: number;
+
+      if ('touches' in e) {
+        if (e.touches.length === 0) return; // Handle case where no touches are present
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+
       const rect = domElement.getBoundingClientRect();
 
-      // Normalize touch coordinates for raycasting
-      const x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
-      const y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+      // Normalize coordinates for raycasting
+      const x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((clientY - rect.top) / rect.height) * 2 + 1;
       const coords = new Vector2(x, y);
 
       raycaster.setFromCamera(coords, camera);
@@ -65,9 +75,9 @@ const InteractionManager = () => {
       }
 
       if (hitMachine) {
-        // Only prevent default if we're hitting the machine area
-        // This allows browser scrolling when touching the background
-        if (e.cancelable) {
+        // Only prevent default if we're hitting the machine area AND it is a touch event (to block scroll)
+        // For mouse, we rely on OrbitControls 'enabled' prop which checks isHoveringMachine
+        if ('touches' in e && e.cancelable) {
           e.preventDefault();
         }
         setIsHoveringMachine(true);
@@ -76,12 +86,14 @@ const InteractionManager = () => {
       }
     };
 
-    domElement.addEventListener('touchstart', handleTouch, { passive: false });
-    domElement.addEventListener('touchmove', handleTouch, { passive: false });
+    domElement.addEventListener('touchstart', handlePointerMove as any, { passive: false });
+    domElement.addEventListener('touchmove', handlePointerMove as any, { passive: false });
+    domElement.addEventListener('mousemove', handlePointerMove as any); // Add mouse support
 
     return () => {
-      domElement.removeEventListener('touchstart', handleTouch);
-      domElement.removeEventListener('touchmove', handleTouch);
+      domElement.removeEventListener('touchstart', handlePointerMove as any);
+      domElement.removeEventListener('touchmove', handlePointerMove as any);
+      domElement.removeEventListener('mousemove', handlePointerMove as any);
     };
   }, [gl, camera, scene, raycaster, setIsHoveringMachine]);
 

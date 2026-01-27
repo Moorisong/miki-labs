@@ -23,6 +23,8 @@ const GameCamera = () => {
   const controlsRef = useRef<any>(null);
   const phase = useGameStore((state) => state.phase);
 
+  const isHoveringMachine = useGameStore((state) => state.isHoveringMachine);
+
   // 게임이 진행 중일 때는 항상 카메라 컨트롤을 켬.
   // 실제 조작 가능 여부(스크롤 방지)는 InteractionManager의 e.preventDefault()로 결정됨.
   const isPlaying = phase !== 'idle' && phase !== 'result';
@@ -42,7 +44,7 @@ const GameCamera = () => {
   return (
     <OrbitControls
       ref={controlsRef}
-      enabled={isPlaying}
+      enabled={isPlaying && isHoveringMachine}
       target={[0, height * 0.4, 0]}
       minDistance={2}
       maxDistance={10}
