@@ -6,7 +6,7 @@
 * **Scope**: `client/app/game`, `client/game/`
 
 ## 📚 Context & Requirements
-Based on `docs/planning/03_game_mechanics.md` and `docs/planning/06_realism_philosophy.md`.
+Based on `docs/planning/claw_machine/product_spec.md`.
 
 ### 1. Technology Stack
 * **Graphics**: Three.js (via `@react-three/fiber` recommended or vanilla within React)

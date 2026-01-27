@@ -6,7 +6,7 @@
 * **Scope**: `client/app` (excluding game logic), `client/components`
 
 ## 📚 Context & Requirements
-Based on `docs/planning/01_project_overview.md` and `docs/planning/02_architecture.md`.
+Based on `docs/planning/01_haroo_box_planning.md` and `docs/planning/claw_machine/engineering_spec.md`.
 
 ### 1. Technology Stack
 * **Framework**: Next.js (App Router)

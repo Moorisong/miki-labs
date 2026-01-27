@@ -1,6 +1,6 @@
 # Collision System Agent Reference
 
-## 04_collision_system.md (04_collision_system.md)
+## Collision System Spec (docs/planning/claw_machine/collision_system.md)
 # Collision System Spec – Ppopgi Addict
 
 ## 1. 목적 (Goal)
