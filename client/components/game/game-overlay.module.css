@@ -335,12 +335,12 @@
 
 @media (max-width: 768px) {
   .startOverlay {
-    bottom: 110px;
+    bottom: 28%;
     /* Ad banner height + padding */
   }
 
   .mobileControls {
-    bottom: 110px;
+    bottom: 28%;
     /* Lift controls above ad banner */
   }
 }

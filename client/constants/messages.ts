@@ -120,8 +120,7 @@ export const HOW_TO_PLAY = [
 // 네비게이션 링크
 export const NAV_LINKS = [
     { href: '/', label: '홈' },
-    { href: '/game', label: '게임' },
-    { href: '/ranking', label: '랭킹' },
+    { href: '/claw', label: '인형뽑기' },
 ] as const;
 
 // 메달 이모지

@@ -5,9 +5,11 @@
 
 export const ROUTES = {
     HOME: '/',
-    GAME: '/game',
-    RANKING: '/ranking',
+    CLAW_HOME: '/claw',
+    GAME: '/claw/game',
+    RANKING: '/claw/ranking',
     LOGIN: '/login',
+    MYPAGE: '/mypage',
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;

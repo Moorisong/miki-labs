@@ -48,23 +48,7 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
                         </ul>
                     </section>
 
-                    <section className={styles.section}>
-                        <div className={styles.loginInfo}>
-                            <p className={styles.infoText}>
-                                <span className={styles.infoIcon}>ℹ️</span>
-                                로그인 없이도 플레이할 수 있어요
-                            </p>
-                            <p className={styles.infoText}>로그인하면 기록을 랭킹에 저장할 수 있어요</p>
-                            {!isLoggedIn && (
-                                <button
-                                    className={styles.loginCTA}
-                                    onClick={() => signIn('kakao', { callbackUrl: ROUTES.GAME })}
-                                >
-                                    지금 로그인하고 랭킹에 도전하세요! →
-                                </button>
-                            )}
-                        </div>
-                    </section>
+
                 </div>
 
                 <button className={styles.confirmButton} onClick={onClose}>

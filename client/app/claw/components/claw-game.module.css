@@ -1,0 +1,61 @@
+.container {
+    position: relative;
+    width: 100%;
+    height: 90vh;
+    /* Adjust height to not be full 100vh to hint at content below */
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    background-color: #1a1a2e;
+    /* overflow: hidden; Removed to allow controls to go outside */
+    z-index: 10;
+    /* Contain the game canvas */
+    border-bottom: 5px solid #2a2a4e;
+    /* Visual separator */
+}
+
+/* On mobile, maybe full height is better? */
+@media (max-width: 768px) {
+    .container {
+        height: auto;
+        min-height: 85vh;
+        padding-top: 150px;
+        /* Ad(120) + HUD(~60) + Margin(100) */
+    }
+
+    .gameCanvas {
+        height: 75vh;
+    }
+}
+
+.gameCanvas {
+    width: 100%;
+    flex: 1;
+    position: relative;
+}
+
+.adSection {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+    background-color: #1a1a2e;
+    z-index: 5;
+    flex: none;
+    min-height: 80px;
+    margin-bottom: 2rem;
+    /* Ensure spacing from next section */
+}
+
+.rankingOverlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 20;
+    padding: 1rem;
+    pointer-events: auto;
+}

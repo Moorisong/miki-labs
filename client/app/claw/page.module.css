@@ -1,0 +1,11 @@
+.main {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding-bottom: 4rem;
+}
+
+/* Ensure no default margins mess up the full-width game */
+.main> :first-child {
+  margin-top: 0;
+}

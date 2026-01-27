@@ -92,24 +92,7 @@ export default function GameHUD({
                 </div>
             )}
 
-            {/* 비로그인 안내 문구 (최초 게임 시작 전까지만 노출) */}
-            {!isLoggedIn && phase === 'idle' && !hasGameStarted && (
-                <div className={styles.loginPrompt}>
-                    <p className={styles.promptText}>
-                        <span className={styles.infoIcon}>ℹ️</span>
-                        {MESSAGES.AUTH.LOGIN_PROMPT}
-                    </p>
-                    <p className={styles.promptSubtext}>
-                        {MESSAGES.AUTH.LOGIN_BENEFIT}
-                    </p>
-                    <button
-                        className={styles.loginLink}
-                        onClick={() => signIn('kakao', { callbackUrl: ROUTES.GAME })}
-                    >
-                        {MESSAGES.AUTH.LOGIN_CTA}
-                    </button>
-                </div>
-            )}
+
         </div>
     );
 }

@@ -60,12 +60,10 @@ const ClawMachine = ({
   return (
     <div style={{
       width: '100%',
-      maxWidth: '600px',
       height: '80vh',
       margin: '0 auto',
       touchAction: 'none',
       position: 'relative',
-      borderRadius: '12px',
       overflow: 'hidden',
     }}>
       <Canvas
