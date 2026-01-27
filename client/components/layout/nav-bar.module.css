@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   z-index: var(--z-sticky);
-  background: rgba(26, 26, 46, 0.8);
+  background: rgba(26, 26, 46, 1);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(162, 155, 254, 0.1);
@@ -272,7 +272,7 @@
     justify-content: flex-start;
     padding-top: var(--space-xl);
     gap: var(--space-sm);
-    background: rgba(26, 26, 46, 0.98);
+    background: rgba(26, 26, 46, 1);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     transform: translateX(100%);
