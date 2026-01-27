@@ -74,7 +74,7 @@ export default function NavBar() {
         <nav className={styles.nav}>
           <Link href="/" className={styles.logo} onClick={closeMenu}>
             <img src="/logo.png" alt="Logo" className={styles.logoIcon} />
-            <span className={styles.logoText}>뽑기중독</span>
+            <span className={styles.logoText}>하루상자</span>
           </Link>
 
           <button

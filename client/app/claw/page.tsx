@@ -5,7 +5,7 @@ import RankingSection from './components/ranking-section';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
-  title: '뽑기중독 - 리얼 3D 인형뽑기 게임',
+  title: '하루상자 - 리얼 3D 인형뽑기 게임',
   description: '설치 없이 바로 즐기는 3D 웹 인형뽑기 게임. 물리엔진 기반의 리얼한 조작감으로 인형을 뽑아보세요!',
 };
 
@@ -13,7 +13,7 @@ export default function ClawPage() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'GameApplication',
-    name: '뽑기중독',
+    name: '하루상자',
     url: 'https://claw-addict.com/claw',
     applicationCategory: 'Game',
     operatingSystem: 'Any',

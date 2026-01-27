@@ -23,7 +23,7 @@ export default function GameFeatures() {
                 <div className={styles.content}>
                     <div className={styles.description}>
                         <p>
-                            뽑기중독은 <strong>실제 인형뽑기 기계의 조작감</strong>을 웹에서 완벽하게 구현한 3D 게임입니다.
+                            하루상자는 <strong>실제 인형뽑기 기계의 조작감</strong>을 웹에서 완벽하게 구현한 3D 게임입니다.
                             단순한 확률 게임이 아닌, <strong>물리엔진 기반의 리얼한 집게 조작</strong>을 경험해보세요.
                         </p>
                         <p className={styles.subText}>

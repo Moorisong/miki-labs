@@ -21,7 +21,7 @@ export const MESSAGES = {
         LOGIN: '로그인',
         LOGOUT: '로그아웃',
         KAKAO_LOGIN: '카카오 로그인',
-        WELCOME: '뽑기중독에 오신 것을 환영합니다',
+        WELCOME: '하루상자에 오신 것을 환영합니다',
         TERMS_NOTICE: '로그인 시 서비스 이용약관에 동의하게 됩니다',
         LOADING: '로딩 중...',
         NO_NICKNAME: '닉네임 미설정',
@@ -69,8 +69,8 @@ export const MESSAGES = {
 
     // 메타 정보
     META: {
-        SITE_NAME: '뽑기중독',
-        TITLE: '뽑기중독 | 리얼한 웹 인형뽑기 게임',
+        SITE_NAME: '하루상자',
+        TITLE: '하루상자 | 리얼한 웹 인형뽑기 게임',
         DESCRIPTION: '리얼한 물리 엔진으로 즐기는 웹 인형뽑기 게임. 실제 인형뽑기의 손맛을 느껴보세요!',
         OG_DESCRIPTION: '리얼한 물리 엔진으로 즐기는 웹 인형뽑기 게임',
     },

@@ -9,7 +9,7 @@ export default function Home() {
     const contents = [
         {
             id: 'claw-machine',
-            title: '뽑기중독',
+            title: '하루상자',
             description: '리얼한 물리 엔진으로 즐기는 웹 인형뽑기 게임.\n실제 인형뽑기의 손맛을 느껴보세요!',
             image: '/hero_character.png',
             link: ROUTES.CLAW_HOME || '/claw', // Safe fallback if constant isn't updated yet

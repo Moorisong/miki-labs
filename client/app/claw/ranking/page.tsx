@@ -10,11 +10,11 @@ import styles from './page.module.css';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '랭킹 | 뽑기중독',
-  description: '뽑기중독 플레이어들의 랭킹을 확인하세요. 최고의 인형뽑기 마스터가 되어보세요!',
+  title: '랭킹 | 하루상자',
+  description: '하루상자 플레이어들의 랭킹을 확인하세요. 최고의 인형뽑기 마스터가 되어보세요!',
   openGraph: {
-    title: '랭킹 | 뽑기중독',
-    description: '뽑기중독 플레이어들의 랭킹을 확인하세요.',
+    title: '랭킹 | 하루상자',
+    description: '하루상자 플레이어들의 랭킹을 확인하세요.',
   },
 };
 
