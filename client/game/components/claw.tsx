@@ -533,6 +533,7 @@ const Claw = () => {
       <ClawCollider />
       <group
         ref={groupRef}
+        name="MachineObject"
       // Position is controlled by spring physics in useFrame, do not bind prop
       >
         <ClawBase />

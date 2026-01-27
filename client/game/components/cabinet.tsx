@@ -222,14 +222,15 @@ const Cabinet = () => {
   const setIsHoveringMachine = useGameStore((state) => state.setIsHoveringMachine);
 
   return (
-    <group>
+    <group name="MachineObject">
       {/* Background hit area to detect when we're NOT on the machine */}
       <mesh
-        position={[0, height / 2, -5]}
+        position={[0, height / 2, -10]}
         onPointerOver={() => setIsHoveringMachine(false)}
-        visible={false}
+        name="BackgroundHitArea"
       >
-        <planeGeometry args={[width * 10, height * 10]} />
+        <planeGeometry args={[width * 20, height * 20]} />
+        <meshBasicMaterial transparent opacity={0} />
       </mesh>
 
       <group
@@ -262,9 +263,9 @@ const Cabinet = () => {
         {/* Front hit area for better detection since there's no front glass but machine is there */}
         <mesh
           position={[0, height / 2, depth / 2]}
-          visible={false}
         >
           <planeGeometry args={[width, height]} />
+          <meshBasicMaterial transparent opacity={0} />
         </mesh>
       </group>
 

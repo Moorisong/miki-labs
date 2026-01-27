@@ -12,6 +12,79 @@ import { createPhysicsConfig } from '../core/physics-world';
 import { PHYSICS_CONFIG } from '../types/game.types';
 import { useGameStore } from '../core/game-manager';
 import { useRef, useEffect } from 'react';
+import { useThree } from '@react-three/fiber';
+
+const InteractionManager = () => {
+  const { gl, camera, scene, raycaster } = useThree();
+  const setIsHoveringMachine = useGameStore((state) => state.setIsHoveringMachine);
+
+  useEffect(() => {
+    const domElement = gl.domElement;
+
+    const handleTouch = (e: TouchEvent) => {
+      if (e.touches.length === 0) return;
+
+      const { phase } = useGameStore.getState();
+      const isPlaying = phase !== 'idle' && phase !== 'result';
+      if (!isPlaying) return;
+
+      const touch = e.touches[0];
+      const rect = domElement.getBoundingClientRect();
+
+      // Normalize touch coordinates for raycasting
+      const x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera({ x, y }, camera);
+      const intersects = raycaster.intersectObjects(scene.children, true);
+
+      // Check if we hit the machine or background
+      let hitMachine = false;
+      for (const intersect of intersects) {
+        let obj = intersect.object;
+        if (obj.name === 'BackgroundHitArea') {
+          hitMachine = false;
+          break;
+        }
+
+        let foundMachine = false;
+        while (obj) {
+          if (obj.name === 'MachineObject') {
+            foundMachine = true;
+            break;
+          }
+          obj = obj.parent as any;
+        }
+
+        if (foundMachine) {
+          hitMachine = true;
+          break;
+        }
+      }
+
+      if (hitMachine) {
+        // Only prevent default if we're hitting the machine area
+        // This allows browser scrolling when touching the background
+        if (e.cancelable) {
+          e.preventDefault();
+        }
+        setIsHoveringMachine(true);
+      } else {
+        setIsHoveringMachine(false);
+      }
+    };
+
+    domElement.addEventListener('touchstart', handleTouch, { passive: false });
+    domElement.addEventListener('touchmove', handleTouch, { passive: false });
+
+    return () => {
+      domElement.removeEventListener('touchstart', handleTouch);
+      domElement.removeEventListener('touchmove', handleTouch);
+    };
+  }, [gl, camera, scene, raycaster, setIsHoveringMachine]);
+
+  return null;
+};
 
 const Lights = () => {
   return (
@@ -95,7 +168,7 @@ const ClawMachine = ({
         width: '100%',
         height: '80vh',
         margin: '0 auto',
-        touchAction: 'auto', // 기본적으로는 auto로 두어 스크롤 허용
+        touchAction: 'manipulation', // Allow basic touch gestures but help with delay
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -106,10 +179,12 @@ const ClawMachine = ({
           antialias: true,
           alpha: false,
           powerPreference: 'high-performance',
+          // Ensure pointer events are handled correctly
         }}
         dpr={[1, 2]}
       >
         <color attach="background" args={['#1a1a2e']} />
+        <InteractionManager />
 
         <Suspense fallback={null}>
           <Physics
