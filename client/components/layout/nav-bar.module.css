@@ -257,11 +257,14 @@
   /* 모바일에서 네비게이션 바 위치 조정 */
   /* 광고 배너 높이에 따라 이 값(100px)을 조정하세요 */
   .header {
+    position: absolute;
     top: 200px;
+    width: 100%;
+    overflow-x: hidden;
   }
 
   .navLinks {
-    position: fixed;
+    position: absolute;
     /* 헤더 높이(64px) + 상단 여백(200px) = 264px */
     /* 위 .header의 top 값을 변경하면 이 값도 (새로운 top값 + 64px)로 변경헤야 합니다 */
     top: 264px;
@@ -276,12 +279,15 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     transform: translateX(100%);
-    transition: transform var(--transition-normal);
+    visibility: hidden;
+    transition: transform var(--transition-normal), visibility 0s linear var(--transition-normal);
     overflow-y: auto;
   }
 
   .navLinks.open {
     transform: translateX(0);
+    visibility: visible;
+    transition: transform var(--transition-normal), visibility 0s;
   }
 
   .navLink {

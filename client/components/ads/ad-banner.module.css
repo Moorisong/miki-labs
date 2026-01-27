@@ -9,9 +9,21 @@
     margin: 16px 0;
 }
 
+@media (max-width: 420px) {
+    .adContainer>div {
+        transform: scale(0.9);
+        transform-origin: center;
+    }
+}
+
 @media (max-width: 360px) {
-    .adContainer {
-        padding: 12px 0;
-        margin: 12px 0;
+    .adContainer>div {
+        transform: scale(0.85);
+    }
+}
+
+@media (max-width: 330px) {
+    .adContainer>div {
+        transform: scale(0.75);
     }
 }
