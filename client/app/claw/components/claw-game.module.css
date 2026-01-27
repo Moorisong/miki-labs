@@ -10,7 +10,8 @@
     /* overflow: hidden; Removed to allow controls to go outside */
     z-index: 10;
     /* Contain the game canvas */
-    /* Visual separator */
+    padding-top: 50px;
+    /* PC에서 HUD와 기계 사이 여백 확보 (HUD는 absolute라 영향 안받음) */
 }
 
 /* On mobile, maybe full height is better? */

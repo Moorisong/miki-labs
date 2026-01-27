@@ -242,7 +242,8 @@
 /* Start Button */
 .startOverlay {
   position: absolute;
-  bottom: 20%;
+  /* PC 위치 조정: 여기서 bottom 값을 변경하세요 (예: 20% -> 25%) */
+  bottom: 10%;
   left: 0;
   right: 0;
   display: flex;

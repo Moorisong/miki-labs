@@ -23,6 +23,14 @@
     /* 세로 길이 동일하게 맞춤 */
     width: 100%;
     gap: var(--space-md);
+    /* PC 환경에서 HUD와 게임 화면 사이 여백 추가 */
+    margin-bottom: var(--space-xl);
+}
+
+@media (max-width: 768px) {
+    .topBar {
+        margin-bottom: 0;
+    }
 }
 
 /* 박스 공통 스타일 */

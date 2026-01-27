@@ -39,7 +39,7 @@ export default function KakaoAdfit({ unit, width, height, className }: KakaoAdfi
                 <head>
                     <meta charset="utf-8">
                     <style>
-                        body { margin: 0; padding: 0; width: ${width}px; height: ${height}px; background: transparent; }
+                        body { margin: 0; padding: 0; width: 100%; height: 100%; background: transparent; display: flex; justify-content: center; align-items: center; }
                         .kakao_ad_area { display: block; width: 100%; height: 100%; }
                     </style>
                 </head>
