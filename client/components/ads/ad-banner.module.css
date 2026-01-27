@@ -4,9 +4,14 @@
     align-items: center;
     padding: 16px 0;
     width: 100%;
+    max-width: 100%;
+    /* 너비 초과 방지 */
     background: rgba(255, 255, 255, 0.02);
     border-radius: 8px;
-    margin: 16px 0;
+    margin: 16px auto;
+    /* 중앙 정렬 */
+    box-sizing: border-box;
+    /* 패딩 포함 크기 계산 */
 }
 
 @media (max-width: 420px) {
