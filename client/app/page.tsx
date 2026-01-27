@@ -9,7 +9,7 @@ export default function Home() {
     const contents = [
         {
             id: 'claw-machine',
-            title: '하루상자',
+            title: '인형뽑기',
             description: '리얼한 물리 엔진으로 즐기는 웹 인형뽑기 게임.\n실제 인형뽑기의 손맛을 느껴보세요!',
             image: '/hero_character.png',
             link: ROUTES.CLAW_HOME || '/claw', // Safe fallback if constant isn't updated yet
@@ -67,7 +67,7 @@ export default function Home() {
                         <div key={content.id} className={`${styles.card} ${styles.disabled}`}>
                             <div className={styles.comingSoonOverlay}>Coming Soon</div>
                             <div className={styles.cardImageWrapper}>
-                                {content.badge && <span className={styles.badge} style={{ background: '#CBD5E0' }}>{content.badge}</span>}
+                                {content.badge && <span className={styles.badge} style={{ background: '#94a3b8' }}>{content.badge}</span>}
                                 <Image
                                     src={content.image}
                                     alt={content.title}
