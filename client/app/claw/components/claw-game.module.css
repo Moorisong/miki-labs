@@ -10,7 +10,6 @@
     /* overflow: hidden; Removed to allow controls to go outside */
     z-index: 10;
     /* Contain the game canvas */
-    border-bottom: 5px solid #2a2a4e;
     /* Visual separator */
 }
 
@@ -43,7 +42,6 @@
     z-index: 5;
     flex: none;
     min-height: 80px;
-    margin-bottom: 2rem;
     /* Ensure spacing from next section */
 }
 

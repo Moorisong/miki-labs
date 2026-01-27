@@ -2,7 +2,9 @@
     width: 100%;
     max-width: 600px;
     margin: 2rem auto;
+    /* Move up to cover gap */
     padding: 0 1rem;
+    padding-bottom: 1rem;
 }
 
 .header {
@@ -15,13 +17,13 @@
 .title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #333;
+    color: #fff;
     margin: 0;
 }
 
 .viewAllLink {
     font-size: 0.9rem;
-    color: #868e96;
+    color: #a29bfe;
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -30,26 +32,27 @@
 
 .viewAllLink:hover {
     text-decoration: underline;
-    color: #495057;
+    color: #8c7ae6;
 }
 
 .table {
-    background: white;
+    background: rgba(26, 26, 46, 0.8);
+    backdrop-filter: blur(12px);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(162, 155, 254, 0.1);
 }
 
 .tableHeader {
     display: grid;
     grid-template-columns: 60px 1fr 100px;
     padding: 0.75rem 1rem;
-    background: #f8f9fa;
+    background: rgba(42, 42, 78, 0.8);
     font-size: 0.85rem;
     font-weight: 600;
-    color: #868e96;
-    border-bottom: 1px solid #eee;
+    color: #a29bfe;
+    border-bottom: 1px solid rgba(162, 155, 254, 0.1);
     text-align: center;
 }
 
@@ -63,7 +66,7 @@
     grid-template-columns: 60px 1fr 100px;
     padding: 0.75rem 1rem;
     align-items: center;
-    border-bottom: 1px solid #f1f3f5;
+    border-bottom: 1px solid rgba(162, 155, 254, 0.05);
     transition: background 0.2s;
 }
 
@@ -72,16 +75,16 @@
 }
 
 .row:hover {
-    background: #f8f9fa;
+    background: rgba(162, 155, 254, 0.05);
 }
 
 .topThree {
-    background: rgba(255, 249, 219, 0.3);
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.05), transparent);
 }
 
 .rankNumber {
     font-weight: 700;
-    color: #adb5bd;
+    color: #a29bfe;
     text-align: center;
 }
 
@@ -91,7 +94,7 @@
 
 .nickname {
     font-weight: 500;
-    color: #495057;
+    color: #e0e0e0;
     padding-left: 1rem;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -100,13 +103,16 @@
 
 .score {
     font-weight: 700;
-    color: #fa5252;
+    color: #ff7675;
     text-align: center;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
 }
 
 .noData {
     padding: 2rem;
     text-align: center;
-    color: #adb5bd;
+    color: #6c5ce7;
     font-size: 0.9rem;
+    background: rgba(26, 26, 46, 0.5);
 }
