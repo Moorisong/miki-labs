@@ -18,39 +18,27 @@ import { useThree } from '@react-three/fiber';
 const InteractionManager = () => {
   const { gl, camera, scene, raycaster } = useThree();
   const setIsHoveringMachine = useGameStore((state) => state.setIsHoveringMachine);
+  const phase = useGameStore((state) => state.phase); // Added to get phase for isPlaying check
+
+  // Track if the current gesture started on the machine
+  const isGestureOnMachine = useRef(false);
 
   useEffect(() => {
     const domElement = gl.domElement;
 
-    const handlePointerMove = (e: MouseEvent | TouchEvent) => {
+    const handlePointerDown = (e: PointerEvent) => {
       const { phase } = useGameStore.getState();
       const isPlaying = phase !== 'idle' && phase !== 'result';
-      // Always run raycaster if isPlaying, or even if not playing if we want consistent hover state
       if (!isPlaying) return;
 
-      let clientX: number;
-      let clientY: number;
-
-      if ('touches' in e) {
-        if (e.touches.length === 0) return; // Handle case where no touches are present
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-      } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-      }
-
       const rect = domElement.getBoundingClientRect();
-
-      // Normalize coordinates for raycasting
-      const x = ((clientX - rect.left) / rect.width) * 2 - 1;
-      const y = -((clientY - rect.top) / rect.height) * 2 + 1;
+      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
       const coords = new Vector2(x, y);
 
       raycaster.setFromCamera(coords, camera);
       const intersects = raycaster.intersectObjects(scene.children, true);
 
-      // Check if we hit the machine or background
       let hitMachine = false;
       for (const intersect of intersects) {
         let obj = intersect.object;
@@ -75,25 +63,84 @@ const InteractionManager = () => {
       }
 
       if (hitMachine) {
-        // Only prevent default if we're hitting the machine area AND it is a touch event (to block scroll)
-        // For mouse, we rely on OrbitControls 'enabled' prop which checks isHoveringMachine
-        if ('touches' in e && e.cancelable) {
-          e.preventDefault();
-        }
         setIsHoveringMachine(true);
+        isGestureOnMachine.current = true;
       } else {
+        // Stop OrbitControls (which listens to pointerdown) from seeing this event
+        e.stopImmediatePropagation();
         setIsHoveringMachine(false);
+        isGestureOnMachine.current = false;
       }
     };
 
-    domElement.addEventListener('touchstart', handlePointerMove as any, { passive: false });
-    domElement.addEventListener('touchmove', handlePointerMove as any, { passive: false });
-    domElement.addEventListener('mousemove', handlePointerMove as any); // Add mouse support
+    const handleTouchMove = (e: TouchEvent) => {
+      // Only prevent browser scroll/zoom if gesture started on machine
+      if (isGestureOnMachine.current && e.cancelable) {
+        e.preventDefault();
+      }
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      const { phase } = useGameStore.getState();
+      const isPlaying = phase !== 'idle' && phase !== 'result';
+      if (!isPlaying) return;
+
+      // Raycast for wheel event
+      const rect = domElement.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      const coords = new Vector2(x, y);
+
+      raycaster.setFromCamera(coords, camera);
+      const intersects = raycaster.intersectObjects(scene.children, true);
+
+      let hitMachine = false;
+      for (const intersect of intersects) {
+        let obj = intersect.object;
+        if (obj.name === 'BackgroundHitArea') {
+          hitMachine = false;
+          break;
+        }
+
+        let foundMachine = false;
+        while (obj) {
+          if (obj.name === 'MachineObject') {
+            foundMachine = true;
+            break;
+          }
+          obj = obj.parent as any;
+        }
+
+        if (foundMachine) {
+          hitMachine = true;
+          break;
+        }
+      }
+
+      if (!hitMachine) {
+        // Stop OrbitControls from zooming if wheel is on background
+        e.stopImmediatePropagation();
+        // Allow browser scroll? Browser wheel scroll is default.
+        // If OrbitControls doesn't see it, browser scrolls. Good.
+        setIsHoveringMachine(false);
+      } else {
+        setIsHoveringMachine(true);
+      }
+    };
+
+    // Use pointerdown (capture) to intercept before OrbitControls/Drei
+    domElement.addEventListener('pointerdown', handlePointerDown as any, { capture: true });
+
+    // Add touchmove (non-passive) to prevent browser scrolling when on machine
+    domElement.addEventListener('touchmove', handleTouchMove as any, { passive: false });
+
+    // Add wheel capture to block Zoom on background on PC (since we enable OrbitControls globally)
+    domElement.addEventListener('wheel', handleWheel as any, { capture: true, passive: false }); // passive false? Wheel blocking usually active. But we WANT stopProp.
 
     return () => {
-      domElement.removeEventListener('touchstart', handlePointerMove as any);
-      domElement.removeEventListener('touchmove', handlePointerMove as any);
-      domElement.removeEventListener('mousemove', handlePointerMove as any);
+      domElement.removeEventListener('pointerdown', handlePointerDown as any, { capture: true } as any);
+      domElement.removeEventListener('touchmove', handleTouchMove as any);
+      domElement.removeEventListener('wheel', handleWheel as any, { capture: true } as any);
     };
   }, [gl, camera, scene, raycaster, setIsHoveringMachine]);
 

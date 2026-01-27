@@ -44,7 +44,7 @@ const GameCamera = () => {
   return (
     <OrbitControls
       ref={controlsRef}
-      enabled={isPlaying && isHoveringMachine}
+      enabled={isPlaying}
       target={[0, height * 0.4, 0]}
       minDistance={2}
       maxDistance={10}
