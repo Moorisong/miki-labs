@@ -70,13 +70,39 @@ export default function AdScriptManager() {
                 for (const mutation of mutations) {
                     for (const node of Array.from(mutation.addedNodes)) {
                         if (node instanceof HTMLElement) {
-                            if (!node.classList.contains('ad-skeleton') &&
-                                (node.tagName === 'IFRAME' || node.tagName === 'INS' ||
-                                    (node.tagName === 'DIV' && node.querySelector('iframe, ins')))) {
+                            if (node.classList.contains('ad-skeleton') || node.classList.contains('main-content') || node.id === '__next') continue;
+
+                            // 1. 바로 Iframe/Ins인 경우
+                            if (node.tagName === 'IFRAME' || node.tagName === 'INS') {
                                 enforceAdStyles(node);
                                 document.body.classList.add('ad-loaded');
                                 observer?.disconnect();
                                 return;
+                            }
+
+                            // 2. DIV인 경우 (컨테이너)
+                            if (node.tagName === 'DIV') {
+                                if (node.querySelector('iframe, ins')) {
+                                    // 이미 내용이 있다면 바로 적용
+                                    enforceAdStyles(node);
+                                    document.body.classList.add('ad-loaded');
+                                    observer?.disconnect();
+                                    return;
+                                } else {
+                                    // 내용이 없다면, 이 DIV 내부를 감시
+                                    const nestedObserver = new MutationObserver((nestedMutations) => {
+                                        for (const nestedMutation of nestedMutations) {
+                                            if (node.querySelector('iframe, ins')) {
+                                                enforceAdStyles(node); // 래퍼에 스타일 적용
+                                                document.body.classList.add('ad-loaded');
+                                                nestedObserver.disconnect();
+                                                observer?.disconnect();
+                                                return;
+                                            }
+                                        }
+                                    });
+                                    nestedObserver.observe(node, { childList: true, subtree: true });
+                                }
                             }
                         }
                     }
