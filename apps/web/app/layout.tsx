@@ -5,9 +5,7 @@ import Footer from '@/components/layout/footer';
 import SessionProvider from '@/components/providers/session-provider';
 import NicknameProvider from '@/components/providers/nickname-provider';
 
-import AdBanner from '@/components/ads/ad-banner';
 import AdScriptManager from '@/components/ads/ad-script-manager';
-import Script from 'next/script';
 import './globals.css';
 
 const geistSans = Geist({

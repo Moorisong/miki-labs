@@ -52,15 +52,20 @@
   --transition-normal: 250ms ease;
   --transition-slow: 350ms ease;
 
-  /* Z-index */
-  /* Z-index Inflated to sandbox Ad(2000) */
-  --z-dropdown: 3100;
+  /* Z-index (광고 z-index 2000 기준으로 상향 조정) */
+  --z-ad-skeleton: 90;
+  --z-content: 2500;
   --z-sticky: 3000;
+  --z-dropdown: 3100;
   --z-fixed: 3500;
   --z-modal-backdrop: 3800;
   --z-modal: 4000;
   --z-popover: 4500;
   --z-tooltip: 5000;
+
+  /* Ad */
+  --ad-height: 200px;
+  --header-height: 64px;
 
   /* Breakpoints (for reference in JS) */
   --breakpoint-sm: 640px;

@@ -112,7 +112,7 @@ h6 {
 }
 
 .main-content {
-  padding-top: 64px;
+  padding-top: var(--header-height);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -120,40 +120,29 @@ h6 {
 
 @media (max-width: 768px) {
   .main-content {
-    /* 모바일: 헤더(64px) + 광고(200px) 공간 미리 확보 */
-    margin-top: 264px;
-    /* padding-top 대신 margin-top 사용 (클릭 및 배경 문제 해결) */
+    /* 모바일: 헤더 + 광고 공간 미리 확보 */
+    margin-top: calc(var(--header-height) + var(--ad-height));
     position: relative;
-    z-index: 2500;
-    /* 광고(2000)보다 높게, 헤더(3000)보다 낮게 */
-    background: #1A1A2E;
-    /* 하드코딩된 배경색으로 불투명 보장 */
-    /* 스켈레톤 배치를 위한 기준점 */
+    z-index: var(--z-content);
+    background: var(--color-background);
   }
 
-  /* 광고 스켈레톤 UI */
   .ad-skeleton {
     position: fixed;
-    /* 헤더처럼 고정 */
     top: 0;
-    /* 최상단 배치 */
     left: 0;
     width: 100%;
-    height: 200px;
+    height: var(--ad-height);
     background-color: var(--color-surface);
-    /* 테마 색상 적용 */
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 90;
-    /* 헤더(보통 100)보다 낮고 컨텐츠보다 높게 */
+    z-index: var(--z-ad-skeleton);
     color: var(--color-text-muted);
-    /* 테마 색상 적용 */
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     animation: pulse 1.5s infinite ease-in-out;
   }
 
-  /* 광고가 로드되면 스켈레톤 숨김 */
   body.ad-loaded .ad-skeleton {
     display: none;
   }

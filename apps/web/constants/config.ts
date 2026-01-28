@@ -25,4 +25,11 @@ export const CONFIG = {
         PAGE_SIZE: 10,
         MAX_PAGE_BUTTONS: 10,
     },
+
+    // 광고 설정
+    AD: {
+        FALLBACK_TIMEOUT_MS: 2500,
+        MIN_HEIGHT_PX: 200,
+        Z_INDEX: 1,
+    },
 } as const;
