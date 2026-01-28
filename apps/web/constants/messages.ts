@@ -99,18 +99,24 @@ export const FEATURES = [
 export const HOW_TO_PLAY = [
     {
         step: 1,
+        title: '시점 회전',
+        description: 'PC에서는 마우스 드래그, 모바일에서는 터치 드래그로 시점을 회전하여 정확한 위치를 확인하세요.',
+        icon: '🔄',
+    },
+    {
+        step: 2,
         title: '위치 선정',
         description: '방향키 또는 화면 버튼으로 크레인을 원하는 위치로 이동시킵니다.',
         icon: '🕹️',
     },
     {
-        step: 2,
+        step: 3,
         title: '크레인 하강',
         description: '하강 버튼을 누르면 크레인이 아래로 내려가 인형을 잡습니다.',
         icon: '⬇️',
     },
     {
-        step: 3,
+        step: 4,
         title: '인형 획득',
         description: '인형을 성공적으로 잡아 출구까지 옮기면 점수를 획득합니다!',
         icon: '🎉',
