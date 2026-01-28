@@ -15,6 +15,7 @@ filter.addWords(
 );
 
 export async function PATCH(request: NextRequest) {
+  console.log('[API] Nickname PATCH request received');
   try {
     const session = await getServerSession(authOptions);
 
@@ -150,6 +151,7 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  console.log('[API] Nickname GET request received');
   try {
     const session = await getServerSession(authOptions);
 

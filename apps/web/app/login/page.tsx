@@ -1,7 +1,8 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
-import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Suspense } from 'react';
 
 import { ROUTES, MESSAGES } from '@/constants';
@@ -11,6 +12,18 @@ import styles from './page.module.css';
 function LoginContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || ROUTES.HOME;
+
+  const { status } = useSession();
+  const router = useRouter();
+
+  /*
+  // 로그인 상태일 때 리다이렉트 (사용자 피드백으로 일시 비활성화 후 원인 파악 중)
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.replace(ROUTES.HOME);
+    }
+  }, [status, router]);
+  */
 
   const handleKakaoLogin = () => {
     signIn('kakao', { callbackUrl });
