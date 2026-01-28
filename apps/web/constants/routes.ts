@@ -10,6 +10,7 @@ export const ROUTES = {
     RANKING: '/claw/ranking',
     LOGIN: '/login',
     MYPAGE: '/mypage',
+    ROLLING_PAPER: 'https://r-paper-web.haroo.site/',
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;
