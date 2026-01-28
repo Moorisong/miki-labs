@@ -257,19 +257,21 @@
   /* 모바일에서 네비게이션 바 위치 조정 */
   .header {
     position: absolute;
-    top: 0;
+    top: 200px;
+    /* 광고(200px) 아래에 배치 */
     left: 0;
     right: 0;
     width: 100%;
-    z-index: 1000;
+    z-index: var(--z-sticky);
+    /* 3000 */
     transition: top 0.3s ease;
     /* overflow-x: hidden 제거 */
   }
 
-  /* 광고 로드 시 헤더 위치 조정 */
-  :global(body.ad-loaded) .header {
+  /* 광고 로드 시 헤더 위치 조정 제거 */
+  /* :global(body.ad-loaded) .header {
     top: 200px;
-  }
+  } */
 
   .navLinks {
     position: absolute;
