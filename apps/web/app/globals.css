@@ -161,3 +161,9 @@ h6 {
     opacity: 1;
   }
 }
+
+@media (min-width: 769px) {
+  .ad-skeleton {
+    display: none;
+  }
+}
