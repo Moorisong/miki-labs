@@ -16,11 +16,11 @@ const AD_SELECTORS = {
 const AD_SCRIPTS = {
     TAG: {
         src: 'https://nap5k.com/tag.min.js',
-        zone: '10521391',
+        zone: '10532408',
     },
     VIGNETTE: {
         src: 'https://gizokraijaw.net/vignette.min.js',
-        zone: '10521394',
+        zone: '10532437',
     },
 } as const;
 
