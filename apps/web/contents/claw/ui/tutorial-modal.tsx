@@ -40,7 +40,7 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
                                 <span className={styles.badge}>확대/축소</span> 마우스 휠 / 두 손가락 줌
                             </li>
                             <li>
-                                <span className={styles.badge}>시점 회전</span> PC: 마우스 드래그 / Mobile: 터치 드래그
+                                <span className={styles.badge}>시점 회전</span> 마우스 드래그 / 터치 드래그
                             </li>
                         </ul>
                     </section>

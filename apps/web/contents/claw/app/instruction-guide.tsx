@@ -54,9 +54,9 @@ export default function InstructionGuide() {
                     <div className={styles.keyItem}>
                         <span className={styles.keyLabel}>카메라</span>
                         <div className={styles.keys}>
-                            <span className={styles.key}>PC: 마우스 드래그</span>
+                            <span className={styles.key}>마우스 드래그</span>
                             <span className={styles.separator}>/</span>
-                            <span className={styles.key}>Mobile: 터치 드래그</span>
+                            <span className={styles.key}>터치 드래그</span>
                         </div>
                     </div>
                 </div>
