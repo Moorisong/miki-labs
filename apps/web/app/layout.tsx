@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://claw-addict-web.haroo.site'),
+  metadataBase: new URL('https://box.haroo.site'),
   title: {
     default: '하루상자 | 즐거움이 가득한 일일 콘텐츠 플랫폼',
     template: '%s | 하루상자',
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: '하루상자 | 즐거움이 가득한 일일 콘텐츠 플랫폼',
     description: '하루상자는 인형뽑기를 비롯해 다양한 미니콘텐츠를 즐길 수 있는 웹 플랫폼입니다.',
-    url: 'https://claw-addict-web.haroo.site',
+    url: 'https://box.haroo.site',
     type: 'website',
     locale: 'ko_KR',
     siteName: '하루상자',
