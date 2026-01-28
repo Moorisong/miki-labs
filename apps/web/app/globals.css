@@ -120,7 +120,13 @@ h6 {
 
 @media (max-width: 768px) {
   .main-content {
-    /* 200px (Ads) + 64px (Header) = 264px */
+    /* 기본: 헤더 높이(64px)만큼만 패딩 */
+    padding-top: 64px;
+    transition: padding-top 0.3s ease;
+  }
+
+  /* 광고 로드 시: 광고 높이(200px) + 헤더 높이(64px) = 264px */
+  body.ad-loaded .main-content {
     padding-top: 264px;
   }
 }

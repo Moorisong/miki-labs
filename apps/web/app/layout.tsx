@@ -6,6 +6,7 @@ import SessionProvider from '@/components/providers/session-provider';
 import NicknameProvider from '@/components/providers/nickname-provider';
 
 import AdBanner from '@/components/ads/ad-banner';
+import AdScriptManager from '@/components/ads/ad-script-manager';
 import Script from 'next/script';
 import './globals.css';
 
@@ -93,14 +94,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Script
-          src="https://nap5k.com/tag.min.js"
-          data-zone="10521391"
-        />
-        <Script
-          src="https://gizokraijaw.net/vignette.min.js"
-          data-zone="10521394"
-        />
+        <AdScriptManager />
         <SessionProvider>
           <NicknameProvider>
             <NavBar />

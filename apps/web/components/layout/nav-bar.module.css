@@ -257,13 +257,18 @@
   /* 모바일에서 네비게이션 바 위치 조정 */
   .header {
     position: absolute;
-    top: 200px;
+    top: 0;
     left: 0;
     right: 0;
     width: 100%;
     z-index: 1000;
-    /* 광고보다 위에 뜨도록 높게 설정 */
+    transition: top 0.3s ease;
     /* overflow-x: hidden 제거 */
+  }
+
+  /* 광고 로드 시 헤더 위치 조정 */
+  :global(body.ad-loaded) .header {
+    top: 200px;
   }
 
   .navLinks {
