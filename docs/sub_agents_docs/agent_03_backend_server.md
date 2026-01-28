@@ -6,7 +6,7 @@
 * **Scope**: `server/src`, MongoDB
 
 ## 📚 Context & Requirements
-Based on `docs/planning/04_backend_and_data.md`.
+Based on `docs/planning/claw_machine/engineering_spec.md`.
 
 ### 1. Technology Stack
 * **Runtime**: Node.js

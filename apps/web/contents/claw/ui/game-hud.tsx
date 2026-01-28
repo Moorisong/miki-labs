@@ -1,0 +1,99 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useSession, signIn } from 'next-auth/react';
+
+import { ROUTES, MESSAGES, CONFIG } from '@/constants';
+
+import styles from './game-hud.module.css';
+
+interface GameHUDProps {
+    score: number;
+    remainingAttempts: number;
+    isOnCooldown: boolean;
+    cooldownRemaining: string;
+    canPlay: boolean;
+    phase: 'idle' | 'moving' | 'dropping' | 'grabbing' | 'rising' | 'returning' | 'releasing' | 'result';
+    onHelpClick?: () => void;
+}
+
+export default function GameHUD({
+    score,
+    remainingAttempts,
+    isOnCooldown,
+    cooldownRemaining,
+    canPlay,
+    phase,
+    onHelpClick,
+}: GameHUDProps) {
+    const { status } = useSession();
+    const isLoggedIn = status === 'authenticated';
+    const isLastAttempt = remainingAttempts === 1 && !isOnCooldown;
+    const [hasGameStarted, setHasGameStarted] = useState(false);
+
+    // 게임이 한 번이라도 시작되면 안내 문구를 숨기기 위한 처리
+    useEffect(() => {
+        if (phase !== 'idle') {
+            setHasGameStarted(true);
+        }
+    }, [phase]);
+
+    return (
+        <div className={styles.hud}>
+            {/* 상단 바 (시도 횟수 - 점수) */}
+            <div className={styles.topBar}>
+                {/* 시도 횟수 / 쿨타임 표시 */}
+                <div className={styles.attemptsSection}>
+                    {isOnCooldown ? (
+                        <div className={styles.cooldownContainer}>
+                            <div className={styles.cooldownBadge}>
+                                <span className={styles.cooldownIcon}>⏳</span>
+                                <span className={styles.cooldownLabel}>소진</span>
+                            </div>
+                            <div className={styles.cooldownTimer}>
+                                <span className={styles.timerValue}>{cooldownRemaining}</span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className={styles.attemptsContainer}>
+                            <div className={styles.attemptsDisplay}>
+                                <span className={styles.label}>{MESSAGES.GAME.REMAINING_ATTEMPTS}</span>
+                                <span className={`${styles.attemptsValue} ${isLastAttempt ? styles.warning : ''}`}>
+                                    {remainingAttempts} / {CONFIG.GAME.MAX_ATTEMPTS}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* 점수 표시 */}
+                <div className={styles.scoreSection}>
+                    <div className={styles.scoreItem}>
+                        <span className={styles.label}>{MESSAGES.TABLE.SCORE}</span>
+                        <span className={styles.value}>{score.toLocaleString()}</span>
+                    </div>
+                </div>
+
+                {/* 도움말 버튼 */}
+                <button
+                    className={styles.helpButton}
+                    onClick={onHelpClick}
+                    aria-label="게임 방법"
+                >
+                    ?
+                </button>
+            </div>
+
+            {/* 경고 메시지 (상단 바 아래 중앙) */}
+            {!isOnCooldown && isLastAttempt && (
+                <div className={styles.warningMessage}>
+                    <span className={styles.warningIcon}>⚠️</span>
+                    <span>{MESSAGES.GAME.LAST_CHANCE_WARNING}</span>
+                </div>
+            )}
+
+
+        </div>
+    );
+}
+
