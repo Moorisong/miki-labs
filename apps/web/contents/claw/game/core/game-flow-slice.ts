@@ -172,4 +172,8 @@ export const createGameFlowSlice: StateCreator<GameStore, [], [], Partial<GameSt
     setIsHoveringMachine: (isHoveringMachine) => {
         set({ isHoveringMachine });
     },
+
+    setHasUserRotated: (hasUserRotated) => {
+        set({ hasUserRotated });
+    },
 });

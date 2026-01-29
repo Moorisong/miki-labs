@@ -256,18 +256,154 @@
 
 .startButton {
   padding: var(--space-md) var(--space-xl);
+  /* 패딩 감소 */
   background: var(--gradient-primary);
   border: none;
   border-radius: var(--radius-full);
   color: var(--color-text);
-  font-size: var(--font-size-lg);
-  font-weight: 700;
+  font-size: var(--font-size-xl);
+  /* 폰트 사이즈 감소 */
+  font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
+  box-shadow: 0 4px 20px rgba(108, 92, 231, 0.6);
   transition: all var(--transition-medium);
   text-transform: uppercase;
   letter-spacing: 2px;
-  animation: pulse-button 2s infinite;
+  animation: pulse-button 1.5s infinite;
+  min-width: 200px;
+  /* 최소 너비 감소 */
+}
+
+/* Rotation Guide */
+.rotationGuide {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-xl);
+  opacity: 0.8;
+  /* PC: 중앙으로 모으기 위해 최대 너비 제한 및 중앙 정렬 */
+  max-width: 600px;
+  margin: 0 auto;
+  /* flex-direction: column;  <-- 제거: 기본 row (가로 배치) 내에서 처리하거나, Container가 row임 */
+  justify-content: center;
+  /* 수직 중앙 정렬을 위해 */
+}
+
+.guideHorizontalContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* 수직 중앙 정렬 */
+  width: 100%;
+}
+
+.guideCenterMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  opacity: 0.9;
+  animation: pulse-opacity 2s ease-in-out infinite;
+}
+
+.guideIconVertical {
+  width: 24px;
+  height: 24px;
+  animation: float-vertical-small 1.5s ease-in-out infinite;
+}
+
+@keyframes float-vertical-small {
+
+  0%,
+  100% {
+    transform: translateY(-3px);
+  }
+
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+@keyframes pulse-opacity {
+
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.guideArrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  animation: float 2s ease-in-out infinite;
+}
+
+
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: translateX(-10px);
+    opacity: 1;
+  }
+}
+
+.guideRight {
+  animation-name: float-right;
+}
+
+@keyframes float-right {
+
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: translateX(10px);
+    opacity: 1;
+  }
+}
+
+/* Vertical float for arrow SVG inside text block if needed */
+@keyframes float-vertical {
+
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: translateY(-5px);
+    opacity: 1;
+  }
 }
 
 .startButton:hover {
@@ -298,7 +434,10 @@
   }
 
   70% {
-    box-shadow: 0 0 0 10px rgba(108, 92, 231, 0);
+    box-shadow: 0 0 0 20px rgba(108, 92, 231, 0);
+    /* 확산 범위 증가 */
+    transform: scale(1.05);
+    /* 펄스 시 약간 확대 */
   }
 
   100% {
@@ -343,5 +482,23 @@
   .mobileControls {
     bottom: 28%;
     /* Lift controls above ad banner */
+  }
+
+  /* Mobile: Move guide up */
+  .rotationGuide {
+    max-width: none;
+    margin: 0;
+    /* 기존 중앙 정렬(center)에서 조금 위로 이동 */
+    padding-bottom: 250px;
+  }
+
+  /* 모바일에서는 화살표 크기 조금 줄이기 */
+  .guideArrow svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .guideArrow {
+    font-size: var(--font-size-xs);
   }
 }

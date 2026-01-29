@@ -17,6 +17,7 @@ interface GameOverlayProps {
   onStart: () => void;
   canPlay?: boolean;
   showRanking?: boolean;
+  hasUserRotated?: boolean;
   children?: ReactNode;
 }
 
@@ -30,6 +31,7 @@ export default function GameOverlay({
   onStart,
   canPlay = true,
   showRanking = false,
+  hasUserRotated = false,
   children,
 }: GameOverlayProps) {
   const getStartButtonText = () => {
@@ -131,6 +133,36 @@ export default function GameOverlay({
             </span>
             <span className={styles.dropText}>DROP</span>
           </button>
+        </div>
+      )}
+
+      {/* Rotation Guide (Only visible in 'moving' phase until user rotates) */}
+      {phase === 'moving' && !hasUserRotated && (
+        <div className={styles.rotationGuide}>
+          <div className={styles.guideHorizontalContainer}>
+            <div className={`${styles.guideArrow} ${styles.guideLeft}`}>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z" />
+              </svg>
+              <span>좌우로 회전</span>
+            </div>
+
+            <div className={styles.guideCenterMessage}>
+              <div className={styles.guideIconVertical}>
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 5.83L15.17 9l1.41-1.41L12 3 7.41 7.59 8.83 9 12 5.83zm0 12.34L8.83 15l-1.41 1.41L12 21l4.59-4.59L15.17 15 12 18.17z" />
+                </svg>
+              </div>
+              <span>위아래로 드래그</span>
+            </div>
+
+            <div className={`${styles.guideArrow} ${styles.guideRight}`}>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+              </svg>
+              <span>좌우로 회전</span>
+            </div>
+          </div>
         </div>
       )}
 

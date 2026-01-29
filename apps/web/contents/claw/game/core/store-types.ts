@@ -64,6 +64,10 @@ export interface GameStore extends GameState {
     checkSuccess: (dollPosition: Position3D) => boolean;
     calculateScore: (doll: DollConfig | null, wasSuccessful: boolean) => number;
     setIsHoveringMachine: (isHovering: boolean) => void;
+
+    // Rotation Guide
+    hasUserRotated: boolean;
+    setHasUserRotated: (hasRotated: boolean) => void;
 }
 
 export const initialClawPosition: Position3D = {
@@ -104,4 +108,5 @@ export const initialGameState: GameState = {
 
 export const initialInteractionState = {
     isHoveringMachine: false,
+    hasUserRotated: false,
 };

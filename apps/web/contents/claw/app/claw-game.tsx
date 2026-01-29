@@ -31,6 +31,7 @@ export default function ClawGame() {
     const attempts = useGameStore((state) => state.attempts);
     const phase = useGameStore((state) => state.phase);
     const dropClaw = useGameStore((state) => state.dropClaw);
+    const hasUserRotated = useGameStore((state) => state.hasUserRotated);
 
     const {
         remainingAttempts,
@@ -115,6 +116,7 @@ export default function ClawGame() {
                 onDrop={dropClaw}
                 canPlay={canPlay}
                 showRanking={showOverlayUI}
+                hasUserRotated={hasUserRotated}
             >
                 {showRanking && (
                     <div className={styles.rankingOverlay}>

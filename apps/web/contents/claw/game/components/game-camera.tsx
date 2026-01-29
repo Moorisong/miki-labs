@@ -22,6 +22,8 @@ const GameCamera = () => {
   const { camera } = useThree();
   const controlsRef = useRef<any>(null);
   const phase = useGameStore((state) => state.phase);
+  const hasUserRotated = useGameStore((state) => state.hasUserRotated);
+  const setHasUserRotated = useGameStore((state) => state.setHasUserRotated);
 
   const isHoveringMachine = useGameStore((state) => state.isHoveringMachine);
 
@@ -41,6 +43,26 @@ const GameCamera = () => {
     camera.lookAt(CAMERA_CONFIG.lookAtBase);
   }, [camera]);
 
+  const handleValuesChange = () => {
+    // 자동 회전이나 초기화가 아닌, 사용자 개입에 의한 회전인지 확인하는 로직이 필요할 수 있으나
+    // OrbitControls는 주로 사용자 입력에 반응하므로, 
+    // 변화가 발생하고 아직 회전 플래그가 false라면 true로 설정
+    // 단, 초기 설정 시에도 호출될 수 있으므로 phase 체크 등 보완 필요
+    if (!hasUserRotated && isPlaying) {
+      // 아주 미세한 움직임(초기 세팅 등)은 무시하고 싶다면 azimuthAngle 등을 비교해야 하지만
+      // 여기서는 일단 컨트롤 이벤트 발생 시 처리
+      // 단, OrbitControls의 onChange는 매 프레임 발생할 수 있으므로
+      // 실제로는 start 이벤트나 변화량을 감지하는게 좋음.
+      // drei OrbitControls는 onStart, onEnd 등을 지원함.
+    }
+  };
+
+  const handleStartInteraction = () => {
+    if (!hasUserRotated && isPlaying) {
+      setHasUserRotated(true);
+    }
+  };
+
   return (
     <OrbitControls
       ref={controlsRef}
@@ -55,6 +77,7 @@ const GameCamera = () => {
       dampingFactor={0.05}
       rotateSpeed={0.8}
       zoomSpeed={1.0}
+      onStart={handleStartInteraction}
     />
   );
 };
