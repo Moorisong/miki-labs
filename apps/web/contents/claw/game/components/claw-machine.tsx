@@ -29,7 +29,12 @@ const InteractionManager = () => {
     const handlePointerDown = (e: PointerEvent) => {
       const { phase } = useGameStore.getState();
       const isPlaying = phase !== 'idle' && phase !== 'result';
-      if (!isPlaying) return;
+
+      if (!isPlaying) {
+        setIsHoveringMachine(false);
+        isGestureOnMachine.current = false;
+        return;
+      }
 
       const rect = domElement.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -236,6 +241,7 @@ const ClawMachine = ({
     >
       <Canvas
         shadows
+        style={{ touchAction: 'manipulation' }} // Allow browser scroll by default
         gl={{
           antialias: true,
           alpha: false,
@@ -243,6 +249,7 @@ const ClawMachine = ({
           // Ensure pointer events are handled correctly
         }}
         dpr={[1, 2]}
+
       >
         <color attach="background" args={['#1a1a2e']} />
         <InteractionManager />

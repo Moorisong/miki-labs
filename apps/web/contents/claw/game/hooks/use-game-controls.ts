@@ -7,6 +7,7 @@ import { CABINET_DIMENSIONS, DEFAULT_GAME_CONFIG } from '../types/game.types';
 interface UseGameControlsOptions {
   enabled?: boolean;
   moveSpeed?: number;
+  onInput?: () => void;
 }
 
 interface KeyState {
@@ -20,6 +21,7 @@ interface KeyState {
 const useGameControls = ({
   enabled = true,
   moveSpeed = DEFAULT_GAME_CONFIG.clawSpeed,
+  onInput,
 }: UseGameControlsOptions = {}) => {
   const keyState = useRef<KeyState>({
     up: false,
@@ -83,31 +85,37 @@ const useGameControls = ({
     const { phase, attempts, startGame, dropClaw } = useGameStore.getState();
 
     // event.code를 사용하여 키보드 레이아웃/언어 설정과 무관하게 처리
+    let isGameKey = false;
     switch (event.code) {
       case 'KeyW':
       case 'ArrowUp':
         if (phase === 'moving') event.preventDefault();
         keyState.current.up = true;
+        isGameKey = true;
         break;
       case 'KeyS':
       case 'ArrowDown':
         if (phase === 'moving') event.preventDefault();
         keyState.current.down = true;
+        isGameKey = true;
         break;
       case 'KeyA':
       case 'ArrowLeft':
         if (phase === 'moving') event.preventDefault();
         keyState.current.left = true;
+        isGameKey = true;
         break;
       case 'KeyD':
       case 'ArrowRight':
         if (phase === 'moving') event.preventDefault();
         keyState.current.right = true;
+        isGameKey = true;
         break;
       case 'Space':
       case 'Enter':
         event.preventDefault();
         keyState.current.action = true;
+        isGameKey = true;
 
         if (attempts > 0) {
           if (phase === 'idle' || phase === 'result') {
@@ -129,7 +137,11 @@ const useGameControls = ({
         }
         break;
     }
-  }, [enabled]); // Dependencies reduced to just enabled
+
+    if (isGameKey && onInput) {
+      onInput();
+    }
+  }, [enabled, onInput]); // Dependencies reduced to just enabled and onInput
 
   const handleKeyUp = useCallback((event: KeyboardEvent) => {
     switch (event.code) {

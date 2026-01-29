@@ -32,6 +32,7 @@ export default function ClawGame() {
     const phase = useGameStore((state) => state.phase);
     const dropClaw = useGameStore((state) => state.dropClaw);
     const hasUserRotated = useGameStore((state) => state.hasUserRotated);
+    const setHasUserRotated = useGameStore((state) => state.setHasUserRotated);
 
     const {
         remainingAttempts,
@@ -67,15 +68,23 @@ export default function ClawGame() {
     const { showTutorial, closeTutorial, openTutorial } = useTutorial();
 
     useGameLoop();
-    const { setInputState } = useGameControls({ enabled: canPlay });
+    const { setInputState } = useGameControls({
+        enabled: canPlay,
+        onInput: () => {
+            if (phase === 'moving' && !hasUserRotated) {
+                setHasUserRotated(true);
+            }
+        }
+    });
 
     const handleMoveStart = useCallback(
         (direction: 'left' | 'right' | 'forward' | 'backward') => {
             if (phase !== 'moving') return;
+            if (!hasUserRotated) setHasUserRotated(true);
             const keyMap = { forward: 'up', backward: 'down', left: 'left', right: 'right' } as const;
             setInputState(keyMap[direction], true);
         },
-        [phase, setInputState]
+        [phase, setInputState, hasUserRotated, setHasUserRotated]
     );
 
     const handleMoveEnd = useCallback(
@@ -85,6 +94,13 @@ export default function ClawGame() {
         },
         [setInputState]
     );
+
+    const handleDrop = useCallback(() => {
+        if (phase === 'moving' && !hasUserRotated) {
+            setHasUserRotated(true);
+        }
+        dropClaw();
+    }, [phase, hasUserRotated, setHasUserRotated, dropClaw]);
 
     const showOverlayUI = showRanking || !!scoreModalData;
 
@@ -113,7 +129,7 @@ export default function ClawGame() {
                 onStart={handleStartGame}
                 onMoveStart={handleMoveStart}
                 onMoveEnd={handleMoveEnd}
-                onDrop={dropClaw}
+                onDrop={handleDrop}
                 canPlay={canPlay}
                 showRanking={showOverlayUI}
                 hasUserRotated={hasUserRotated}
