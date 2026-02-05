@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { decodeResultData, ELEMENTS } from '@/lib/pet-destiny/fortune';
 import { PetDestinyResult, Element } from '@/lib/pet-destiny/types';
 import styles from './styles.module.css';
@@ -101,7 +102,12 @@ export default function ResultPage() {
                 {/* 헤더 */}
                 <div className={styles.header}>
                     <div className={styles.headerTitle}>
-                        <h1 className={styles.title} style={{ fontSize: '1.5rem' }}>운명연구소</h1>
+                        <Image
+                            src="/pet-destiny-logo-transparent-v2.png"
+                            alt="운명연구소 로고"
+                            width={120}
+                            height={120}
+                        />
                     </div>
                 </div>
 
@@ -246,10 +252,10 @@ export default function ResultPage() {
                 {/* 액션 버튼 */}
                 <div className={styles.actionButtons}>
                     <button onClick={handleShare} className={styles.shareButton}>
-                        📤 공유하기
+                        공유하기
                     </button>
                     <button onClick={handleRetry} className={styles.retryButton}>
-                        🔄 다시 해보기
+                        다시 해보기
                     </button>
                 </div>
 

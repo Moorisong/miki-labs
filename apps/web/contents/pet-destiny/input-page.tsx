@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { calculateAge, encodeResultData } from '@/lib/pet-destiny/fortune';
 import { PetDestinyRequest, PetDestinyResponse } from '@/lib/pet-destiny/types';
 import styles from './styles.module.css';
@@ -95,7 +96,13 @@ export default function InputPage() {
                 {/* 헤더 */}
                 <div className={styles.header}>
                     <div className={styles.headerTitle}>
-                        <span style={{ fontSize: '2rem' }}>✨</span>
+                        <Image
+                            src="/pet-destiny-logo-transparent-v2.png"
+                            alt="운명연구소 로고"
+                            width={80}
+                            height={80}
+
+                        />
                         <h1 className={styles.title}>운명연구소</h1>
                     </div>
                     <p className={styles.subtitle}>반려동물과 집사의 특별한 인연을 분석해드려요</p>
@@ -215,7 +222,7 @@ export default function InputPage() {
                 {/* 안내 문구 */}
                 <div className={styles.footer}>
                     <p className={styles.privacyNote}>
-                        🔒 입력하신 생년월일 정보는 결과 계산에만 사용되며 어떠한 개인정보도 저장되지 않습니다.
+                        입력하신 생년월일 정보는 결과 계산에만 사용되며 어떠한 개인정보도 저장되지 않습니다.
                         로그인 없이 이용 가능합니다.
                     </p>
                     <p className={styles.disclaimer}>
