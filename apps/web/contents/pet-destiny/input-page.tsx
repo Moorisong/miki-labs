@@ -29,9 +29,15 @@ function DateInputGroup({ onChange, maxDate, onError, disabled, value }: DateInp
     const [month, setMonth] = useState('');
     const [day, setDay] = useState('');
     const dateInputRef = useRef<HTMLInputElement>(null);
+    const dateGroupRef = useRef<HTMLDivElement>(null);
 
     // Sync from props (value) to internal state
     useEffect(() => {
+        // 포커스가 내부에 있다면, 외부 변경(특히 초기화)을 무시하여 입력 중 리셋 방지
+        if (dateGroupRef.current?.contains(document.activeElement)) {
+            return;
+        }
+
         if (value) {
             const [y, m, d] = value.split('-');
             setYear((prev) => (prev !== y ? y : prev));
@@ -65,6 +71,7 @@ function DateInputGroup({ onChange, maxDate, onError, disabled, value }: DateInp
 
         // Validate date existence
         const dateObj = new Date(formattedDate);
+        if (isNaN(dateObj.getTime())) return;
         if (dateObj.toISOString().split('T')[0] !== formattedDate) return;
         if (maxDate && formattedDate > maxDate) return;
 
@@ -147,7 +154,11 @@ function DateInputGroup({ onChange, maxDate, onError, disabled, value }: DateInp
     };
 
     return (
-        <div className={`${styles.dateInputGroup} ${disabled ? styles.disabled : ''}`} onBlur={handleBlur}>
+        <div
+            ref={dateGroupRef}
+            className={`${styles.dateInputGroup} ${disabled ? styles.disabled : ''}`}
+            onBlur={handleBlur}
+        >
             <div className={styles.dateInputWrapper}>
                 <input
                     className={styles.dateInput}
@@ -314,7 +325,6 @@ export default function InputPage() {
                             height={80}
 
                         />
-                        <h1 className={styles.title}>운명연구소</h1>
                     </div>
                     <p className={styles.subtitle}>반려동물과 집사의 특별한 인연을 분석해드려요</p>
                 </div>
@@ -373,15 +383,18 @@ export default function InputPage() {
                             value={petBirthDate}
                         />
                         <div style={{ marginTop: '0.8rem', display: 'flex', alignItems: 'center' }}>
-                            <label className={styles.checkboxLabel} style={{ display: 'flex', alignItems: 'center', fontSize: '0.95rem', color: '#4b5563', cursor: 'pointer' }}>
+                            <div className={styles.checkboxWrapper} style={{ display: 'flex', alignItems: 'center' }}>
                                 <input
                                     type="checkbox"
+                                    id="unknown-birthday-checkbox"
                                     checked={isUnknownPetBirthday}
                                     onChange={handleUnknownPetBirthdayChange}
-                                    style={{ width: '1.1rem', height: '1.1rem', marginRight: '0.5rem', accentColor: '#a78bfa' }}
+                                    style={{ width: '1.1rem', height: '1.1rem', marginRight: '0.5rem', accentColor: '#a78bfa', cursor: 'pointer' }}
                                 />
-                                모름 (평균 나이를 기준으로 분석)
-                            </label>
+                                <span style={{ fontSize: '0.95rem', color: '#4b5563' }}>
+                                    모름 (평균 나이를 기준으로 분석)
+                                </span>
+                            </div>
                         </div>
                     </div>
 
