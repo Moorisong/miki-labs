@@ -1,0 +1,467 @@
+.container {
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #faf5ff, #fdf2f8);
+    padding: 2rem 1rem;
+}
+
+.innerContainer {
+    max-width: 28rem;
+    margin: 0 auto;
+}
+
+/* 헤더 */
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.headerTitle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.headerIcon {
+    width: 2rem;
+    height: 2rem;
+    color: #7c3aed;
+}
+
+.title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #581c87;
+    margin: 0;
+}
+
+.subtitle {
+    color: #6b21a8;
+    margin: 0;
+}
+
+/* 폼 카드 */
+.formCard {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.formSection {
+    margin-bottom: 1.5rem;
+}
+
+.label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #1f2937;
+}
+
+/* 동물 선택 */
+.animalGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+
+.animalOption {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+}
+
+.animalOption:hover {
+    border-color: #a78bfa;
+}
+
+.animalOptionSelected {
+    border-color: #7c3aed;
+    background: #faf5ff;
+}
+
+.animalIcon {
+    font-size: 2rem;
+}
+
+.animalLabel {
+    font-size: 0.875rem;
+}
+
+.hiddenRadio {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 입력 필드 */
+.input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.input:focus {
+    outline: none;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+/* 선택 입력 섹션 */
+.optionalSection {
+    background: #f9fafb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.optionalTitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 1rem;
+}
+
+.optionalFields {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* CTA 버튼 */
+.ctaButton {
+    width: 100%;
+    height: 3.5rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(to right, #7c3aed, #db2777);
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ctaButton:hover:not(:disabled) {
+    background: linear-gradient(to right, #6d28d9, #be185d);
+}
+
+.ctaButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 안내 문구 */
+.footer {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.privacyNote {
+    font-size: 0.75rem;
+    color: #4b5563;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.disclaimer {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* 결과 페이지 */
+.resultContainer {
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #faf5ff, #fdf2f8, #fff7ed);
+    padding: 2rem 1rem;
+}
+
+.summaryCard {
+    background: linear-gradient(to right, #c4b5fd, #f9a8d4);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.summaryPetType {
+    font-size: 0.875rem;
+    color: #581c87;
+    margin-bottom: 0.5rem;
+}
+
+.summaryTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #581c87;
+    margin: 0 0 1rem 0;
+}
+
+.elementInfo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: #581c87;
+}
+
+.elementItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* 결과 카드 */
+.resultCards {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.resultCard {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.25rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.cardTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.75rem 0;
+}
+
+.cardEmoji {
+    font-size: 1.25rem;
+}
+
+.cardContent {
+    color: #4b5563;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* 게이지 */
+.gaugeContainer {
+    margin-bottom: 0.75rem;
+}
+
+.gaugeBar {
+    height: 0.75rem;
+    background: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.gaugeFill {
+    height: 100%;
+    background: linear-gradient(to right, #7c3aed, #db2777);
+    border-radius: 9999px;
+    transition: width 0.5s ease-out;
+}
+
+.gaugeLabel {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+.gaugeScore {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #7c3aed;
+    text-align: center;
+}
+
+/* 특성 태그 */
+.traitTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.traitTag {
+    font-size: 0.75rem;
+    background: #faf5ff;
+    color: #7c3aed;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+}
+
+/* 평생운 스테이지 */
+.lifetimeStages {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.lifetimeStage {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background: #f9fafb;
+    border-radius: 0.5rem;
+}
+
+.stageAge {
+    font-weight: 500;
+    color: #1f2937;
+    font-size: 0.875rem;
+}
+
+.stageFortune {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.stageLevel {
+    font-weight: 600;
+    color: #7c3aed;
+    font-size: 0.875rem;
+}
+
+/* 액션 버튼 */
+.actionButtons {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 2rem;
+}
+
+.shareButton {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 3rem;
+    background: linear-gradient(to right, #c4b5fd, #f9a8d4);
+    color: #581c87;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.shareButton:hover {
+    background: linear-gradient(to right, #a78bfa, #f472b6);
+}
+
+.retryButton {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 3rem;
+    background: white;
+    color: #7c3aed;
+    border: 1px solid #c4b5fd;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.retryButton:hover {
+    background: #faf5ff;
+}
+
+/* 푸터 */
+.resultFooter {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.resultFooter p {
+    margin: 0 0 0.5rem 0;
+}
+
+/* 로딩 */
+.loadingContainer {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to bottom, #faf5ff, #fdf2f8);
+}
+
+.loadingContent {
+    text-align: center;
+}
+
+.loadingIcon {
+    width: 3rem;
+    height: 3rem;
+    color: #7c3aed;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loadingText {
+    color: #6b7280;
+}
+
+/* 올해 운세 그리드 */
+.yearFortuneGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.yearFortuneItem {
+    background: #f9fafb;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+}
+
+.yearFortuneLabel {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+}
+
+.yearFortuneValue {
+    font-size: 0.875rem;
+    color: #1f2937;
+}
+
+.yearFortuneFull {
+    grid-column: span 2;
+}
