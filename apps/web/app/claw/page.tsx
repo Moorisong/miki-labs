@@ -5,8 +5,35 @@ import RankingSection from '@contents/claw/app/ranking-section';
 import styles from '@contents/claw/app/page.module.css';
 
 export const metadata: Metadata = {
-  title: '하루상자 - 리얼 3D 인형뽑기 게임',
-  description: '설치 없이 바로 즐기는 3D 웹 인형뽑기 게임. 물리엔진 기반의 리얼한 조작감으로 인형을 뽑아보세요!',
+  title: '인형뽑기 | 하루상자',
+  description: '하루상자 인형뽑기 게임에서 다양한 캐릭터와 아이템을 즐기세요. 간편하게 참여하고 바로 뽑기의 재미를 경험할 수 있습니다.',
+  keywords: [
+    '인형뽑기', '온라인 인형뽑기', 'Claw Machine', 'UFO Catcher',
+    '랜덤 게임', '뽑기', '미니게임', '캐주얼 게임', '무료 게임',
+    '아케이드', '하루상자', 'Haroo Box'
+  ],
+  alternates: {
+    canonical: 'https://box.haroo.site/claw',
+  },
+  openGraph: {
+    title: '인형뽑기 | 하루상자',
+    description: '하루상자 인형뽑기 게임에서 다양한 캐릭터와 아이템을 즐기세요.',
+    url: 'https://box.haroo.site/claw',
+    images: [
+      {
+        url: '/images/claw-og.png',
+        width: 1200,
+        height: 630,
+        alt: '하루상자 인형뽑기',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '인형뽑기 | 하루상자',
+    description: '하루상자 인형뽑기 게임에서 다양한 캐릭터와 아이템을 즐기세요.',
+    images: ['/images/claw-og.png'],
+  },
 };
 
 export default function ClawPage() {

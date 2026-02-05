@@ -1,10 +1,44 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import type { Metadata } from 'next';
 import { ROUTES } from '@/constants';
 import AdBanner from '@/components/ads/ad-banner';
 import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+    title: '하루상자 | 즐거움이 가득한 일일 콘텐츠 플랫폼',
+    description: '하루상자는 인형뽑기를 비롯해 다양한 미니콘텐츠를 즐길 수 있는 웹 플랫폼입니다. 매일 새로운 즐거움을 하루상자에서 만나보세요.',
+    keywords: [
+        '하루상자', 'Haroo Box', 'Haroo App',
+        '미니게임', '웹게임', '킬링타임', '심심풀이', '플랫폼',
+        '캐주얼 게임', '무료 게임', 'HTML5 게임'
+    ],
+    alternates: {
+        canonical: '/',
+    },
+    openGraph: {
+        title: '하루상자 | 즐거움이 가득한 일일 콘텐츠 플랫폼',
+        description: '하루상자는 인형뽑기를 비롯해 다양한 미니콘텐츠를 즐길 수 있는 웹 플랫폼입니다.',
+        url: 'https://box.haroo.site',
+        type: 'website',
+        images: [
+            {
+                url: '/og-image.png',
+                width: 1200,
+                height: 630,
+                alt: '하루상자 메인 이미지',
+            },
+        ],
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: '하루상자 | 즐거움이 가득한 일일 콘텐츠 플랫폼',
+        description: '하루상자는 인형뽑기를 비롯해 다양한 미니콘텐츠를 즐길 수 있는 웹 플랫폼입니다.',
+        images: ['/og-image.png'],
+    },
+};
 
 export default function Home() {
     const contents = [
