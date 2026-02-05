@@ -54,7 +54,7 @@ export default function ResultPage() {
         if (navigator.share) {
             try {
                 await navigator.share({
-                    title: '동물 운명연구소',
+                    title: '운명연구소',
                     text: `${petName}와 ${ownerName}의 궁합은 ${score}점!`,
                     url: url,
                 });
@@ -101,8 +101,7 @@ export default function ResultPage() {
                 {/* 헤더 */}
                 <div className={styles.header}>
                     <div className={styles.headerTitle}>
-                        <span style={{ fontSize: '2rem' }}>✨</span>
-                        <h1 className={styles.title} style={{ fontSize: '1.5rem' }}>동물 운명연구소</h1>
+                        <h1 className={styles.title} style={{ fontSize: '1.5rem' }}>운명연구소</h1>
                     </div>
                 </div>
 
@@ -133,7 +132,6 @@ export default function ResultPage() {
                     {/* 1. 궁합 */}
                     <div className={styles.resultCard}>
                         <h3 className={styles.cardTitle}>
-                            <span className={styles.cardEmoji}>💕</span>
                             집사-반려동물 궁합
                         </h3>
                         <div className={styles.gaugeScore}>{data.compatibility}점</div>
@@ -155,7 +153,6 @@ export default function ResultPage() {
                     {/* 2. 성격 분석 */}
                     <div className={styles.resultCard}>
                         <h3 className={styles.cardTitle}>
-                            <span className={styles.cardEmoji}>{petElementInfo.emoji}</span>
                             성격 분석
                         </h3>
                         <p className={styles.cardContent} style={{ fontWeight: 600, marginBottom: '0.5rem' }}>
@@ -172,7 +169,6 @@ export default function ResultPage() {
                     {/* 3. 건강 운 */}
                     <div className={styles.resultCard}>
                         <h3 className={styles.cardTitle}>
-                            <span className={styles.cardEmoji}>💚</span>
                             평생 건강 운
                         </h3>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
@@ -185,7 +181,6 @@ export default function ResultPage() {
                     {/* 4. 마음 경계 지수 */}
                     <div className={styles.resultCard}>
                         <h3 className={styles.cardTitle}>
-                            <span className={styles.cardEmoji}>💗</span>
                             마음 경계 지수
                         </h3>
                         <div className={styles.gaugeContainer}>
@@ -206,7 +201,6 @@ export default function ResultPage() {
                     {/* 5. 평생 운 흐름 */}
                     <div className={styles.resultCard}>
                         <h3 className={styles.cardTitle}>
-                            <span className={styles.cardEmoji}>📈</span>
                             평생 운 흐름
                         </h3>
                         <div className={styles.lifetimeStages}>
@@ -223,7 +217,6 @@ export default function ResultPage() {
                     {/* 6. 올해 운세 */}
                     <div className={styles.resultCard}>
                         <h3 className={styles.cardTitle}>
-                            <span className={styles.cardEmoji}>🎉</span>
                             2026년 운세 {data.yearFortuneLabel}
                         </h3>
                         <p className={styles.cardContent} style={{ marginBottom: '0.75rem' }}>
@@ -263,7 +256,7 @@ export default function ResultPage() {
                 {/* 푸터 */}
                 <div className={styles.resultFooter}>
                     <p>✨ 본 콘텐츠는 엔터테인먼트 목적의 운세 서비스입니다.</p>
-                    <p>© 2026 동물 운명연구소. All rights reserved.</p>
+                    <p>© 2026 운명연구소. All rights reserved.</p>
                 </div>
             </div>
         </div>

@@ -96,7 +96,7 @@ export default function InputPage() {
                 <div className={styles.header}>
                     <div className={styles.headerTitle}>
                         <span style={{ fontSize: '2rem' }}>✨</span>
-                        <h1 className={styles.title}>동물 운명연구소</h1>
+                        <h1 className={styles.title}>운명연구소</h1>
                     </div>
                     <p className={styles.subtitle}>반려동물과 집사의 특별한 인연을 분석해드려요</p>
                 </div>

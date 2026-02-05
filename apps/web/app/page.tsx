@@ -28,9 +28,9 @@ export default function Home() {
         },
         {
             id: 'pet-destiny',
-            title: '동물 운명연구소',
-            description: '반려동물과 집사의 오행 궁합 분석.\\n우리 아이와의 특별한 인연을 확인해보세요!',
-            image: '/logo.png',
+            title: '운명연구소',
+            description: '반려동물과 집사의 오행 궁합 분석.\n우리 아이와의 특별한 인연을 확인해보세요!',
+            image: '/pet-destiny-logo-transparent-v2.png',
             link: '/pet-destiny',
             badge: 'New',
             active: true,
