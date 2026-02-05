@@ -1,0 +1,52 @@
+{
+    "목": {
+        "barrierLevel": "low",
+        "openness": 80,
+        "description": "마음을 잘 여는 편이에요. 낯선 사람에게도 친근하게 다가가요.",
+        "traits": [
+            "낯가림 적음",
+            "친화력 좋음",
+            "빠른 적응"
+        ]
+    },
+    "화": {
+        "barrierLevel": "low",
+        "openness": 85,
+        "description": "애착이 강하고 사랑을 듬뿍 표현해요. 집사님께 올인하는 스타일!",
+        "traits": [
+            "애착 강함",
+            "감정 표현 활발",
+            "사랑꾼"
+        ]
+    },
+    "토": {
+        "barrierLevel": "medium",
+        "openness": 60,
+        "description": "신뢰 형성에 시간이 걸리지만, 한번 마음을 열면 끝까지 함께해요.",
+        "traits": [
+            "신뢰 형성 느림",
+            "의리 있음",
+            "든든한 파트너"
+        ]
+    },
+    "금": {
+        "barrierLevel": "high",
+        "openness": 40,
+        "description": "경계심이 높지만 그만큼 특별한 존재에게만 마음을 열어요.",
+        "traits": [
+            "경계심 높음",
+            "까다로움",
+            "특별한 신뢰"
+        ]
+    },
+    "수": {
+        "barrierLevel": "medium",
+        "openness": 55,
+        "description": "독립적인 성격으로 자기만의 시간을 중요시해요. 적당한 거리감을 유지해요.",
+        "traits": [
+            "독립성 강함",
+            "관찰형",
+            "은근 츤데레"
+        ]
+    }
+}
