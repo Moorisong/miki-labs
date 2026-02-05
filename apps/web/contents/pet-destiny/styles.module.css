@@ -561,3 +561,27 @@
 .yearFortuneFull {
     grid-column: span 2;
 }
+
+.disclaimerBox {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    color: #d1d5db;
+    line-height: 1.6;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    text-align: center;
+}
+
+.disclaimerLink {
+    text-decoration: underline;
+    cursor: pointer;
+    color: #c4b5fd;
+    font-weight: 600;
+}
+
+.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}

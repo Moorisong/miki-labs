@@ -20,13 +20,29 @@ interface DateInputGroupProps {
     onChange: (date: string) => void;
     maxDate?: string;
     onError?: (message: string) => void;
+    disabled?: boolean;
+    value?: string;
 }
 
-function DateInputGroup({ onChange, maxDate, onError }: DateInputGroupProps) {
+function DateInputGroup({ onChange, maxDate, onError, disabled, value }: DateInputGroupProps) {
     const [year, setYear] = useState('');
     const [month, setMonth] = useState('');
     const [day, setDay] = useState('');
     const dateInputRef = useRef<HTMLInputElement>(null);
+
+    // Sync from props (value) to internal state
+    useEffect(() => {
+        if (value) {
+            const [y, m, d] = value.split('-');
+            setYear((prev) => (prev !== y ? y : prev));
+            setMonth((prev) => (prev !== m ? m : prev));
+            setDay((prev) => (prev !== d ? d : prev));
+        } else if (value === '') {
+            setYear('');
+            setMonth('');
+            setDay('');
+        }
+    }, [value]);
 
     // Sync from internal state to parent
     useEffect(() => {
@@ -57,6 +73,7 @@ function DateInputGroup({ onChange, maxDate, onError }: DateInputGroupProps) {
 
     // Handle calendar picker selection
     const handleDateSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (disabled) return;
         const val = e.target.value;
         if (val) {
             const [y, m, d] = val.split('-');
@@ -67,6 +84,7 @@ function DateInputGroup({ onChange, maxDate, onError }: DateInputGroupProps) {
     };
 
     const handleNumberInput = (e: React.ChangeEvent<HTMLInputElement>, setter: (val: string) => void, maxLen: number) => {
+        if (disabled) return;
         const value = e.target.value.replace(/[^0-9]/g, '');
         if (value.length <= maxLen) {
             setter(value);
@@ -74,21 +92,21 @@ function DateInputGroup({ onChange, maxDate, onError }: DateInputGroupProps) {
     };
 
     const openCalendar = () => {
-        if (dateInputRef.current) {
-            if ('showPicker' in dateInputRef.current && typeof dateInputRef.current.showPicker === 'function') {
-                try {
-                    dateInputRef.current.showPicker();
-                } catch (err) {
-                    // Fallback for browsers that don't support showPicker effectively or if blocked
-                    dateInputRef.current.click();
-                }
-            } else {
+        if (!dateInputRef.current) return;
+
+        if ('showPicker' in dateInputRef.current && typeof dateInputRef.current.showPicker === 'function') {
+            try {
+                dateInputRef.current.showPicker();
+            } catch (err) {
                 dateInputRef.current.click();
             }
+        } else {
+            dateInputRef.current.click();
         }
     };
 
     const handleBlur = (e: React.FocusEvent) => {
+        if (disabled) return;
         // 내부에서 포커스 이동하는 경우는 무시
         if (e.currentTarget.contains(e.relatedTarget)) return;
 
@@ -129,7 +147,7 @@ function DateInputGroup({ onChange, maxDate, onError }: DateInputGroupProps) {
     };
 
     return (
-        <div className={styles.dateInputGroup} onBlur={handleBlur}>
+        <div className={`${styles.dateInputGroup} ${disabled ? styles.disabled : ''}`} onBlur={handleBlur}>
             <div className={styles.dateInputWrapper}>
                 <input
                     className={styles.dateInput}
@@ -139,6 +157,7 @@ function DateInputGroup({ onChange, maxDate, onError }: DateInputGroupProps) {
                     type="text"
                     inputMode="numeric"
                     maxLength={4}
+                    disabled={disabled}
                 />
                 <span className={styles.dateSuffix}>년</span>
             </div>
@@ -151,6 +170,7 @@ function DateInputGroup({ onChange, maxDate, onError }: DateInputGroupProps) {
                     type="text"
                     inputMode="numeric"
                     maxLength={2}
+                    disabled={disabled}
                 />
                 <span className={styles.dateSuffix}>월</span>
             </div>
@@ -163,11 +183,12 @@ function DateInputGroup({ onChange, maxDate, onError }: DateInputGroupProps) {
                     type="text"
                     inputMode="numeric"
                     maxLength={2}
+                    disabled={disabled}
                 />
                 <span className={styles.dateSuffix}>일</span>
             </div>
 
-            <button type="button" className={styles.calendarButton} onClick={openCalendar} title="날짜 선택">
+            <button type="button" className={styles.calendarButton} onClick={openCalendar} title="날짜 선택" disabled={disabled}>
                 📅
             </button>
 
@@ -178,8 +199,9 @@ function DateInputGroup({ onChange, maxDate, onError }: DateInputGroupProps) {
                 max={maxDate}
                 className={styles.hiddenDateInput}
                 tabIndex={-1}
+                disabled={disabled}
             />
-        </div>
+        </div >
     );
 }
 
@@ -188,6 +210,7 @@ export default function InputPage() {
     const [petType, setPetType] = useState<string>('');
     const [otherPetType, setOtherPetType] = useState<string>('');
     const [petBirthDate, setPetBirthDate] = useState<string>('');
+    const [isUnknownPetBirthday, setIsUnknownPetBirthday] = useState(false);
     const [ownerBirthDate, setOwnerBirthDate] = useState<string>('');
     const [petName, setPetName] = useState<string>('');
     const [ownerName, setOwnerName] = useState<string>('');
@@ -246,7 +269,8 @@ export default function InputPage() {
                     ownerName,
                 });
 
-                router.push(`/pet-destiny/result?seed=${encodeURIComponent(seed)}`);
+
+                router.push(`/pet-destiny/result?seed=${encodeURIComponent(seed)}&unknown=${isUnknownPetBirthday}`);
             } else {
                 showToast(data.error?.message || '오류가 발생했습니다.');
                 setIsLoading(false);
@@ -259,6 +283,23 @@ export default function InputPage() {
     };
 
     const today = new Date().toISOString().split('T')[0];
+
+    const handleUnknownPetBirthdayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const isChecked = e.target.checked;
+        setIsUnknownPetBirthday(isChecked);
+
+        if (isChecked) {
+            // 이번 해 가져오기
+            const currentYear = new Date().getFullYear();
+            // 3살(만 2년?) -> currentYear - 3
+            // 월일은 06-01로 설정
+            const calculatedYear = currentYear - 3;
+            // 202x-06-01
+            setPetBirthDate(`${calculatedYear}-06-01`);
+        } else {
+            setPetBirthDate('');
+        }
+    };
 
     return (
         <div className={styles.container}>
@@ -328,7 +369,20 @@ export default function InputPage() {
                             onChange={setPetBirthDate}
                             maxDate={today}
                             onError={(msg) => showToast(msg)}
+                            disabled={isUnknownPetBirthday}
+                            value={petBirthDate}
                         />
+                        <div style={{ marginTop: '0.8rem', display: 'flex', alignItems: 'center' }}>
+                            <label className={styles.checkboxLabel} style={{ display: 'flex', alignItems: 'center', fontSize: '0.95rem', color: '#4b5563', cursor: 'pointer' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={isUnknownPetBirthday}
+                                    onChange={handleUnknownPetBirthdayChange}
+                                    style={{ width: '1.1rem', height: '1.1rem', marginRight: '0.5rem', accentColor: '#a78bfa' }}
+                                />
+                                모름 (평균 나이를 기준으로 분석)
+                            </label>
+                        </div>
                     </div>
 
                     {/* 집사 생년월일 */}
