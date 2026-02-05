@@ -169,25 +169,30 @@
         }
     },
     "yearFortuneLabels": {
-        "상생": {
+        "daegil": {
             "label": "대길",
-            "emoji": "🎉",
-            "description": "최고의 한 해가 될 거예요!"
+            "emoji": "🍀",
+            "desc": "최고의 기회가 찾아올 거예요!"
         },
-        "같음": {
+        "gil": {
             "label": "길",
-            "emoji": "✨",
-            "description": "좋은 한 해가 될 거예요!"
+            "emoji": "🌸",
+            "desc": "좋은 기운이 함께합니다."
         },
-        "중립": {
-            "label": "평",
+        "normal": {
+            "label": "보통",
             "emoji": "🌤️",
-            "description": "평온한 한 해가 될 거예요!"
+            "desc": "평범한 한 해가 될 거예요."
         },
-        "상극": {
+        "caution": {
             "label": "주의",
             "emoji": "⚠️",
-            "description": "조금 더 신경 써주세요!"
+            "desc": "건강과 감정 관리가 필요해요."
+        },
+        "bad": {
+            "label": "흉",
+            "emoji": "🌩️",
+            "desc": "예상치 못한 어려움이 있을 수 있어요."
         }
     }
 }
