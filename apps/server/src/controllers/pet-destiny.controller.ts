@@ -4,47 +4,47 @@ import { calculatePetDestiny, PetDestinyRequest } from '../services/pet-destiny'
 // 요청 검증
 function validateRequest(body: unknown): { valid: true; data: PetDestinyRequest } | { valid: false; error: string } {
     if (!body || typeof body !== 'object') {
-        return { valid: false, error: '요청 본문이 없습니다.' };
+        return { valid: false, error: '잘못된 요청입니다. 다시 시도해주세요.' };
     }
 
     const { ownerBirth, petBirth, petType } = body as Record<string, unknown>;
 
     // ownerBirth 검증
     if (!ownerBirth || typeof ownerBirth !== 'string') {
-        return { valid: false, error: 'ownerBirth가 필요합니다.' };
+        return { valid: false, error: '집사의 생년월일을 입력해주세요.' };
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(ownerBirth)) {
-        return { valid: false, error: 'ownerBirth 형식이 올바르지 않습니다. (YYYY-MM-DD)' };
+        return { valid: false, error: '집사 생년월일 형식이 올바르지 않습니다. (YYYY-MM-DD)' };
     }
     const ownerDate = new Date(ownerBirth);
     if (isNaN(ownerDate.getTime())) {
-        return { valid: false, error: 'ownerBirth가 유효한 날짜가 아닙니다.' };
+        return { valid: false, error: '집사 생년월일에 존재하지 않는 날짜가 있습니다. 다시 확인해주세요.' };
     }
     if (ownerDate.getFullYear() < 1900 || ownerDate > new Date()) {
-        return { valid: false, error: 'ownerBirth가 허용 범위를 벗어났습니다. (1900년 이후, 오늘 이전)' };
+        return { valid: false, error: '집사 생년월일은 1900년 이후부터 오늘까지만 입력 가능합니다.' };
     }
 
     // petBirth 검증
     if (!petBirth || typeof petBirth !== 'string') {
-        return { valid: false, error: 'petBirth가 필요합니다.' };
+        return { valid: false, error: '반려동물의 생년월일을 입력해주세요.' };
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(petBirth)) {
-        return { valid: false, error: 'petBirth 형식이 올바르지 않습니다. (YYYY-MM-DD)' };
+        return { valid: false, error: '반려동물 생년월일 형식이 올바르지 않습니다. (YYYY-MM-DD)' };
     }
     const petDate = new Date(petBirth);
     if (isNaN(petDate.getTime())) {
-        return { valid: false, error: 'petBirth가 유효한 날짜가 아닙니다.' };
+        return { valid: false, error: '반려동물 생년월일에 존재하지 않는 날짜가 있습니다. 다시 확인해주세요.' };
     }
     if (petDate.getFullYear() < 2000 || petDate > new Date()) {
-        return { valid: false, error: 'petBirth가 허용 범위를 벗어났습니다. (2000년 이후, 오늘 이전)' };
+        return { valid: false, error: '반려동물 생년월일은 2000년 이후부터 입력 가능해요.' };
     }
 
     // petType 검증
     if (!petType || typeof petType !== 'string') {
-        return { valid: false, error: 'petType이 필요합니다.' };
+        return { valid: false, error: '반려동물 종류를 선택해주세요.' };
     }
     if (!['cat', 'dog', 'other'].includes(petType)) {
-        return { valid: false, error: 'petType은 cat, dog, other 중 하나여야 합니다.' };
+        return { valid: false, error: '반려동물 종류가 올바르지 않습니다.' };
     }
 
     return {
@@ -89,7 +89,7 @@ export async function calculatePetDestinyHandler(req: Request, res: Response) {
             success: false,
             error: {
                 code: 'INTERNAL_ERROR',
-                message: '운세 계산 중 오류가 발생했습니다.'
+                message: '운명 분석 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.'
             }
         });
     }
