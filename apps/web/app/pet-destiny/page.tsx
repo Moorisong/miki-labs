@@ -19,9 +19,9 @@ export const metadata: Metadata = {
         url: 'https://box.haroo.site/pet-destiny',
         images: [
             {
-                url: '/images/pet-destiny-og.png',
-                width: 1200,
-                height: 630,
+                url: 'https://box.haroo.site/pet-destiny-og-v2.png',
+                width: 1024,
+                height: 1024,
                 alt: '동물 운명연구소',
             },
         ],
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
         card: 'summary_large_image',
         title: '동물 운명연구소 | 반려동물 운세·성격·궁합 분석',
         description: '반려동물과 집사의 생년월일을 기반으로 오행 명리학으로 분석하는 재미있는 운세 서비스입니다.',
-        images: ['/images/pet-destiny-og.png'],
+        images: ['https://box.haroo.site/pet-destiny-og-v2.png'],
     },
 };
 

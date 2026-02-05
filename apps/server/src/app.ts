@@ -14,13 +14,20 @@ const allowedOrigins = [
   process.env.CLIENT_URL,
 ].filter(Boolean) as string[];
 
+console.log('[DEBUG] Initialized allowedOrigins:', allowedOrigins);
+
 app.use(cors({
   origin: (origin, callback) => {
+    console.log('Incoming Origin:', origin);
+    console.log('Allowed Origins:', allowedOrigins);
+
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) {
+      console.log('Origin allowed');
       return callback(null, true);
     }
+    console.log('Origin NOT allowed');
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true

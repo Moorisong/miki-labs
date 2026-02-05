@@ -77,7 +77,7 @@ export default function ResultPage() {
                     content: {
                         title: `🐾 ${score}점! ${petType}와 집사의 궁합: ${compatibilityLabel}`,
                         description: `${petName}와(과) ${ownerName}의 운명적 만남 💛 주요 성격: ${mainTrait}. 지금 바로 결과를 확인하세요!`,
-                        imageUrl: 'https://box.haroo.site/opengraph-image.png',
+                        imageUrl: 'https://box.haroo.site/pet-destiny-og-v2.png',
                         link: {
                             mobileWebUrl: resultUrl,
                             webUrl: resultUrl,
