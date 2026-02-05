@@ -1,6 +1,6 @@
 .container {
     min-height: 100vh;
-    background: linear-gradient(to bottom, #faf5ff, #fdf2f8);
+    background: #1a1a2e;
     padding: 2rem 1rem;
 }
 
@@ -32,12 +32,12 @@
 .title {
     font-size: 1.875rem;
     font-weight: 700;
-    color: #581c87;
+    color: #f3e8ff;
     margin: 0;
 }
 
 .subtitle {
-    color: #6b21a8;
+    color: #d8b4fe;
     margin: 0;
 }
 
@@ -95,6 +95,8 @@
 
 .animalLabel {
     font-size: 0.875rem;
+    color: #1f2937;
+    font-weight: 600;
 }
 
 .hiddenRadio {
@@ -169,8 +171,8 @@
 
 .privacyNote {
     font-size: 0.75rem;
-    color: #4b5563;
-    background: rgba(255, 255, 255, 0.5);
+    color: #d1d5db;
+    background: rgba(255, 255, 255, 0.1);
     padding: 0.75rem;
     border-radius: 0.5rem;
     margin-bottom: 0.75rem;
@@ -178,14 +180,14 @@
 
 .disclaimer {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: #9ca3af;
     margin: 0;
 }
 
 /* 결과 페이지 */
 .resultContainer {
     min-height: 100vh;
-    background: linear-gradient(to bottom, #faf5ff, #fdf2f8, #fff7ed);
+    background: #1a1a2e;
     padding: 2rem 1rem;
 }
 
@@ -244,10 +246,10 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1.25rem;
+    font-weight: 700;
     color: #1f2937;
-    margin: 0 0 0.75rem 0;
+    margin: 0 0 1rem 0;
 }
 
 .cardEmoji {
@@ -256,8 +258,8 @@
 
 .cardContent {
     color: #4b5563;
-    font-size: 0.875rem;
-    line-height: 1.5;
+    font-size: 0.95rem;
+    line-height: 1.6;
 }
 
 /* 게이지 */
@@ -395,7 +397,7 @@
     margin-top: 2rem;
     text-align: center;
     font-size: 0.75rem;
-    color: #6b7280;
+    color: #9ca3af;
 }
 
 .resultFooter p {
@@ -408,7 +410,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(to bottom, #faf5ff, #fdf2f8);
+    background: #1a1a2e;
 }
 
 .loadingContent {
@@ -434,7 +436,7 @@
 }
 
 .loadingText {
-    color: #6b7280;
+    color: #9ca3af;
 }
 
 /* 올해 운세 그리드 */
