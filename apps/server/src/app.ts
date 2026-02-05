@@ -7,8 +7,22 @@ import './types/express';
 const app = express();
 
 // Middlewares
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'https://box.haroo.site',
+  process.env.CLIENT_URL,
+].filter(Boolean) as string[];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 app.use(express.json());
