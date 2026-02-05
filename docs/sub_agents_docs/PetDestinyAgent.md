@@ -1,6 +1,6 @@
 # Pet Destiny Agent Reference
 
-## [Planning] 동물 운명연구소 (Animal Destiny Lab)
+## [Planning] 운명연구소 (Animal Destiny Lab)
 - **문서 위치**: `docs/planning/pet_destiny/01_pet_destiny_spec.md`
 - **내용 요약**: 반려동물 사주/궁합 콘텐츠의 기획, 로직, UX, 기술 명세 상세
 
@@ -9,7 +9,7 @@
 ## AI 작업 지침
 
 ### 1. 목적
-- 동물 운명연구소 콘텐츠의 Frontend 및 Backend 기능 구현
+- 운명연구소 콘텐츠의 Frontend 및 Backend 기능 구현
 - 병렬 개발이 가능하도록 Backend(API/Logic)와 Frontend(UI/UX) 작업을 분리하여 정의
 
 ### 2. 병렬 작업 구조 (Parallel Execution)
