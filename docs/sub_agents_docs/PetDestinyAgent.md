@@ -81,10 +81,39 @@
 1. labels 구간 확장 (40~49: 애증관계, 0~39: 주인교체)
 2. 각 구간별 중립/경고/부정 문장 추가
 
-#### [Track E] 건강 및 올해 운세 변동
-**파일**: `apps/server/data/health.json`, `apps/server/data/fortune.json`
-1. Seed 기반 건강 포인트 변동 (예: 간/눈 중 선택)
-2. 올해 운세에 중립/경고 표현 추가
+#### [Track E] 건강 및 올해 운세 개선 (Year Fortune Update)
+**파일**: `apps/server/data/fortune.json`, `apps/server/src/services/pet-destiny/fortune.service.ts`
+
+**1. 올해 운세 로직 고도화 (`fortune.service.ts`)**:
+   - 오행 비교 점수(+2/+1/-1) + Seed 조정(-1/0/+1) = 최종 점수(Range: -2 ~ +3) 계산 로직 구현
+   - 점수 구간별 레이블(대길/길/보통/주의/흉) 매핑
+   - 이유(Reason) 텍스트 생성: "올해는 O(O) 기운이 [돕습니다/충돌합니다]."
+
+**2. 템플릿 데이터 구조화 (`fortune.json`)**:
+   - 기존 단순 문자열 배열에서 구조화된 객체 또는 매핑 테이블로 변경
+   - 각 운세 레이블별 이모지 및 상세 설명(Description) 텍스트 정의
+   - **예시**:
+     ```json
+     {
+       "daegil": { "emoji": "🍀", "desc": "최고의 기회가 찾아올 거예요!" },
+       "gil": { "emoji": "🌸", "desc": "좋은 기운이 함께합니다." },
+       ...
+     }
+     ```
+
+#### [Track F] 상세 성격 분석 구현 (Detailed Personality)
+**파일**: `apps/server/data/personality_detail.json`, `apps/server/src/services/pet-destiny/index.ts`
+
+**1. 데이터 파일 생성 (`personality_detail.json`)**:
+   - 오행(목, 화, 토, 금, 수)별로 5개 카테고리(`intro`, `body_positive`, `body_habit`, `relation_owner`, `outro`) 구성
+   - 각 카테고리당 최소 3개 이상의 문장 템플릿 작성
+   - `{name}` 플레이스홀더 포함
+
+**2. 로직 구현 (`index.ts` 내부 또는 `personality.service.ts`)**:
+   - `calculateDetailedPersonality(petElement, petName, seed)` 함수 구현
+   - Seed 비트연산 또는 모듈로 연산을 통해 각 카테고리에서 문장 하나씩 선택
+   - 선택된 문장들을 `join(' ')`하여 최종 텍스트 생성
+   - 기존 `personality.description` 필드를 이 생성된 텍스트로 대체
 
 ### 3. 구현 원칙
 - **Deterministic 유지**: Seed 기반 변동은 같은 입력 = 같은 결과 보장
