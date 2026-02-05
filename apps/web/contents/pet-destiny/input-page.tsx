@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { calculateAge, encodeResultData } from '@/lib/pet-destiny/fortune';
 import { PetDestinyRequest, PetDestinyResponse } from '@/lib/pet-destiny/types';
 import styles from './styles.module.css';
+import { useToast } from '@/lib/hooks/use-toast';
+import Toast from '@/components/ui/toast';
 
 const LOADING_MESSAGES = [
     '궁합 계산 중...',
@@ -13,6 +15,173 @@ const LOADING_MESSAGES = [
     '운명의 실타래를 풀고 있어요...',
     '별자리를 읽고 있어요...',
 ];
+
+interface DateInputGroupProps {
+    onChange: (date: string) => void;
+    maxDate?: string;
+    onError?: (message: string) => void;
+}
+
+function DateInputGroup({ onChange, maxDate, onError }: DateInputGroupProps) {
+    const [year, setYear] = useState('');
+    const [month, setMonth] = useState('');
+    const [day, setDay] = useState('');
+    const dateInputRef = useRef<HTMLInputElement>(null);
+
+    // Sync from internal state to parent
+    useEffect(() => {
+        if (!year || !month || !day) {
+            onChange('');
+            return;
+        }
+
+        const y = parseInt(year);
+        const m = parseInt(month);
+        const d = parseInt(day);
+
+        if (isNaN(y) || isNaN(m) || isNaN(d)) return;
+
+        // Basic range checks
+        if (m < 1 || m > 12) return;
+        if (d < 1 || d > 31) return;
+
+        const formattedDate = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+        // Validate date existence
+        const dateObj = new Date(formattedDate);
+        if (dateObj.toISOString().split('T')[0] !== formattedDate) return;
+        if (maxDate && formattedDate > maxDate) return;
+
+        onChange(formattedDate);
+    }, [year, month, day, onChange, maxDate]);
+
+    // Handle calendar picker selection
+    const handleDateSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        if (val) {
+            const [y, m, d] = val.split('-');
+            setYear(y);
+            setMonth(m);
+            setDay(d);
+        }
+    };
+
+    const handleNumberInput = (e: React.ChangeEvent<HTMLInputElement>, setter: (val: string) => void, maxLen: number) => {
+        const value = e.target.value.replace(/[^0-9]/g, '');
+        if (value.length <= maxLen) {
+            setter(value);
+        }
+    };
+
+    const openCalendar = () => {
+        if (dateInputRef.current) {
+            if ('showPicker' in dateInputRef.current && typeof dateInputRef.current.showPicker === 'function') {
+                try {
+                    dateInputRef.current.showPicker();
+                } catch (err) {
+                    // Fallback for browsers that don't support showPicker effectively or if blocked
+                    dateInputRef.current.click();
+                }
+            } else {
+                dateInputRef.current.click();
+            }
+        }
+    };
+
+    const handleBlur = (e: React.FocusEvent) => {
+        // 내부에서 포커스 이동하는 경우는 무시
+        if (e.currentTarget.contains(e.relatedTarget)) return;
+
+        // 하나라도 입력되어 있다면 검증 시도
+        if (year || month || day) {
+            if (!year || year.length < 4) return; // 연도는 아직 입력중일 수 있음
+            if (!month) return;
+            if (!day) return;
+
+            const y = parseInt(year);
+            const m = parseInt(month);
+            const d = parseInt(day);
+
+            if (m < 1 || m > 12) {
+                onError?.('올바른 월(1-12)을 입력해주세요.');
+                return;
+            }
+            if (d < 1 || d > 31) {
+                onError?.('올바른 일(1-31)을 입력해주세요.');
+                return;
+            }
+
+            const formattedDate = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            const dateObj = new Date(formattedDate);
+
+            // 유효하지 않은 날짜 (예: 2월 30일)
+            if (dateObj.toISOString().split('T')[0] !== formattedDate) {
+                onError?.('존재하지 않는 날짜입니다. 다시 확인해주세요.');
+                return;
+            }
+
+            // 미래 날짜 확인
+            if (maxDate && formattedDate > maxDate) {
+                onError?.('미래의 날짜는 입력할 수 없습니다.');
+                return;
+            }
+        }
+    };
+
+    return (
+        <div className={styles.dateInputGroup} onBlur={handleBlur}>
+            <div className={styles.dateInputWrapper}>
+                <input
+                    className={styles.dateInput}
+                    placeholder="YYYY"
+                    value={year}
+                    onChange={(e) => handleNumberInput(e, setYear, 4)}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={4}
+                />
+                <span className={styles.dateSuffix}>년</span>
+            </div>
+            <div className={styles.dateInputWrapper}>
+                <input
+                    className={styles.dateInput}
+                    placeholder="MM"
+                    value={month}
+                    onChange={(e) => handleNumberInput(e, setMonth, 2)}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={2}
+                />
+                <span className={styles.dateSuffix}>월</span>
+            </div>
+            <div className={styles.dateInputWrapper}>
+                <input
+                    className={styles.dateInput}
+                    placeholder="DD"
+                    value={day}
+                    onChange={(e) => handleNumberInput(e, setDay, 2)}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={2}
+                />
+                <span className={styles.dateSuffix}>일</span>
+            </div>
+
+            <button type="button" className={styles.calendarButton} onClick={openCalendar} title="날짜 선택">
+                📅
+            </button>
+
+            <input
+                type="date"
+                ref={dateInputRef}
+                onChange={handleDateSelect}
+                max={maxDate}
+                className={styles.hiddenDateInput}
+                tabIndex={-1}
+            />
+        </div>
+    );
+}
 
 export default function InputPage() {
     const router = useRouter();
@@ -24,6 +193,7 @@ export default function InputPage() {
     const [ownerName, setOwnerName] = useState<string>('');
     const [isLoading, setIsLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState('');
+    const { toast, showToast, hideToast } = useToast();
 
     const isFormValid = () => {
         const hasPetType = petType !== '';
@@ -78,12 +248,12 @@ export default function InputPage() {
 
                 router.push(`/pet-destiny/result?seed=${encodeURIComponent(seed)}`);
             } else {
-                alert(data.error?.message || '오류가 발생했습니다.');
+                showToast(data.error?.message || '오류가 발생했습니다.');
                 setIsLoading(false);
             }
         } catch (error) {
             console.error('API 호출 오류:', error);
-            alert('서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
+            showToast('서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
             setIsLoading(false);
         }
     };
@@ -154,13 +324,10 @@ export default function InputPage() {
                         <label className={styles.label} htmlFor="petBirthDate">
                             반려동물 생년월일 {petBirthDate && calculateAge(petBirthDate)}
                         </label>
-                        <input
-                            id="petBirthDate"
-                            type="date"
-                            value={petBirthDate}
-                            onChange={(e) => setPetBirthDate(e.target.value)}
-                            max={today}
-                            className={styles.input}
+                        <DateInputGroup
+                            onChange={setPetBirthDate}
+                            maxDate={today}
+                            onError={(msg) => showToast(msg)}
                         />
                     </div>
 
@@ -169,13 +336,10 @@ export default function InputPage() {
                         <label className={styles.label} htmlFor="ownerBirthDate">
                             집사 생년월일
                         </label>
-                        <input
-                            id="ownerBirthDate"
-                            type="date"
-                            value={ownerBirthDate}
-                            onChange={(e) => setOwnerBirthDate(e.target.value)}
-                            max={today}
-                            className={styles.input}
+                        <DateInputGroup
+                            onChange={setOwnerBirthDate}
+                            maxDate={today}
+                            onError={(msg) => showToast(msg)}
                         />
                     </div>
 
@@ -230,6 +394,7 @@ export default function InputPage() {
                     </p>
                 </div>
             </div>
+            <Toast toast={toast} onHide={hideToast} />
         </div>
     );
 }

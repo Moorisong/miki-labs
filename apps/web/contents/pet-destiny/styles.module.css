@@ -113,12 +113,106 @@
     border-radius: 0.5rem;
     font-size: 1rem;
     box-sizing: border-box;
+    cursor: text;
+}
+
+.inputHint {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    font-weight: 400;
+    margin-left: 0.5rem;
+}
+
+/* 입력 필드 */
+.input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    box-sizing: border-box;
 }
 
 .input:focus {
     outline: none;
     border-color: #7c3aed;
     box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.dateInputGroup {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+}
+
+.dateInputWrapper {
+    position: relative;
+    flex: 1;
+}
+
+/* Give more space to Year input (first child) */
+.dateInputWrapper:first-child {
+    flex: 1.6;
+}
+
+.dateInput {
+    width: 100%;
+    padding: 0.75rem;
+    padding-right: 2rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.dateInput:focus {
+    outline: none;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.dateInput::placeholder {
+    font-size: 0.8rem;
+    color: #9ca3af;
+}
+
+.dateSuffix {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 0.875rem;
+    pointer-events: none;
+}
+
+.calendarButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border: 1px solid #e5e7eb;
+    background: white;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.calendarButton:hover {
+    border-color: #7c3aed;
+    background: #faf5ff;
+}
+
+.hiddenDateInput {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
 }
 
 /* 선택 입력 섹션 */
