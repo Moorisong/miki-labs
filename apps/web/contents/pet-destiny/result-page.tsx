@@ -59,6 +59,8 @@ export default function ResultPage() {
         const ownerName = data?.ownerName || '나';
         const score = data?.compatibility || 0;
         const petType = data?.petType || '반려동물';
+        const compatibilityLabel = data?.compatibilityLabel || '운명의 만남';
+        const mainTrait = data?.personality?.mainTrait || '특별한 매력';
 
         if (typeof window !== 'undefined' && window.Kakao) {
             // 초기화되지 않았다면 시도
@@ -73,8 +75,8 @@ export default function ResultPage() {
                 window.Kakao.Share.sendDefault({
                     objectType: 'feed',
                     content: {
-                        title: `[운명연구소] ${petType}와 집사의 궁합 점수는?`,
-                        description: `${petName}와(과) ${ownerName}의 운명적인 만남! 지금 바로 결과를 확인해보세요. ✨`,
+                        title: `🐾 ${score}점! ${petType}와 집사의 궁합: ${compatibilityLabel}`,
+                        description: `${petName}와(과) ${ownerName}의 운명적 만남 💛 주요 성격: ${mainTrait}. 지금 바로 결과를 확인하세요!`,
                         imageUrl: 'https://box.haroo.site/opengraph-image.png',
                         link: {
                             mobileWebUrl: resultUrl,

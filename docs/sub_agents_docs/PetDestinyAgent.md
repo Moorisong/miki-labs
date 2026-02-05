@@ -48,7 +48,13 @@
 3.  **결과 페이지 UI (Result UI)**
     *   결과 데이터 시각화 (게이지, 카드형 레이아웃)
     *   **모름 상태 안내**: URL Query Param (`unknown=true`) 확인하여 상단 안내 문구 표시
-    *   공유 기능 (카카오 SDK 연동, 클립보드 복사)
+    *   **카카오 공유 템플릿 구현**:
+        *   SDK 초기화 (`window.Kakao.init`)
+        *   `Kakao.Share.sendDefault` 호출
+        *   템플릿: `🐾 ${score}점! ${petType}와 집사의 궁합: ${compatibilityLabel}`
+        *   설명: `${petName}와(과) ${ownerName}...주요 성격: ${mainTrait}`
+        *   이미지: `/opengraph-image.png`
+    *   클립보드 복사 폴백
     *   SEO 메타태그 동적 생성 (`generateMetadata`)
 
 ### 3. 통합 및 검증 (Integration)

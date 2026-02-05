@@ -401,6 +401,40 @@ healthVariant = seed % 2;  // 0 또는 1
 - **카카오 공유하기**
 - **다시 해보기**
 
+### 4.4.1 카카오 공유 템플릿 명세
+
+#### 목적
+- 점수, 성격, 궁합 라벨 직관적 노출
+- 클릭 유도 문구 포함
+- 모바일/PC 미리보기 최적화
+
+#### 사용 가능 변수
+| 변수 | 예시 값 | 설명 |
+|------|--------|------|
+| petName | 초코 | 반려동물 이름 |
+| ownerName | 김집사 | 집사 이름 |
+| petType | 고양이 | 반려동물 종류 |
+| score | 95 | 궁합 점수 |
+| data.compatibilityLabel | 천생연분 | 궁합 라벨 |
+| data.personality.mainTrait | 호기심 가득한 탐험가 | 주요 성격 |
+| ogImage | /opengraph-image.png | 공유용 OG 이미지 |
+
+#### 템플릿 구조
+```ts
+title: `🐾 ${score}점! ${petType}와 집사의 궁합: ${data.compatibilityLabel}`,
+description: `${petName}와(과) ${ownerName}의 운명적 만남 💛 주요 성격: ${data.personality.mainTrait}. 지금 바로 결과를 확인하세요!`,
+imageUrl: ogImage
+```
+
+#### 문자 수 권장
+- **타이틀**: 50~60자 내외
+- **설명**: 60~100자 내외
+
+#### 기대 효과
+- 공유 클릭률 증가
+- 모바일/PC 미리보기 최적화
+- 점수, 성격, 궁합 라벨 직관적 노출
+
 ### 4.5 결과 페이지 SEO 메타 규칙
 결과 페이지는 공유 및 검색 유입을 위한 **동적 메타 태그**를 생성한다.
 
