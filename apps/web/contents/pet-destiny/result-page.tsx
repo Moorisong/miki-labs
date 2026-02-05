@@ -60,33 +60,45 @@ export default function ResultPage() {
         const score = data?.compatibility || 0;
         const petType = data?.petType || '반려동물';
 
-        if (window.Kakao) {
-            const resultUrl = window.location.href; // 현재 결과 페이지 URL
+        if (typeof window !== 'undefined' && window.Kakao) {
+            // 초기화되지 않았다면 시도
+            if (!window.Kakao.isInitialized()) {
+                window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_API_KEY);
+            }
 
-            window.Kakao.Share.sendDefault({
-                objectType: 'feed',
-                content: {
-                    title: `운명연구소 - ${petType}와 집사의 궁합`,
-                    description: `'${petName}'와 '${ownerName}'의 궁합 점수는 ${score}점입니다! 💕`,
-                    imageUrl:
-                        'https://box.haroo.site/pet-destiny-logo-transparent-v2.png', // 실제 배포된 로고 이미지 URL 사용 권장
-                    link: {
-                        mobileWebUrl: resultUrl,
-                        webUrl: resultUrl,
-                        androidExecutionParams: `destiny_seed=${searchParams.get('seed')}`,
-                        iosExecutionParams: `destiny_seed=${searchParams.get('seed')}`,
-                    },
-                },
-                buttons: [
-                    {
-                        title: '결과 확인하기',
+            // Share가 로드되었는지 확인
+            if (window.Kakao.Share) {
+                const resultUrl = window.location.href;
+
+                window.Kakao.Share.sendDefault({
+                    objectType: 'feed',
+                    content: {
+                        title: `[운명연구소] ${petType}와 집사의 궁합 점수는?`,
+                        description: `${petName}와(과) ${ownerName}의 운명적인 만남! 지금 바로 결과를 확인해보세요. ✨`,
+                        imageUrl: 'https://box.haroo.site/opengraph-image.png',
                         link: {
                             mobileWebUrl: resultUrl,
                             webUrl: resultUrl,
+                            androidExecutionParams: `destiny_seed=${searchParams.get('seed')}`,
+                            iosExecutionParams: `destiny_seed=${searchParams.get('seed')}`,
                         },
                     },
-                ],
-            });
+                    buttons: [
+                        {
+                            title: '결과 확인하기',
+                            link: {
+                                mobileWebUrl: resultUrl,
+                                webUrl: resultUrl,
+                            },
+                        },
+                    ],
+                });
+            } else {
+                // Kakao.Share가 아직 로드되지 않은 경우 클립보드 복사
+                const url = window.location.href;
+                await navigator.clipboard.writeText(url);
+                alert('카카오톡 공유 기능을 불러오지 못했습니다. 링크가 복사되었습니다!');
+            }
         } else {
             // Kakao SDK 로드 실패 시 클립보드 복사로 대체
             const url = window.location.href;
