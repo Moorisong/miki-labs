@@ -2,13 +2,14 @@ import { Element } from './zodiac.service';
 import { calculateElementFromDate, getCurrentYearElement, ELEMENT_INFO } from './element.service';
 import {
     calculateCompatibility,
-    calculateMindBarrier,
-    calculateYearFortuneRelation
+    calculateMindBarrier
 } from './compatibility.service';
+import { calculateYearFortune } from './fortune.service';
 import { generateSeed } from './seed.service';
 
 // JSON 데이터 임포트
 import personalityData from '../../../data/personality.json';
+import personalityDetailData from '../../../data/personality_detail.json'; // Import new data
 import healthData from '../../../data/health.json';
 import mindData from '../../../data/mind.json';
 import fortuneData from '../../../data/fortune.json';
@@ -21,6 +22,7 @@ export interface PetDestinyRequest {
     ownerBirth: string;
     petBirth: string;
     petType: 'cat' | 'dog' | 'other';
+    petName?: string;
 }
 
 export interface PetDestinyResult {
@@ -32,6 +34,7 @@ export interface PetDestinyResult {
         mainTrait: string;
         subTraits: string[];
         description: string;
+        detailedDescription: string;
         element: Element;
         elementInfo: typeof ELEMENT_INFO[Element];
     };
@@ -87,6 +90,30 @@ export function calculatePetDestiny(request: PetDestinyRequest): PetDestinyResul
         color: string;
     }>)[petElement];
 
+    // 상세 성격 분석 생성 (New Logic)
+    const petName = request.petName || (petType === 'cat' ? '고양이' : petType === 'dog' ? '강아지' : '반려동물');
+    const detailTemplates = (personalityDetailData as Record<string, {
+        intro: string[];
+        body_positive: string[];
+        body_habit: string[];
+        relation_owner: string[];
+        outro: string[];
+    }>)[petElement];
+
+    // Seed를 이용하여 각 카테고리에서 문장 선택
+    const seedNum = parseInt(cacheKey.substring(0, 8), 16);
+    const getSentence = (arr: string[], shift: number) => arr[(seedNum >> shift) % arr.length];
+
+    const descriptionParts = [
+        getSentence(detailTemplates.intro, 0),
+        getSentence(detailTemplates.body_positive, 2),
+        getSentence(detailTemplates.body_habit, 4),
+        getSentence(detailTemplates.relation_owner, 6),
+        getSentence(detailTemplates.outro, 8)
+    ];
+
+    const detailedDescription = descriptionParts.join(' ').replace(/{name}/g, petName);
+
     // 건강 운 (Seed 기반 변형 적용)
     const healthRaw = (healthData as Record<Element, {
         level: string;
@@ -98,10 +125,9 @@ export function calculatePetDestiny(request: PetDestinyRequest): PetDestinyResul
     // Seed 기반으로 건강 조언 변형 선택 (궁합 점수가 낮으면 변형 사용)
     let healthAdvice = healthRaw.advice;
     if (healthRaw.adviceVariants && healthRaw.adviceVariants.length > 0) {
-        const seedNum = parseInt(cacheKey.substring(8, 16), 16);
-        // 궁합 점수가 60 미만이면 변형 조언 사용
+        // ... (existing code for health advice selection)
+        const variantIndex = seedNum % healthRaw.adviceVariants.length;
         if (compatibilityResult.score < 60) {
-            const variantIndex = seedNum % healthRaw.adviceVariants.length;
             healthAdvice = healthRaw.adviceVariants[variantIndex];
         }
     }
@@ -116,45 +142,30 @@ export function calculatePetDestiny(request: PetDestinyRequest): PetDestinyResul
         level: number;
     }>>)[petElement];
 
-    // 올해 운세 (Seed 기반 변형 적용)
+    // 올해 운세 (New Logic)
     const yearFortuneRaw = (fortuneData.yearFortune as Record<Element, {
         overall: string;
-        overallVariants?: string[];
         love: string;
         health: string;
         wealth: string;
         lucky: string;
     }>)[petElement];
 
-    const yearFortuneRelation = calculateYearFortuneRelation(petBirth);
-    const yearFortuneLabelInfo = (fortuneData.yearFortuneLabels as Record<string, {
-        label: string;
-        emoji: string;
-        description: string;
-    }>)[yearFortuneRelation];
-
-    // 올해 운세 변형 선택 (상극이면 변형 사용)
-    let yearFortuneOverall = yearFortuneRaw.overall;
-    if (yearFortuneRaw.overallVariants && yearFortuneRaw.overallVariants.length > 0) {
-        if (yearFortuneRelation === '상극' || yearFortuneRelation === '중립') {
-            const seedNum = parseInt(cacheKey.substring(16, 24), 16);
-            const variantIndex = seedNum % yearFortuneRaw.overallVariants.length;
-            yearFortuneOverall = yearFortuneRaw.overallVariants[variantIndex];
-        }
-    }
+    const yearFortuneResult = calculateYearFortune(petBirth, cacheKey);
 
     // 결과 생성
     const petTypeName = petType === 'cat' ? '고양이' : petType === 'dog' ? '강아지' : '반려동물';
 
     const result: PetDestinyResult = {
         summary: `${petTypeName}와 집사의 궁합은 ${compatibilityResult.score}점! ${compatibilityResult.text}`,
-        shareText: `우리 ${petTypeName}와 나의 궁합은 ${compatibilityResult.score}점! ${ELEMENT_INFO[petElement].emoji} ${petElement} 오행의 ${petTypeName}에요.`,
+        shareText: `우리 ${petTypeName}의 2026년 운세: ${yearFortuneResult.fullText}`,
         compatibility: compatibilityResult.score,
         compatibilityLabel: compatibilityResult.label,
         personality: {
             mainTrait: personalityInfo.mainTrait,
             subTraits: personalityInfo.subTraits,
             description: personalityInfo.description,
+            detailedDescription, // Add generated detailed description
             element: petElement,
             elementInfo: ELEMENT_INFO[petElement]
         },
@@ -166,14 +177,14 @@ export function calculatePetDestiny(request: PetDestinyRequest): PetDestinyResul
         mind: mindResult,
         lifetimeFlow,
         yearFortune: {
-            overall: yearFortuneOverall,
+            overall: yearFortuneResult.fullText,
             love: yearFortuneRaw.love,
             health: yearFortuneRaw.health,
             wealth: yearFortuneRaw.wealth,
             lucky: yearFortuneRaw.lucky,
-            label: yearFortuneLabelInfo.label
+            label: yearFortuneResult.label
         },
-        yearFortuneLabel: `${yearFortuneLabelInfo.emoji} ${yearFortuneLabelInfo.label}`,
+        yearFortuneLabel: `${yearFortuneResult.emoji} ${yearFortuneResult.label}`,
         petElement,
         ownerElement
     };
