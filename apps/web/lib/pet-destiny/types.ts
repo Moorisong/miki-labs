@@ -43,6 +43,7 @@ export interface PetDestinyResult {
         mainTrait: string;
         subTraits: string[];
         description: string;
+        detailedDescription: string;
         element: Element;
         elementInfo: ElementInfo;
     };

@@ -169,7 +169,7 @@ export default function ResultPage() {
                                 <span key={index} className={styles.traitTag}>{trait}</span>
                             ))}
                         </div>
-                        <p className={styles.cardContent}>{data.personality.description}</p>
+                        <p className={styles.cardContent}>{data.personality.detailedDescription}</p>
                     </div>
 
                     {/* 3. 건강 운 */}
