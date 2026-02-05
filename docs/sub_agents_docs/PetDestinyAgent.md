@@ -39,11 +39,15 @@
     *   `apps/web/app/pet-destiny/` Next.js 라우트 설정
 2.  **입력 폼 UI (Input UX)**
     *   동물 선택(Radio), DatePicker 컴포넌트 구현
+    *   **생년월일 모름 처리**:
+        *   CheckBox 토글 구현 ("모름 (평균 나이를 기준으로 분석)")
+        *   체크 시 DatePicker 비활성화 및 `currentYear - 3`, `06-01` 자동 설정
     *   순차적 입력 애니메이션 또는 Step UI 적용
     *   유효성 검사 및 '결과 보기' 버튼 활성화 로직
     *   로딩 화면 및 랜덤 문구 구현
 3.  **결과 페이지 UI (Result UI)**
     *   결과 데이터 시각화 (게이지, 카드형 레이아웃)
+    *   **모름 상태 안내**: URL Query Param (`unknown=true`) 확인하여 상단 안내 문구 표시
     *   공유 기능 (카카오 SDK 연동, 클립보드 복사)
     *   SEO 메타태그 동적 생성 (`generateMetadata`)
 
