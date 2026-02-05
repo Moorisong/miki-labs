@@ -46,25 +46,50 @@ export default function ResultPage() {
         }
     }, [searchParams, router]);
 
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.Kakao) {
+            if (!window.Kakao.isInitialized()) {
+                window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_API_KEY);
+            }
+        }
+    }, []);
+
     const handleShare = async () => {
-        const url = window.location.href;
         const petName = data?.petName || '우리 아이';
         const ownerName = data?.ownerName || '나';
         const score = data?.compatibility || 0;
+        const petType = data?.petType || '반려동물';
 
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: '운명연구소',
-                    text: `${petName}와 ${ownerName}의 궁합은 ${score}점!`,
-                    url: url,
-                });
-            } catch {
-                // 공유 취소 시 URL 복사
-                await navigator.clipboard.writeText(url);
-                alert('링크가 복사되었습니다!');
-            }
+        if (window.Kakao) {
+            const resultUrl = window.location.href; // 현재 결과 페이지 URL
+
+            window.Kakao.Share.sendDefault({
+                objectType: 'feed',
+                content: {
+                    title: `운명연구소 - ${petType}와 집사의 궁합`,
+                    description: `'${petName}'와 '${ownerName}'의 궁합 점수는 ${score}점입니다! 💕`,
+                    imageUrl:
+                        'https://box.haroo.site/pet-destiny-logo-transparent-v2.png', // 실제 배포된 로고 이미지 URL 사용 권장
+                    link: {
+                        mobileWebUrl: resultUrl,
+                        webUrl: resultUrl,
+                        androidExecutionParams: `destiny_seed=${searchParams.get('seed')}`,
+                        iosExecutionParams: `destiny_seed=${searchParams.get('seed')}`,
+                    },
+                },
+                buttons: [
+                    {
+                        title: '결과 확인하기',
+                        link: {
+                            mobileWebUrl: resultUrl,
+                            webUrl: resultUrl,
+                        },
+                    },
+                ],
+            });
         } else {
+            // Kakao SDK 로드 실패 시 클립보드 복사로 대체
+            const url = window.location.href;
             await navigator.clipboard.writeText(url);
             alert('링크가 복사되었습니다!');
         }

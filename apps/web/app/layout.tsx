@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import Script from 'next/script';
 import NavBar from '@/components/layout/nav-bar';
 import Footer from '@/components/layout/footer';
 import SessionProvider from '@/components/providers/session-provider';
@@ -68,6 +69,10 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <Script
+          src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
+          strategy="lazyOnload"
+        />
         <AdScriptManager />
         <SessionProvider>
           <NicknameProvider>
