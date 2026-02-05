@@ -27,13 +27,13 @@ export default function Home() {
             active: true,
         },
         {
-            id: 'letter',
-            title: '마음 편지',
-            description: '소중한 사람에게 전하는 따뜻한 메시지와 스티커.',
-            image: '/logo.png', // Placeholder
-            link: '#',
-            badge: null,
-            active: false,
+            id: 'pet-destiny',
+            title: '동물 운명연구소',
+            description: '반려동물과 집사의 오행 궁합 분석.\\n우리 아이와의 특별한 인연을 확인해보세요!',
+            image: '/logo.png',
+            link: '/pet-destiny',
+            badge: 'New',
+            active: true,
         },
     ];
 
