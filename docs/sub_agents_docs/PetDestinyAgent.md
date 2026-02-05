@@ -57,3 +57,37 @@
 - **No Database**: DB 스키마 변경이나 마이그레이션 불필요. JSON과 코드로만 동작.
 - **Security**: 서버 로그에 사용자 생년월일 남기지 말 것.
 - **Parallelism**: Track A와 Track B는 서로 API 스키마(`Request/Response Schema`)만 준수하면 독립적으로 진행 가능.
+
+---
+
+## 결과 편향 개선 AI 작업 지침
+
+### 1. 개요
+사용자가 항상 긍정적 결과만 보지 않도록 결과 균형을 조정한다.
+
+### 2. 작업 영역
+
+#### [Track C] 궁합 점수 개선
+**파일**: `apps/server/src/services/pet-destiny/compatibility.service.ts`
+1. Seed 기반 가중치 변동 적용
+   ```ts
+   const seedAdjust = (seed % 3) - 1; // -1, 0, +1
+   const finalScore = Math.max(0, Math.min(100, baseScore + seedAdjust));
+   ```
+2. 점수 범위를 0~39 구간까지 확장하여 부정 결과 허용
+
+#### [Track D] 문장 템플릿 다양화
+**파일**: `apps/server/data/compatibility.json`
+1. labels 구간 확장 (40~49: 애증관계, 0~39: 주인교체)
+2. 각 구간별 중립/경고/부정 문장 추가
+
+#### [Track E] 건강 및 올해 운세 변동
+**파일**: `apps/server/data/health.json`, `apps/server/data/fortune.json`
+1. Seed 기반 건강 포인트 변동 (예: 간/눈 중 선택)
+2. 올해 운세에 중립/경고 표현 추가
+
+### 3. 구현 원칙
+- **Deterministic 유지**: Seed 기반 변동은 같은 입력 = 같은 결과 보장
+- **균형 목표**: 긍정 40% / 중립 35% / 주의·경고 25%
+- **기존 API 스키마 유지**: Response 필드 변경 없음
+

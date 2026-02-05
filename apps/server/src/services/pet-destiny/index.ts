@@ -87,12 +87,24 @@ export function calculatePetDestiny(request: PetDestinyRequest): PetDestinyResul
         color: string;
     }>)[petElement];
 
-    // 건강 운
-    const healthInfo = (healthData as Record<Element, {
+    // 건강 운 (Seed 기반 변형 적용)
+    const healthRaw = (healthData as Record<Element, {
         level: string;
         score: number;
         advice: string;
+        adviceVariants?: string[];
     }>)[petElement];
+
+    // Seed 기반으로 건강 조언 변형 선택 (궁합 점수가 낮으면 변형 사용)
+    let healthAdvice = healthRaw.advice;
+    if (healthRaw.adviceVariants && healthRaw.adviceVariants.length > 0) {
+        const seedNum = parseInt(cacheKey.substring(8, 16), 16);
+        // 궁합 점수가 60 미만이면 변형 조언 사용
+        if (compatibilityResult.score < 60) {
+            const variantIndex = seedNum % healthRaw.adviceVariants.length;
+            healthAdvice = healthRaw.adviceVariants[variantIndex];
+        }
+    }
 
     // 마음 경계 지수
     const mindResult = calculateMindBarrier(petBirth, ownerBirth);
@@ -104,14 +116,14 @@ export function calculatePetDestiny(request: PetDestinyRequest): PetDestinyResul
         level: number;
     }>>)[petElement];
 
-    // 올해 운세
-    const yearFortuneInfo = (fortuneData.yearFortune as Record<Element, {
+    // 올해 운세 (Seed 기반 변형 적용)
+    const yearFortuneRaw = (fortuneData.yearFortune as Record<Element, {
         overall: string;
+        overallVariants?: string[];
         love: string;
         health: string;
         wealth: string;
         lucky: string;
-        label: string;
     }>)[petElement];
 
     const yearFortuneRelation = calculateYearFortuneRelation(petBirth);
@@ -120,6 +132,16 @@ export function calculatePetDestiny(request: PetDestinyRequest): PetDestinyResul
         emoji: string;
         description: string;
     }>)[yearFortuneRelation];
+
+    // 올해 운세 변형 선택 (상극이면 변형 사용)
+    let yearFortuneOverall = yearFortuneRaw.overall;
+    if (yearFortuneRaw.overallVariants && yearFortuneRaw.overallVariants.length > 0) {
+        if (yearFortuneRelation === '상극' || yearFortuneRelation === '중립') {
+            const seedNum = parseInt(cacheKey.substring(16, 24), 16);
+            const variantIndex = seedNum % yearFortuneRaw.overallVariants.length;
+            yearFortuneOverall = yearFortuneRaw.overallVariants[variantIndex];
+        }
+    }
 
     // 결과 생성
     const petTypeName = petType === 'cat' ? '고양이' : petType === 'dog' ? '강아지' : '반려동물';
@@ -137,14 +159,18 @@ export function calculatePetDestiny(request: PetDestinyRequest): PetDestinyResul
             elementInfo: ELEMENT_INFO[petElement]
         },
         health: {
-            level: healthInfo.level,
-            score: healthInfo.score,
-            advice: healthInfo.advice
+            level: healthRaw.level,
+            score: healthRaw.score,
+            advice: healthAdvice
         },
         mind: mindResult,
         lifetimeFlow,
         yearFortune: {
-            ...yearFortuneInfo,
+            overall: yearFortuneOverall,
+            love: yearFortuneRaw.love,
+            health: yearFortuneRaw.health,
+            wealth: yearFortuneRaw.wealth,
+            lucky: yearFortuneRaw.lucky,
             label: yearFortuneLabelInfo.label
         },
         yearFortuneLabel: `${yearFortuneLabelInfo.emoji} ${yearFortuneLabelInfo.label}`,

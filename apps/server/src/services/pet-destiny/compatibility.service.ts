@@ -5,6 +5,7 @@ import {
     getCurrentYearElement,
     ELEMENT_INFO
 } from './element.service';
+import { generateSeed, getNumberBySeed } from './seed.service';
 import compatibilityData from '../../../data/compatibility.json';
 
 interface CompatibilityResult {
@@ -36,9 +37,15 @@ export function calculateCompatibility(
     const ownerElement = calculateElementFromDate(ownerBirth);
     const relationType = getElementRelation(petElement, ownerElement);
 
+    // Seed 생성 (결과 편향 개선용)
+    const seed = generateSeed(ownerBirth, petBirth, 'compatibility');
+
     // 기본 점수
     const scores = compatibilityData.scores as Record<string, number>;
     let baseScore = scores[relationType] || 75;
+
+    // Seed 기반 가중치 변동 (-5 ~ +5)
+    const seedAdjust = getNumberBySeed(seed, -5, 5, 0);
 
     // 날짜 차이를 고려한 미세 조정
     const petDate = new Date(petBirth);
@@ -46,7 +53,8 @@ export function calculateCompatibility(
     const monthDiff = Math.abs(petDate.getMonth() - ownerDate.getMonth());
     const dayAdjust = (monthDiff % 3) * 2;
 
-    const score = Math.min(100, baseScore + dayAdjust);
+    // 최종 점수 계산 (0~100 범위)
+    const score = Math.max(0, Math.min(100, baseScore + dayAdjust + seedAdjust));
 
     // 라벨 결정
     const labels = compatibilityData.labels as Record<string, {
