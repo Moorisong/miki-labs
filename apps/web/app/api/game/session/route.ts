@@ -10,8 +10,11 @@ const SESSION_EXPIRY_MS = 10 * 60 * 1000;
 // 최소 게임 플레이 시간 (3초)
 export const MIN_GAME_DURATION_MS = 3000;
 
-// 서버 전용 시크릿 (환경 변수에서 가져옴)
-const SESSION_SECRET = process.env.GAME_SESSION_SECRET || 'fallback_secret_change_in_production_' + crypto.randomBytes(16).toString('hex');
+// 서버 전용 시크릿 (환경 변수에서 가져옴 - 필수)
+const SESSION_SECRET = process.env.GAME_SESSION_SECRET;
+if (!SESSION_SECRET) {
+  throw new Error('GAME_SESSION_SECRET 환경변수가 설정되지 않았습니다.');
+}
 
 /**
  * 게임 세션 토큰 생성
