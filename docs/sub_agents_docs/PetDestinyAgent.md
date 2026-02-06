@@ -125,6 +125,23 @@
    - 선택된 문장들을 `join(' ')`하여 최종 텍스트 생성
    - 기존 `personality.description` 필드를 이 생성된 텍스트로 대체
 
+#### [Track G] 배너 광고 구현 (Cross Promotion)
+**파일**: `apps/web/contents/pet-destiny/result/cross-banner.tsx` (신규), `apps/web/app/pet-destiny/result/page.tsx`
+1.  **배너 컴포넌트 구현 (`cross-banner.tsx`)**:
+    *   **디자인 스펙**:
+        *   배경: `#F7F7F7` (또는 `#FFFFFF`)
+        *   높이: 120~140px, Radius: 12~16px
+        *   레이아웃: 아이콘(좌측) + 텍스트(중앙) + CTA(우측)
+    *   **텍스트 내용**:
+        *   Label: "고양이 집사를 위한 추천 앱" (Small)
+        *   Title: "**고양이 건강 기록 앱, 묘록**" (Bold)
+        *   Desc: "병원 기록 · 투약 일정 · 증상 메모를 한 곳에서 관리하세요"
+        *   CTA: "앱 보러가기 →" (하루상자 메인 컬러 사용)
+    *   **링크**: 묘록 랜딩 페이지(또는 스토어)로 새 탭 이동
+2.  **결과 페이지 배치**:
+    *   `result/page.tsx`의 최하단 (공유 버튼 아래, Footer 위)에 배치
+    *   자연스러운 "추천" 느낌으로 노출 (광고 느낌 지양)
+
 ### 3. 구현 원칙
 - **Deterministic 유지**: Seed 기반 변동은 같은 입력 = 같은 결과 보장
 - **균형 목표**: 긍정 40% / 중립 35% / 주의·경고 25%
