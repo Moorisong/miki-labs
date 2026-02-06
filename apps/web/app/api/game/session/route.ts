@@ -22,7 +22,7 @@ if (!SESSION_SECRET) {
  */
 function generateSessionToken(kakaoId: string, startTime: number): string {
   const payload = `${kakaoId}:${startTime}:${crypto.randomBytes(16).toString('hex')}`;
-  const hmac = crypto.createHmac('sha256', SESSION_SECRET);
+  const hmac = crypto.createHmac('sha256', SESSION_SECRET!);
   hmac.update(payload);
   const signature = hmac.digest('hex');
 
