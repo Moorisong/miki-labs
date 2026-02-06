@@ -1,7 +1,13 @@
 .DS_Store
 node_modules
+# Environment files - NEVER commit these!
 .env
+.env.*
 .env.local
+.env.development
+.env.production
+.env.staging
+*.env
 dist
 build
 .vscode
