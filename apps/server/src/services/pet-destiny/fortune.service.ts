@@ -93,10 +93,11 @@ export function calculateYearFortune(petBirth: string, seed: string): YearFortun
 
     let detailText = yearFortuneRaw.overall;
 
-    // 점수가 낮거나 높을 때 변형 텍스트 사용 (다양성)
+    // 점수가 낮거나 높을 때, 또는 충돌 관계일 때 변형 텍스트 사용
     if (yearFortuneRaw.overallVariants && yearFortuneRaw.overallVariants.length > 0) {
-        // 점수가 -1 이하(주의/흉)이거나 +3(대길)일 때 변형 텍스트 사용 확률 높임
-        if (finalScore <= -1 || finalScore >= 3) {
+        // 점수가 -1 이하(주의/흉), +3(대길), 또는 충돌 관계(baseScore -1)일 때 변형 텍스트 사용
+        // 충돌 관계에서는 긍정적 메시지와 맞지 않으므로 항상 변형 사용
+        if (finalScore <= -1 || finalScore >= 3 || baseScore <= -1) {
             const variantIdx = (seedNum % yearFortuneRaw.overallVariants.length);
             detailText = yearFortuneRaw.overallVariants[variantIdx];
         }

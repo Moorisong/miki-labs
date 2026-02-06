@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { decodeResultData, ELEMENTS } from '@/lib/pet-destiny/fortune';
 import { PetDestinyResult, Element } from '@/lib/pet-destiny/types';
 import styles from './styles.module.css';
@@ -17,6 +18,7 @@ export default function ResultPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const [data, setData] = useState<ResultData | null>(null);
+    const currentYear = new Date().getFullYear();
 
     useEffect(() => {
         const seed = searchParams.get('seed');
@@ -87,10 +89,17 @@ export default function ResultPage() {
                     },
                     buttons: [
                         {
-                            title: '결과 확인하기',
+                            title: '결과 확인',
                             link: {
                                 mobileWebUrl: resultUrl,
                                 webUrl: resultUrl,
+                            },
+                        },
+                        {
+                            title: '나도 해보기',
+                            link: {
+                                mobileWebUrl: 'https://box.haroo.site/pet-destiny',
+                                webUrl: 'https://box.haroo.site/pet-destiny',
                             },
                         },
                     ],
@@ -141,12 +150,15 @@ export default function ResultPage() {
                 {/* 헤더 */}
                 <div className={styles.header}>
                     <div className={styles.headerTitle}>
-                        <Image
-                            src="/pet-destiny-logo-transparent-v2.png"
-                            alt="운명연구소 로고"
-                            width={120}
-                            height={120}
-                        />
+                        <Link href="/pet-destiny">
+                            <Image
+                                src="/pet-destiny-logo-transparent-v2.png"
+                                alt="운명연구소 로고"
+                                width={120}
+                                height={120}
+                                style={{ cursor: 'pointer' }}
+                            />
+                        </Link>
                     </div>
                 </div>
 
@@ -274,7 +286,7 @@ export default function ResultPage() {
                     {/* 6. 올해 운세 */}
                     <div className={styles.resultCard}>
                         <h3 className={styles.cardTitle}>
-                            2026년 운세 {data.yearFortuneLabel}
+                            {currentYear}년 운세 {data.yearFortuneLabel}
                         </h3>
                         <p className={styles.cardContent} style={{ marginBottom: '0.75rem' }}>
                             {data.yearFortune.overall}
@@ -313,7 +325,7 @@ export default function ResultPage() {
                 {/* 푸터 */}
                 <div className={styles.resultFooter}>
                     <p>✨ 본 콘텐츠는 엔터테인먼트 목적의 운세 서비스입니다.</p>
-                    <p>© 2026 운명연구소. All rights reserved.</p>
+                    <p>© {currentYear} 운명연구소. All rights reserved.</p>
                 </div>
             </div>
         </div>
