@@ -18,10 +18,7 @@ const AD_SCRIPTS = {
         src: 'https://nap5k.com/tag.min.js',
         zone: '10532408',
     },
-    VIGNETTE: {
-        src: 'https://gizokraijaw.net/vignette.min.js',
-        zone: '10532437',
-    },
+
 } as const;
 
 interface WindowWithAdHandler extends Window {
@@ -203,10 +200,7 @@ export default function AdScriptManager() {
                     (window as WindowWithAdHandler).onAdScriptLoad?.();
                 }}
             />
-            <Script
-                src={AD_SCRIPTS.VIGNETTE.src}
-                data-zone={AD_SCRIPTS.VIGNETTE.zone}
-            />
+
         </>
     );
 }
