@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/language-context';
 
-import { HTSM_KEYWORDS, HTSM_CONFIG } from './constants';
+import { HTSM_KEYWORDS, HTSM_CONFIG, HTSM_STORAGE_KEY } from './constants';
 import { fetchProofToken, createTest } from './api';
 import styles from './styles.module.css';
 
@@ -37,7 +37,12 @@ export default function SelfSelectionPage() {
             // 2. 테스트 생성 (API)
             const shareId = await createTest(selectedKeywords, proofToken);
 
-            // 3. 공유 페이지로 이동
+            // 3. LocalStorage 저장 (재방문 UX)
+            if (typeof window !== 'undefined') {
+                localStorage.setItem(HTSM_STORAGE_KEY.SHARE_ID, shareId);
+            }
+
+            // 4. 공유 페이지로 이동
             router.push(`/htsm/share/${shareId}`);
         } catch (err) {
             console.error('Test creation failed:', err);
