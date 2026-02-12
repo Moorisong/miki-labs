@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/language-context';
 
 import styles from './styles.module.css';
 
@@ -28,6 +29,7 @@ const FLOATING_POSITIONS = [
 
 export default function LandingPage() {
     const router = useRouter();
+    const { t } = useLanguage();
 
     const handleStart = () => {
         router.push('/htsm/start');
@@ -39,11 +41,11 @@ export default function LandingPage() {
             <section className={styles.heroSection}>
                 <div className={styles.heroContent}>
                     <h1 className={styles.heroTitle}>
-                        See how they{' '}
-                        <span className={styles.heroGradientText}>see you</span>
+                        {t('hero.title', { highlight: '' })}
+                        <span className={styles.heroGradientText}>{t('hero.highlight')}</span>
                     </h1>
                     <p className={styles.heroSubtitle}>
-                        Friends help reveal the real you.
+                        {t('hero.subtitle')}
                     </p>
 
                     <div className={styles.heroCta}>
@@ -51,13 +53,13 @@ export default function LandingPage() {
                             className={`${styles.btnPrimary} ${styles.btnPrimaryLg}`}
                             onClick={handleStart}
                         >
-                            Start My Test
+                            {t('hero.startButton')}
                         </button>
                     </div>
 
                     <p className={styles.heroHint}>
                         <span aria-hidden="true">✨</span>
-                        Takes 10 seconds
+                        {t('hero.hint')}
                     </p>
 
                     {/* Floating Keywords (Desktop) */}
@@ -83,10 +85,10 @@ export default function LandingPage() {
             {/* How It Works Section */}
             <section className={styles.sectionBg} aria-labelledby="how-it-works-title">
                 <h2 id="how-it-works-title" className={styles.sectionTitle}>
-                    How It Works
+                    {t('howItWorks.title')}
                 </h2>
                 <p className={styles.sectionSubtitle}>
-                    Three simple steps to discover yourself
+                    {t('howItWorks.subtitle')}
                 </p>
 
                 <div className={styles.stepsGrid}>
@@ -97,9 +99,9 @@ export default function LandingPage() {
                                 <circle cx="12" cy="12" r="3" />
                             </svg>
                         </div>
-                        <h3 className={styles.stepTitle}>1. Choose 3 words</h3>
+                        <h3 className={styles.stepTitle}>{t('howItWorks.step1.title')}</h3>
                         <p className={styles.stepDescription}>
-                            Select 3 words that describe you
+                            {t('howItWorks.step1.desc')}
                         </p>
                     </div>
 
@@ -112,9 +114,9 @@ export default function LandingPage() {
                                 <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                             </svg>
                         </div>
-                        <h3 className={styles.stepTitle}>2. Friends choose</h3>
+                        <h3 className={styles.stepTitle}>{t('howItWorks.step2.title')}</h3>
                         <p className={styles.stepDescription}>
-                            Share with friends to get their perspective
+                            {t('howItWorks.step2.desc')}
                         </p>
                     </div>
 
@@ -124,9 +126,9 @@ export default function LandingPage() {
                                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                             </svg>
                         </div>
-                        <h3 className={styles.stepTitle}>3. See your result</h3>
+                        <h3 className={styles.stepTitle}>{t('howItWorks.step3.title')}</h3>
                         <p className={styles.stepDescription}>
-                            Discover your Johari Window
+                            {t('howItWorks.step3.desc')}
                         </p>
                     </div>
                 </div>
@@ -137,11 +139,11 @@ export default function LandingPage() {
                 <div className={styles.socialProofGrid}>
                     <div className={styles.card}>
                         <div className={styles.socialProofNumber}>10,000+</div>
-                        <p className={styles.socialProofLabel}>Results created</p>
+                        <p className={styles.socialProofLabel}>{t('social.resultsCreated')}</p>
                     </div>
                     <div className={styles.card}>
                         <div className={styles.socialProofNumberAlt}>5</div>
-                        <p className={styles.socialProofLabel}>Average friends participate</p>
+                        <p className={styles.socialProofLabel}>{t('social.avgFriends')}</p>
                     </div>
                 </div>
             </section>
@@ -150,13 +152,13 @@ export default function LandingPage() {
             <section className={styles.ctaSection} aria-label="Call to action">
                 <div style={{ maxWidth: '48rem', margin: '0 auto', textAlign: 'center' }}>
                     <h2 className={styles.ctaTitle}>
-                        Ready to see yourself through their eyes?
+                        {t('cta.title')}
                     </h2>
                     <button
                         className={`${styles.btnPrimary} ${styles.btnPrimaryLg}`}
                         onClick={handleStart}
                     >
-                        Start My Test
+                        {t('cta.button')}
                     </button>
                 </div>
             </section>

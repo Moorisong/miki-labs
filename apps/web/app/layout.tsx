@@ -7,6 +7,8 @@ import SessionProvider from '@/components/providers/session-provider';
 import NicknameProvider from '@/components/providers/nickname-provider';
 
 import AdScriptManager from '@/components/ads/ad-script-manager';
+import { LanguageProvider } from '@/context/language-context';
+import LanguageSwitcher from '@/components/common/language-switcher';
 import './globals.css';
 
 const geistSans = Geist({
@@ -59,8 +61,6 @@ export const metadata: Metadata = {
   },
 };
 
-
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -74,15 +74,18 @@ export default function RootLayout({
           strategy="lazyOnload"
         />
         <AdScriptManager />
-        <SessionProvider>
-          <NicknameProvider>
-            <NavBar />
-            <main className="main-content">
-              {children}
-            </main>
-            <Footer />
-          </NicknameProvider>
-        </SessionProvider>
+        <LanguageProvider>
+          <LanguageSwitcher />
+          <SessionProvider>
+            <NicknameProvider>
+              <NavBar />
+              <main className="main-content">
+                {children}
+              </main>
+              <Footer />
+            </NicknameProvider>
+          </SessionProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

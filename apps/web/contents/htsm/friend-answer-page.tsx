@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/language-context';
 
 import { HTSM_KEYWORDS, HTSM_CONFIG } from './constants';
 import { submitAnswer } from './api';
@@ -33,6 +34,7 @@ function generateFingerprint(): string {
 
 export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
     const router = useRouter();
+    const { t } = useLanguage();
     const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
     const [submitted, setSubmitted] = useState<boolean>(false);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -58,7 +60,7 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
             await submitAnswer(shareId, selectedKeywords, fingerprintHash);
             setSubmitted(true);
         } catch (err) {
-            const message = err instanceof Error ? err.message : '응답 제출에 실패했습니다.';
+            const message = err instanceof Error ? err.message : t('answer.error');
             setError(message);
             setIsSubmitting(false);
         }
@@ -70,16 +72,16 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
                 <div className={styles.submittedContainer}>
                     <div className={styles.submittedContent}>
                         <div className={styles.submittedEmoji}>✨</div>
-                        <h1 className={styles.submittedTitle}>Thanks for your answer!</h1>
+                        <h1 className={styles.submittedTitle}>{t('answer.thanksTitle')}</h1>
                         <p className={styles.submittedSubtitle}>
-                            Your friend will see the combined results
+                            {t('answer.thanksSubtitle')}
                         </p>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                             <button className={styles.btnPrimary} onClick={() => router.push(`/htsm/result/${shareId}`)}>
-                                View Result
+                                {t('answer.viewResult')}
                             </button>
                             <button className={styles.btnSecondary} onClick={() => router.push('/htsm')}>
-                                Create Your Own Test
+                                {t('answer.createMine')}
                             </button>
                         </div>
                     </div>
@@ -95,16 +97,16 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
             <div className={styles.innerContainer}>
                 <div className={styles.friendPage}>
                     <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                        <h1 className={styles.friendTitle}>Describe your friend in 3 words</h1>
-                        <p className={styles.friendCount}>{count}/{HTSM_CONFIG.MAX_KEYWORD_SELECTION} selected</p>
+                        <h1 className={styles.friendTitle}>{t('answer.title')}</h1>
+                        <p className={styles.friendCount}>{t('answer.count', { current: count, max: HTSM_CONFIG.MAX_KEYWORD_SELECTION })}</p>
                         <div className={styles.trustIndicators}>
                             <div className={styles.trustItem}>
                                 <svg className={styles.trustIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-                                <span>Anonymous</span>
+                                <span>{t('answer.anonymous')}</span>
                             </div>
                             <div className={styles.trustItem}>
                                 <svg className={styles.trustIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                                <span>Takes 10 seconds</span>
+                                <span>{t('answer.takesTime')}</span>
                             </div>
                         </div>
                     </div>
@@ -133,7 +135,7 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
                         <div className={styles.stickyBottomInner}>
                             <button className={`${styles.btnPrimary} ${styles.btnFull}`} onClick={handleSubmit}
                                 disabled={count !== HTSM_CONFIG.MAX_KEYWORD_SELECTION || isSubmitting}>
-                                {isSubmitting ? 'Submitting...' : 'Submit Answer'}
+                                {isSubmitting ? t('answer.submitting') : t('answer.submit')}
                             </button>
                         </div>
                     </div>

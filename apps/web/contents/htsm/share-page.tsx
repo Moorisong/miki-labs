@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useLanguage } from '@/context/language-context';
 
 import { HTSM_MESSAGES } from './constants';
 import styles from './styles.module.css';
@@ -10,6 +11,7 @@ interface SharePageProps {
 }
 
 export default function SharePage({ shareId }: SharePageProps) {
+    const { t } = useLanguage();
     const [copied, setCopied] = useState<boolean>(false);
     const shareUrl =
         typeof window !== 'undefined'
@@ -27,8 +29,8 @@ export default function SharePage({ shareId }: SharePageProps) {
     const handleShare = () => {
         if (typeof navigator !== 'undefined' && navigator.share) {
             navigator.share({
-                title: HTSM_MESSAGES.SHARE_TITLE,
-                text: HTSM_MESSAGES.SHARE_TEXT,
+                title: t('share.title'),
+                text: t('share.subtitle'),
                 url: shareUrl,
             });
         } else {
@@ -43,9 +45,9 @@ export default function SharePage({ shareId }: SharePageProps) {
                     {/* Header */}
                     <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                         <div className={styles.shareEmoji}>🎉</div>
-                        <h1 className={styles.shareTitle}>Your test is ready</h1>
+                        <h1 className={styles.shareTitle}>{t('share.title')}</h1>
                         <p className={styles.shareSubtitle}>
-                            Share it with friends to see how they see you
+                            {t('share.subtitle')}
                         </p>
                     </div>
 
@@ -69,9 +71,9 @@ export default function SharePage({ shareId }: SharePageProps) {
                                     <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
                                 </svg>
                             </div>
-                            <h2 className={styles.shareCardTitle}>How do you see me?</h2>
+                            <h2 className={styles.shareCardTitle}>{t('share.cardTitle')}</h2>
                             <p className={styles.shareCardDescription}>
-                                Help me discover how you see me! Pick 3 words that describe me.
+                                {t('share.cardDesc')}
                             </p>
                             <div className={styles.shareUrlBox}>{shareUrl}</div>
                         </div>
@@ -98,7 +100,7 @@ export default function SharePage({ shareId }: SharePageProps) {
                                 <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
                                 <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
                             </svg>
-                            Share on KakaoTalk
+                            {t('share.kakaoButton')}
                         </button>
 
                         <button
@@ -118,7 +120,7 @@ export default function SharePage({ shareId }: SharePageProps) {
                                     >
                                         <polyline points="20 6 9 17 4 12" />
                                     </svg>
-                                    Link Copied!
+                                    {t('share.copied')}
                                 </>
                             ) : (
                                 <>
@@ -134,7 +136,7 @@ export default function SharePage({ shareId }: SharePageProps) {
                                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                                     </svg>
-                                    Copy Link
+                                    {t('share.copyButton')}
                                 </>
                             )}
                         </button>
@@ -143,9 +145,9 @@ export default function SharePage({ shareId }: SharePageProps) {
                     {/* Helper Text */}
                     <div className={styles.infoCard}>
                         <p className={styles.shareHelperText}>
-                            <strong>Friends choose 3 words about you anonymously.</strong>
+                            <strong>{t('share.helperTitle')}</strong>
                             <br />
-                            The more friends participate, the better your result!
+                            {t('share.helperDesc')}
                         </p>
                     </div>
                 </div>

@@ -1,10 +1,13 @@
 import express from 'express';
+import helmet from 'helmet';
 import cors from 'cors';
 import routes from './routes';
 import { errorHandler } from './middlewares/error-handler';
 import './types/express';
 
 const app = express();
+
+app.use(helmet());
 
 // Middlewares
 const allowedOrigins = [

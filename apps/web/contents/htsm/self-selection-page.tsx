@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/language-context';
 
 import { HTSM_KEYWORDS, HTSM_CONFIG } from './constants';
 import { fetchProofToken, createTest } from './api';
@@ -9,6 +10,7 @@ import styles from './styles.module.css';
 
 export default function SelfSelectionPage() {
     const router = useRouter();
+    const { t } = useLanguage();
     const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
@@ -39,7 +41,7 @@ export default function SelfSelectionPage() {
             router.push(`/htsm/share/${shareId}`);
         } catch (err) {
             console.error('Test creation failed:', err);
-            setError('테스트 생성에 실패했습니다. 잠시 후 다시 시도해주세요.');
+            setError(t('create.error'));
             setIsSubmitting(false);
         }
     };
@@ -60,16 +62,16 @@ export default function SelfSelectionPage() {
                             />
                         </div>
                         <div className={styles.progressStep}>
-                            Step 1 of 2
+                            {t('create.step')}
                         </div>
                     </div>
 
                     {/* Title */}
                     <h1 className={styles.selectionTitle}>
-                        Pick 3 words that describe you
+                        {t('create.title')}
                     </h1>
                     <p className={styles.selectionCount}>
-                        {selectionCount}/{HTSM_CONFIG.MAX_KEYWORD_SELECTION} selected
+                        {t('create.count', { current: selectionCount, max: HTSM_CONFIG.MAX_KEYWORD_SELECTION })}
                     </p>
 
                     {/* Error */}
@@ -110,7 +112,7 @@ export default function SelfSelectionPage() {
                                 onClick={handleContinue}
                                 disabled={selectionCount !== HTSM_CONFIG.MAX_KEYWORD_SELECTION || isSubmitting}
                             >
-                                {isSubmitting ? 'Creating...' : 'Continue'}
+                                {isSubmitting ? t('create.creating') : t('create.continue')}
                             </button>
                         </div>
                     </div>
