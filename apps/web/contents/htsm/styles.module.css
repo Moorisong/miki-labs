@@ -1,0 +1,988 @@
+/* ================================================
+   HTSM (HowTheySeeMe) Styles
+   Johari Window 기반 심리 분석 콘텐츠
+   ================================================ */
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Layout */
+.pageContainer {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f3ff 0%, #eff6ff 50%, #ecfeff 100%);
+    padding-bottom: 6rem;
+}
+
+.innerContainer {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.narrowContainer {
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.wideContainer {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* ================================================
+   Navbar (HTSM 자체 네비바)
+   ================================================ */
+.navbar {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.navInner {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 4rem;
+}
+
+.navLogo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 150ms ease;
+}
+
+.navLogo:hover {
+    transform: scale(1.05);
+    color: inherit;
+}
+
+.navLogoIcon {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.navLogoText {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(to right, #9333ea, #3b82f6, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ================================================
+   Footer
+   ================================================ */
+.footer {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 2rem 0;
+}
+
+.footerInner {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+/* ================================================
+   Hero / Landing
+   ================================================ */
+.heroSection {
+    padding: 5rem 1rem 8rem;
+}
+
+.heroContent {
+    max-width: 72rem;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.heroTitle {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+}
+
+.heroGradientText {
+    background: linear-gradient(to right, #9333ea, #3b82f6, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.heroSubtitle {
+    font-size: 1.25rem;
+    color: #6b7280;
+    margin-bottom: 2rem;
+}
+
+.heroCta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.heroHint {
+    font-size: 0.875rem;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.heroHintIcon {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Floating Keywords */
+.floatingContainer {
+    margin-top: 4rem;
+    position: relative;
+    height: 16rem;
+}
+
+.floatingChip {
+    position: absolute;
+}
+
+/* How it works */
+.sectionBg {
+    padding: 5rem 1rem;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.sectionTitle {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.sectionSubtitle {
+    font-size: 1.25rem;
+    color: #6b7280;
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.stepsGrid {
+    max-width: 72rem;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.stepCard {
+    text-align: center;
+}
+
+.stepIconBox {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.stepIconBoxPurple {
+    background: linear-gradient(to right, #9333ea, #3b82f6);
+}
+
+.stepIconBoxBlue {
+    background: linear-gradient(to right, #3b82f6, #06b6d4);
+}
+
+.stepIconBoxCyan {
+    background: linear-gradient(to right, #06b6d4, #9333ea);
+}
+
+.stepIcon {
+    width: 2rem;
+    height: 2rem;
+    color: white;
+}
+
+.stepTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.stepDescription {
+    color: #6b7280;
+}
+
+/* Social proof */
+.socialProofSection {
+    padding: 5rem 1rem;
+}
+
+.socialProofGrid {
+    max-width: 48rem;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+}
+
+.socialProofNumber {
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(to right, #9333ea, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.socialProofNumberAlt {
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(to right, #3b82f6, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.socialProofLabel {
+    color: #6b7280;
+}
+
+/* Final CTA */
+.ctaSection {
+    padding: 5rem 1rem;
+}
+
+.ctaTitle {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* ================================================
+   Cards
+   ================================================ */
+.card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06);
+    padding: 1.5rem;
+}
+
+.cardGradient {
+    background: linear-gradient(135deg, white, #faf5ff, #ecfeff);
+}
+
+.cardHover {
+    transition: all 300ms ease;
+}
+
+.cardHover:hover {
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.glassCard {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 1rem;
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1.5rem;
+}
+
+.infoCard {
+    background: linear-gradient(to right, #faf5ff, #ecfeff);
+    border: 1px solid #e9d5ff;
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+
+/* ================================================
+   Buttons
+   ================================================ */
+.btnPrimary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(to right, #9333ea, #3b82f6, #06b6d4);
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+    box-shadow: 0 10px 25px -5px rgba(147, 51, 234, 0.3);
+    transition: all 200ms ease;
+}
+
+.btnPrimary:hover:not(:disabled) {
+    box-shadow: 0 15px 35px -5px rgba(147, 51, 234, 0.4);
+    transform: scale(1.02);
+}
+
+.btnPrimary:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.btnPrimary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btnPrimaryLg {
+    padding: 1.25rem 2.5rem;
+    font-size: 1.25rem;
+    border-radius: 1.25rem;
+}
+
+.btnSecondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #374151;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transition: all 200ms ease;
+}
+
+.btnSecondary:hover:not(:disabled) {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    transform: scale(1.02);
+}
+
+.btnSecondary:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.btnSecondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btnFull {
+    width: 100%;
+}
+
+.btnIcon {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* ================================================
+   Keywords / Chips
+   ================================================ */
+.keywordGrid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.keywordChip {
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 200ms ease;
+    border: 1px solid #e5e7eb;
+    background: white;
+    color: #374151;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    text-align: center;
+}
+
+.keywordChip:hover:not(:disabled) {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: scale(1.05);
+}
+
+.keywordChipSelected {
+    background: linear-gradient(to right, #9333ea, #3b82f6, #06b6d4);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 16px rgba(147, 51, 234, 0.3);
+}
+
+.keywordChipDisabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.keywordChipFloating {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    background: white;
+    color: #374151;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+}
+
+/* ================================================
+   Progress Bar
+   ================================================ */
+.progressWrapper {
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+.progressLabel {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+.progressTrack {
+    width: 100%;
+    height: 0.5rem;
+    background: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(to right, #9333ea, #3b82f6, #06b6d4);
+    transition: width 500ms ease-out;
+}
+
+.progressStep {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-top: 0.25rem;
+}
+
+/* ================================================
+   Selection Page
+   ================================================ */
+.selectionPage {
+    padding: 3rem 0;
+}
+
+.selectionTitle {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.selectionCount {
+    font-size: 1.125rem;
+    color: #6b7280;
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+/* Sticky Bottom */
+.stickyBottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid #e5e7eb;
+    padding: 1rem 1.5rem;
+    z-index: 40;
+}
+
+.stickyBottomInner {
+    max-width: 72rem;
+    margin: 0 auto;
+}
+
+/* ================================================
+   Share Page
+   ================================================ */
+.sharePage {
+    padding: 3rem 0;
+}
+
+.shareEmoji {
+    font-size: 3.75rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.shareTitle {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.shareSubtitle {
+    font-size: 1.125rem;
+    color: #6b7280;
+    text-align: center;
+}
+
+.shareCardContent {
+    text-align: center;
+    padding: 1rem;
+}
+
+.shareIconBox {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 1rem;
+    background: linear-gradient(to right, #9333ea, #3b82f6, #06b6d4);
+    margin-bottom: 1rem;
+}
+
+.shareIconBoxIcon {
+    width: 2.5rem;
+    height: 2.5rem;
+    color: white;
+}
+
+.shareCardTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.5rem;
+}
+
+.shareCardDescription {
+    color: #6b7280;
+    margin-bottom: 1rem;
+}
+
+.shareUrlBox {
+    background: #f3f4f6;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: #374151;
+    font-family: monospace;
+    word-break: break-all;
+}
+
+.shareButtonGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.shareHelperText {
+    text-align: center;
+    color: #374151;
+}
+
+/* ================================================
+   Friend Answer Page
+   ================================================ */
+.friendPage {
+    padding: 3rem 0;
+}
+
+.friendTitle {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.friendCount {
+    font-size: 1.125rem;
+    color: #6b7280;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.trustIndicators {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.trustItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.trustIcon {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Submitted State */
+.submittedContainer {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem;
+}
+
+.submittedContent {
+    text-align: center;
+}
+
+.submittedEmoji {
+    font-size: 4.375rem;
+    margin-bottom: 1.5rem;
+}
+
+.submittedTitle {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1rem;
+}
+
+.submittedSubtitle {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin-bottom: 2rem;
+}
+
+/* ================================================
+   Result Page
+   ================================================ */
+.resultPage {
+    padding: 3rem 0;
+}
+
+.resultTitle {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.resultSubtitle {
+    font-size: 1.125rem;
+    color: #6b7280;
+    text-align: center;
+}
+
+/* Participation Progress */
+.participationCard {
+    margin-bottom: 2rem;
+}
+
+.participationHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.participationInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.participationIcon {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #9333ea;
+}
+
+.participationText {
+    font-weight: 600;
+    color: #111827;
+}
+
+.participationPercent {
+    font-size: 1.875rem;
+    font-weight: 700;
+    background: linear-gradient(to right, #9333ea, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.participationBar {
+    width: 100%;
+    height: 0.75rem;
+    background: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.participationBarFill {
+    height: 100%;
+    background: linear-gradient(to right, #9333ea, #3b82f6, #06b6d4);
+    transition: width 1000ms ease-out;
+}
+
+.participationHint {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.75rem;
+}
+
+/* Johari Window Grid */
+.johariGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Result Card */
+.resultCard {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+    transition: box-shadow 300ms ease;
+}
+
+.resultCard:hover {
+    box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.12);
+}
+
+.resultCardHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.resultCardTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.25rem;
+}
+
+.resultCardDescription {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.resultCardPercent {
+    font-size: 1.875rem;
+    font-weight: 700;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.resultCardKeywords {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.resultCardKeyword {
+    padding: 0.5rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
+}
+
+/* Gradient variants for result cards */
+.gradientGreen {
+    background: linear-gradient(135deg, #4ade80, #059669);
+}
+
+.gradientBlue {
+    background: linear-gradient(135deg, #60a5fa, #2563eb);
+}
+
+.gradientPurple {
+    background: linear-gradient(135deg, #c084fc, #9333ea);
+}
+
+.gradientCyan {
+    background: linear-gradient(135deg, #22d3ee, #0891b2);
+}
+
+/* Action Buttons */
+.actionButtons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Johari Info Card */
+.johariInfoTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.75rem;
+}
+
+.johariInfoText {
+    color: #374151;
+    line-height: 1.7;
+}
+
+/* ================================================
+   Privacy Note
+   ================================================ */
+.privacyNote {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+/* ================================================
+   Responsive
+   ================================================ */
+@media (min-width: 640px) {
+    .heroTitle {
+        font-size: 3.75rem;
+    }
+
+    .heroSubtitle {
+        font-size: 1.5rem;
+    }
+
+    .selectionTitle {
+        font-size: 3rem;
+    }
+
+    .friendTitle {
+        font-size: 3rem;
+    }
+
+    .shareTitle {
+        font-size: 3rem;
+    }
+
+    .actionButtons {
+        flex-direction: row;
+    }
+
+    .actionButtons>button {
+        flex: 1;
+    }
+}
+
+@media (min-width: 768px) {
+    .innerContainer {
+        padding: 0 1.5rem;
+    }
+}
+
+@media (max-width: 1023px) {
+    .keywordGrid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .floatingContainer {
+        display: none;
+    }
+}
+
+@media (max-width: 767px) {
+    .keywordGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .stepsGrid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .socialProofGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .johariGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .heroTitle {
+        font-size: 2.25rem;
+    }
+
+    .sectionTitle {
+        font-size: 1.875rem;
+    }
+
+    .ctaTitle {
+        font-size: 1.875rem;
+    }
+}
+
+@media (max-width: 639px) {
+    .keywordGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .innerContainer {
+        padding: 0 2rem;
+    }
+
+    .heroTitle {
+        font-size: 4.5rem;
+    }
+}
