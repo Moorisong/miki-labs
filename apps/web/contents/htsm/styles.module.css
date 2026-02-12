@@ -16,27 +16,42 @@
 }
 
 /* Layout */
-/* Toast Notification */
+/* Toast Notification - Floating above button */
 .toast {
-    position: fixed;
-    bottom: 24px;
+    position: absolute;
+    bottom: calc(100% + 12px);
+    /* 버튼 바로 위 12px 간격 */
     left: 50%;
     transform: translateX(-50%);
     background-color: rgba(33, 33, 33, 0.9);
     color: white;
-    padding: 12px 24px;
-    border-radius: 9999px;
-    font-size: 0.9rem;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
     font-weight: 500;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 100;
-    animation: fadeInOut 2.5s ease-in-out forwards;
+    white-space: nowrap;
+    pointer-events: none;
+    animation: fadeInUp 2s ease-in-out forwards;
 }
 
-@keyframes fadeInOut {
+/* 말풍선 꼬리 */
+.toast::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -6px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: rgba(33, 33, 33, 0.9) transparent transparent transparent;
+}
+
+@keyframes fadeInUp {
     0% {
         opacity: 0;
-        transform: translate(-50%, 20px);
+        transform: translate(-50%, 10px);
     }
 
     10% {
@@ -51,7 +66,7 @@
 
     100% {
         opacity: 0;
-        transform: translate(-50%, -20px);
+        transform: translate(-50%, -10px);
     }
 }
 
