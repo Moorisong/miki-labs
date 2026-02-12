@@ -93,6 +93,8 @@
     min-height: 100vh;
     background: linear-gradient(135deg, #f5f3ff 0%, #eff6ff 50%, #ecfeff 100%);
     padding-bottom: 6rem;
+    position: relative;
+    overflow-x: hidden;
 }
 
 .innerContainer {
@@ -190,6 +192,7 @@
 .heroSection {
     padding: 5rem 1rem 8rem;
     position: relative;
+    z-index: 2;
 }
 
 .heroContent {
@@ -221,10 +224,18 @@
 
 .heroCta {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row;
+    justify-content: center;
+    align-items: stretch;
     gap: 1rem;
-    margin-bottom: 1rem;
+    margin: 0 auto 1.5rem;
+    max-width: 32rem;
+    /* 가로 너비 적당히 조절 */
+    width: 100%;
+}
+
+.heroCta>button {
+    flex: 1;
 }
 
 .heroHint {
@@ -284,6 +295,8 @@
 .sectionBg {
     padding: 5rem 1rem;
     background: rgba(255, 255, 255, 0.5);
+    position: relative;
+    z-index: 2;
 }
 
 .sectionTitle {
@@ -345,6 +358,7 @@
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 0.75rem;
+    color: #111827;
 }
 
 .stepDescription {
@@ -354,6 +368,8 @@
 /* Social proof */
 .socialProofSection {
     padding: 5rem 1rem;
+    position: relative;
+    z-index: 2;
 }
 
 .socialProofGrid {
@@ -372,6 +388,7 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-bottom: 0.5rem;
+    text-align: center;
 }
 
 .socialProofNumberAlt {
@@ -382,15 +399,19 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-bottom: 0.5rem;
+    text-align: center;
 }
 
 .socialProofLabel {
     color: #6b7280;
+    text-align: center;
 }
 
 /* Final CTA */
 .ctaSection {
     padding: 5rem 1rem;
+    position: relative;
+    z-index: 2;
 }
 
 .ctaTitle {
@@ -453,17 +474,19 @@
     font-size: 1.125rem;
     font-weight: 600;
     color: white;
-    background: linear-gradient(to right, #9333ea, #3b82f6, #06b6d4);
+    background: #6366f1;
+    /* Indigo */
     border: none;
     border-radius: 1rem;
     cursor: pointer;
-    box-shadow: 0 10px 25px -5px rgba(147, 51, 234, 0.3);
+    box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
     transition: all 200ms ease;
 }
 
 .btnPrimary:hover:not(:disabled) {
-    box-shadow: 0 15px 35px -5px rgba(147, 51, 234, 0.4);
-    transform: scale(1.02);
+    background: #4f46e5;
+    box-shadow: 0 12px 20px -5px rgba(99, 102, 241, 0.4);
+    transform: translateY(-2px);
 }
 
 .btnPrimary:active:not(:disabled) {
@@ -489,18 +512,20 @@
     padding: 1rem 2rem;
     font-size: 1.125rem;
     font-weight: 600;
-    color: #374151;
-    background: white;
-    border: 1px solid #e5e7eb;
+    color: white;
+    background: #8b5cf6;
+    /* Violet */
+    border: none;
     border-radius: 1rem;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.3);
     transition: all 200ms ease;
 }
 
 .btnSecondary:hover:not(:disabled) {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    transform: scale(1.02);
+    background: #7c3aed;
+    box-shadow: 0 12px 20px -5px rgba(139, 92, 246, 0.4);
+    transform: translateY(-2px);
 }
 
 .btnSecondary:active:not(:disabled) {
@@ -1023,6 +1048,16 @@
 
     .actionButtons>button {
         flex: 1;
+    }
+}
+
+@media (max-width: 639px) {
+    .heroCta {
+        flex-direction: column;
+    }
+
+    .heroCta>button {
+        width: 100%;
     }
 }
 

@@ -9,6 +9,7 @@ import { HTSM_STORAGE_KEY } from './constants';
 import styles from './styles.module.css';
 
 const KeywordCloud3D = dynamic(() => import('./keyword-cloud-3d'), { ssr: false });
+const BackgroundSparkles = dynamic(() => import('./background-sparkles'), { ssr: false });
 
 export default function LandingPage() {
     const router = useRouter();
@@ -34,6 +35,7 @@ export default function LandingPage() {
 
     return (
         <div className={styles.pageContainer}>
+            <BackgroundSparkles />
             {/* Hero Section */}
             <section className={styles.heroSection}>
                 <div className={styles.heroContent}>
@@ -61,7 +63,6 @@ export default function LandingPage() {
                         {myShareId && (
                             <button
                                 className={`${styles.btnSecondary} ${styles.btnPrimaryLg}`}
-                                style={{ marginTop: '0.75rem', width: '100%' }}
                                 onClick={handleContinue}
                             >
                                 {t('hero.continueButton')}
@@ -69,10 +70,7 @@ export default function LandingPage() {
                         )}
                     </div>
 
-                    <p className={styles.heroHint}>
-                        <span aria-hidden="true">✨</span>
-                        {t('hero.hint')}
-                    </p>
+
                 </div>
 
 
@@ -150,22 +148,23 @@ export default function LandingPage() {
                     <h2 className={styles.ctaTitle}>
                         {t('cta.title')}
                     </h2>
-                    <button
-                        className={`${styles.btnPrimary} ${styles.btnPrimaryLg}`}
-                        onClick={handleStart}
-                    >
-                        {t('cta.button')}
-                    </button>
-
-                    {myShareId && (
+                    <div className={styles.heroCta} style={{ marginTop: '2rem' }}>
                         <button
-                            className={`${styles.btnSecondary} ${styles.btnPrimaryLg}`}
-                            style={{ marginTop: '0.75rem', width: '100%' }}
-                            onClick={handleContinue}
+                            className={`${styles.btnPrimary} ${styles.btnPrimaryLg}`}
+                            onClick={handleStart}
                         >
-                            {t('hero.continueButton')}
+                            {t('cta.button')}
                         </button>
-                    )}
+
+                        {myShareId && (
+                            <button
+                                className={`${styles.btnSecondary} ${styles.btnPrimaryLg}`}
+                                onClick={handleContinue}
+                            >
+                                {t('hero.continueButton')}
+                            </button>
+                        )}
+                    </div>
                 </div>
             </section>
         </div>
