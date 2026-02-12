@@ -33,11 +33,21 @@ export default function ResultPage({ shareId }: ResultPageProps) {
 
     const handleShare = () => {
         const url = `${window.location.origin}/htsm/answer/${shareId}`;
-        if (navigator.share) {
-            navigator.share({ title: t('share.cardTitle'), text: t('share.cardDesc'), url });
-        } else {
-            navigator.clipboard.writeText(url);
-        }
+
+        // 무조건 클립보드에 복사
+        navigator.clipboard.writeText(url).then(() => {
+            // PC인 경우에만 토스트(alert) 표시
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (!isMobile) {
+                alert(t('share.copied'));
+            }
+        }).catch((err) => {
+            console.error('Failed to copy text: ', err);
+            // 복사 실패 시 fallback으로 web share api 시도 (모바일 등)
+            if (navigator.share) {
+                navigator.share({ title: t('share.cardTitle'), text: t('share.cardDesc'), url });
+            }
+        });
     };
 
     if (loading) {
