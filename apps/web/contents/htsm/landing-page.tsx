@@ -1,7 +1,9 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/language-context';
+import { HTSM_STORAGE_KEY } from './constants';
 
 import styles from './styles.module.css';
 
@@ -30,9 +32,23 @@ const FLOATING_POSITIONS = [
 export default function LandingPage() {
     const router = useRouter();
     const { t } = useLanguage();
+    const [myShareId, setMyShareId] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem(HTSM_STORAGE_KEY.SHARE_ID);
+            if (stored) setMyShareId(stored);
+        }
+    }, []);
 
     const handleStart = () => {
         router.push('/htsm/start');
+    };
+
+    const handleContinue = () => {
+        if (myShareId) {
+            router.push(`/htsm/result/${myShareId}`);
+        }
     };
 
     return (
@@ -55,6 +71,16 @@ export default function LandingPage() {
                         >
                             {t('hero.startButton')}
                         </button>
+
+                        {myShareId && (
+                            <button
+                                className={`${styles.btnSecondary} ${styles.btnPrimaryLg}`}
+                                style={{ marginTop: '0.75rem', width: '100%' }}
+                                onClick={handleContinue}
+                            >
+                                {t('hero.continueButton')}
+                            </button>
+                        )}
                     </div>
 
                     <p className={styles.heroHint}>
@@ -160,6 +186,16 @@ export default function LandingPage() {
                     >
                         {t('cta.button')}
                     </button>
+
+                    {myShareId && (
+                        <button
+                            className={`${styles.btnSecondary} ${styles.btnPrimaryLg}`}
+                            style={{ marginTop: '0.75rem', width: '100%' }}
+                            onClick={handleContinue}
+                        >
+                            {t('hero.continueButton')}
+                        </button>
+                    )}
                 </div>
             </section>
         </div>
