@@ -1,0 +1,67 @@
+/**
+ * HTSM 서버 전용 상수
+ * 프론트엔드와 동일한 키워드 화이트리스트 (서버 검증용)
+ */
+
+export const HTSM_KEYWORD_WHITELIST = [
+    'Creative',
+    'Funny',
+    'Kind',
+    'Energetic',
+    'Thoughtful',
+    'Organized',
+    'Adventurous',
+    'Loyal',
+    'Confident',
+    'Empathetic',
+    'Ambitious',
+    'Calm',
+    'Spontaneous',
+    'Patient',
+    'Optimistic',
+    'Analytical',
+    'Supportive',
+    'Curious',
+    'Reliable',
+    'Friendly',
+    'Independent',
+    'Cheerful',
+    'Humble',
+    'Bold',
+    'Caring',
+    'Wise',
+    'Playful',
+    'Focused',
+    'Honest',
+    'Generous',
+    'Passionate',
+    'Practical',
+    'Imaginative',
+    'Determined',
+    'Open-minded',
+    'Compassionate',
+    'Resilient',
+    'Charismatic',
+    'Gentle',
+    'Articulate',
+] as const;
+
+export const HTSM_CONFIG = {
+    KEYWORD_COUNT: 3,
+    MAX_ANSWERS_PER_TEST: 10,
+    SHARE_ID_LENGTH: 10,
+    PROOF_TOKEN_TTL_MS: 10 * 60 * 1000, // 10분
+    MAX_FINGERPRINT_HASH_LENGTH: 200,
+} as const;
+
+export const HTSM_ERRORS = {
+    INVALID_PROOF_TOKEN: '유효하지 않은 인증 토큰입니다.',
+    INVALID_KEYWORDS: '키워드가 유효하지 않습니다. 허용된 키워드 목록에서 선택해주세요.',
+    INVALID_KEYWORD_COUNT: `키워드는 정확히 ${HTSM_CONFIG.KEYWORD_COUNT}개를 선택해야 합니다.`,
+    TEST_NOT_FOUND: '테스트를 찾을 수 없습니다.',
+    TEST_CLOSED: '이 테스트는 마감되었습니다.',
+    DUPLICATE_ANSWER: '이미 응답하셨습니다.',
+    INVALID_SHARE_ID: 'shareId 형식이 올바르지 않습니다.',
+    INVALID_FINGERPRINT: 'fingerprint 형식이 올바르지 않습니다.',
+    INTERNAL_ERROR: '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+} as const;
