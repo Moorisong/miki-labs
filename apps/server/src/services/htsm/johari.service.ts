@@ -84,7 +84,7 @@ export function calculateJohari(
         return Math.round((count / totalCount) * 100);
     };
 
-    const maxDisplay = HTSM_CONFIG.KEYWORD_COUNT;
+    const maxDisplay = HTSM_CONFIG.MAX_KEYWORD_COUNT;
 
     return {
         open: {
