@@ -41,7 +41,11 @@ export async function createTest(req: Request, res: Response): Promise<void> {
         }
 
         // 2. Keywords 검증
-        if (!Array.isArray(selfKeywords) || selfKeywords.length !== HTSM_CONFIG.KEYWORD_COUNT) {
+        if (
+            !Array.isArray(selfKeywords) ||
+            selfKeywords.length < HTSM_CONFIG.MIN_KEYWORD_COUNT ||
+            selfKeywords.length > HTSM_CONFIG.MAX_KEYWORD_COUNT
+        ) {
             res.status(400).json({ success: false, error: HTSM_ERRORS.INVALID_KEYWORD_COUNT });
             return;
         }
@@ -83,7 +87,11 @@ export async function submitAnswer(req: Request, res: Response): Promise<void> {
         }
 
         // 2. Keywords 검증
-        if (!Array.isArray(keywords) || keywords.length !== HTSM_CONFIG.KEYWORD_COUNT) {
+        if (
+            !Array.isArray(keywords) ||
+            keywords.length < HTSM_CONFIG.MIN_KEYWORD_COUNT ||
+            keywords.length > HTSM_CONFIG.MAX_KEYWORD_COUNT
+        ) {
             res.status(400).json({ success: false, error: HTSM_ERRORS.INVALID_KEYWORD_COUNT });
             return;
         }
@@ -205,6 +213,42 @@ export async function getResult(req: Request, res: Response): Promise<void> {
         });
     } catch (error) {
         console.error('[HTSM] Get result error:', error);
+        res.status(500).json({ success: false, error: HTSM_ERRORS.INTERNAL_ERROR });
+    }
+}
+/**
+ * GET /api/htsm/stats
+ * 전체 통계 조회
+ */
+export async function getStats(req: Request, res: Response): Promise<void> {
+    try {
+        const JohariTest = getJohariTestModel();
+
+        // 1. 전체 생성 수 (현실적인 느낌을 위해 기본값 10,000에서 시작하거나 그대로 노출)
+        // 여기서는 실제 숫자를 가져옴
+        const totalCreated = await JohariTest.countDocuments();
+
+        // 2. 평균 참여 수
+        const stats = await JohariTest.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    avgAnswers: { $avg: '$answerCount' },
+                },
+            },
+        ]);
+
+        const avgFriends = stats.length > 0 ? Math.round((stats[0].avgAnswers || 0) * 10) / 10 : 0;
+
+        res.json({
+            success: true,
+            data: {
+                totalCreated,
+                avgFriends,
+            },
+        });
+    } catch (error) {
+        console.error('[HTSM] Get stats error:', error);
         res.status(500).json({ success: false, error: HTSM_ERRORS.INTERNAL_ERROR });
     }
 }

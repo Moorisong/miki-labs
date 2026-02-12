@@ -2,7 +2,8 @@
 
 import React, { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Html, Sparkles, OrbitControls } from '@react-three/drei';
+import { Html, OrbitControls } from '@react-three/drei';
+import { useLanguage } from '@/context/language-context';
 import type { Group } from 'three';
 
 const KEYWORDS = [
@@ -24,6 +25,7 @@ function FloatingWord({ text, gradient, shadow, position, index }: {
     index: number;
 }) {
     const groupRef = useRef<Group>(null);
+    const { t } = useLanguage();
 
     useFrame((state) => {
         if (groupRef.current) {
@@ -55,7 +57,7 @@ function FloatingWord({ text, gradient, shadow, position, index }: {
                         userSelect: 'none',
                     }}
                 >
-                    {text}
+                    {t(`keywords.${text}`)}
                 </div>
             </Html>
         </group>

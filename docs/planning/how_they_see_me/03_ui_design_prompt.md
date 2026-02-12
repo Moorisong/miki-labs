@@ -33,7 +33,7 @@ t("start.button")
 ```ts
 export default {
   hero: {
-    title: "See how they see you.",
+    title: "See how they see me.",
     subtitle: "Friends help reveal the real you.",
     cta: "Start My Test"
   }

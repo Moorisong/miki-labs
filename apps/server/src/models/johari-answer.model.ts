@@ -22,8 +22,8 @@ const johariAnswerSchema = new Schema<IJohariAnswer>(
             type: [String],
             required: true,
             validate: {
-                validator: (v: string[]) => v.length === 3,
-                message: 'keywords must contain exactly 3 items',
+                validator: (v: string[]) => v.length >= 3 && v.length <= 5,
+                message: 'keywords must contain 3 to 5 items',
             },
         },
         fingerprintHash: {

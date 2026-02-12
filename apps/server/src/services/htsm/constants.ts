@@ -47,7 +47,8 @@ export const HTSM_KEYWORD_WHITELIST = [
 ] as const;
 
 export const HTSM_CONFIG = {
-    KEYWORD_COUNT: 3,
+    MIN_KEYWORD_COUNT: 3,
+    MAX_KEYWORD_COUNT: 5,
     MAX_ANSWERS_PER_TEST: 10,
     SHARE_ID_LENGTH: 10,
     PROOF_TOKEN_TTL_MS: 10 * 60 * 1000, // 10분
@@ -57,7 +58,7 @@ export const HTSM_CONFIG = {
 export const HTSM_ERRORS = {
     INVALID_PROOF_TOKEN: '유효하지 않은 인증 토큰입니다.',
     INVALID_KEYWORDS: '키워드가 유효하지 않습니다. 허용된 키워드 목록에서 선택해주세요.',
-    INVALID_KEYWORD_COUNT: `키워드는 정확히 ${HTSM_CONFIG.KEYWORD_COUNT}개를 선택해야 합니다.`,
+    INVALID_KEYWORD_COUNT: `키워드는 ${HTSM_CONFIG.MIN_KEYWORD_COUNT}~${HTSM_CONFIG.MAX_KEYWORD_COUNT}개를 선택해야 합니다.`,
     TEST_NOT_FOUND: '테스트를 찾을 수 없습니다.',
     TEST_CLOSED: '이 테스트는 마감되었습니다.',
     DUPLICATE_ANSWER: '이미 응답하셨습니다.',

@@ -70,3 +70,16 @@ export async function fetchResult(shareId: string): Promise<HtsmResult> {
     if (!json.success || !json.data) throw new Error(json.error || 'Failed to fetch result');
     return json.data;
 }
+
+export interface HtsmStats {
+    totalCreated: number;
+    avgFriends: number;
+}
+
+/** 전체 통계 조회 */
+export async function fetchStats(): Promise<HtsmStats> {
+    const res = await fetch(`${API_BASE}/stats`);
+    const json: ApiResponse<HtsmStats> = await res.json();
+    if (!json.success || !json.data) throw new Error(json.error || 'Failed to fetch stats');
+    return json.data;
+}

@@ -147,7 +147,7 @@ export default function ResultPage({ shareId }: ResultPageProps) {
                                     {card.data.keywords.length > 0 ? (
                                         card.data.keywords.map((kw) => (
                                             <div key={kw} className={`${styles.resultCardKeyword} ${card.gradientClass}`}>
-                                                {kw}
+                                                {t(`keywords.${kw}`)}
                                             </div>
                                         ))
                                     ) : (

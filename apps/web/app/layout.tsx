@@ -9,6 +9,8 @@ import NicknameProvider from '@/components/providers/nickname-provider';
 import AdScriptManager from '@/components/ads/ad-script-manager';
 import { LanguageProvider } from '@/context/language-context';
 import LanguageSwitcher from '@/components/common/language-switcher';
+import { cookies } from 'next/headers';
+import { Language } from '@/i18n/i18n';
 import './globals.css';
 
 const geistSans = Geist({
@@ -61,20 +63,23 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const initialLang = (cookieStore.get('lang')?.value as Language) || 'ko';
+
   return (
-    <html lang="ko">
+    <html lang={initialLang}>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Script
           src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
           strategy="lazyOnload"
         />
         <AdScriptManager />
-        <LanguageProvider>
+        <LanguageProvider initialLanguage={initialLang}>
           <LanguageSwitcher />
           <SessionProvider>
             <NicknameProvider>

@@ -1,9 +1,10 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import Script from 'next/script';
 import { useEffect } from 'react';
 
-import { CONFIG } from '@/constants';
+import { CONFIG, ROUTES } from '@/constants';
 
 const AD_SELECTORS = {
     SKELETON_CLASS: 'ad-skeleton',
@@ -82,7 +83,12 @@ const enforceAdStyles = (node: HTMLElement): void => {
 };
 
 export default function AdScriptManager() {
+    const pathname = usePathname();
+    const isHtsmPage = pathname?.startsWith(ROUTES.HTSM);
+
     useEffect(() => {
+        if (isHtsmPage) return;
+
         let observer: MutationObserver | null = null;
         let timeoutId: NodeJS.Timeout;
 
@@ -164,7 +170,9 @@ export default function AdScriptManager() {
             observer?.disconnect();
             clearTimeout(timeoutId);
         };
-    }, []);
+    }, [isHtsmPage]);
+
+    if (isHtsmPage) return null;
 
     return (
         <>

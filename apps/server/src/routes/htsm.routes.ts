@@ -5,6 +5,7 @@ import {
     createTest,
     submitAnswer,
     getResult,
+    getStats,
 } from '../controllers/htsm.controller';
 
 const router = Router();
@@ -77,5 +78,6 @@ router.get('/proof-token', getProofToken);
 router.post('/tests', createIpLimiter, createHourLimiter, createTest);
 router.post('/answers', answerIpLimiter, answerShareIdLimiter, submitAnswer);
 router.get('/result/:shareId', viewLimiter, getResult);
+router.get('/stats', getStats);
 
 export default router;

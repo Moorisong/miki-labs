@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useLanguage } from '@/context/language-context';
 import { HTSM_STORAGE_KEY } from './constants';
+import { fetchStats, HtsmStats } from './api';
 
 import styles from './styles.module.css';
 
@@ -15,12 +16,15 @@ export default function LandingPage() {
     const router = useRouter();
     const { t } = useLanguage();
     const [myShareId, setMyShareId] = useState<string | null>(null);
+    const [stats, setStats] = useState<HtsmStats | null>(null);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const stored = localStorage.getItem(HTSM_STORAGE_KEY.SHARE_ID);
             if (stored) setMyShareId(stored);
         }
+
+        fetchStats().then(setStats).catch(console.error);
     }, []);
 
     const handleStart = () => {
@@ -132,11 +136,15 @@ export default function LandingPage() {
             <section className={styles.socialProofSection} aria-label="Statistics">
                 <div className={styles.socialProofGrid}>
                     <div className={styles.card}>
-                        <div className={styles.socialProofNumber}>10,000+</div>
+                        <div className={styles.socialProofNumber}>
+                            {stats ? stats.totalCreated.toLocaleString() : '...'}
+                        </div>
                         <p className={styles.socialProofLabel}>{t('social.resultsCreated')}</p>
                     </div>
                     <div className={styles.card}>
-                        <div className={styles.socialProofNumberAlt}>5</div>
+                        <div className={styles.socialProofNumberAlt}>
+                            {stats ? stats.avgFriends : '...'}
+                        </div>
                         <p className={styles.socialProofLabel}>{t('social.avgFriends')}</p>
                     </div>
                 </div>

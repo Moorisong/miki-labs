@@ -11,8 +11,14 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-    const [language, setLanguageState] = useState<Language>(DEFAULT_LANGUAGE);
+export function LanguageProvider({
+    children,
+    initialLanguage = DEFAULT_LANGUAGE
+}: {
+    children: ReactNode;
+    initialLanguage?: Language;
+}) {
+    const [language, setLanguageState] = useState<Language>(initialLanguage);
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {

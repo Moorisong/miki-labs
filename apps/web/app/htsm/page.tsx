@@ -22,7 +22,7 @@ export const metadata: Metadata = {
                 url: 'https://box.haroo.site/og-image.png',
                 width: 1200,
                 height: 630,
-                alt: 'HowTheySeeMe - See how they see you',
+                alt: 'HowTheySeeMe - See how they see me',
             },
         ],
     },

@@ -47,7 +47,8 @@ export const HTSM_KEYWORDS = [
 ] as const;
 
 export const HTSM_CONFIG = {
-    MAX_KEYWORD_SELECTION: 3,
+    MIN_KEYWORD_SELECTION: 3,
+    MAX_KEYWORD_SELECTION: 5,
     MIN_FRIENDS_FOR_RESULT: 3,
     MAX_FRIENDS: 10,
 } as const;

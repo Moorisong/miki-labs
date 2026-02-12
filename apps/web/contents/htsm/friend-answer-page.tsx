@@ -49,7 +49,7 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
     };
 
     const handleSubmit = async () => {
-        if (selectedKeywords.length !== HTSM_CONFIG.MAX_KEYWORD_SELECTION) return;
+        if (selectedKeywords.length < HTSM_CONFIG.MIN_KEYWORD_SELECTION || selectedKeywords.length > HTSM_CONFIG.MAX_KEYWORD_SELECTION) return;
         if (isSubmitting) return;
 
         setIsSubmitting(true);
@@ -125,7 +125,7 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
                             return (
                                 <button key={keyword} type="button" onClick={() => toggleKeyword(keyword)} disabled={dis || isSubmitting}
                                     className={`${styles.keywordChip} ${sel ? styles.keywordChipSelected : ''} ${dis ? styles.keywordChipDisabled : ''}`}>
-                                    {keyword}
+                                    {t(`keywords.${keyword}`)}
                                 </button>
                             );
                         })}
@@ -134,7 +134,7 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
                     <div className={styles.stickyBottom}>
                         <div className={styles.stickyBottomInner}>
                             <button className={`${styles.btnPrimary} ${styles.btnFull}`} onClick={handleSubmit}
-                                disabled={count !== HTSM_CONFIG.MAX_KEYWORD_SELECTION || isSubmitting}>
+                                disabled={selectedKeywords.length < HTSM_CONFIG.MIN_KEYWORD_SELECTION || isSubmitting}>
                                 {isSubmitting ? t('answer.submitting') : t('answer.submit')}
                             </button>
                         </div>

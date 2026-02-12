@@ -12,7 +12,7 @@ export default {
     },
     hero: {
         title: "See how they {highlight}",
-        highlight: "see you",
+        highlight: "see me",
         subtitle: "Friends help reveal the real you.",
         startButton: "Start My Test",
         continueButton: "Continue My Result",
@@ -22,8 +22,8 @@ export default {
         title: "How It Works",
         subtitle: "Three simple steps to discover yourself",
         step1: {
-            title: "1. Choose 3 words",
-            desc: "Select 3 words that describe you"
+            title: "1. Choose 3~5 words",
+            desc: "Select 3~5 words that describe you"
         },
         step2: {
             title: "2. Friends choose",
@@ -44,9 +44,9 @@ export default {
     },
     create: {
         step: "Step 1 of 2",
-        title: "Pick 3 words that describe YOU",
+        title: "Pick 3~5 words that describe YOU",
         selected: "Selected",
-        limit: "Select 3 words to continue",
+        limit: "Select 3~5 words to continue",
         button: "Create My Test",
         count: "{current}/{max} selected",
         creating: "Creating...",
@@ -55,18 +55,18 @@ export default {
     },
     share: {
         title: "Your test is ready",
-        subtitle: "Share it with friends to see how they see you",
+        subtitle: "Share it with friends to See how they see me",
         kakaoButton: "Share on KakaoTalk",
         copyButton: "Copy Link",
         copied: "Link Copied!",
         cardTitle: "How do you see me?",
-        cardDesc: "Help me discover how you see me! Pick 3 words that describe me.",
-        helperTitle: "Friends choose 3 words about you anonymously.",
+        cardDesc: "Help me discover how you see me! Pick 3~5 words that describe me.",
+        helperTitle: "Friends choose 3~5 words about you anonymously.",
         helperDesc: "The more friends participate, the better your result!",
         viewResult: "View My Result"
     },
     answer: {
-        title: "Describe your friend in 3 words",
+        title: "Describe your friend in 3~5 words",
         count: "{current}/{max} selected",
         anonymous: "Anonymous",
         takesTime: "Takes 10 seconds",
@@ -101,5 +101,47 @@ export default {
             hidden: "What only you know",
             unknown: "Undiscovered potential"
         }
+    },
+    keywords: {
+        'Creative': 'Creative',
+        'Funny': 'Funny',
+        'Kind': 'Kind',
+        'Energetic': 'Energetic',
+        'Thoughtful': 'Thoughtful',
+        'Organized': 'Organized',
+        'Adventurous': 'Adventurous',
+        'Loyal': 'Loyal',
+        'Confident': 'Confident',
+        'Empathetic': 'Empathetic',
+        'Ambitious': 'Ambitious',
+        'Calm': 'Calm',
+        'Spontaneous': 'Spontaneous',
+        'Patient': 'Patient',
+        'Optimistic': 'Optimistic',
+        'Analytical': 'Analytical',
+        'Supportive': 'Supportive',
+        'Curious': 'Curious',
+        'Reliable': 'Reliable',
+        'Friendly': 'Friendly',
+        'Independent': 'Independent',
+        'Cheerful': 'Cheerful',
+        'Humble': 'Humble',
+        'Bold': 'Bold',
+        'Caring': 'Caring',
+        'Wise': 'Wise',
+        'Playful': 'Playful',
+        'Focused': 'Focused',
+        'Honest': 'Honest',
+        'Generous': 'Generous',
+        'Passionate': 'Passionate',
+        'Practical': 'Practical',
+        'Imaginative': 'Imaginative',
+        'Determined': 'Determined',
+        'Open-minded': 'Open-minded',
+        'Compassionate': 'Compassionate',
+        'Resilient': 'Resilient',
+        'Charismatic': 'Charismatic',
+        'Gentle': 'Gentle',
+        'Articulate': 'Articulate'
     }
 }

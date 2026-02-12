@@ -18,6 +18,7 @@ export const getCurrentLanguage = (): Language => {
 export const setStoredLanguage = (lang: Language) => {
     if (typeof window !== 'undefined') {
         localStorage.setItem('lang', lang);
+        document.cookie = `lang=${lang};path=/;max-age=31536000`; // 1 year
     }
 };
 

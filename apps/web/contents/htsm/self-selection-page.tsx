@@ -24,7 +24,7 @@ export default function SelfSelectionPage() {
     };
 
     const handleContinue = async () => {
-        if (selectedKeywords.length !== HTSM_CONFIG.MAX_KEYWORD_SELECTION) return;
+        if (selectedKeywords.length < HTSM_CONFIG.MIN_KEYWORD_SELECTION || selectedKeywords.length > HTSM_CONFIG.MAX_KEYWORD_SELECTION) return;
         if (isSubmitting) return;
 
         setIsSubmitting(true);
@@ -103,7 +103,7 @@ export default function SelfSelectionPage() {
                                     className={`${styles.keywordChip} ${isSelected ? styles.keywordChipSelected : ''
                                         } ${isDisabled ? styles.keywordChipDisabled : ''}`}
                                 >
-                                    {keyword}
+                                    {t(`keywords.${keyword}`)}
                                 </button>
                             );
                         })}
@@ -115,7 +115,7 @@ export default function SelfSelectionPage() {
                             <button
                                 className={`${styles.btnPrimary} ${styles.btnFull}`}
                                 onClick={handleContinue}
-                                disabled={selectionCount !== HTSM_CONFIG.MAX_KEYWORD_SELECTION || isSubmitting}
+                                disabled={selectedKeywords.length < HTSM_CONFIG.MIN_KEYWORD_SELECTION || isSubmitting}
                             >
                                 {isSubmitting ? t('create.creating') : t('create.continue')}
                             </button>

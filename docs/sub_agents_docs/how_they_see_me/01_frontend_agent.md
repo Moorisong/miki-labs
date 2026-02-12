@@ -42,7 +42,7 @@ Next.js (App Router) 환경에서 사용자가 테스트를 생성하고, 친구
 
 ### Step 2: HTSM 랜딩 & 테스트 생성
 - **랜딩 (`/htsm`)**:
-    - 히어로 섹션 ("See how they see you")
+    - 히어로 섹션 ("See how they see me")
     - "Start My Test" 버튼 -> `/htsm/start` 이동
 - **생성 페이지 (`/htsm/start`)**:
     - 30~40개 키워드 리스트 렌더링 (Chips)
