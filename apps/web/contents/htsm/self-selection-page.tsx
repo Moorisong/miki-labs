@@ -3,12 +3,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { HTSM_KEYWORDS, HTSM_CONFIG, HTSM_STORAGE_KEY } from './constants';
+import { HTSM_KEYWORDS, HTSM_CONFIG } from './constants';
+import { fetchProofToken, createTest } from './api';
 import styles from './styles.module.css';
 
 export default function SelfSelectionPage() {
     const router = useRouter();
     const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [error, setError] = useState<string>('');
 
     const toggleKeyword = (keyword: string) => {
         if (selectedKeywords.includes(keyword)) {
@@ -18,16 +21,26 @@ export default function SelfSelectionPage() {
         }
     };
 
-    const handleContinue = () => {
-        if (selectedKeywords.length === HTSM_CONFIG.MAX_KEYWORD_SELECTION) {
-            localStorage.setItem(
-                HTSM_STORAGE_KEY.SELF_SELECTION,
-                JSON.stringify(selectedKeywords)
-            );
-            // Demo: generate a simple share ID
-            const shareId = Math.random().toString(36).substring(2, 12);
-            localStorage.setItem(HTSM_STORAGE_KEY.SHARE_ID, shareId);
+    const handleContinue = async () => {
+        if (selectedKeywords.length !== HTSM_CONFIG.MAX_KEYWORD_SELECTION) return;
+        if (isSubmitting) return;
+
+        setIsSubmitting(true);
+        setError('');
+
+        try {
+            // 1. Proof Token 발급
+            const proofToken = await fetchProofToken();
+
+            // 2. 테스트 생성 (API)
+            const shareId = await createTest(selectedKeywords, proofToken);
+
+            // 3. 공유 페이지로 이동
             router.push(`/htsm/share/${shareId}`);
+        } catch (err) {
+            console.error('Test creation failed:', err);
+            setError('테스트 생성에 실패했습니다. 잠시 후 다시 시도해주세요.');
+            setIsSubmitting(false);
         }
     };
 
@@ -59,6 +72,13 @@ export default function SelfSelectionPage() {
                         {selectionCount}/{HTSM_CONFIG.MAX_KEYWORD_SELECTION} selected
                     </p>
 
+                    {/* Error */}
+                    {error && (
+                        <p style={{ color: '#ef4444', textAlign: 'center', marginBottom: '1rem' }}>
+                            {error}
+                        </p>
+                    )}
+
                     {/* Keyword Grid */}
                     <div className={styles.keywordGrid}>
                         {HTSM_KEYWORDS.map((keyword) => {
@@ -72,7 +92,7 @@ export default function SelfSelectionPage() {
                                     key={keyword}
                                     type="button"
                                     onClick={() => toggleKeyword(keyword)}
-                                    disabled={isDisabled}
+                                    disabled={isDisabled || isSubmitting}
                                     className={`${styles.keywordChip} ${isSelected ? styles.keywordChipSelected : ''
                                         } ${isDisabled ? styles.keywordChipDisabled : ''}`}
                                 >
@@ -88,9 +108,9 @@ export default function SelfSelectionPage() {
                             <button
                                 className={`${styles.btnPrimary} ${styles.btnFull}`}
                                 onClick={handleContinue}
-                                disabled={selectionCount !== HTSM_CONFIG.MAX_KEYWORD_SELECTION}
+                                disabled={selectionCount !== HTSM_CONFIG.MAX_KEYWORD_SELECTION || isSubmitting}
                             >
-                                Continue
+                                {isSubmitting ? 'Creating...' : 'Continue'}
                             </button>
                         </div>
                     </div>

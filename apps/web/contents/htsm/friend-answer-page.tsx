@@ -3,17 +3,40 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { HTSM_KEYWORDS, HTSM_CONFIG, HTSM_STORAGE_KEY } from './constants';
+import { HTSM_KEYWORDS, HTSM_CONFIG } from './constants';
+import { submitAnswer } from './api';
 import styles from './styles.module.css';
 
 interface FriendAnswerPageProps {
     shareId: string;
 }
 
+/** 간단한 브라우저 fingerprint 생성 */
+function generateFingerprint(): string {
+    const data = [
+        navigator.userAgent,
+        navigator.language,
+        screen.width,
+        screen.height,
+        new Date().getTimezoneOffset(),
+    ].join('|');
+
+    // 간단한 해시
+    let hash = 0;
+    for (let i = 0; i < data.length; i++) {
+        const char = data.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash |= 0;
+    }
+    return Math.abs(hash).toString(36);
+}
+
 export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
     const router = useRouter();
     const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
     const [submitted, setSubmitted] = useState<boolean>(false);
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [error, setError] = useState<string>('');
 
     const toggleKeyword = (keyword: string) => {
         if (selectedKeywords.includes(keyword)) {
@@ -23,14 +46,21 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
         }
     };
 
-    const handleSubmit = () => {
-        if (selectedKeywords.length === HTSM_CONFIG.MAX_KEYWORD_SELECTION) {
-            const existing = JSON.parse(
-                localStorage.getItem(HTSM_STORAGE_KEY.FRIEND_ANSWERS) || '[]'
-            );
-            existing.push(selectedKeywords);
-            localStorage.setItem(HTSM_STORAGE_KEY.FRIEND_ANSWERS, JSON.stringify(existing));
+    const handleSubmit = async () => {
+        if (selectedKeywords.length !== HTSM_CONFIG.MAX_KEYWORD_SELECTION) return;
+        if (isSubmitting) return;
+
+        setIsSubmitting(true);
+        setError('');
+
+        try {
+            const fingerprintHash = generateFingerprint();
+            await submitAnswer(shareId, selectedKeywords, fingerprintHash);
             setSubmitted(true);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : '응답 제출에 실패했습니다.';
+            setError(message);
+            setIsSubmitting(false);
         }
     };
 
@@ -79,12 +109,19 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
                         </div>
                     </div>
 
+                    {/* Error */}
+                    {error && (
+                        <p style={{ color: '#ef4444', textAlign: 'center', marginBottom: '1rem' }}>
+                            {error}
+                        </p>
+                    )}
+
                     <div className={styles.keywordGrid}>
                         {HTSM_KEYWORDS.map((keyword) => {
                             const sel = selectedKeywords.includes(keyword);
                             const dis = !sel && count >= HTSM_CONFIG.MAX_KEYWORD_SELECTION;
                             return (
-                                <button key={keyword} type="button" onClick={() => toggleKeyword(keyword)} disabled={dis}
+                                <button key={keyword} type="button" onClick={() => toggleKeyword(keyword)} disabled={dis || isSubmitting}
                                     className={`${styles.keywordChip} ${sel ? styles.keywordChipSelected : ''} ${dis ? styles.keywordChipDisabled : ''}`}>
                                     {keyword}
                                 </button>
@@ -95,8 +132,8 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
                     <div className={styles.stickyBottom}>
                         <div className={styles.stickyBottomInner}>
                             <button className={`${styles.btnPrimary} ${styles.btnFull}`} onClick={handleSubmit}
-                                disabled={count !== HTSM_CONFIG.MAX_KEYWORD_SELECTION}>
-                                Submit Answer
+                                disabled={count !== HTSM_CONFIG.MAX_KEYWORD_SELECTION || isSubmitting}>
+                                {isSubmitting ? 'Submitting...' : 'Submit Answer'}
                             </button>
                         </div>
                     </div>
