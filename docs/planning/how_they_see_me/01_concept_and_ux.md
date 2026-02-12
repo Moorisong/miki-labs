@@ -331,6 +331,8 @@ Friends help reveal the real you.
 **CTA**
 Start My Test →
 
+(재방문 시) Continue My Result →
+
 스크롤 없이 첫 화면에 배치
 
 ---
@@ -356,6 +358,8 @@ Already discovering how they’re seen 👀
 ### 하단 CTA 반복
 
 Start My Test →
+
+(재방문 시) Continue My Result →
 
 ---
 
@@ -398,6 +402,8 @@ Create My Test →
 
 클릭 시 shareId 생성 후 공유 페이지 이동
 
+**※ 생성 시 LocalStorage에 shareId 저장 (재방문 UX 핵심)**
+
 ---
 
 ## 3. 공유 페이지 (본인용) ⭐
@@ -437,6 +443,10 @@ Ask Friends on Kakao 💬
 Copy Link
 
 ⚠️ 공유 버튼 반복 노출 필수
+
+### 내 결과 보기 버튼 (추가)
+
+View My Result (텍스트 링크 등)
 
 ---
 
@@ -486,7 +496,12 @@ Submit anonymously
 
 Your response is recorded ✅
 
-버튼
+버튼 1 (바이럴 핵심 ⭐)
+
+See Friend's Result →
+(친구의 결과를 확인하고 재미를 느껴 본인 테스트 생성으로 유도)
+
+버튼 2
 
 Create Your Own Test →
 
