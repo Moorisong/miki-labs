@@ -2,32 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { useLanguage } from '@/context/language-context';
 import { HTSM_STORAGE_KEY } from './constants';
 
 import styles from './styles.module.css';
 
-const FLOATING_KEYWORDS = [
-    'Creative',
-    'Funny',
-    'Kind',
-    'Energetic',
-    'Thoughtful',
-    'Organized',
-    'Adventurous',
-    'Loyal',
-];
-
-const FLOATING_POSITIONS = [
-    { left: '10%', top: '10%' },
-    { left: '35%', top: '10%' },
-    { left: '60%', top: '10%' },
-    { left: '85%', top: '10%' },
-    { left: '10%', top: '60%' },
-    { left: '35%', top: '60%' },
-    { left: '60%', top: '60%' },
-    { left: '85%', top: '60%' },
-];
+const KeywordCloud3D = dynamic(() => import('./keyword-cloud-3d'), { ssr: false });
 
 export default function LandingPage() {
     const router = useRouter();
@@ -64,6 +45,11 @@ export default function LandingPage() {
                         {t('hero.subtitle')}
                     </p>
 
+                    {/* Floating Keywords - 3D Cloud */}
+                    <div className={styles.floatingContainer}>
+                        <KeywordCloud3D />
+                    </div>
+
                     <div className={styles.heroCta}>
                         <button
                             className={`${styles.btnPrimary} ${styles.btnPrimaryLg}`}
@@ -87,25 +73,9 @@ export default function LandingPage() {
                         <span aria-hidden="true">✨</span>
                         {t('hero.hint')}
                     </p>
-
-                    {/* Floating Keywords (Desktop) */}
-                    <div className={styles.floatingContainer}>
-                        {FLOATING_KEYWORDS.map((keyword, index) => (
-                            <div
-                                key={keyword}
-                                className={styles.floatingChip}
-                                style={{
-                                    left: FLOATING_POSITIONS[index].left,
-                                    top: FLOATING_POSITIONS[index].top,
-                                    animation: `float ${2 + index * 0.3}s ease-in-out infinite`,
-                                    animationDelay: `${0.5 + index * 0.1}s`,
-                                }}
-                            >
-                                <span className={styles.keywordChipFloating}>{keyword}</span>
-                            </div>
-                        ))}
-                    </div>
                 </div>
+
+
             </section>
 
             {/* How It Works Section */}

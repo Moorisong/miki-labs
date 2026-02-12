@@ -15,6 +15,25 @@
     }
 }
 
+@keyframes bounce {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(0) translateX(-50%);
+    }
+
+    40% {
+        transform: translateY(-10px) translateX(-50%);
+    }
+
+    60% {
+        transform: translateY(-5px) translateX(-50%);
+    }
+}
+
 /* Layout */
 /* Toast Notification - Floating above button */
 .toast {
@@ -170,6 +189,7 @@
    ================================================ */
 .heroSection {
     padding: 5rem 1rem 8rem;
+    position: relative;
 }
 
 .heroContent {
@@ -223,13 +243,40 @@
 
 /* Floating Keywords */
 .floatingContainer {
-    margin-top: 4rem;
+    margin-top: 2rem;
+    margin-bottom: 3rem;
     position: relative;
-    height: 16rem;
+    height: 500px;
+    width: 100%;
 }
 
 .floatingChip {
     position: absolute;
+}
+
+.scrollIndicator {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    animation: bounce 2s infinite;
+    z-index: 10;
+    color: #6b7280;
+    transition: color 0.2s;
+}
+
+.scrollIndicator:hover {
+    color: #3b82f6;
+}
+
+.scrollText {
+    font-size: 0.875rem;
+    font-weight: 500;
 }
 
 /* How it works */
@@ -990,7 +1037,7 @@
     }
 
     .floatingContainer {
-        display: none;
+        height: 350px;
     }
 }
 
