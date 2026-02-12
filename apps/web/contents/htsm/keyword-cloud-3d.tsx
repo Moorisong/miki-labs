@@ -37,7 +37,7 @@ function FloatingWord({ text, gradient, shadow, position, index }: {
 
     return (
         <group ref={groupRef} position={position}>
-            <Html center distanceFactor={8} style={{ pointerEvents: 'none' }}>
+            <Html center distanceFactor={8} style={{ pointerEvents: 'none' }} zIndexRange={[10, 0]}>
                 <div
                     style={{
                         background: gradient,
