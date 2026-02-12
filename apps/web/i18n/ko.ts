@@ -15,6 +15,7 @@ export default {
         highlight: "진짜 나",
         subtitle: "친구들이 진짜 나를 찾아줍니다.",
         startButton: "테스트 시작하기",
+        continueButton: "내 결과 이어보기",
         hint: "10초면 충분해요"
     },
     howItWorks: {
@@ -61,7 +62,8 @@ export default {
         cardTitle: "남들이 보는 나는?",
         cardDesc: "내 이미지를 찾아줘! 나에게 어울리는 키워드 3개를 골라주세요.",
         helperTitle: "친구들이 익명으로 나에 대한 키워드 3개를 선택합니다.",
-        helperDesc: "더 많은 친구가 참여할수록 결과가 정확해집니다!"
+        helperDesc: "더 많은 친구가 참여할수록 결과가 정확해집니다!",
+        viewResult: "내 결과 확인하기"
     },
     answer: {
         title: "친구를 표현하는 단어 3개를 골라주세요",
@@ -72,7 +74,7 @@ export default {
         submitting: "제출 중...",
         thanksTitle: "답변해주셔서 감사합니다!",
         thanksSubtitle: "친구가 종합된 결과를 확인할 수 있게 되었습니다",
-        viewResult: "결과 보기",
+        viewResult: "친구 결과 보기",
         createMine: "나도 테스트 만들기",
         error: "답변 제출에 실패했습니다."
     },
@@ -84,7 +86,7 @@ export default {
         loading: "결과를 불러오는 중...",
         error: "결과를 불러올 수 없습니다.",
         noKeywords: "아직 키워드가 없습니다",
-        shareMore: "더 많은 친구에게 공유하기",
+        shareMore: "더 많은 친구에게 요청하기",
         infoTitle: "조하리의 창이란?",
         infoDesc: "조하리의 창(Johari Window)은 1955년 심리학자 조셉 루프트와 해리 잉햄이 개발한 심리학 도구입니다. 나와 타인의 관계 속에서 내가 어떤 사람인지 이해하도록 도와줍니다. 내가 아는 나와 모르는 나, 타인이 아는 나와 모르는 나를 구분하여 4가지 영역(개방, 맹목, 숨겨진, 미지)으로 나눕니다.",
         area: {

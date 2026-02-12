@@ -15,6 +15,7 @@ export default {
         highlight: "see you",
         subtitle: "Friends help reveal the real you.",
         startButton: "Start My Test",
+        continueButton: "Continue My Result",
         hint: "Takes 10 seconds"
     },
     howItWorks: {
@@ -61,7 +62,8 @@ export default {
         cardTitle: "How do you see me?",
         cardDesc: "Help me discover how you see me! Pick 3 words that describe me.",
         helperTitle: "Friends choose 3 words about you anonymously.",
-        helperDesc: "The more friends participate, the better your result!"
+        helperDesc: "The more friends participate, the better your result!",
+        viewResult: "View My Result"
     },
     answer: {
         title: "Describe your friend in 3 words",
@@ -72,7 +74,7 @@ export default {
         submitting: "Submitting...",
         thanksTitle: "Thanks for your answer!",
         thanksSubtitle: "Your friend will see the combined results",
-        viewResult: "View Result",
+        viewResult: "See Friend's Result",
         createMine: "Create Your Own Test",
         error: "Failed to submit answer."
     },
