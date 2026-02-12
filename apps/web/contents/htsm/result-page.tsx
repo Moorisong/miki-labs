@@ -17,6 +17,8 @@ export default function ResultPage({ shareId }: ResultPageProps) {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>('');
 
+    const [showToast, setShowToast] = useState<boolean>(false);
+
     useEffect(() => {
         const loadResult = async () => {
             try {
@@ -36,10 +38,11 @@ export default function ResultPage({ shareId }: ResultPageProps) {
 
         // 무조건 클립보드에 복사
         navigator.clipboard.writeText(url).then(() => {
-            // PC인 경우에만 토스트(alert) 표시
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             if (!isMobile) {
-                alert(t('share.copied'));
+                // PC: 토스트 메시지 표시
+                setShowToast(true);
+                setTimeout(() => setShowToast(false), 2500);
             }
         }).catch((err) => {
             console.error('Failed to copy text: ', err);
@@ -83,6 +86,13 @@ export default function ResultPage({ shareId }: ResultPageProps) {
 
     return (
         <div className={styles.pageContainer}>
+            {/* Toast Notification */}
+            {showToast && (
+                <div className={styles.toast}>
+                    {t('share.copied')}
+                </div>
+            )}
+
             <div className={styles.wideContainer}>
                 <div className={styles.resultPage}>
                     <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
