@@ -91,25 +91,6 @@ export default function KeywordCloud3D() {
             >
                 <ambientLight intensity={1} />
 
-                {/* 보라 스파클 */}
-                <Sparkles
-                    count={100}
-                    scale={12}
-                    size={3}
-                    speed={0.3}
-                    opacity={0.5}
-                    color="#c084fc"
-                />
-                {/* 시안 스파클 */}
-                <Sparkles
-                    count={60}
-                    scale={10}
-                    size={2}
-                    speed={0.5}
-                    opacity={0.3}
-                    color="#67e8f9"
-                />
-
                 <Cloud />
 
                 <OrbitControls
