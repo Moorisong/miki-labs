@@ -142,6 +142,17 @@ export default function SharePage({ shareId }: SharePageProps) {
                         </button>
                     </div>
 
+                    {/* View Result Button */}
+                    <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                        <button
+                            className={styles.btnText}
+                            onClick={() => window.location.href = `/htsm/result/${shareId}`}
+                            style={{ textDecoration: 'underline', color: '#6b7280', fontSize: '0.9rem' }}
+                        >
+                            {t('share.viewResult')}
+                        </button>
+                    </div>
+
                     {/* Helper Text */}
                     <div className={styles.infoCard}>
                         <p className={styles.shareHelperText}>
