@@ -13,7 +13,7 @@ export default {
     hero: {
         title: "남들이 보는 {highlight}",
         highlight: "진짜 나",
-        subtitle: "친구들이 진짜 나를 찾아줍니다.",
+        subtitle: "10초면 충분해요. 친구들이 진짜 나를 찾아줍니다.",
         startButton: "테스트 시작하기",
         continueButton: "내 결과 이어보기",
         hint: "10초면 충분해요"
