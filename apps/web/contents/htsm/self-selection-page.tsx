@@ -92,9 +92,9 @@ export default function SelfSelectionPage() {
             <div className={styles.pageContainer}>
                 <div className={styles.innerContainer}>
                     <div className={styles.selectionPage} style={{ textAlign: 'center', padding: '40px 20px' }}>
-                        <h1 className={styles.selectionTitle} style={{ marginBottom: '20px' }}>
-                            나를 가장 잘 나타내는 키워드 3~5개를 골라주세요
-                        </h1>
+                        <div onClick={() => router.push('/htsm')} style={{ cursor: 'pointer', marginBottom: '20px', display: 'inline-block' }}>
+                            <img src="/htsm-logo-v6.png" alt="HTSM Logo" style={{ width: '80px', height: '80px', borderRadius: '20px' }} />
+                        </div>
                         <p style={{ marginBottom: '40px', color: '#666' }}>
                             테스트를 생성하려면 로그인이 필요합니다.<br />
                             카카오 로그인으로 간편하게 시작하세요.
