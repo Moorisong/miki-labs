@@ -13,36 +13,32 @@ interface JohariCardProps {
 }
 
 export default function JohariCard({ title, area, keywords, colorClass }: JohariCardProps) {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
 
-
-    // Get localized keywords for the generator
     const localizedKeywords = useMemo(() => {
         return keywords.map(kw => t(`keywords.${kw}`));
     }, [keywords, t]);
 
-    // Generate description only once (or when keywords change)
     const description = useMemo(() => {
-        // Only generate for Korean if the user wants Korean. 
-        // The instructions imply Korean text generation.
-        // For other languages, we might need other logic or fallback.
-        // Since the task is specific about "HTSM 결과 페이지", likely targeting Korean audience or the provided templates are KR only.
-        return generateDescription(area, localizedKeywords);
-    }, [area, localizedKeywords]);
+        return generateDescription(area, localizedKeywords, language);
+    }, [area, localizedKeywords, language]);
+
+    const subtitle = t(`result.subtitles.${area}`);
 
     return (
         <div className={styles.resultCard}>
             <div className={styles.resultCardHeader}>
-                <div>
+                <div className={styles.resultCardTitleGroup}>
                     <h3 className={styles.resultCardTitle}>{title}</h3>
-                    {/* Replaced short description with the generated long description */}
-                    <p className={styles.resultCardDescriptionLong}>
-                        {description}
-                    </p>
+                    <p className={styles.resultCardSubtitle}>{subtitle}</p>
                 </div>
             </div>
 
-
+            <div className={styles.resultCardDescriptionSection}>
+                <p className={styles.resultCardDescriptionLong}>
+                    {description}
+                </p>
+            </div>
 
             <div className={styles.resultCardKeywords}>
                 {keywords.length > 0 ? (

@@ -142,8 +142,20 @@
     *   `result/page.tsx`의 최하단 (공유 버튼 아래, Footer 위)에 배치
     *   자연스러운 "추천" 느낌으로 노출 (광고 느낌 지양)
 
+#### [Track H] Daily Animal Destiny Implementation (New)
+**파일**: `apps/server/data/animal_destiny.json`, `apps/server/src/services/pet-destiny/animal-destiny.service.ts`
+1.  **데이터 구성**: [동물 운명 콘텐츠 개선 기획](docs/planning/pet_destiny/02_animal_destiny_improvement.md)에 따라 5개 동물의 템플릿 데이터(Intro, Analysis, Guide) 및 키워드 5개 구성
+2.  **로직 구현**:
+    *   AI 선택 로직 시뮬레이션: 날짜(오늘)에 따라 고정된 5개 동물을 선별하거나 해시로 결정
+    *   템플릿 조합 엔진: `intro(1) + analysis(1-2) + guide(1-2)` 조합으로 긴 문단 생성
+    *   키워드 5개 상시 노출 처리
+3.  **UI 연동**:
+    *   결과 페이지에 "오늘의 동물 운세" 섹션 추가
+    *   "오늘 당신은 [동물] 입니다" 타이틀 + 긴 설명 + 키워드 5개(Chip UI) 노출
+
 ### 3. 구현 원칙
 - **Deterministic 유지**: Seed 기반 변동은 같은 입력 = 같은 결과 보장
 - **균형 목표**: 긍정 40% / 중립 35% / 주의·경고 25%
-- **기존 API 스키마 유지**: Response 필드 변경 없음
+- **기존 API 스키마 유지**: Response 필드 추가 시 하위 호환성 고려
+- **문체 가이드 준수**: [HTSM 결과 가이드]와 유사하게 대화체/공감 중심으로 작성 (연구 보고서 느낌 금지)
 

@@ -47,6 +47,12 @@ export interface PetDestinyResult {
         element: Element;
         elementInfo: ElementInfo;
     };
+    dailyAnimal: {
+        animalName: string;
+        animalEmoji: string;
+        description: string;
+        keywords: string[];
+    };
     health: {
         level: string;
         score: number;

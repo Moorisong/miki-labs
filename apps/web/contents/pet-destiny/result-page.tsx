@@ -199,6 +199,28 @@ export default function ResultPage() {
 
                 {/* 결과 카드들 */}
                 <div className={styles.resultCards}>
+                    {/* 🆕 오늘의 동물 운세 (New) */}
+                    <div className={`${styles.resultCard} ${styles.dailyAnimalCard}`}>
+                        <div className={styles.dailyAnimalHeader}>
+                            <span className={styles.dailyAnimalBadge}>Today's Animal</span>
+                            <h3 className={styles.dailyAnimalTitle}>
+                                오늘 당신은 {data.dailyAnimal.animalName} 입니다 {data.dailyAnimal.animalEmoji}
+                            </h3>
+                        </div>
+                        <div className={styles.dailyAnimalDescription}>
+                            {data.dailyAnimal.description.split('\n\n').map((para, i) => (
+                                <p key={i} className={styles.cardContent} style={{ marginBottom: '1rem' }}>
+                                    {para}
+                                </p>
+                            ))}
+                        </div>
+                        <div className={styles.dailyAnimalKeywords}>
+                            {data.dailyAnimal.keywords.map((kw, i) => (
+                                <span key={i} className={styles.dailyKeywordTag}>#{kw}</span>
+                            ))}
+                        </div>
+                    </div>
+
                     {/* 1. 궁합 */}
                     <div className={styles.resultCard}>
                         <h3 className={styles.cardTitle}>

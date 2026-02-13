@@ -59,7 +59,7 @@ export default function ClawPage() {
   };
 
   return (
-    <main className={styles.main}>
+    <div className={styles.main}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -68,12 +68,8 @@ export default function ClawPage() {
       {/* 1. Game Section (Immediate Play) */}
       <ClawGame />
 
-
-
       {/* 3. Ranking Section */}
       <RankingSection />
-
-
-    </main>
+    </div>
   );
 }

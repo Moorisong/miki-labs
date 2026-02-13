@@ -1,139 +1,116 @@
-export const OPEN_SELF_INTRO = [
-    "이 영역은 당신이 스스로 인식하는 모습과 주변 사람들이 느끼는 이미지가 비교적 일치하는 부분입니다.",
-    "이 영역은 당신의 외부 이미지와 자기 인식이 자연스럽게 겹치는 성향을 보여줍니다."
-];
+// HTSM Result Description Generator
+// Follows the "조하리 창 결과 텍스트 개선 기획서 (최종)" guide.
 
-export const BLIND_SELF_INTRO = [
-    "이 영역은 주변 사람들이 더 강하게 인식하고 있을 가능성이 높은 당신의 모습입니다.",
-    "이 영역은 타인의 시선에서 발견되는 당신의 특징을 보여줍니다."
-];
+const TEMPLATES = {
+    open: {
+        praise: ["사람들이 당신을 일상 속에서 마주할 때 느끼는 분위기는 꽤나 긍정적이고 안정적인 것 같아요."],
+        but: ["하지만 당신의 ${k1Mod} 모습 뒤에는 생각보다 본인만의 기준이나 루틴이 꽤나 확고하게 자리 잡고 있네요."],
+        sting: ["남들에겐 항상 여유로워 보이지만, 실은 익숙한 환경을 벗어나는 걸 조금 귀찮아하거나 변화에 보수적인 편일 때도 있어요."],
+        closing: ["이런 모습마저 당신을 더 예측 가능한 사람으로 만들어주는 인간적인 모습이라 더욱 신뢰가 갑니다."]
+    },
+    blind: {
+        praise: ["당신이 미처 몰랐을 수도 있지만, 사람들은 당신에게서 ${k1Mod} 매력을 꽤나 인상 깊게 발견한 것 같아요."],
+        but: ["의외로 주변 시선에는 당신이 스스로 인식하는 것보다 ${k2Mod} 면모가 더 선명하게 비춰지고 있습니다."],
+        sting: ["가끔은 본인도 모르게 상대방의 기분을 살피느라 에너지를 많이 쓰거나, 은근히 고집이 강한 편이라는 의견도 있어요."],
+        closing: ["내가 몰랐던 나의 조각들을 발견하는 이런 순간이 당신을 더욱 입체적인 사람으로 만들어줄 겁니다."]
+    },
+    hidden: {
+        praise: ["겉으로 보이는 당신의 모습은 꽤나 ${k1Mod} 느낌으로 주변에 잘 스며들어 있는 것 같아 보여요."],
+        but: ["하지만 실제 속마음은 사람들이 생각하는 것보다 훨씬 더 ${k2Mod} 성향을 강하게 품고 계신 듯합니다."],
+        sting: ["사실은 속으로 타인을 냉철하게 판단하거나, 혼자만의 시간이 부족하면 쉽게 예민해지는 편이라는 걸 가까운 사람만 알 것 같아요."],
+        closing: ["이런 반전이야말로 당신을 알면 알수록 궁금하게 만드는 진짜 매력이지 않을까 싶네요."]
+    },
+    unknown: {
+        praise: ["당신의 내면에는 앞으로 더 멋지게 발휘될 수 있는 ${k1Mod} 능력이 아직 잠잠히 숨어 있는 것 같아요."],
+        but: ["동시에 아직은 드러나지 않은 ${k2Mod} 기운들이 적절한 계기를 만나면 발휘될 가능성이 높아 보입니다."],
+        sting: ["지금은 새로운 시도를 하는 게 조금 조심스럽거나 쉽게 움직이지 않는 편일 수도 있지만, 그건 곧 잠재력이 터지기 전의 충전 상태 같아요."],
+        closing: ["시간이 흘러 당신이 보여줄 새로운 모습들이 어떤 멋진 변화를 만들어낼지 벌써부터 기대가 됩니다."]
+    }
+};
 
-export const HIDDEN_SELF_INTRO = [
-    "이 영역은 당신이 비교적 신중하게 드러내는 내면의 성향과 관련되어 있습니다.",
-    "이 영역은 가까운 사람들에게만 보일 가능성이 높은 당신의 모습입니다."
-];
+const ENGLISH_TEMPLATES = {
+    open: {
+        praise: ["The vibe people get when they encounter you in daily life seems quite positive and stable."],
+        but: ["However, behind your ${k1Mod} exterior, your own standards and routines seem to be quite firmly established."],
+        sting: ["While you look relaxed to others, you can be a bit conservative about change or reluctant to step out of your comfort zone."],
+        closing: ["These traits make you a predictable and trustworthy person, which adds to your human charm."]
+    },
+    blind: {
+        praise: ["You might not have realized it, but people have discovered a very impressive ${k1Mod} charm in you."],
+        but: ["Interestingly, your ${k2Mod} side is reflected more clearly in the eyes of others than you might recognize."],
+        sting: ["There are opinions that you sometimes spend too much energy reading others' moods or that you're secretly quite stubborn."],
+        closing: ["Moments of discovering these unknown pieces of yourself will make you a more multi-dimensional person."]
+    },
+    hidden: {
+        praise: ["On the surface, you seem to blend in well with a fairly ${k1Mod} image."],
+        but: ["However, your true inner self seems to hold a much stronger ${k2Mod} personality than people might think."],
+        sting: ["In reality, you might be judging others inwardly or becoming easily sensitive when you lack personal time—something only those close to you know."],
+        closing: ["This contrast is likely the very thing that makes you more intriguing the more someone gets to know you."]
+    },
+    unknown: {
+        praise: ["Deep inside, there seems to be a ${k1Mod} ability that is still quietly waiting to be fully unleashed."],
+        but: ["At the same time, undiscovered ${k2Mod} energies are likely to manifest when the right opportunity arises."],
+        sting: ["You might be cautious about trying new things or slow to take action now, but that's just a charging state before your potential explodes."],
+        closing: ["I'm already looking forward to seeing what wonderful changes your future self will bring."]
+    }
+};
 
-export const UNKNOWN_SELF_INTRO = [
-    "이 영역은 아직 충분히 드러나지 않았을 수 있는 잠재적인 성향을 의미합니다.",
-    "이 영역은 새로운 환경에서 나타날 수 있는 가능성을 보여줍니다."
-];
 
-export const SOCIAL_TEMPLATES = [
-    "이러한 특성은 인간관계 속에서 안정감과 신뢰를 형성하는 데 긍정적으로 작용할 가능성이 큽니다.",
-    "주변 사람들은 이러한 모습에서 일관성과 매력을 동시에 느낄 수 있습니다.",
-    "이 성향은 협업이나 관계 형성 과정에서 자연스럽게 드러날 가능성이 높습니다."
-];
-
-export const ENDING_TEMPLATES = [
-    "전반적으로 이는 당신의 성격 인상에 중요한 기반을 형성하는 요소라고 볼 수 있습니다.",
-    "이러한 특징은 앞으로 다양한 상황에서 의미 있는 강점으로 작용할 수 있습니다.",
-    "이 요소들은 당신의 전반적인 이미지 형성에 지속적으로 영향을 줄 수 있습니다."
-];
-
-// Helper to conjugate adjective/noun to "And" form (e.g. 친절한 -> 친절하고)
+// Helper for Korean conjugation
 function conjugateToAnd(word: string): string {
-    const lastChar = word.charAt(word.length - 1);
-
-    // 1. Adjectives ending in '한' -> '하고' (친절한 -> 친절하고)
-    if (word.endsWith('한')) {
-        return word.slice(0, -1) + '하고';
-    }
-    // 2. Adjectives ending in '인' -> '이고' (창의적인 -> 창의적이고)
-    if (word.endsWith('인')) {
-        return word.slice(0, -1) + '이고';
-    }
-    // 3. Adjectives ending in '있는' -> '있고' (재미있는 -> 재미있고)
-    if (word.endsWith('있는')) {
-        return word.slice(0, -2) + '있고';
-    }
-    // 4. Adjectives ending in '운' -> '롭고' (지혜로운 -> 지혜롭고) - '운' might be tricky if not '로운'
-    if (word.endsWith('로운')) {
-        return word.slice(0, -2) + '롭고';
-    }
-    if (word.endsWith('운')) {
-        return word.slice(0, -1) + '웁고'; // 고마운 -> 고맙고 (irregular), strictly '웁고' is ok approx
-    }
-    // 5. Adjectives ending in '은' -> '고' (수줍음 많은 -> 수줍음 많고)
-    if (word.endsWith('은')) {
-        return word.slice(0, -1) + '고';
-    }
-    // 6. Adjectives ending in '는' -> '고' (즐기는 -> 즐기고)
-    if (word.endsWith('는')) {
-        return word.slice(0, -1) + '고';
-    }
-
-    // 7. Nouns or others: Add '이고'
-    // Simple check for batchim?
-    const charCode = lastChar.charCodeAt(0);
-    const hasBatchim = (charCode - 44032) % 28 !== 0;
-
-    if (hasBatchim) {
-        return word + '이고';
-    } else {
-        return word + '이고'; // or '고' if vowel ending? usually '이고' works for nouns in this context "몽상가이고"
-    }
+    if (!word) return '';
+    if (word.endsWith('한')) return word.slice(0, -1) + '하고';
+    if (word.endsWith('인')) return word.slice(0, -1) + '이고';
+    if (word.endsWith('있는')) return word.slice(0, -2) + '있고';
+    if (word.endsWith('로운')) return word.slice(0, -2) + '롭고';
+    if (word.endsWith('운')) return word.slice(0, -1) + '웁고';
+    if (word.endsWith('은')) return word.slice(0, -1) + '고';
+    if (word.endsWith('는')) return word.slice(0, -1) + '고';
+    return word + '이고';
 }
-
-// Helper to conjugate adjective/noun to "Modifier" form if needed, but usually input is already modifier.
-// But output needs to be "Noun Modifying Form"?
-// The template uses "{k1}하고 {k2}한 모습".
-// k2 should stay as is (e.g. "책임감 있는").
-// k3 in 2nd sentence: "여기에 {k3}한 성향이".
-// If k3 is "몽상가" (Noun), then "여기에 몽상가한 성향"? No. "몽상가적인 성향" or "몽상가 같은 성향".
-// We need to handle nouns for the final position.
 
 function conjugateToModifier(word: string): string {
-    // If it's already an adjective (starts with noun but ends with modifier like '한', '인', '는', '운', '은'), keep it.
-    if (word.endsWith('한') || word.endsWith('인') || word.endsWith('는') || word.endsWith('운') || word.endsWith('은')) {
-        return word;
+    if (!word) return '';
+    // For Korean
+    if (/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(word)) {
+        if (word.endsWith('한') || word.endsWith('인') || word.endsWith('는') || word.endsWith('운') || word.endsWith('은')) {
+            return word;
+        }
+        return word + '인';
     }
-    // If it's a noun
-    return word + '인'; // 몽상가 -> 몽상가인, 헬창 -> 헬창인
+    // For English (simple lowercase)
+    return word.toLowerCase();
 }
-
 
 export function generateDescription(
     area: 'open' | 'blind' | 'hidden' | 'unknown',
-    keywords: string[] // LOCALIZED keywords (Korean strings)
+    keywords: string[],
+    lang: string = 'ko'
 ): string {
     if (!keywords || keywords.length === 0) return '';
 
-    // 1. Select Intro
-    let introTemplates = OPEN_SELF_INTRO;
-    if (area === 'blind') introTemplates = BLIND_SELF_INTRO;
-    if (area === 'hidden') introTemplates = HIDDEN_SELF_INTRO;
-    if (area === 'unknown') introTemplates = UNKNOWN_SELF_INTRO;
+    const isEn = lang === 'en';
+    const templates = isEn ? ENGLISH_TEMPLATES[area] : TEMPLATES[area] as any;
+    const getRandom = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
 
-    const intro = introTemplates[Math.floor(Math.random() * introTemplates.length)];
+    const uniqueKeywords = Array.from(new Set(keywords));
+    const k1 = uniqueKeywords[0];
+    const k2 = uniqueKeywords.length > 1 ? uniqueKeywords[1] : (uniqueKeywords.length > 0 ? uniqueKeywords[0] : '');
 
-    // 2. Keyword Sentence
-    let keywordSentence = '';
-    const k1 = keywords[0]; // Most dominant?
-    const k2 = keywords.length > 1 ? keywords[1] : '';
-    const k3 = keywords.length > 2 ? keywords[2] : '';
+    const k1Mod = conjugateToModifier(k1);
+    const k2Mod = conjugateToModifier(k2);
 
-    if (k1 && k2) {
-        // "특히 {k1}하고 {k2}한 모습이 당신의 인상을 형성하는 핵심 요소로 작용합니다."
-        const k1Conj = conjugateToAnd(k1);
-        const k2Mod = conjugateToModifier(k2);
-        keywordSentence = `특히 ${k1Conj} ${k2Mod} 모습이 당신의 인상을 형성하는 핵심 요소로 작용합니다.`;
+    // 1단계: 칭찬 (Praise)
+    const s1 = getRandom(templates.praise).replace('${k1Mod}', k1Mod);
 
-        if (k3) {
-            // "여기에 {k3}한 성향이 더해지면서 독특한 이미지가 만들어집니다."
-            const k3Mod = conjugateToModifier(k3);
-            keywordSentence += ` 여기에 ${k3Mod} 성향이 더해지면서 독특한 이미지가 만들어집니다.`;
-        }
-    } else if (k1) {
-        // Only 1 keyword
-        const k1Mod = conjugateToModifier(k1);
-        keywordSentence = `특히 ${k1Mod} 모습이 당신의 가장 두드러진 특징으로 보입니다.`;
-    }
+    // 2단계: 반전 (BUT)
+    const s2 = getRandom(templates.but).replace('${k1Mod}', k1Mod).replace('${k2Mod}', k2Mod);
 
-    // 3. Social Sentence
-    const social = SOCIAL_TEMPLATES[Math.floor(Math.random() * SOCIAL_TEMPLATES.length)];
+    // 3단계: 찔림 (Sting)
+    const s3 = getRandom(templates.sting);
 
-    // 4. Ending Sentence
-    const ending = ENDING_TEMPLATES[Math.floor(Math.random() * ENDING_TEMPLATES.length)];
+    // 4단계: 마무리 (Human Closing)
+    const s4 = getRandom(templates.closing);
 
-    return `${intro} ${keywordSentence} ${social} ${ending}`;
+    return `${s1} ${s2} ${s3} ${s4}`;
 }

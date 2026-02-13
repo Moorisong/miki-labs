@@ -52,7 +52,7 @@ export default function SharePage({ shareId }: SharePageProps) {
                     </div>
 
                     {/* Share Card */}
-                    <div className={styles.glassCard} style={{ marginBottom: '2rem' }}>
+                    <div className={styles.glassCard} style={{ marginBottom: '3rem' }}>
                         <div className={styles.shareCardContent}>
                             <div className={styles.shareIconBox}>
                                 <svg
@@ -77,6 +77,28 @@ export default function SharePage({ shareId }: SharePageProps) {
                             </p>
                             <div className={styles.shareUrlBox}>{shareUrl}</div>
                         </div>
+                    </div>
+
+                    {/* View Result Button (Now emphasized at the bottom) */}
+                    <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+                        <button
+                            className={styles.btnViewResult}
+                            onClick={() => window.location.href = `/htsm/result/${shareId}`}
+                        >
+                            <svg
+                                className={styles.btnIcon}
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+                                <path d="M22 12A10 10 0 0 0 12 2v10z" />
+                            </svg>
+                            {t('share.viewResult')}
+                        </button>
                     </div>
 
                     {/* Action Buttons */}
@@ -142,16 +164,6 @@ export default function SharePage({ shareId }: SharePageProps) {
                         </button>
                     </div>
 
-                    {/* View Result Button */}
-                    <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                        <button
-                            className={styles.btnText}
-                            onClick={() => window.location.href = `/htsm/result/${shareId}`}
-                            style={{ textDecoration: 'underline', color: '#6b7280', fontSize: '0.9rem' }}
-                        >
-                            {t('share.viewResult')}
-                        </button>
-                    </div>
 
                     {/* Helper Text */}
                     <div className={styles.infoCard}>

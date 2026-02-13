@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Script from 'next/script';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { CONFIG, ROUTES } from '@/constants';
 
@@ -84,7 +84,11 @@ const enforceAdStyles = (node: HTMLElement): void => {
 
 export default function AdScriptManager() {
     const pathname = usePathname();
-    const isHtsmPage = pathname?.startsWith(ROUTES.HTSM);
+    const [isHtsmPage, setIsHtsmPage] = useState(false);
+
+    useEffect(() => {
+        setIsHtsmPage(pathname?.startsWith(ROUTES.HTSM) || false);
+    }, [pathname]);
 
     useEffect(() => {
         if (isHtsmPage) return;
