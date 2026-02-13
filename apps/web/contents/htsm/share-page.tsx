@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/context/language-context';
 
 import { HTSM_MESSAGES } from './constants';
@@ -13,29 +13,75 @@ interface SharePageProps {
 export default function SharePage({ shareId }: SharePageProps) {
     const { t } = useLanguage();
     const [copied, setCopied] = useState<boolean>(false);
-    const shareUrl =
-        typeof window !== 'undefined'
-            ? `${window.location.origin}/htsm/answer/${shareId}`
-            : '';
+    const [isKakaoInitialized, setIsKakaoInitialized] = useState<boolean>(false);
+
+    // 클라이언트 사이드에서만 URL 생성
+    const [shareUrl, setShareUrl] = useState<string>('');
+
+    useEffect(() => {
+        setShareUrl(`${window.location.origin}/htsm/answer/${shareId}`);
+
+        if (typeof window !== 'undefined' && window.Kakao) {
+            if (!window.Kakao.isInitialized()) {
+                window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_API_KEY);
+            }
+            setIsKakaoInitialized(true);
+        }
+    }, [shareId]);
 
     const handleCopyLink = () => {
-        if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        if (typeof navigator !== 'undefined' && navigator.clipboard && shareUrl) {
             navigator.clipboard.writeText(shareUrl);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         }
     };
 
-    const handleShare = () => {
-        if (typeof navigator !== 'undefined' && navigator.share) {
-            navigator.share({
-                title: t('share.title'),
-                text: t('share.subtitle'),
-                url: shareUrl,
-            });
-        } else {
-            handleCopyLink();
+    const handleKakaoShare = () => {
+        if (!isKakaoInitialized || !window.Kakao) {
+            // SDK 로드 실패 시 클립보드 복사로 대체하거나 Web Share API 사용
+            if (typeof navigator !== 'undefined' && navigator.share && shareUrl) {
+                navigator.share({
+                    title: t('share.title'),
+                    text: t('share.subtitle'),
+                    url: shareUrl,
+                });
+            } else {
+                handleCopyLink();
+            }
+            return;
         }
+
+        const answerUrl = shareUrl || `${window.location.origin}/htsm/answer/${shareId}`;
+
+        window.Kakao.Share.sendDefault({
+            objectType: 'feed',
+            content: {
+                title: t('share.cardTitle'),
+                description: t('share.cardDesc'),
+                imageUrl: 'https://box.haroo.site/htsm-logo-v6.png',
+                link: {
+                    mobileWebUrl: answerUrl,
+                    webUrl: answerUrl,
+                },
+            },
+            buttons: [
+                {
+                    title: '답변 남기기',
+                    link: {
+                        mobileWebUrl: answerUrl,
+                        webUrl: answerUrl,
+                    },
+                },
+                {
+                    title: '나도 만들기',
+                    link: {
+                        mobileWebUrl: 'https://box.haroo.site/htsm',
+                        webUrl: 'https://box.haroo.site/htsm',
+                    },
+                },
+            ],
+        });
     };
 
     return (
@@ -105,7 +151,7 @@ export default function SharePage({ shareId }: SharePageProps) {
                     <div className={styles.shareButtonGroup} style={{ marginBottom: '2rem' }}>
                         <button
                             className={`${styles.btnPrimary} ${styles.btnFull}`}
-                            onClick={handleShare}
+                            onClick={handleKakaoShare}
                         >
                             <svg
                                 className={styles.btnIcon}
