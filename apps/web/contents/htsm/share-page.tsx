@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useLanguage } from '@/context/language-context';
-
 import { HTSM_MESSAGES } from './constants';
 import styles from './styles.module.css';
 
@@ -11,7 +9,6 @@ interface SharePageProps {
 }
 
 export default function SharePage({ shareId }: SharePageProps) {
-    const { t } = useLanguage();
     const [copied, setCopied] = useState<boolean>(false);
     const [isKakaoInitialized, setIsKakaoInitialized] = useState<boolean>(false);
 
@@ -42,8 +39,8 @@ export default function SharePage({ shareId }: SharePageProps) {
             // SDK 로드 실패 시 클립보드 복사로 대체하거나 Web Share API 사용
             if (typeof navigator !== 'undefined' && navigator.share && shareUrl) {
                 navigator.share({
-                    title: t('share.title'),
-                    text: t('share.subtitle'),
+                    title: '테스트가 준비되었습니다',
+                    text: '친구들에게 공유해서 내가 어떻게 보이는지 알아보세요',
                     url: shareUrl,
                 });
             } else {
@@ -57,8 +54,8 @@ export default function SharePage({ shareId }: SharePageProps) {
         window.Kakao.Share.sendDefault({
             objectType: 'feed',
             content: {
-                title: t('share.cardTitle'),
-                description: t('share.cardDesc'),
+                title: '남들이 보는 나는?',
+                description: '내 이미지를 찾아줘! 나에게 어울리는 키워드 3~5개를 골라주세요.',
                 imageUrl: 'https://box.haroo.site/htsm-logo-v6.png',
                 link: {
                     mobileWebUrl: answerUrl,
@@ -91,9 +88,9 @@ export default function SharePage({ shareId }: SharePageProps) {
                     {/* Header */}
                     <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                         <div className={styles.shareEmoji}>🎉</div>
-                        <h1 className={styles.shareTitle}>{t('share.title')}</h1>
+                        <h1 className={styles.shareTitle}>테스트가 준비되었습니다</h1>
                         <p className={styles.shareSubtitle}>
-                            {t('share.subtitle')}
+                            친구들에게 공유해서 내가 어떻게 보이는지 알아보세요
                         </p>
                     </div>
 
@@ -117,9 +114,9 @@ export default function SharePage({ shareId }: SharePageProps) {
                                     <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
                                 </svg>
                             </div>
-                            <h2 className={styles.shareCardTitle}>{t('share.cardTitle')}</h2>
+                            <h2 className={styles.shareCardTitle}>남들이 보는 나는?</h2>
                             <p className={styles.shareCardDescription}>
-                                {t('share.cardDesc')}
+                                내 이미지를 찾아줘! 나에게 어울리는 키워드 3~5개를 골라주세요.
                             </p>
                             <div className={styles.shareUrlBox}>{shareUrl}</div>
                         </div>
@@ -143,7 +140,7 @@ export default function SharePage({ shareId }: SharePageProps) {
                                 <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
                                 <path d="M22 12A10 10 0 0 0 12 2v10z" />
                             </svg>
-                            {t('share.viewResult')}
+                            내 결과 확인하기
                         </button>
                     </div>
 
@@ -168,7 +165,7 @@ export default function SharePage({ shareId }: SharePageProps) {
                                 <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
                                 <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
                             </svg>
-                            {t('share.kakaoButton')}
+                            카카오톡으로 공유하기
                         </button>
 
                         <button
@@ -188,7 +185,7 @@ export default function SharePage({ shareId }: SharePageProps) {
                                     >
                                         <polyline points="20 6 9 17 4 12" />
                                     </svg>
-                                    {t('share.copied')}
+                                    복사 완료!
                                 </>
                             ) : (
                                 <>
@@ -204,7 +201,7 @@ export default function SharePage({ shareId }: SharePageProps) {
                                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                                     </svg>
-                                    {t('share.copyButton')}
+                                    링크 복사
                                 </>
                             )}
                         </button>
@@ -214,9 +211,9 @@ export default function SharePage({ shareId }: SharePageProps) {
                     {/* Helper Text */}
                     <div className={styles.infoCard}>
                         <p className={styles.shareHelperText}>
-                            <strong>{t('share.helperTitle')}</strong>
+                            <strong>친구들이 익명으로 나에 대한 키워드 3~5개를 선택합니다.</strong>
                             <br />
-                            {t('share.helperDesc')}
+                            더 맋은 친구가 참여할수록 결과가 정확해집니다!
                         </p>
                     </div>
                 </div>
@@ -224,3 +221,4 @@ export default function SharePage({ shareId }: SharePageProps) {
         </div>
     );
 }
+

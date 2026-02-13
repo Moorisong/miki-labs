@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useLanguage } from '@/context/language-context';
+import { useMemo } from 'react';
 import styles from './styles.module.css';
 import { generateDescription } from './utils/description-generator';
+import { getKoreanKeyword } from './keyword-map';
 
 interface JohariCardProps {
     title: string;
@@ -12,18 +12,23 @@ interface JohariCardProps {
     colorClass: string;
 }
 
-export default function JohariCard({ title, area, keywords, colorClass }: JohariCardProps) {
-    const { t, language } = useLanguage();
+const SUBTITLES = {
+    open: "나도 알고, 남도 아는 나",
+    blind: "나는 모르지만 남이 보는 나",
+    hidden: "나만 알고 있을지도 모르는 진짜 나",
+    unknown: "새로운 환경에서 드러날 가능성"
+};
 
+export default function JohariCard({ title, area, keywords, colorClass }: JohariCardProps) {
     const localizedKeywords = useMemo(() => {
-        return keywords.map(kw => t(`keywords.${kw}`));
-    }, [keywords, t]);
+        return keywords.map(kw => getKoreanKeyword(kw));
+    }, [keywords]);
 
     const description = useMemo(() => {
-        return generateDescription(area, localizedKeywords, language);
-    }, [area, localizedKeywords, language]);
+        return generateDescription(area, localizedKeywords);
+    }, [area, localizedKeywords]);
 
-    const subtitle = t(`result.subtitles.${area}`);
+    const subtitle = SUBTITLES[area];
 
     return (
         <div className={styles.resultCard}>
@@ -44,11 +49,11 @@ export default function JohariCard({ title, area, keywords, colorClass }: Johari
                 {keywords.length > 0 ? (
                     keywords.map((kw) => (
                         <div key={kw} className={`${styles.resultCardKeyword} ${colorClass}`}>
-                            {t(`keywords.${kw}`)}
+                            {getKoreanKeyword(kw)}
                         </div>
                     ))
                 ) : (
-                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{t('result.noKeywords')}</p>
+                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>아직 키워드가 없습니다</p>
                 )}
             </div>
         </div>

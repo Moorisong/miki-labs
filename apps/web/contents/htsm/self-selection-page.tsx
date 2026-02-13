@@ -3,16 +3,22 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signIn } from 'next-auth/react';
-import { useLanguage } from '@/context/language-context';
 
 import { HTSM_KEYWORD_CATEGORIES, HTSM_CONFIG, HTSM_STORAGE_KEY } from './constants';
 import { fetchProofToken, createTest } from './api';
 import { generateFingerprint } from './utils/fingerprint';
+import { getKoreanKeyword } from './keyword-map';
 import styles from './styles.module.css';
+
+const CATEGORY_NAMES: Record<string, string> = {
+    positiveTraits: '긍정적 성격',
+    boldPersonality: '강한 개성',
+    innerSelf: '깊은 내면',
+    vibes: '나만의 바이브',
+};
 
 export default function SelfSelectionPage() {
     const router = useRouter();
-    const { t } = useLanguage();
     const { data: session, status } = useSession();
     const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -69,7 +75,7 @@ export default function SelfSelectionPage() {
             router.push(`/htsm/share/${shareId}`);
         } catch (err) {
             console.error('Test creation failed:', err);
-            setError(t('create.error'));
+            setError('테스트 생성에 실패했습니다. 잠시 후 다시 시도해주세요.');
             setIsSubmitting(false);
         }
     };
@@ -87,7 +93,7 @@ export default function SelfSelectionPage() {
                 <div className={styles.innerContainer}>
                     <div className={styles.selectionPage} style={{ textAlign: 'center', padding: '40px 20px' }}>
                         <h1 className={styles.selectionTitle} style={{ marginBottom: '20px' }}>
-                            {t('create.title')}
+                            나를 가장 잘 나타내는 키워드 3~5개를 골라주세요
                         </h1>
                         <p style={{ marginBottom: '40px', color: '#666' }}>
                             테스트를 생성하려면 로그인이 필요합니다.<br />
@@ -132,16 +138,16 @@ export default function SelfSelectionPage() {
                             />
                         </div>
                         <div className={styles.progressStep}>
-                            {t('create.step')}
+                            1단계 / 2단계
                         </div>
                     </div>
 
                     {/* Title */}
                     <h1 className={styles.selectionTitle}>
-                        {t('create.title')}
+                        나를 가장 잘 나타내는 키워드 3~5개를 골라주세요
                     </h1>
                     <p className={styles.selectionCount}>
-                        {t('create.count', { current: selectionCount, max: HTSM_CONFIG.MAX_KEYWORD_SELECTION })}
+                        {selectionCount}/{HTSM_CONFIG.MAX_KEYWORD_SELECTION} 선택됨
                     </p>
 
                     {/* Error */}
@@ -175,7 +181,7 @@ export default function SelfSelectionPage() {
                                                 {category.emoji}
                                             </span>
                                             <span className={styles.categoryName}>
-                                                {t(`categories.${category.id}`)}
+                                                {CATEGORY_NAMES[category.id] || category.id}
                                             </span>
                                             {selectedInCategory > 0 && (
                                                 <span className={styles.categoryBadge}>
@@ -211,7 +217,7 @@ export default function SelfSelectionPage() {
                                                         className={`${styles.keywordChip} ${isSelected ? styles.keywordChipSelected : ''
                                                             } ${isDisabled ? styles.keywordChipDisabled : ''}`}
                                                     >
-                                                        {t(`keywords.${keyword}`)}
+                                                        {getKoreanKeyword(keyword)}
                                                     </button>
                                                 );
                                             })}
@@ -230,7 +236,7 @@ export default function SelfSelectionPage() {
                                 onClick={handleContinue}
                                 disabled={selectedKeywords.length < HTSM_CONFIG.MIN_KEYWORD_SELECTION || isSubmitting}
                             >
-                                {isSubmitting ? t('create.creating') : t('create.continue')}
+                                {isSubmitting ? '생성 중...' : '계속하기'}
                             </button>
                         </div>
                     </div>

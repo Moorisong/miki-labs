@@ -3,15 +3,22 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { useLanguage } from '@/context/language-context';
 
 import { HTSM_KEYWORD_CATEGORIES, HTSM_CONFIG } from './constants';
 import { submitAnswer, fetchTestInfo } from './api';
+import { getKoreanKeyword } from './keyword-map';
 import styles from './styles.module.css';
 
 interface FriendAnswerPageProps {
     shareId: string;
 }
+
+const CATEGORY_NAMES: Record<string, string> = {
+    positiveTraits: '긍정적 성격',
+    boldPersonality: '강한 개성',
+    innerSelf: '깊은 내면',
+    vibes: '나만의 바이브',
+};
 
 /** 간단한 브라우저 fingerprint 생성 */
 function generateFingerprint(): string {
@@ -36,7 +43,6 @@ function generateFingerprint(): string {
 export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
     const router = useRouter();
     const { data: session } = useSession();
-    const { t } = useLanguage();
     const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
     const [submitted, setSubmitted] = useState<boolean>(false);
     const [isClosed, setIsClosed] = useState<boolean>(false);
@@ -107,7 +113,7 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
             await submitAnswer(shareId, selectedKeywords, fingerprintHash);
             setSubmitted(true);
         } catch (err) {
-            const message = err instanceof Error ? err.message : t('answer.error');
+            const message = err instanceof Error ? err.message : '답변 제출에 실패했습니다.';
             setError(message);
             setIsSubmitting(false);
         }
@@ -118,7 +124,7 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
         return (
             <div className={styles.pageContainer}>
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                    <p>{t('common.loading')}</p>
+                    <p>로딩 중...</p>
                 </div>
             </div>
         );
@@ -155,16 +161,16 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
                 <div className={styles.submittedContainer}>
                     <div className={styles.submittedContent}>
                         <div className={styles.submittedEmoji}>🔒</div>
-                        <h1 className={styles.submittedTitle}>{t('answer.fullTitle')}</h1>
+                        <h1 className={styles.submittedTitle}>이미 많은 친구들이 참여했어요!</h1>
                         <p className={styles.submittedSubtitle}>
-                            {t('answer.fullSubtitle')}
+                            최대 인원(10명)이 모두 참여하여 더 이상 응답을 남길 수 없습니다.
                         </p>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', width: '100%', maxWidth: '300px', margin: '0 auto' }}>
                             <button className={`${styles.btnPrimary} ${styles.btnFull}`} onClick={() => router.push(`/htsm/result/${shareId}`)}>
-                                {t('answer.viewResult')}
+                                친구 결과 보기
                             </button>
                             <button className={`${styles.btnSecondary} ${styles.btnFull}`} onClick={() => router.push('/htsm')}>
-                                {t('answer.createMine')}
+                                나도 테스트 만들기
                             </button>
                         </div>
                     </div>
@@ -179,16 +185,16 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
                 <div className={styles.submittedContainer}>
                     <div className={styles.submittedContent}>
                         <div className={styles.submittedEmoji}>✨</div>
-                        <h1 className={styles.submittedTitle}>{t('answer.thanksTitle')}</h1>
+                        <h1 className={styles.submittedTitle}>답변해주셔서 감사합니다!</h1>
                         <p className={styles.submittedSubtitle}>
-                            {t('answer.thanksSubtitle')}
+                            친구가 종합된 결과를 확인할 수 있게 되었습니다
                         </p>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', width: '100%', maxWidth: '300px', margin: '0 auto' }}>
                             <button className={`${styles.btnPrimary} ${styles.btnFull}`} onClick={() => router.push(`/htsm/result/${shareId}`)}>
-                                {t('answer.viewResult')}
+                                친구 결과 보기
                             </button>
                             <button className={`${styles.btnSecondary} ${styles.btnFull}`} onClick={() => router.push('/htsm')}>
-                                {t('answer.createMine')}
+                                나도 테스트 만들기
                             </button>
                         </div>
                     </div>
@@ -204,16 +210,16 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
             <div className={styles.innerContainer}>
                 <div className={styles.friendPage}>
                     <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                        <h1 className={styles.friendTitle}>{t('answer.title')}</h1>
-                        <p className={styles.friendCount}>{t('answer.count', { current: count, max: HTSM_CONFIG.MAX_KEYWORD_SELECTION })}</p>
+                        <h1 className={styles.friendTitle}>친구를 표현하는 단어 3~5개를 골라주세요</h1>
+                        <p className={styles.friendCount}>{count}/{HTSM_CONFIG.MAX_KEYWORD_SELECTION} 선택됨</p>
                         <div className={styles.trustIndicators}>
                             <div className={styles.trustItem}>
                                 <svg className={styles.trustIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-                                <span>{t('answer.anonymous')}</span>
+                                <span>익명 보장</span>
                             </div>
                             <div className={styles.trustItem}>
                                 <svg className={styles.trustIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                                <span>{t('answer.takesTime')}</span>
+                                <span>1분 투자하세요</span>
                             </div>
                         </div>
                     </div>
@@ -249,7 +255,7 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
                                                 {category.emoji}
                                             </span>
                                             <span className={styles.categoryName}>
-                                                {t(`categories.${category.id}`)}
+                                                {CATEGORY_NAMES[category.id] || category.id}
                                             </span>
                                             {selectedInCategory > 0 && (
                                                 <span className={styles.categoryBadge}>
@@ -276,7 +282,7 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
                                                 return (
                                                     <button key={keyword} type="button" onClick={() => toggleKeyword(keyword)} disabled={dis || isSubmitting}
                                                         className={`${styles.keywordChip} ${sel ? styles.keywordChipSelected : ''} ${dis ? styles.keywordChipDisabled : ''}`}>
-                                                        {t(`keywords.${keyword}`)}
+                                                        {getKoreanKeyword(keyword)}
                                                     </button>
                                                 );
                                             })}
@@ -291,7 +297,7 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
                         <div className={styles.stickyBottomInner}>
                             <button className={`${styles.btnPrimary} ${styles.btnFull}`} onClick={handleSubmit}
                                 disabled={selectedKeywords.length < HTSM_CONFIG.MIN_KEYWORD_SELECTION || isSubmitting}>
-                                {isSubmitting ? t('answer.submitting') : t('answer.submit')}
+                                {isSubmitting ? '제출 중...' : '답변 제출하기'}
                             </button>
                             <button
                                 className={`${styles.btnSecondary} ${styles.btnFull}`}

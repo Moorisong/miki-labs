@@ -4,13 +4,11 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useSession } from 'next-auth/react';
-import { useLanguage } from '@/context/language-context';
 import { HTSM_STORAGE_KEY } from './constants';
 import { fetchStats, HtsmStats, fetchMyTest } from './api';
 import { generateFingerprint } from './utils/fingerprint';
 
 import styles from './styles.module.css';
-import LanguageSwitcher from '@/components/common/language-switcher';
 
 const KeywordCloud3D = dynamic(() => import('./keyword-cloud-3d'), { ssr: false });
 const BackgroundSparkles = dynamic(() => import('./background-sparkles'), { ssr: false });
@@ -18,7 +16,6 @@ const BackgroundSparkles = dynamic(() => import('./background-sparkles'), { ssr:
 export default function LandingPage() {
     const router = useRouter();
     const { data: session, status } = useSession();
-    const { t } = useLanguage();
     const [myShareId, setMyShareId] = useState<string | null>(null);
     const [stats, setStats] = useState<HtsmStats | null>(null);
 
@@ -66,13 +63,12 @@ export default function LandingPage() {
             {/* Hero Section */}
             <section className={styles.heroSection}>
                 <div className={styles.heroContent}>
-                    <LanguageSwitcher inline />
                     <h1 className={styles.heroTitle}>
-                        {t('hero.title', { highlight: '' })}
-                        <span className={styles.heroGradientText}>{t('hero.highlight')}</span>
+                        남들이 보는
+                        <span className={styles.heroGradientText}>진짜 나</span>
                     </h1>
-                    <p className={styles.heroSubtitle}>
-                        {t('hero.subtitle')}
+                    <p className={styles.heroSubtitle} style={{ fontSize: '15px' }}>
+                        1분이면 충분해요.<br />친구들이 진짜 나를 찾아줍니다.
                     </p>
 
                     {/* Floating Keywords - 3D Cloud */}
@@ -85,7 +81,7 @@ export default function LandingPage() {
                             className={`${styles.btnPrimary} ${styles.btnPrimaryLg}`}
                             onClick={handleStart}
                         >
-                            {t('hero.startButton')}
+                            테스트 시작하기
                         </button>
 
                         {myShareId && (
@@ -93,7 +89,7 @@ export default function LandingPage() {
                                 className={`${styles.btnSecondary} ${styles.btnPrimaryLg}`}
                                 onClick={handleContinue}
                             >
-                                {t('hero.continueButton')}
+                                내 결과 이어보기
                             </button>
                         )}
                     </div>
@@ -107,10 +103,10 @@ export default function LandingPage() {
             {/* How It Works Section */}
             <section className={styles.sectionBg} aria-labelledby="how-it-works-title">
                 <h2 id="how-it-works-title" className={styles.sectionTitle}>
-                    {t('howItWorks.title')}
+                    이용 방법
                 </h2>
                 <p className={styles.sectionSubtitle}>
-                    {t('howItWorks.subtitle')}
+                    나를 발견하는 간단한 3단계
                 </p>
 
                 <div className={styles.stepsGrid}>
@@ -121,9 +117,9 @@ export default function LandingPage() {
                                 <circle cx="12" cy="12" r="3" />
                             </svg>
                         </div>
-                        <h3 className={styles.stepTitle}>{t('howItWorks.step1.title')}</h3>
+                        <h3 className={styles.stepTitle}>1. 키워드 3~5개 선택</h3>
                         <p className={styles.stepDescription}>
-                            {t('howItWorks.step1.desc')}
+                            나를 가장 잘 나타내는 단어를 고르세요
                         </p>
                     </div>
 
@@ -136,9 +132,9 @@ export default function LandingPage() {
                                 <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                             </svg>
                         </div>
-                        <h3 className={styles.stepTitle}>{t('howItWorks.step2.title')}</h3>
+                        <h3 className={styles.stepTitle}>2. 친구에게 공유</h3>
                         <p className={styles.stepDescription}>
-                            {t('howItWorks.step2.desc')}
+                            친구들에게 내가 어떻게 보이는지 물어보세요
                         </p>
                     </div>
 
@@ -148,9 +144,9 @@ export default function LandingPage() {
                                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                             </svg>
                         </div>
-                        <h3 className={styles.stepTitle}>{t('howItWorks.step3.title')}</h3>
+                        <h3 className={styles.stepTitle}>3. 결과 확인</h3>
                         <p className={styles.stepDescription}>
-                            {t('howItWorks.step3.desc')}
+                            나만의 조하리의 창을 확인하세요
                         </p>
                     </div>
                 </div>
@@ -163,13 +159,13 @@ export default function LandingPage() {
                         <div className={styles.socialProofNumber}>
                             {stats ? stats.totalCreated.toLocaleString() : '...'}
                         </div>
-                        <p className={styles.socialProofLabel}>{t('social.resultsCreated')}</p>
+                        <p className={styles.socialProofLabel}>개의 결과 생성됨</p>
                     </div>
                     <div className={styles.card}>
                         <div className={styles.socialProofNumberAlt}>
                             {stats ? stats.avgFriends : '...'}
                         </div>
-                        <p className={styles.socialProofLabel}>{t('social.avgFriends')}</p>
+                        <p className={styles.socialProofLabel}>평균 참여 친구 수</p>
                     </div>
                 </div>
             </section>
@@ -178,14 +174,14 @@ export default function LandingPage() {
             <section className={styles.ctaSection} aria-label="Call to action">
                 <div style={{ maxWidth: '48rem', margin: '0 auto', textAlign: 'center' }}>
                     <h2 className={styles.ctaTitle}>
-                        {t('cta.title')}
+                        친구들의 눈에 비친 내 모습이 궁금한가요?
                     </h2>
                     <div className={styles.heroCta} style={{ marginTop: '2rem' }}>
                         <button
                             className={`${styles.btnPrimary} ${styles.btnPrimaryLg}`}
                             onClick={handleStart}
                         >
-                            {t('cta.button')}
+                            테스트 시작하기
                         </button>
 
                         {myShareId && (
@@ -193,7 +189,7 @@ export default function LandingPage() {
                                 className={`${styles.btnSecondary} ${styles.btnPrimaryLg}`}
                                 onClick={handleContinue}
                             >
-                                {t('hero.continueButton')}
+                                내 결과 이어보기
                             </button>
                         )}
                     </div>
@@ -202,3 +198,4 @@ export default function LandingPage() {
         </div>
     );
 }
+
