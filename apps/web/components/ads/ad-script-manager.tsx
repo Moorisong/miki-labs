@@ -84,15 +84,7 @@ const enforceAdStyles = (node: HTMLElement): void => {
 
 export default function AdScriptManager() {
     const pathname = usePathname();
-    const [isHtsmPage, setIsHtsmPage] = useState(false);
-
     useEffect(() => {
-        setIsHtsmPage(pathname?.startsWith(ROUTES.HTSM) || false);
-    }, [pathname]);
-
-    useEffect(() => {
-        if (isHtsmPage) return;
-
         let observer: MutationObserver | null = null;
         let timeoutId: NodeJS.Timeout;
 
@@ -174,9 +166,7 @@ export default function AdScriptManager() {
             observer?.disconnect();
             clearTimeout(timeoutId);
         };
-    }, [isHtsmPage]);
-
-    if (isHtsmPage) return null;
+    }, []);
 
     return (
         <>
