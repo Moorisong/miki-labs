@@ -8,7 +8,6 @@ import NicknameProvider from '@/components/providers/nickname-provider';
 
 import AdScriptManager from '@/components/ads/ad-script-manager';
 import { LanguageProvider } from '@/context/language-context';
-import LanguageSwitcher from '@/components/common/language-switcher';
 import { cookies } from 'next/headers';
 import { Language } from '@/i18n/i18n';
 import './globals.css';
@@ -80,7 +79,6 @@ export default async function RootLayout({
         />
         <AdScriptManager />
         <LanguageProvider initialLanguage={initialLang}>
-          <LanguageSwitcher />
           <SessionProvider>
             <NicknameProvider>
               <NavBar />

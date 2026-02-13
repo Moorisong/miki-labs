@@ -4,11 +4,15 @@ import React from 'react';
 import { useLanguage } from '../../context/language-context';
 import styles from './language-switcher.module.css';
 
-export default function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+    inline?: boolean;
+}
+
+export default function LanguageSwitcher({ inline }: LanguageSwitcherProps = {}) {
     const { language, setLanguage } = useLanguage();
 
     return (
-        <div className={styles.container}>
+        <div className={inline ? styles.inlineContainer : styles.container}>
             <button
                 onClick={() => setLanguage('en')}
                 className={`${styles.button} ${language === 'en' ? styles.active : ''}`}
