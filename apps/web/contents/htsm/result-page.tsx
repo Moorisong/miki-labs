@@ -53,6 +53,26 @@ export default function ResultPage({ shareId }: ResultPageProps) {
         });
     };
 
+    const handleSharePage = () => {
+        const url = window.location.href;
+
+        // 무조건 클립보드에 복사
+        navigator.clipboard.writeText(url).then(() => {
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (!isMobile) {
+                // PC: 토스트 메시지 표시
+                setShowToast(true);
+                setTimeout(() => setShowToast(false), 2500);
+            }
+        }).catch((err) => {
+            console.error('Failed to copy text: ', err);
+            // 복사 실패 시 fallback으로 web share api 시도 (모바일 등)
+            if (navigator.share) {
+                navigator.share({ title: t('result.title'), text: t('result.subtitle'), url });
+            }
+        });
+    };
+
     if (loading) {
         return (
             <div className={styles.pageContainer}>
@@ -137,11 +157,6 @@ export default function ResultPage({ shareId }: ResultPageProps) {
                                         <h3 className={styles.resultCardTitle}>{card.title}</h3>
                                         <p className={styles.resultCardDescription}>{card.description}</p>
                                     </div>
-                                    <div className={styles.resultCardPercent} style={{ background: 'none' }}>
-                                        <span className={card.gradientClass} style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                                            {card.data.percent}%
-                                        </span>
-                                    </div>
                                 </div>
                                 <div className={styles.resultCardKeywords}>
                                     {card.data.keywords.length > 0 ? (
@@ -172,6 +187,13 @@ export default function ResultPage({ shareId }: ResultPageProps) {
                             </svg>
                             {t('result.shareMore')}
                         </button>
+                        <button className={styles.btnSecondary} onClick={handleSharePage} style={{ flex: 1 }}>
+                            <svg className={styles.btnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                            </svg>
+                            {t('result.sharePage')}
+                        </button>
                     </div>
 
                     {/* Johari Info */}
@@ -183,6 +205,6 @@ export default function ResultPage({ shareId }: ResultPageProps) {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

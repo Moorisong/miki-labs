@@ -87,6 +87,7 @@ export default {
         error: "Failed to load result.",
         noKeywords: "No keywords yet",
         shareMore: "Copy Link - Ask more friends",
+        sharePage: "Copy Link - Send Current Page",
         infoTitle: "What is the Johari Window?",
         infoDesc: "The Johari Window is a psychological tool created in 1955 by Joseph Luft and Harrington Ingham. It helps people understand their relationship with themselves and others by mapping awareness into four areas: what both you and others know (Open), what only others see (Blind), what only you know (Hidden), and what neither knows yet (Unknown).",
         area: {

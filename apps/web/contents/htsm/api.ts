@@ -49,7 +49,6 @@ export async function submitAnswer(
 
 /** 결과 조회 */
 export interface JohariArea {
-    percent: number;
     keywords: string[];
 }
 

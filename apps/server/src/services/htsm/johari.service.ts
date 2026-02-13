@@ -4,10 +4,10 @@ import { HTSM_KEYWORD_WHITELIST, HTSM_CONFIG } from './constants';
  * Johari Window 4사분면 계산 결과
  */
 export interface JohariResult {
-    open: { percent: number; keywords: string[] };
-    blind: { percent: number; keywords: string[] };
-    hidden: { percent: number; keywords: string[] };
-    unknown: { percent: number; keywords: string[] };
+    open: { keywords: string[] };
+    blind: { keywords: string[] };
+    hidden: { keywords: string[] };
+    unknown: { keywords: string[] };
 }
 
 /**
@@ -76,31 +76,22 @@ export function calculateJohari(
         }
     }
 
-    // 총 카운트 (분모)
-    const totalCount = openKeywords.length + blindKeywords.length + hiddenKeywords.length + unknownKeywords.length;
-
-    const calcPercent = (count: number): number => {
-        if (totalCount === 0) return 0;
-        return Math.round((count / totalCount) * 100);
-    };
+    // 총 카운트 (분모) - 퍼센테이지 로직 제거로 인해 미사용
+    // const totalCount = openKeywords.length + blindKeywords.length + hiddenKeywords.length + unknownKeywords.length;
 
     const maxDisplay = HTSM_CONFIG.MAX_KEYWORD_COUNT;
 
     return {
         open: {
-            percent: calcPercent(openKeywords.length),
             keywords: getTopKeywords(openKeywords, frequencyMap, maxDisplay),
         },
         blind: {
-            percent: calcPercent(blindKeywords.length),
             keywords: getTopKeywords(blindKeywords, frequencyMap, maxDisplay),
         },
         hidden: {
-            percent: calcPercent(hiddenKeywords.length),
             keywords: getTopKeywords(hiddenKeywords, frequencyMap, maxDisplay),
         },
         unknown: {
-            percent: calcPercent(unknownKeywords.length),
             keywords: getTopKeywords(unknownKeywords, frequencyMap, maxDisplay),
         },
     };
