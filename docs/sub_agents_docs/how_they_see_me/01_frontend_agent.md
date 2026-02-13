@@ -62,12 +62,20 @@ Next.js (App Router) 환경에서 사용자가 테스트를 생성하고, 친구
     - "Submit anonymously" 버튼 -> `POST /api/htsm/answers` 호출
     - 성공 시 완료 화면 ("Create Your Own Test" 버튼 노출)
 
-### Step 5: 결과 페이지 & 3D 시각화
+### Step 5: 결과 페이지 & 3D 시각화 (업데이트)
 - **결과 페이지 (`/htsm/result/[id]`)**:
     - `GET /api/htsm/result/[id]` 호출
     - **조건부 렌더링**:
         - 응답 < 3: "1 more to unlock..." 블러 처리 및 잠금 아이콘
         - 응답 >= 3: 3D Canvas 및 상세 리포트 노출
+    - **카드 UI 변경**:
+        1. **설명 문단** 기본 표시 (Template Engine 사용)
+        2. **[Show keywords] 토글 버튼**
+        3. **키워드 리스트** 슬라이드 애니메이션으로 노출
+    - **Template Engine**:
+        - AI 사용 없이 규칙 기반으로 문단 생성
+        - `{영역별 도입} + {키워드 조합 해석} + {사회적 맥락} + {마무리}`
+        - 키워드 3~5개를 활용해 자연스러운 한국어 문장 조합
     - **3D Canvas (R3F)**:
         - 4개 영역(Open, Blind, Hidden, Unknown) 카드 배치 (2x2)
         - 각 영역 크기/위치는 데이터 비율에 따라 동적 조정

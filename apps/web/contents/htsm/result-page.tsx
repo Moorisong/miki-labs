@@ -5,6 +5,7 @@ import { useLanguage } from '@/context/language-context';
 
 import { HTSM_CONFIG } from './constants';
 import { fetchResult, HtsmResult } from './api';
+import JohariCard from './johari-card';
 import styles from './styles.module.css';
 
 interface ResultPageProps {
@@ -85,10 +86,10 @@ export default function ResultPage({ shareId }: ResultPageProps) {
     const percent = Math.min(Math.round((answerCount / totalFriends) * 100), 100);
 
     const johariCards = [
-        { title: t('result.area.open'), description: t('result.desc.open'), data: johari.open, gradientClass: styles.gradientGreen },
-        { title: t('result.area.blind'), description: t('result.desc.blind'), data: johari.blind, gradientClass: styles.gradientBlue },
-        { title: t('result.area.hidden'), description: t('result.desc.hidden'), data: johari.hidden, gradientClass: styles.gradientPurple },
-        { title: t('result.area.unknown'), description: t('result.desc.unknown'), data: answerCount === 0 ? { keywords: [] } : johari.unknown, gradientClass: styles.gradientCyan },
+        { title: t('result.area.open'), area: 'open' as const, data: johari.open, gradientClass: styles.gradientGreen },
+        { title: t('result.area.blind'), area: 'blind' as const, data: johari.blind, gradientClass: styles.gradientBlue },
+        { title: t('result.area.hidden'), area: 'hidden' as const, data: johari.hidden, gradientClass: styles.gradientPurple },
+        { title: t('result.area.unknown'), area: 'unknown' as const, data: answerCount === 0 ? { keywords: [] } : johari.unknown, gradientClass: styles.gradientCyan },
     ];
 
     return (
@@ -138,25 +139,13 @@ export default function ResultPage({ shareId }: ResultPageProps) {
                     {/* Johari Grid */}
                     <div className={styles.johariGrid}>
                         {johariCards.map((card) => (
-                            <div key={card.title} className={styles.resultCard}>
-                                <div className={styles.resultCardHeader}>
-                                    <div>
-                                        <h3 className={styles.resultCardTitle}>{card.title}</h3>
-                                        <p className={styles.resultCardDescription}>{card.description}</p>
-                                    </div>
-                                </div>
-                                <div className={styles.resultCardKeywords}>
-                                    {card.data.keywords.length > 0 ? (
-                                        card.data.keywords.map((kw) => (
-                                            <div key={kw} className={`${styles.resultCardKeyword} ${card.gradientClass}`}>
-                                                {t(`keywords.${kw}`)}
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{t('result.noKeywords')}</p>
-                                    )}
-                                </div>
-                            </div>
+                            <JohariCard
+                                key={card.title}
+                                title={card.title}
+                                area={card.area}
+                                keywords={card.data.keywords}
+                                gradientClass={card.gradientClass}
+                            />
                         ))}
                     </div>
 
