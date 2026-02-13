@@ -4,53 +4,25 @@
  */
 
 export const HTSM_KEYWORD_WHITELIST = [
-    'Creative',
-    'Funny',
-    'Kind',
-    'Energetic',
-    'Thoughtful',
-    'Organized',
-    'Adventurous',
-    'Loyal',
-    'Confident',
-    'Empathetic',
-    'Ambitious',
-    'Calm',
-    'Spontaneous',
-    'Patient',
-    'Optimistic',
-    'Analytical',
-    'Curious',
-    'Reliable',
-    'Friendly',
-    'Independent',
-    'Stubborn',
-    'Impulsive',
-    'Overthinking',
-    'Moody',
-    'Blunt',
-    'Perfectionist',
-    'Competitive',
-    'People-pleaser',
-    'Sarcastic',
-    'Forgetful',
-    'Lazy',
-    'Procrastinator',
-    'Messy',
-    'Sensitive',
-    'Shy',
-    'Secretive',
-    'Rebellious',
-    'Night-owl',
-    'Clumsy',
-    'Chaotic',
-    'Weirdly-lucky',
-    'Coffee-dependent',
-    'Late',
-    'Always-hungry',
-    'Over-apologetic',
-    'Golden-retriever-energy',
-    'Black-cat-energy',
+    // Positive Traits
+    'Creative', 'Funny', 'Kind', 'Energetic', 'Thoughtful',
+    'Organized', 'Adventurous', 'Loyal', 'Confident', 'Empathetic',
+    'Ambitious', 'Calm', 'Optimistic', 'Reliable', 'Friendly',
+
+    // Bold Personality
+    'Stubborn', 'Impulsive', 'Overthinking', 'Moody', 'Blunt',
+    'Perfectionist', 'Competitive', 'People-pleaser', 'Sarcastic', 'Forgetful',
+    'Talkative', 'Expressive', 'Opinionated', 'Chill', 'Direct',
+
+    // Inner Self
+    'Lazy', 'Procrastinator', 'Messy', 'Sensitive', 'Shy',
+    'Secretive', 'Rebellious', 'Emotional', 'Introverted', 'Extroverted',
+    'Dreamer', 'Realist', 'Sentimental', 'Indecisive', 'Homebody',
+
+    // Vibes
+    'Night-owl', 'Clumsy', 'Free-spirited', 'Weirdly-lucky', 'Coffee-dependent',
+    'Always-hungry', 'Sociable', 'Chic', 'Early-bird', 'Foodie',
+    'Gamer', 'Geek', 'Gym-rat', 'Bookworm', 'Stylish',
 ] as const;
 
 export const HTSM_CONFIG = {
