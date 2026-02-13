@@ -8,6 +8,7 @@ import { HTSM_STORAGE_KEY } from './constants';
 import { fetchStats, HtsmStats } from './api';
 
 import styles from './styles.module.css';
+import LanguageSwitcher from '@/components/common/language-switcher';
 
 const KeywordCloud3D = dynamic(() => import('./keyword-cloud-3d'), { ssr: false });
 const BackgroundSparkles = dynamic(() => import('./background-sparkles'), { ssr: false });
@@ -43,6 +44,7 @@ export default function LandingPage() {
             {/* Hero Section */}
             <section className={styles.heroSection}>
                 <div className={styles.heroContent}>
+                    <LanguageSwitcher inline />
                     <h1 className={styles.heroTitle}>
                         {t('hero.title', { highlight: '' })}
                         <span className={styles.heroGradientText}>{t('hero.highlight')}</span>

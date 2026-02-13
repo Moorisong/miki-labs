@@ -17,7 +17,8 @@ export default function ResultPage({ shareId }: ResultPageProps) {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>('');
 
-    const [showToast, setShowToast] = useState<boolean>(false);
+    const [copiedShare, setCopiedShare] = useState<boolean>(false);
+    const [copiedPage, setCopiedPage] = useState<boolean>(false);
 
     useEffect(() => {
         const loadResult = async () => {
@@ -35,18 +36,11 @@ export default function ResultPage({ shareId }: ResultPageProps) {
 
     const handleShare = () => {
         const url = `${window.location.origin}/htsm/answer/${shareId}`;
-
-        // 무조건 클립보드에 복사
         navigator.clipboard.writeText(url).then(() => {
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            if (!isMobile) {
-                // PC: 토스트 메시지 표시
-                setShowToast(true);
-                setTimeout(() => setShowToast(false), 2500);
-            }
+            setCopiedShare(true);
+            setTimeout(() => setCopiedShare(false), 2000);
         }).catch((err) => {
             console.error('Failed to copy text: ', err);
-            // 복사 실패 시 fallback으로 web share api 시도 (모바일 등)
             if (navigator.share) {
                 navigator.share({ title: t('share.cardTitle'), text: t('share.cardDesc'), url });
             }
@@ -55,18 +49,11 @@ export default function ResultPage({ shareId }: ResultPageProps) {
 
     const handleSharePage = () => {
         const url = window.location.href;
-
-        // 무조건 클립보드에 복사
         navigator.clipboard.writeText(url).then(() => {
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            if (!isMobile) {
-                // PC: 토스트 메시지 표시
-                setShowToast(true);
-                setTimeout(() => setShowToast(false), 2500);
-            }
+            setCopiedPage(true);
+            setTimeout(() => setCopiedPage(false), 2000);
         }).catch((err) => {
             console.error('Failed to copy text: ', err);
-            // 복사 실패 시 fallback으로 web share api 시도 (모바일 등)
             if (navigator.share) {
                 navigator.share({ title: t('result.title'), text: t('result.subtitle'), url });
             }
@@ -101,7 +88,7 @@ export default function ResultPage({ shareId }: ResultPageProps) {
         { title: t('result.area.open'), description: t('result.desc.open'), data: johari.open, gradientClass: styles.gradientGreen },
         { title: t('result.area.blind'), description: t('result.desc.blind'), data: johari.blind, gradientClass: styles.gradientBlue },
         { title: t('result.area.hidden'), description: t('result.desc.hidden'), data: johari.hidden, gradientClass: styles.gradientPurple },
-        { title: t('result.area.unknown'), description: t('result.desc.unknown'), data: johari.unknown, gradientClass: styles.gradientCyan },
+        { title: t('result.area.unknown'), description: t('result.desc.unknown'), data: answerCount === 0 ? { keywords: [] } : johari.unknown, gradientClass: styles.gradientCyan },
     ];
 
     return (
@@ -174,25 +161,42 @@ export default function ResultPage({ shareId }: ResultPageProps) {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className={styles.actionButtons} style={{ position: 'relative' }}>
-                        {showToast && (
-                            <div className={styles.toast}>
-                                {t('share.copied')}
-                            </div>
-                        )}
+                    <div className={styles.actionButtons}>
                         <button className={styles.btnPrimary} onClick={handleShare} style={{ flex: 1 }}>
-                            <svg className={styles.btnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                            </svg>
-                            {t('result.shareMore')}
+                            {copiedShare ? (
+                                <>
+                                    <svg className={styles.btnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                    {t('share.copied')}
+                                </>
+                            ) : (
+                                <>
+                                    <svg className={styles.btnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                    </svg>
+                                    {t('result.shareMore')}
+                                </>
+                            )}
                         </button>
                         <button className={styles.btnSecondary} onClick={handleSharePage} style={{ flex: 1 }}>
-                            <svg className={styles.btnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                            </svg>
-                            {t('result.sharePage')}
+                            {copiedPage ? (
+                                <>
+                                    <svg className={styles.btnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                    {t('share.copied')}
+                                </>
+                            ) : (
+                                <>
+                                    <svg className={styles.btnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                    </svg>
+                                    {t('result.sharePage')}
+                                </>
+                            )}
                         </button>
                     </div>
 
