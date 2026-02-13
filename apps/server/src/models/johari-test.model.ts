@@ -6,7 +6,10 @@ export interface IJohariTest {
     selfKeywords: string[];
     answerCount: number;
     isClosed: boolean;
-    creatorFingerprint?: string; // 생성자 식별용 (DB 조회)
+    creatorFingerprint?: string; // 생성자 식별용 (레거시/보조)
+    userId?: string; // 카카오 ID (주 식별자)
+    createdIp?: string;
+    createdUserAgent?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -18,6 +21,16 @@ const johariTestSchema = new Schema<IJohariTest>(
             required: true,
             unique: true,
             index: true,
+        },
+        userId: {
+            type: String,
+            index: true, // 유저별 조회
+        },
+        createdIp: {
+            type: String,
+        },
+        createdUserAgent: {
+            type: String,
         },
         selfKeywords: {
             type: [String],

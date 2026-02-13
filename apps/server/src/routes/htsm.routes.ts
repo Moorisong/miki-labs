@@ -38,13 +38,13 @@ const createHourLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-/** 응답 제출: IP당 10회/분 */
+/** 응답 제출: IP당 5회/10초 */
 const answerIpLimiter = rateLimit({
-    windowMs: 60 * 1000,
-    max: 10,
+    windowMs: 10 * 1000,
+    max: 5,
     message: {
         success: false,
-        error: '응답 제출 요청이 너무 많습니다. 1분 후 다시 시도해주세요.',
+        error: '응답 제출 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.',
     },
     standardHeaders: true,
     legacyHeaders: false,
@@ -81,7 +81,7 @@ router.post('/tests', createIpLimiter, createHourLimiter, createTest);
 router.post('/answers', answerIpLimiter, answerShareIdLimiter, submitAnswer);
 router.get('/result/:shareId', viewLimiter, getResult);
 router.get('/tests/:shareId', viewLimiter, getTestInfo);
-router.get('/my-test/:fingerprintHash', viewLimiter, getMyTest);
+router.get('/my-test/:userId', viewLimiter, getMyTest);
 router.get('/stats', getStats);
 
 export default router;

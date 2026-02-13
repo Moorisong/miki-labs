@@ -23,12 +23,13 @@ export async function fetchProofToken(): Promise<string> {
 export async function createTest(
     selfKeywords: string[],
     proofToken: string,
+    userId: string,
     fingerprintHash?: string
 ): Promise<string> {
     const res = await fetch(`${API_BASE}/tests`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ selfKeywords, proofToken, fingerprintHash }),
+        body: JSON.stringify({ selfKeywords, proofToken, userId, fingerprintHash }),
     });
     const json: ApiResponse<{ shareId: string }> = await res.json();
     if (!json.success || !json.data) throw new Error(json.error || 'Failed to create test');
@@ -36,8 +37,8 @@ export async function createTest(
 }
 
 /** 내 최근 테스트 조회 */
-export async function fetchMyTest(fingerprintHash: string): Promise<string | null> {
-    const res = await fetch(`${API_BASE}/my-test/${fingerprintHash}`);
+export async function fetchMyTest(userId: string): Promise<string | null> {
+    const res = await fetch(`${API_BASE}/my-test/${userId}`);
     const json: ApiResponse<{ shareId: string | null }> = await res.json();
     if (!json.success || !json.data) throw new Error(json.error || 'Failed to fetch my test');
     return json.data.shareId;
@@ -102,8 +103,12 @@ export interface HtsmTestInfo {
 }
 
 /** 테스트 정보 조회 */
-export async function fetchTestInfo(shareId: string, fingerprintHash?: string): Promise<HtsmTestInfo> {
-    const query = fingerprintHash ? `?fp=${fingerprintHash}` : '';
+export async function fetchTestInfo(shareId: string, fingerprintHash?: string, userId?: string): Promise<HtsmTestInfo> {
+    const params = new URLSearchParams();
+    if (fingerprintHash) params.append('fp', fingerprintHash);
+    if (userId) params.append('userId', userId);
+
+    const query = params.toString() ? `?${params.toString()}` : '';
     const res = await fetch(`${API_BASE}/tests/${shareId}${query}`);
     const json: ApiResponse<HtsmTestInfo> = await res.json();
     if (!json.success || !json.data) throw new Error(json.error || 'Failed to fetch test info');

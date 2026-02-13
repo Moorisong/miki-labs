@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useLanguage } from '@/context/language-context';
 
 import { HTSM_KEYWORD_CATEGORIES, HTSM_CONFIG } from './constants';
@@ -34,6 +35,7 @@ function generateFingerprint(): string {
 
 export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
     const router = useRouter();
+    const { data: session } = useSession();
     const { t } = useLanguage();
     const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
     const [submitted, setSubmitted] = useState<boolean>(false);
@@ -48,7 +50,12 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
         const checkStatus = async () => {
             try {
                 const fingerprint = generateFingerprint();
-                const info = await fetchTestInfo(shareId, fingerprint);
+                const info = await fetchTestInfo(
+                    shareId,
+                    fingerprint,
+                    session?.user?.kakaoId
+                );
+
 
                 if (info.isCreator) {
                     setIsCreator(true);

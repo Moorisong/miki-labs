@@ -398,11 +398,11 @@ Select 3 words to continue
 
 활성
 
-Create My Test →
+Start with Kakao →
 
-클릭 시 shareId 생성 후 공유 페이지 이동
+클릭 시 카카오 로그인 후 테스트 생성 (DB에 카카오 ID 연동)
 
-**※ 생성 시 LocalStorage에 shareId 저장 (재방문 UX 핵심)**
+**※ 생성 시 카카오 계정과 연동하여 영구 저장 (재방문 UX 핵심)**
 
 ---
 

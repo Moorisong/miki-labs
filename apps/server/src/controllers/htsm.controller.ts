@@ -76,7 +76,7 @@ export async function getProofToken(req: Request, res: Response): Promise<void> 
  */
 export async function createTest(req: Request, res: Response): Promise<void> {
     try {
-        const { selfKeywords, proofToken, fingerprintHash } = req.body;
+        const { selfKeywords, proofToken, fingerprintHash, userId } = req.body;
 
         // 1. Proof Token 검증
         if (!proofToken || typeof proofToken !== 'string') {
@@ -107,19 +107,39 @@ export async function createTest(req: Request, res: Response): Promise<void> {
             return;
         }
 
-        // 3. Fingerprint 검증 (선택적일 수도 있지만, 기능 구현을 위해 필요)
-        if (fingerprintHash && typeof fingerprintHash !== 'string') {
-            res.status(400).json({ success: false, error: HTSM_ERRORS.INVALID_FINGERPRINT });
+        // 3. User ID 검증 (필수)
+        if (!userId || typeof userId !== 'string') {
+            res.status(400).json({ success: false, error: '로그인이 필요합니다.' });
+            return;
+        }
+
+        // 3.5 생성 제한 정책 (하루 5개)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // 오늘 00:00:00
+
+        const JohariTest = getJohariTestModel();
+        const dailyCount = await JohariTest.countDocuments({
+            userId,
+            createdAt: { $gte: today }
+        });
+
+        if (dailyCount >= 5) {
+            res.status(429).json({ success: false, error: '하루에 생성할 수 있는 테스트 개수(5개)를 초과했습니다.' });
             return;
         }
 
         // 4. ShareId 생성 & DB 저장
         const shareId = nanoid(HTSM_CONFIG.SHARE_ID_LENGTH);
-        const JohariTest = getJohariTestModel();
+        const ip = req.ip || req.socket.remoteAddress || 'unknown';
+        const userAgent = req.get('User-Agent') || 'unknown';
+
         const test = await JohariTest.create({
             shareId,
             selfKeywords,
-            creatorFingerprint: fingerprintHash,
+            userId, // 카카오 ID 저장
+            creatorFingerprint: fingerprintHash, // 보조 저장
+            createdIp: ip,
+            createdUserAgent: userAgent,
         });
 
         // 통계 업데이트 (비동기 처리)
@@ -134,21 +154,21 @@ export async function createTest(req: Request, res: Response): Promise<void> {
 }
 
 /**
- * GET /api/htsm/my-test/:fingerprintHash
+ * GET /api/htsm/my-test/:userId
  * 내 최근 테스트 조회
  */
 export async function getMyTest(req: Request, res: Response): Promise<void> {
     try {
-        const { fingerprintHash } = req.params;
+        const { userId } = req.params;
 
-        if (!fingerprintHash || typeof fingerprintHash !== 'string') {
-            res.status(400).json({ success: false, error: HTSM_ERRORS.INVALID_FINGERPRINT });
+        if (!userId || typeof userId !== 'string') {
+            res.status(400).json({ success: false, error: '유저 ID가 필요합니다.' });
             return;
         }
 
         const JohariTest = getJohariTestModel();
-        // 가장 최근에 생성한 테스트 하나만 조회
-        const test = await JohariTest.findOne({ creatorFingerprint: fingerprintHash })
+        // 가장 최근에 생성한 테스트 하나만 조회 (userId 기준)
+        const test = await JohariTest.findOne({ userId })
             .sort({ createdAt: -1 });
 
         if (!test) {
@@ -223,6 +243,28 @@ export async function submitAnswer(req: Request, res: Response): Promise<void> {
         const userAgent = req.get('User-Agent') || 'unknown';
 
         const JohariAnswer = getJohariAnswerModel();
+
+        // 5.1 동일 IP 제한 (한 테스트당 2회까지만 허용)
+        const ipCount = await JohariAnswer.countDocuments({
+            testId: test._id,
+            ip: ip
+        });
+
+        if (ipCount >= 2) {
+            res.status(403).json({ success: false, error: '같은 네트워크에서 참여 가능한 인원이 모두 참여했어요 🙏 친구 결과를 확인해 보세요!' });
+            return;
+        }
+
+        // 5.2 Fingerprint 중복 검사 (DB Unique Index가 잡지만 명시적 처리)
+        const existingAnswer = await JohariAnswer.findOne({
+            testId: test._id,
+            fingerprintHash
+        });
+
+        if (existingAnswer) {
+            res.status(409).json({ success: false, error: '이미 참여하셨습니다 😊 친구 결과를 확인해 보세요!' });
+            return;
+        }
         try {
             await JohariAnswer.create({
                 testId: test._id,
@@ -313,6 +355,7 @@ export async function getResult(req: Request, res: Response): Promise<void> {
 export async function getTestInfo(req: Request, res: Response): Promise<void> {
     try {
         const shareId = req.params.shareId as string;
+        const userId = req.query.userId as string | undefined;
         const fingerprintHash = req.query.fp as string | undefined;
 
         if (!shareId || !SHARE_ID_REGEX.test(shareId)) {
@@ -327,7 +370,7 @@ export async function getTestInfo(req: Request, res: Response): Promise<void> {
             return;
         }
 
-        const isCreator = fingerprintHash && test.creatorFingerprint === fingerprintHash;
+        const isCreator = (userId && test.userId === userId) || (fingerprintHash && test.creatorFingerprint === fingerprintHash);
 
         console.log(`[HTSM] Test info viewed for ${shareId} (isCreator: ${isCreator})`);
         res.json({

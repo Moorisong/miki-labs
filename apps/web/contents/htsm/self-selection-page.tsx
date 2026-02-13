@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession, signIn } from 'next-auth/react';
 import { useLanguage } from '@/context/language-context';
 
 import { HTSM_KEYWORD_CATEGORIES, HTSM_CONFIG, HTSM_STORAGE_KEY } from './constants';
@@ -12,6 +13,7 @@ import styles from './styles.module.css';
 export default function SelfSelectionPage() {
     const router = useRouter();
     const { t } = useLanguage();
+    const { data: session, status } = useSession();
     const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
@@ -52,7 +54,11 @@ export default function SelfSelectionPage() {
             const fingerprint = generateFingerprint();
 
             // 3. 테스트 생성 (API)
-            const shareId = await createTest(selectedKeywords, proofToken, fingerprint);
+            const userId = session?.user?.kakaoId;
+            if (!userId) {
+                throw new Error('로그인이 필요합니다.');
+            }
+            const shareId = await createTest(selectedKeywords, proofToken, userId, fingerprint);
 
             // 3. LocalStorage 저장 (재방문 UX)
             if (typeof window !== 'undefined') {
@@ -70,6 +76,48 @@ export default function SelfSelectionPage() {
 
     const selectionCount = selectedKeywords.length;
     const progress = (selectionCount / HTSM_CONFIG.MAX_KEYWORD_SELECTION) * 100;
+
+    if (status === 'loading') {
+        return <div className={styles.pageContainer}><div className={styles.innerContainer}><p style={{ textAlign: 'center', marginTop: '50px' }}>Loading...</p></div></div>;
+    }
+
+    if (status === 'unauthenticated') {
+        return (
+            <div className={styles.pageContainer}>
+                <div className={styles.innerContainer}>
+                    <div className={styles.selectionPage} style={{ textAlign: 'center', padding: '40px 20px' }}>
+                        <h1 className={styles.selectionTitle} style={{ marginBottom: '20px' }}>
+                            {t('create.title')}
+                        </h1>
+                        <p style={{ marginBottom: '40px', color: '#666' }}>
+                            테스트를 생성하려면 로그인이 필요합니다.<br />
+                            카카오 로그인으로 간편하게 시작하세요.
+                        </p>
+                        <button
+                            className={styles.btnPrimary}
+                            style={{
+                                backgroundColor: '#FEE500',
+                                color: '#191919',
+                                border: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                margin: '0 auto',
+                                maxWidth: '300px'
+                            }}
+                            onClick={() => signIn('kakao', { callbackUrl: window.location.href })}
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 3C6.48 3 2 6.58 2 11c0 2.85 1.89 5.35 4.72 6.77-.15.53-.96 3.39-1 3.56 0 .05-.01.1-.01.15 0 .16.08.3.22.37.08.04.16.05.24.05.13 0 .26-.05.37-.13.52-.37 4.03-2.73 4.67-3.16.59.08 1.19.12 1.79.12 5.52 0 10-3.58 10-8s-4.48-8-10-8" />
+                            </svg>
+                            카카오로 시작하기
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.pageContainer}>

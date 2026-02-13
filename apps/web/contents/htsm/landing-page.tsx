@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import { useSession } from 'next-auth/react';
 import { useLanguage } from '@/context/language-context';
 import { HTSM_STORAGE_KEY } from './constants';
 import { fetchStats, HtsmStats, fetchMyTest } from './api';
@@ -16,6 +17,7 @@ const BackgroundSparkles = dynamic(() => import('./background-sparkles'), { ssr:
 
 export default function LandingPage() {
     const router = useRouter();
+    const { data: session, status } = useSession();
     const { t } = useLanguage();
     const [myShareId, setMyShareId] = useState<string | null>(null);
     const [stats, setStats] = useState<HtsmStats | null>(null);
@@ -31,25 +33,22 @@ export default function LandingPage() {
                 }
             }
 
-            // 2. DB 확인 (Fingerprint 기반)
-            try {
-                const fingerprint = generateFingerprint();
-                if (fingerprint) {
-                    const dbShareId = await fetchMyTest(fingerprint);
+            // 2. 로그인 세션 확인
+            if (status === 'authenticated' && session?.user?.kakaoId) {
+                try {
+                    const dbShareId = await fetchMyTest(session.user.kakaoId);
                     if (dbShareId) {
                         setMyShareId(dbShareId);
-                        // LocalStorage 동기화
                         localStorage.setItem(HTSM_STORAGE_KEY.SHARE_ID, dbShareId);
                     }
+                } catch (err) {
+                    console.error('Failed to fetch my test:', err);
                 }
-            } catch (err) {
-                console.error('Failed to restore from DB:', err);
             }
         };
 
         initialize();
-        fetchStats().then(setStats).catch(console.error);
-    }, []);
+    }, [session, status]);
 
     const handleStart = () => {
         router.push('/htsm/start');

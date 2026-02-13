@@ -44,10 +44,12 @@ Next.js (App Router) 환경에서 사용자가 테스트를 생성하고, 친구
 - **랜딩 (`/htsm`)**:
     - 히어로 섹션 ("See how they see me")
     - "Start My Test" 버튼 -> `/htsm/start` 이동
+    - (로그인된 경우) "Continue My Result" 버튼 노출
 - **생성 페이지 (`/htsm/start`)**:
+    - **로그인 체크**: 미로그인 시 "카카오로 시작하기" 버튼 노출 (필수)
     - 30~40개 키워드 리스트 렌더링 (Chips)
     - 최대 3개 선택 로직 (useState)
-    - "Create My Test" 버튼 -> `POST /api/htsm/tests` 호출 -> 성공 시 `/htsm/share/[id]` 이동
+    - "Create My Test" 버튼 -> `POST /api/htsm/tests` 호출 (userId 포함) -> 성공 시 `/htsm/share/[id]` 이동
 
 ### Step 3: 공유 페이지 (작성자)
 - **공유 페이지 (`/htsm/share/[id]`)**:
