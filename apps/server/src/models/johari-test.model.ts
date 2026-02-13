@@ -6,6 +6,7 @@ export interface IJohariTest {
     selfKeywords: string[];
     answerCount: number;
     isClosed: boolean;
+    creatorFingerprint?: string; // 생성자 식별용 (DB 조회)
     createdAt: Date;
     updatedAt: Date;
 }
@@ -34,6 +35,10 @@ const johariTestSchema = new Schema<IJohariTest>(
         isClosed: {
             type: Boolean,
             default: false,
+        },
+        creatorFingerprint: {
+            type: String,
+            index: true, // 빠른 조회를 위해 인덱스 추가
         },
     },
     {

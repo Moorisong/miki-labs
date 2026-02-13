@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useLanguage } from '@/context/language-context';
 import { HTSM_STORAGE_KEY } from './constants';
-import { fetchStats, HtsmStats } from './api';
+import { fetchStats, HtsmStats, fetchMyTest } from './api';
+import { generateFingerprint } from './utils/fingerprint';
 
 import styles from './styles.module.css';
 import LanguageSwitcher from '@/components/common/language-switcher';
@@ -20,11 +21,33 @@ export default function LandingPage() {
     const [stats, setStats] = useState<HtsmStats | null>(null);
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const stored = localStorage.getItem(HTSM_STORAGE_KEY.SHARE_ID);
-            if (stored) setMyShareId(stored);
-        }
+        const initialize = async () => {
+            // 1. LocalStorage 확인
+            if (typeof window !== 'undefined') {
+                const stored = localStorage.getItem(HTSM_STORAGE_KEY.SHARE_ID);
+                if (stored && stored !== 'null' && stored !== 'undefined') {
+                    setMyShareId(stored);
+                    return; // 이미 있으면 종료
+                }
+            }
 
+            // 2. DB 확인 (Fingerprint 기반)
+            try {
+                const fingerprint = generateFingerprint();
+                if (fingerprint) {
+                    const dbShareId = await fetchMyTest(fingerprint);
+                    if (dbShareId) {
+                        setMyShareId(dbShareId);
+                        // LocalStorage 동기화
+                        localStorage.setItem(HTSM_STORAGE_KEY.SHARE_ID, dbShareId);
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to restore from DB:', err);
+            }
+        };
+
+        initialize();
         fetchStats().then(setStats).catch(console.error);
     }, []);
 

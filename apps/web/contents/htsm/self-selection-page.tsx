@@ -6,6 +6,7 @@ import { useLanguage } from '@/context/language-context';
 
 import { HTSM_KEYWORD_CATEGORIES, HTSM_CONFIG, HTSM_STORAGE_KEY } from './constants';
 import { fetchProofToken, createTest } from './api';
+import { generateFingerprint } from './utils/fingerprint';
 import styles from './styles.module.css';
 
 export default function SelfSelectionPage() {
@@ -47,8 +48,11 @@ export default function SelfSelectionPage() {
             // 1. Proof Token 발급
             const proofToken = await fetchProofToken();
 
-            // 2. 테스트 생성 (API)
-            const shareId = await createTest(selectedKeywords, proofToken);
+            // 2. Fingerprint 생성
+            const fingerprint = generateFingerprint();
+
+            // 3. 테스트 생성 (API)
+            const shareId = await createTest(selectedKeywords, proofToken, fingerprint);
 
             // 3. LocalStorage 저장 (재방문 UX)
             if (typeof window !== 'undefined') {
