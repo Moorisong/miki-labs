@@ -3,18 +3,18 @@
 import React, { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Html, OrbitControls } from '@react-three/drei';
-import { useLanguage } from '@/context/language-context';
+
 import type { Group } from 'three';
 
 const KEYWORDS = [
-    { text: 'Creative', gradient: 'linear-gradient(135deg, #ec4899, #f472b6)', shadow: '#ec489966', position: [-2.5, 2.2, 0] as [number, number, number] },
-    { text: 'Funny', gradient: 'linear-gradient(135deg, #f59e0b, #fbbf24)', shadow: '#f59e0b66', position: [2.3, 1.8, 1] as [number, number, number] },
-    { text: 'Kind', gradient: 'linear-gradient(135deg, #10b981, #34d399)', shadow: '#10b98166', position: [-3.0, -0.8, 0.8] as [number, number, number] },
-    { text: 'Energetic', gradient: 'linear-gradient(135deg, #ef4444, #f87171)', shadow: '#ef444466', position: [2.8, -0.5, -0.8] as [number, number, number] },
-    { text: 'Thoughtful', gradient: 'linear-gradient(135deg, #8b5cf6, #a78bfa)', shadow: '#8b5cf666', position: [0, 0.3, 1.5] as [number, number, number] },
-    { text: 'Organized', gradient: 'linear-gradient(135deg, #3b82f6, #60a5fa)', shadow: '#3b82f666', position: [-1.8, -2.5, -0.5] as [number, number, number] },
-    { text: 'Adventurous', gradient: 'linear-gradient(135deg, #f97316, #fb923c)', shadow: '#f9731666', position: [1.5, 3.0, -0.5] as [number, number, number] },
-    { text: 'Loyal', gradient: 'linear-gradient(135deg, #6366f1, #818cf8)', shadow: '#6366f166', position: [2.5, -2.8, 0.3] as [number, number, number] },
+    { text: '창의적인', gradient: 'linear-gradient(135deg, #ec4899, #f472b6)', shadow: '#ec489966', position: [-2.5, 2.2, 0] as [number, number, number] },
+    { text: '재미있는', gradient: 'linear-gradient(135deg, #f59e0b, #fbbf24)', shadow: '#f59e0b66', position: [2.3, 1.8, 1] as [number, number, number] },
+    { text: '친절한', gradient: 'linear-gradient(135deg, #10b981, #34d399)', shadow: '#10b98166', position: [-3.0, -0.8, 0.8] as [number, number, number] },
+    { text: '활기찬', gradient: 'linear-gradient(135deg, #ef4444, #f87171)', shadow: '#ef444466', position: [2.8, -0.5, -0.8] as [number, number, number] },
+    { text: '사려 깊은', gradient: 'linear-gradient(135deg, #8b5cf6, #a78bfa)', shadow: '#8b5cf666', position: [0, 0.3, 1.5] as [number, number, number] },
+    { text: '체계적인', gradient: 'linear-gradient(135deg, #3b82f6, #60a5fa)', shadow: '#3b82f666', position: [-1.8, -2.5, -0.5] as [number, number, number] },
+    { text: '모험적인', gradient: 'linear-gradient(135deg, #f97316, #fb923c)', shadow: '#f9731666', position: [1.5, 3.0, -0.5] as [number, number, number] },
+    { text: '의리 있는', gradient: 'linear-gradient(135deg, #6366f1, #818cf8)', shadow: '#6366f166', position: [2.5, -2.8, 0.3] as [number, number, number] },
 ];
 
 function FloatingWord({ text, gradient, shadow, position, index }: {
@@ -25,7 +25,6 @@ function FloatingWord({ text, gradient, shadow, position, index }: {
     index: number;
 }) {
     const groupRef = useRef<Group>(null);
-    const { t } = useLanguage();
 
     useFrame((state) => {
         if (groupRef.current) {
@@ -57,7 +56,7 @@ function FloatingWord({ text, gradient, shadow, position, index }: {
                         userSelect: 'none',
                     }}
                 >
-                    {t(`keywords.${text}`)}
+                    {text}
                 </div>
             </Html>
         </group>

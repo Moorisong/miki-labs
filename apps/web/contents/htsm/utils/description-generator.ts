@@ -28,47 +28,6 @@ const TEMPLATES = {
     }
 };
 
-const ENGLISH_TEMPLATES = {
-    open: {
-        praise: ["The vibe people get when they encounter you in daily life seems quite positive and stable."],
-        but: ["However, behind your ${k1Mod} exterior, your own standards and routines seem to be quite firmly established."],
-        sting: ["While you look relaxed to others, you can be a bit conservative about change or reluctant to step out of your comfort zone."],
-        closing: ["These traits make you a predictable and trustworthy person, which adds to your human charm."]
-    },
-    blind: {
-        praise: ["You might not have realized it, but people have discovered a very impressive ${k1Mod} charm in you."],
-        but: ["Interestingly, your ${k2Mod} side is reflected more clearly in the eyes of others than you might recognize."],
-        sting: ["There are opinions that you sometimes spend too much energy reading others' moods or that you're secretly quite stubborn."],
-        closing: ["Moments of discovering these unknown pieces of yourself will make you a more multi-dimensional person."]
-    },
-    hidden: {
-        praise: ["On the surface, you seem to blend in well with a fairly ${k1Mod} image."],
-        but: ["However, your true inner self seems to hold a much stronger ${k2Mod} personality than people might think."],
-        sting: ["In reality, you might be judging others inwardly or becoming easily sensitive when you lack personal time—something only those close to you know."],
-        closing: ["This contrast is likely the very thing that makes you more intriguing the more someone gets to know you."]
-    },
-    unknown: {
-        praise: ["Deep inside, there seems to be a ${k1Mod} ability that is still quietly waiting to be fully unleashed."],
-        but: ["At the same time, undiscovered ${k2Mod} energies are likely to manifest when the right opportunity arises."],
-        sting: ["You might be cautious about trying new things or slow to take action now, but that's just a charging state before your potential explodes."],
-        closing: ["I'm already looking forward to seeing what wonderful changes your future self will bring."]
-    }
-};
-
-
-// Helper for Korean conjugation
-function conjugateToAnd(word: string): string {
-    if (!word) return '';
-    if (word.endsWith('한')) return word.slice(0, -1) + '하고';
-    if (word.endsWith('인')) return word.slice(0, -1) + '이고';
-    if (word.endsWith('있는')) return word.slice(0, -2) + '있고';
-    if (word.endsWith('로운')) return word.slice(0, -2) + '롭고';
-    if (word.endsWith('운')) return word.slice(0, -1) + '웁고';
-    if (word.endsWith('은')) return word.slice(0, -1) + '고';
-    if (word.endsWith('는')) return word.slice(0, -1) + '고';
-    return word + '이고';
-}
-
 function conjugateToModifier(word: string): string {
     if (!word) return '';
     // For Korean
@@ -78,19 +37,16 @@ function conjugateToModifier(word: string): string {
         }
         return word + '인';
     }
-    // For English (simple lowercase)
-    return word.toLowerCase();
+    return word;
 }
 
 export function generateDescription(
     area: 'open' | 'blind' | 'hidden' | 'unknown',
-    keywords: string[],
-    lang: string = 'ko'
+    keywords: string[]
 ): string {
     if (!keywords || keywords.length === 0) return '';
 
-    const isEn = lang === 'en';
-    const templates = isEn ? ENGLISH_TEMPLATES[area] : TEMPLATES[area] as any;
+    const templates = TEMPLATES[area];
     const getRandom = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
 
     const uniqueKeywords = Array.from(new Set(keywords));

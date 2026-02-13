@@ -76,6 +76,6 @@ export const HTSM_MESSAGES = {
     KEYWORD_LIMIT: `최대 ${HTSM_CONFIG.MAX_KEYWORD_SELECTION}개까지 선택할 수 있어요.`,
     SUBMIT_SUCCESS: '감사합니다! 답변이 제출되었어요.',
     COPY_SUCCESS: '링크가 복사되었어요!',
-    SHARE_TEXT: 'Help me discover how you see me! Pick 3 words that describe me.',
-    SHARE_TITLE: 'How do you see me?',
+    SHARE_TEXT: '내가 보는 나 vs 남들이 보는 나! 친구들이 생각하는 내 이미지는?',
+    SHARE_TITLE: '나의 조하리의 창',
 } as const;
