@@ -20,14 +20,26 @@ export async function fetchProofToken(): Promise<string> {
 }
 
 /** 테스트 생성 */
-export async function createTest(selfKeywords: string[], proofToken: string): Promise<string> {
+export async function createTest(
+    selfKeywords: string[],
+    proofToken: string,
+    fingerprintHash?: string
+): Promise<string> {
     const res = await fetch(`${API_BASE}/tests`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ selfKeywords, proofToken }),
+        body: JSON.stringify({ selfKeywords, proofToken, fingerprintHash }),
     });
     const json: ApiResponse<{ shareId: string }> = await res.json();
     if (!json.success || !json.data) throw new Error(json.error || 'Failed to create test');
+    return json.data.shareId;
+}
+
+/** 내 최근 테스트 조회 */
+export async function fetchMyTest(fingerprintHash: string): Promise<string | null> {
+    const res = await fetch(`${API_BASE}/my-test/${fingerprintHash}`);
+    const json: ApiResponse<{ shareId: string | null }> = await res.json();
+    if (!json.success || !json.data) throw new Error(json.error || 'Failed to fetch my test');
     return json.data.shareId;
 }
 
@@ -82,3 +94,18 @@ export async function fetchStats(): Promise<HtsmStats> {
     if (!json.success || !json.data) throw new Error(json.error || 'Failed to fetch stats');
     return json.data;
 }
+
+export interface HtsmTestInfo {
+    answerCount: number;
+    isClosed: boolean;
+}
+
+/** 테스트 정보 조회 */
+export async function fetchTestInfo(shareId: string): Promise<HtsmTestInfo> {
+    const res = await fetch(`${API_BASE}/tests/${shareId}`);
+    const json: ApiResponse<HtsmTestInfo> = await res.json();
+    if (!json.success || !json.data) throw new Error(json.error || 'Failed to fetch test info');
+    return json.data;
+}
+
+/** 결과 조회 */

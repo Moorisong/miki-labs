@@ -76,7 +76,9 @@ export default {
         thanksSubtitle: "Your friend will see the combined results",
         viewResult: "See Friend's Result",
         createMine: "Create Your Own Test",
-        error: "Failed to submit answer."
+        error: "Failed to submit answer.",
+        fullTitle: "This test is already full!",
+        fullSubtitle: "Maximum number of friends (10) have already participated.",
     },
     result: {
         title: "My Johari Result",

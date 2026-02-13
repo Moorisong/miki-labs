@@ -28,7 +28,7 @@ export async function getProofToken(req: Request, res: Response): Promise<void> 
  */
 export async function createTest(req: Request, res: Response): Promise<void> {
     try {
-        const { selfKeywords, proofToken } = req.body;
+        const { selfKeywords, proofToken, fingerprintHash } = req.body;
 
         // 1. Proof Token 검증
         if (!proofToken || typeof proofToken !== 'string') {
@@ -59,15 +59,55 @@ export async function createTest(req: Request, res: Response): Promise<void> {
             return;
         }
 
-        // 3. ShareId 생성 & DB 저장
+        // 3. Fingerprint 검증 (선택적일 수도 있지만, 기능 구현을 위해 필요)
+        if (fingerprintHash && typeof fingerprintHash !== 'string') {
+            res.status(400).json({ success: false, error: HTSM_ERRORS.INVALID_FINGERPRINT });
+            return;
+        }
+
+        // 4. ShareId 생성 & DB 저장
         const shareId = nanoid(HTSM_CONFIG.SHARE_ID_LENGTH);
         const JohariTest = getJohariTestModel();
-        const test = await JohariTest.create({ shareId, selfKeywords });
+        const test = await JohariTest.create({
+            shareId,
+            selfKeywords,
+            creatorFingerprint: fingerprintHash,
+        });
 
-        console.log(`[HTSM] Test created: ${shareId}`);
+        console.log(`[HTSM] Test created: ${shareId} (fingerprint: ${fingerprintHash})`);
         res.status(201).json({ success: true, data: { shareId: test.shareId } });
     } catch (error) {
         console.error('[HTSM] Create test error:', error);
+        res.status(500).json({ success: false, error: HTSM_ERRORS.INTERNAL_ERROR });
+    }
+}
+
+/**
+ * GET /api/htsm/my-test/:fingerprintHash
+ * 내 최근 테스트 조회
+ */
+export async function getMyTest(req: Request, res: Response): Promise<void> {
+    try {
+        const { fingerprintHash } = req.params;
+
+        if (!fingerprintHash || typeof fingerprintHash !== 'string') {
+            res.status(400).json({ success: false, error: HTSM_ERRORS.INVALID_FINGERPRINT });
+            return;
+        }
+
+        const JohariTest = getJohariTestModel();
+        // 가장 최근에 생성한 테스트 하나만 조회
+        const test = await JohariTest.findOne({ creatorFingerprint: fingerprintHash })
+            .sort({ createdAt: -1 });
+
+        if (!test) {
+            res.json({ success: true, data: { shareId: null } });
+            return;
+        }
+
+        res.json({ success: true, data: { shareId: test.shareId } });
+    } catch (error) {
+        console.error('[HTSM] Get my test error:', error);
         res.status(500).json({ success: false, error: HTSM_ERRORS.INTERNAL_ERROR });
     }
 }
@@ -213,6 +253,42 @@ export async function getResult(req: Request, res: Response): Promise<void> {
         });
     } catch (error) {
         console.error('[HTSM] Get result error:', error);
+        res.status(500).json({ success: false, error: HTSM_ERRORS.INTERNAL_ERROR });
+    }
+}
+
+/**
+ * GET /api/htsm/tests/:shareId
+ * 테스트 정보 조회 (참여 가능 여부 확인용)
+ */
+export async function getTestInfo(req: Request, res: Response): Promise<void> {
+    try {
+        const shareId = req.params.shareId as string;
+
+        // 1. shareId 검증
+        if (!shareId || !SHARE_ID_REGEX.test(shareId)) {
+            res.status(400).json({ success: false, error: HTSM_ERRORS.INVALID_SHARE_ID });
+            return;
+        }
+
+        // 2. Test 조회
+        const JohariTest = getJohariTestModel();
+        const test = await JohariTest.findOne({ shareId });
+        if (!test) {
+            res.status(404).json({ success: false, error: HTSM_ERRORS.TEST_NOT_FOUND });
+            return;
+        }
+
+        console.log(`[HTSM] Test info viewed for ${shareId}`);
+        res.json({
+            success: true,
+            data: {
+                answerCount: test.answerCount,
+                isClosed: test.isClosed,
+            },
+        });
+    } catch (error) {
+        console.error('[HTSM] Get test info error:', error);
         res.status(500).json({ success: false, error: HTSM_ERRORS.INTERNAL_ERROR });
     }
 }

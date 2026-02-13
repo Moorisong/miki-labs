@@ -76,7 +76,9 @@ export default {
         thanksSubtitle: "친구가 종합된 결과를 확인할 수 있게 되었습니다",
         viewResult: "친구 결과 보기",
         createMine: "나도 테스트 만들기",
-        error: "답변 제출에 실패했습니다."
+        error: "답변 제출에 실패했습니다.",
+        fullTitle: "이미 많은 친구들이 참여했어요!",
+        fullSubtitle: "최대 인원(10명)이 모두 참여하여 더 이상 응답을 남길 수 없습니다.",
     },
     result: {
         title: "나의 조하리의 창 결과",

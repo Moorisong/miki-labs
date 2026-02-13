@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/language-context';
 
 import { HTSM_KEYWORD_CATEGORIES, HTSM_CONFIG } from './constants';
-import { submitAnswer } from './api';
+import { submitAnswer, fetchTestInfo } from './api';
 import styles from './styles.module.css';
 
 interface FriendAnswerPageProps {
@@ -37,9 +37,30 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
     const { t } = useLanguage();
     const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
     const [submitted, setSubmitted] = useState<boolean>(false);
+    const [isClosed, setIsClosed] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
     const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+
+    useEffect(() => {
+        const checkStatus = async () => {
+            try {
+                const info = await fetchTestInfo(shareId);
+                if (info.isClosed || info.answerCount >= HTSM_CONFIG.MAX_FRIENDS) {
+                    setIsClosed(true);
+                }
+            } catch (err) {
+                console.error('Failed to fetch test info:', err);
+                // 에러 발생 시 진행을 허용하거나 별도 처리가 필요할 수 있으나,
+                // 여기서는 사용자 경험을 위해 무시하고 진행하거나 에러 메시지만 표시
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        checkStatus();
+    }, [shareId]);
 
     const toggleKeyword = (keyword: string) => {
         if (selectedKeywords.includes(keyword)) {
@@ -79,6 +100,40 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
         }
     };
 
+
+    if (isLoading) {
+        return (
+            <div className={styles.pageContainer}>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                    <p>{t('common.loading')}</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (isClosed) {
+        return (
+            <div className={styles.pageContainer}>
+                <div className={styles.submittedContainer}>
+                    <div className={styles.submittedContent}>
+                        <div className={styles.submittedEmoji}>🔒</div>
+                        <h1 className={styles.submittedTitle}>{t('answer.fullTitle')}</h1>
+                        <p className={styles.submittedSubtitle}>
+                            {t('answer.fullSubtitle')}
+                        </p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', width: '100%', maxWidth: '300px', margin: '0 auto' }}>
+                            <button className={`${styles.btnPrimary} ${styles.btnFull}`} onClick={() => router.push(`/htsm/result/${shareId}`)}>
+                                {t('answer.viewResult')}
+                            </button>
+                            <button className={`${styles.btnSecondary} ${styles.btnFull}`} onClick={() => router.push('/htsm')}>
+                                {t('answer.createMine')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (submitted) {
         return (

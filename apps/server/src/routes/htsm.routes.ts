@@ -5,6 +5,8 @@ import {
     createTest,
     submitAnswer,
     getResult,
+    getTestInfo,
+    getMyTest,
     getStats,
 } from '../controllers/htsm.controller';
 
@@ -78,6 +80,8 @@ router.get('/proof-token', getProofToken);
 router.post('/tests', createIpLimiter, createHourLimiter, createTest);
 router.post('/answers', answerIpLimiter, answerShareIdLimiter, submitAnswer);
 router.get('/result/:shareId', viewLimiter, getResult);
+router.get('/tests/:shareId', viewLimiter, getTestInfo);
+router.get('/my-test/:fingerprintHash', viewLimiter, getMyTest);
 router.get('/stats', getStats);
 
 export default router;
