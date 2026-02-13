@@ -101,7 +101,7 @@ export default function ResultPage({ shareId }: ResultPageProps) {
                     <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                         <Link href="/htsm" style={{ display: 'inline-block', marginBottom: '1rem' }}>
                             <Image
-                                src="/htsm-logo-v3.png"
+                                src="/htsm-logo-v6.png"
                                 alt="HTSM Logo"
                                 width={80}
                                 height={80}
