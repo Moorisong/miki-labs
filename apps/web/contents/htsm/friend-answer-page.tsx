@@ -42,18 +42,24 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
     const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+    const [isCreator, setIsCreator] = useState<boolean>(false);
 
     useEffect(() => {
         const checkStatus = async () => {
             try {
-                const info = await fetchTestInfo(shareId);
+                const fingerprint = generateFingerprint();
+                const info = await fetchTestInfo(shareId, fingerprint);
+
+                if (info.isCreator) {
+                    setIsCreator(true);
+                    return;
+                }
+
                 if (info.isClosed || info.answerCount >= HTSM_CONFIG.MAX_FRIENDS) {
                     setIsClosed(true);
                 }
             } catch (err) {
                 console.error('Failed to fetch test info:', err);
-                // 에러 발생 시 진행을 허용하거나 별도 처리가 필요할 수 있으나,
-                // 여기서는 사용자 경험을 위해 무시하고 진행하거나 에러 메시지만 표시
             } finally {
                 setIsLoading(false);
             }
@@ -106,6 +112,31 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
             <div className={styles.pageContainer}>
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
                     <p>{t('common.loading')}</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (isCreator) {
+        return (
+            <div className={styles.pageContainer}>
+                <div className={styles.submittedContainer}>
+                    <div className={styles.submittedContent}>
+                        <div className={styles.submittedEmoji}>🚫</div>
+                        <h1 className={styles.submittedTitle}>본인의 테스트입니다</h1>
+                        <p className={styles.submittedSubtitle}>
+                            자신의 테스트에는 답변을 남길 수 없어요.<br />
+                            친구들에게 링크를 공유해보세요!
+                        </p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', width: '100%', maxWidth: '300px', margin: '0 auto' }}>
+                            <button className={`${styles.btnPrimary} ${styles.btnFull}`} onClick={() => router.push(`/htsm/share/${shareId}`)}>
+                                공유하기
+                            </button>
+                            <button className={`${styles.btnSecondary} ${styles.btnFull}`} onClick={() => router.push(`/htsm/result/${shareId}`)}>
+                                결과 보기
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         );
@@ -254,6 +285,13 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
                             <button className={`${styles.btnPrimary} ${styles.btnFull}`} onClick={handleSubmit}
                                 disabled={selectedKeywords.length < HTSM_CONFIG.MIN_KEYWORD_SELECTION || isSubmitting}>
                                 {isSubmitting ? t('answer.submitting') : t('answer.submit')}
+                            </button>
+                            <button
+                                className={`${styles.btnSecondary} ${styles.btnFull}`}
+                                onClick={() => router.push('/htsm')}
+                                style={{ marginTop: '0.75rem' }}
+                            >
+                                취소하기
                             </button>
                         </div>
                     </div>

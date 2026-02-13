@@ -98,11 +98,13 @@ export async function fetchStats(): Promise<HtsmStats> {
 export interface HtsmTestInfo {
     answerCount: number;
     isClosed: boolean;
+    isCreator?: boolean;
 }
 
 /** 테스트 정보 조회 */
-export async function fetchTestInfo(shareId: string): Promise<HtsmTestInfo> {
-    const res = await fetch(`${API_BASE}/tests/${shareId}`);
+export async function fetchTestInfo(shareId: string, fingerprintHash?: string): Promise<HtsmTestInfo> {
+    const query = fingerprintHash ? `?fp=${fingerprintHash}` : '';
+    const res = await fetch(`${API_BASE}/tests/${shareId}${query}`);
     const json: ApiResponse<HtsmTestInfo> = await res.json();
     if (!json.success || !json.data) throw new Error(json.error || 'Failed to fetch test info');
     return json.data;

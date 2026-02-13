@@ -69,7 +69,7 @@ export default {
         title: "친구를 표현하는 단어 3~5개를 골라주세요",
         count: "{current}/{max} 선택됨",
         anonymous: "익명 보장",
-        takesTime: "10초 소요",
+        takesTime: "1분 투자하세요",
         submit: "답변 제출하기",
         submitting: "제출 중...",
         thanksTitle: "답변해주셔서 감사합니다!",

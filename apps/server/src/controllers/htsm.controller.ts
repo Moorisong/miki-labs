@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid';
 
 import { getJohariTestModel } from '../models/johari-test.model';
 import { getJohariAnswerModel } from '../models/johari-answer.model';
+import { getHtsmStatsModel } from '../models/htsm-stats.model';
 import { calculateJohari } from '../services/htsm/johari.service';
 import { generateProofToken, verifyProofToken } from '../services/htsm/proof-token.service';
 import {
@@ -12,6 +13,53 @@ import {
 } from '../services/htsm/constants';
 
 const SHARE_ID_REGEX = /^[a-zA-Z0-9_-]+$/;
+
+/**
+ * 오늘 날짜(UTC 00:00) 구하기
+ */
+function getTodayDate(): Date {
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+}
+
+/**
+ * 통계 업데이트 (증가)
+ */
+async function incrementStats(testCount: number, answerCount: number) {
+    try {
+        const HtsmStats = getHtsmStatsModel();
+        const today = getTodayDate();
+
+        // 오늘 날짜 통계 업데이트 (없으면 생성)
+        await HtsmStats.findOneAndUpdate(
+            { date: today },
+            {
+                $inc: {
+                    newTests: testCount,
+                    newAnswers: answerCount,
+                    totalTests: testCount, // 누적도 여기서 증가시킴 (나중에 전체 합산 방식 대신)
+                    totalAnswers: answerCount
+                }
+            },
+            { upsert: true, new: true }
+        );
+
+        // 전체 누적용 (date: 1970-01-01)
+        await HtsmStats.findOneAndUpdate(
+            { date: new Date(0) }, // 특수 키 (1970-01-01)
+            {
+                $inc: {
+                    totalTests: testCount,
+                    totalAnswers: answerCount
+                }
+            },
+            { upsert: true }
+        );
+
+    } catch (e) {
+        console.error('Failed to update stats:', e);
+    }
+}
 
 /**
  * GET /api/htsm/proof-token
@@ -73,6 +121,9 @@ export async function createTest(req: Request, res: Response): Promise<void> {
             selfKeywords,
             creatorFingerprint: fingerprintHash,
         });
+
+        // 통계 업데이트 (비동기 처리)
+        incrementStats(1, 0).catch(console.error);
 
         console.log(`[HTSM] Test created: ${shareId} (fingerprint: ${fingerprintHash})`);
         res.status(201).json({ success: true, data: { shareId: test.shareId } });
@@ -167,7 +218,7 @@ export async function submitAnswer(req: Request, res: Response): Promise<void> {
             return;
         }
 
-        // 5. 중복 검사 (fingerprint + testId 복합 유니크 인덱스가 처리)
+        // 5. 중복 검사
         const ip = req.ip || req.socket.remoteAddress || 'unknown';
         const userAgent = req.get('User-Agent') || 'unknown';
 
@@ -181,7 +232,6 @@ export async function submitAnswer(req: Request, res: Response): Promise<void> {
                 userAgent,
             });
         } catch (err: unknown) {
-            // MongoDB duplicate key error (E11000)
             if (err && typeof err === 'object' && 'code' in err && (err as { code: number }).code === 11000) {
                 res.status(409).json({ success: false, error: HTSM_ERRORS.DUPLICATE_ANSWER });
                 return;
@@ -200,6 +250,9 @@ export async function submitAnswer(req: Request, res: Response): Promise<void> {
             },
             { new: true }
         );
+
+        // 통계 업데이트
+        incrementStats(0, 1).catch(console.error);
 
         console.log(`[HTSM] Answer submitted for test ${shareId} (count: ${updatedTest?.answerCount})`);
         res.json({
@@ -220,13 +273,11 @@ export async function getResult(req: Request, res: Response): Promise<void> {
     try {
         const shareId = req.params.shareId as string;
 
-        // 1. shareId 검증
         if (!shareId || !SHARE_ID_REGEX.test(shareId)) {
             res.status(400).json({ success: false, error: HTSM_ERRORS.INVALID_SHARE_ID });
             return;
         }
 
-        // 2. Test 조회
         const JohariTest = getJohariTestModel();
         const test = await JohariTest.findOne({ shareId });
         if (!test) {
@@ -234,12 +285,10 @@ export async function getResult(req: Request, res: Response): Promise<void> {
             return;
         }
 
-        // 3. Answers 조회
         const JohariAnswer = getJohariAnswerModel();
         const answers = await JohariAnswer.find({ testId: test._id });
         const friendAnswers = answers.map((a) => a.keywords);
 
-        // 4. Johari 계산
         const johari = calculateJohari(test.selfKeywords, friendAnswers);
 
         console.log(`[HTSM] Result viewed for test ${shareId} (answers: ${answers.length})`);
@@ -259,19 +308,18 @@ export async function getResult(req: Request, res: Response): Promise<void> {
 
 /**
  * GET /api/htsm/tests/:shareId
- * 테스트 정보 조회 (참여 가능 여부 확인용)
+ * 테스트 정보 조회
  */
 export async function getTestInfo(req: Request, res: Response): Promise<void> {
     try {
         const shareId = req.params.shareId as string;
+        const fingerprintHash = req.query.fp as string | undefined;
 
-        // 1. shareId 검증
         if (!shareId || !SHARE_ID_REGEX.test(shareId)) {
             res.status(400).json({ success: false, error: HTSM_ERRORS.INVALID_SHARE_ID });
             return;
         }
 
-        // 2. Test 조회
         const JohariTest = getJohariTestModel();
         const test = await JohariTest.findOne({ shareId });
         if (!test) {
@@ -279,12 +327,15 @@ export async function getTestInfo(req: Request, res: Response): Promise<void> {
             return;
         }
 
-        console.log(`[HTSM] Test info viewed for ${shareId}`);
+        const isCreator = fingerprintHash && test.creatorFingerprint === fingerprintHash;
+
+        console.log(`[HTSM] Test info viewed for ${shareId} (isCreator: ${isCreator})`);
         res.json({
             success: true,
             data: {
                 answerCount: test.answerCount,
                 isClosed: test.isClosed,
+                isCreator,
             },
         });
     } catch (error) {
@@ -292,29 +343,43 @@ export async function getTestInfo(req: Request, res: Response): Promise<void> {
         res.status(500).json({ success: false, error: HTSM_ERRORS.INTERNAL_ERROR });
     }
 }
+
 /**
  * GET /api/htsm/stats
  * 전체 통계 조회
  */
 export async function getStats(req: Request, res: Response): Promise<void> {
     try {
-        const JohariTest = getJohariTestModel();
+        const HtsmStats = getHtsmStatsModel();
 
-        // 1. 전체 생성 수 (현실적인 느낌을 위해 기본값 10,000에서 시작하거나 그대로 노출)
-        // 여기서는 실제 숫자를 가져옴
-        const totalCreated = await JohariTest.countDocuments();
+        // 전체 누적 통계 조회 (Date(0) 사용)
+        let globalStats = await HtsmStats.findOne({ date: new Date(0) });
 
-        // 2. 평균 참여 수
-        const stats = await JohariTest.aggregate([
-            {
-                $group: {
-                    _id: null,
-                    avgAnswers: { $avg: '$answerCount' },
-                },
-            },
-        ]);
+        if (!globalStats) {
+            // 초기 데이터가 없으면 현재 DB 기준으로 생성
+            const JohariTest = getJohariTestModel();
+            const currentTotal = await JohariTest.countDocuments();
 
-        const avgFriends = stats.length > 0 ? Math.round((stats[0].avgAnswers || 0) * 10) / 10 : 0;
+            // 기존 데이터의 총 답변 수는 aggregate로 계산
+            const answerStats = await JohariTest.aggregate([
+                { $group: { _id: null, totalAnswers: { $sum: '$answerCount' } } }
+            ]);
+            const currentTotalAnswers = answerStats.length > 0 ? answerStats[0].totalAnswers : 0;
+
+            globalStats = await HtsmStats.create({
+                date: new Date(0),
+                totalTests: currentTotal,
+                totalAnswers: currentTotalAnswers,
+            });
+        }
+
+        const totalCreated = globalStats.totalTests;
+        const totalAnswers = globalStats.totalAnswers;
+
+        // 평균 친구 수 계산 (전체 답변 / 전체 테스트)
+        const avgFriends = totalCreated > 0
+            ? Math.round((totalAnswers / totalCreated) * 10) / 10
+            : 0;
 
         res.json({
             success: true,
