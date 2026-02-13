@@ -7,9 +7,6 @@ import SessionProvider from '@/components/providers/session-provider';
 import NicknameProvider from '@/components/providers/nickname-provider';
 
 import AdScriptManager from '@/components/ads/ad-script-manager';
-import { LanguageProvider } from '@/context/language-context';
-import { cookies } from 'next/headers';
-import { Language } from '@/i18n/i18n';
 import './globals.css';
 
 const geistSans = Geist({
@@ -67,28 +64,23 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const initialLang = (cookieStore.get('lang')?.value as Language) || 'ko';
-
   return (
-    <html lang={initialLang}>
+    <html lang="ko">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Script
           src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
           strategy="lazyOnload"
         />
         <AdScriptManager />
-        <LanguageProvider initialLanguage={initialLang}>
-          <SessionProvider>
-            <NicknameProvider>
-              <NavBar />
-              <main className="main-content">
-                {children}
-              </main>
-              <Footer />
-            </NicknameProvider>
-          </SessionProvider>
-        </LanguageProvider>
+        <SessionProvider>
+          <NicknameProvider>
+            <NavBar />
+            <main className="main-content">
+              {children}
+            </main>
+            <Footer />
+          </NicknameProvider>
+        </SessionProvider>
       </body>
     </html>
   );
