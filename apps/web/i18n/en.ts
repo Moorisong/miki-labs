@@ -101,6 +101,12 @@ export default {
             blind: "What others see in you",
             hidden: "What only you know",
             unknown: "Undiscovered potential"
+        },
+        subtitles: {
+            open: "Known to you and others",
+            blind: "Known only to others",
+            hidden: "Known only to you",
+            unknown: "Unknown to anyone yet"
         }
     },
     categories: {

@@ -79,6 +79,7 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
         }
     };
 
+
     if (submitted) {
         return (
             <div className={styles.pageContainer}>
@@ -89,11 +90,11 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
                         <p className={styles.submittedSubtitle}>
                             {t('answer.thanksSubtitle')}
                         </p>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
-                            <button className={styles.btnPrimary} onClick={() => router.push(`/htsm/result/${shareId}`)}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', width: '100%', maxWidth: '300px', margin: '0 auto' }}>
+                            <button className={`${styles.btnPrimary} ${styles.btnFull}`} onClick={() => router.push(`/htsm/result/${shareId}`)}>
                                 {t('answer.viewResult')}
                             </button>
-                            <button className={styles.btnSecondary} onClick={() => router.push('/htsm')}>
+                            <button className={`${styles.btnSecondary} ${styles.btnFull}`} onClick={() => router.push('/htsm')}>
                                 {t('answer.createMine')}
                             </button>
                         </div>

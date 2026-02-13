@@ -91,16 +91,22 @@ export default {
         infoTitle: "조하리의 창이란?",
         infoDesc: "조하리의 창(Johari Window)은 1955년 심리학자 조셉 루프트와 해리 잉햄이 개발한 심리학 도구입니다. 나와 타인의 관계 속에서 내가 어떤 사람인지 이해하도록 도와줍니다. 내가 아는 나와 모르는 나, 타인이 아는 나와 모르는 나를 구분하여 4가지 영역(개방, 맹목, 숨겨진, 미지)으로 나눕니다.",
         area: {
-            open: "개방된 자아 (Open Self)",
-            blind: "눈먼 자아 (Blind Self)",
-            hidden: "숨겨진 자아 (Hidden Self)",
-            unknown: "미지의 자아 (Unknown Self)"
+            open: "개방된 자아",
+            blind: "눈먼 자아",
+            hidden: "숨겨진 자아",
+            unknown: "미지의 자아"
         },
         desc: {
             open: "나도 알고 남도 아는 나의 모습",
             blind: "나는 모르지만 남들은 아는 나의 모습",
             hidden: "나만 알고 남들은 모르는 나의 모습",
             unknown: "나도 모르고 남들도 모르는 잠재력"
+        },
+        subtitles: {
+            open: "나도 알고, 남도 아는 나",
+            blind: "나는 모르지만 남이 보는 나",
+            hidden: "나만 알고 있을지도 모르는 진짜 나",
+            unknown: "새로운 환경에서 드러날 가능성"
         }
     },
     categories: {
