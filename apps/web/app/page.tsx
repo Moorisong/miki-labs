@@ -73,7 +73,7 @@ export default function Home() {
             id: 'htsm',
             title: 'HTSM',
             description: '친구들의 익명 평가로 발견하는 나.\nJohari Window 기반 심리 분석!',
-            image: '/og-image.png',
+            image: '/htsm-logo-v3.png',
             link: '/htsm',
             badge: 'New',
             active: true,

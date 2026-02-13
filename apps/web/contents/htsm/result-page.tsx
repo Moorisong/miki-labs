@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { useLanguage } from '@/context/language-context';
 
 import { HTSM_CONFIG } from './constants';
@@ -97,6 +99,15 @@ export default function ResultPage({ shareId }: ResultPageProps) {
             <div className={styles.wideContainer}>
                 <div className={styles.resultPage}>
                     <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                        <Link href="/htsm" style={{ display: 'inline-block', marginBottom: '1rem' }}>
+                            <Image
+                                src="/htsm-logo-v3.png"
+                                alt="HTSM Logo"
+                                width={80}
+                                height={80}
+                                style={{ objectFit: 'contain' }}
+                            />
+                        </Link>
                         <h1 className={styles.resultTitle}>{t('result.title')}</h1>
                         <p className={styles.resultSubtitle}>
                             {t('result.subtitle')}
