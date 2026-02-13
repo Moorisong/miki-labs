@@ -12,6 +12,7 @@ import styles from './nav-bar.module.css';
 
 export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNicknameModalOpen, setIsNicknameModalOpen] = useState(false);
   const [nicknameInfo, setNicknameInfo] = useState<{
     canChangeNickname: boolean;
@@ -45,6 +46,8 @@ export default function NavBar() {
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  const isContentsActive = NAV_LINKS.some(link => pathname === link.href);
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -89,8 +92,41 @@ export default function NavBar() {
           </button>
 
           <ul className={`${styles.navLinks} ${isMenuOpen ? styles.open : ''}`}>
+            {/* PC: Dropdown Menu */}
+            <li
+              className={`${styles.dropdownContainer} ${styles.desktopOnly}`}
+              onMouseEnter={() => setIsDropdownOpen(true)}
+              onMouseLeave={() => setIsDropdownOpen(false)}
+            >
+              <button
+                className={`${styles.navLink} ${styles.dropdownToggle} ${isContentsActive ? styles.active : ''}`}
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                aria-haspopup="true"
+                aria-expanded={isDropdownOpen}
+              >
+                콘텐츠 <span className={`${styles.arrow} ${isDropdownOpen ? styles.arrowRotate : ''}`}>▾</span>
+              </button>
+              <ul className={`${styles.dropdownMenu} ${isDropdownOpen ? styles.show : ''}`}>
+                {NAV_LINKS.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className={`${styles.dropdownItem} ${pathname === link.href ? styles.dropdownItemActive : ''}`}
+                      onClick={() => {
+                        closeMenu();
+                        setIsDropdownOpen(false);
+                      }}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </li>
+
+            {/* Mobile: Linear List */}
             {NAV_LINKS.map((link) => (
-              <li key={link.href}>
+              <li key={link.href} className={styles.mobileOnly}>
                 <Link
                   href={link.href}
                   className={`${styles.navLink} ${pathname === link.href ? styles.active : ''}`}
