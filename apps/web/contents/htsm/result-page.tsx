@@ -86,10 +86,10 @@ export default function ResultPage({ shareId }: ResultPageProps) {
     const percent = Math.min(Math.round((answerCount / totalFriends) * 100), 100);
 
     const johariCards = [
-        { title: t('result.area.open'), area: 'open' as const, data: johari.open, gradientClass: styles.gradientGreen },
-        { title: t('result.area.blind'), area: 'blind' as const, data: johari.blind, gradientClass: styles.gradientBlue },
-        { title: t('result.area.hidden'), area: 'hidden' as const, data: johari.hidden, gradientClass: styles.gradientPurple },
-        { title: t('result.area.unknown'), area: 'unknown' as const, data: answerCount === 0 ? { keywords: [] } : johari.unknown, gradientClass: styles.gradientCyan },
+        { title: t('result.area.open'), area: 'open' as const, data: johari.open, colorClass: styles.colorGreen },
+        { title: t('result.area.blind'), area: 'blind' as const, data: johari.blind, colorClass: styles.colorBlue },
+        { title: t('result.area.hidden'), area: 'hidden' as const, data: johari.hidden, colorClass: styles.colorPurple },
+        { title: t('result.area.unknown'), area: 'unknown' as const, data: answerCount === 0 ? { keywords: [] } : johari.unknown, colorClass: styles.colorCyan },
     ];
 
     return (
@@ -144,7 +144,7 @@ export default function ResultPage({ shareId }: ResultPageProps) {
                                 title={card.title}
                                 area={card.area}
                                 keywords={card.data.keywords}
-                                gradientClass={card.gradientClass}
+                                colorClass={card.colorClass}
                             />
                         ))}
                     </div>

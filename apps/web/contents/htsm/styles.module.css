@@ -1073,54 +1073,6 @@
     white-space: pre-line;
 }
 
-.toggleContainer {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 0.5rem;
-}
-
-.toggleButton {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 9999px;
-    background: #f3f4f6;
-    border: none;
-    color: #6b7280;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 200ms ease;
-}
-
-.toggleButton:hover {
-    background: #e5e7eb;
-    color: #374151;
-}
-
-.toggleIcon {
-    width: 1rem;
-    height: 1rem;
-    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.toggleIconOpen {
-    transform: rotate(180deg);
-}
-
-.keywordListContainer {
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-    transition: max-height 500ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms ease;
-}
-
-.keywordListOpen {
-    max-height: 500px;
-    opacity: 1;
-}
-
 .resultCardKeyword {
     padding: 0.5rem 1rem;
     border-radius: 0.75rem;
@@ -1130,20 +1082,21 @@
 }
 
 /* Gradient variants for result cards */
-.gradientGreen {
-    background: linear-gradient(135deg, #4ade80, #059669);
+/* Flat colors for result cards */
+.colorGreen {
+    background: #10b981;
 }
 
-.gradientBlue {
-    background: linear-gradient(135deg, #60a5fa, #2563eb);
+.colorBlue {
+    background: #3b82f6;
 }
 
-.gradientPurple {
-    background: linear-gradient(135deg, #c084fc, #9333ea);
+.colorPurple {
+    background: #a855f7;
 }
 
-.gradientCyan {
-    background: linear-gradient(135deg, #22d3ee, #0891b2);
+.colorCyan {
+    background: #06b6d4;
 }
 
 /* Action Buttons */

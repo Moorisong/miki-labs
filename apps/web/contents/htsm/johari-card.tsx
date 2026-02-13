@@ -9,12 +9,12 @@ interface JohariCardProps {
     title: string;
     area: 'open' | 'blind' | 'hidden' | 'unknown';
     keywords: string[];
-    gradientClass: string;
+    colorClass: string;
 }
 
-export default function JohariCard({ title, area, keywords, gradientClass }: JohariCardProps) {
+export default function JohariCard({ title, area, keywords, colorClass }: JohariCardProps) {
     const { t } = useLanguage();
-    const [isOpen, setIsOpen] = useState(false);
+
 
     // Get localized keywords for the generator
     const localizedKeywords = useMemo(() => {
@@ -42,38 +42,18 @@ export default function JohariCard({ title, area, keywords, gradientClass }: Joh
                 </div>
             </div>
 
-            <div className={styles.toggleContainer}>
-                <button
-                    className={styles.toggleButton}
-                    onClick={() => setIsOpen(!isOpen)}
-                >
-                    {isOpen ? 'Hide keywords' : 'Show keywords'}
-                    <svg
-                        className={`${styles.toggleIcon} ${isOpen ? styles.toggleIconOpen : ''}`}
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    >
-                        <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                </button>
-            </div>
 
-            <div className={`${styles.keywordListContainer} ${isOpen ? styles.keywordListOpen : ''}`}>
-                <div className={styles.resultCardKeywords}>
-                    {keywords.length > 0 ? (
-                        keywords.map((kw) => (
-                            <div key={kw} className={`${styles.resultCardKeyword} ${gradientClass}`}>
-                                {t(`keywords.${kw}`)}
-                            </div>
-                        ))
-                    ) : (
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{t('result.noKeywords')}</p>
-                    )}
-                </div>
+
+            <div className={styles.resultCardKeywords}>
+                {keywords.length > 0 ? (
+                    keywords.map((kw) => (
+                        <div key={kw} className={`${styles.resultCardKeyword} ${colorClass}`}>
+                            {t(`keywords.${kw}`)}
+                        </div>
+                    ))
+                ) : (
+                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>{t('result.noKeywords')}</p>
+                )}
             </div>
         </div>
     );
