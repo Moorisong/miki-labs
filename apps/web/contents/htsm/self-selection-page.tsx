@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/language-context';
 
-import { HTSM_KEYWORDS, HTSM_CONFIG, HTSM_STORAGE_KEY } from './constants';
+import { HTSM_KEYWORD_CATEGORIES, HTSM_CONFIG, HTSM_STORAGE_KEY } from './constants';
 import { fetchProofToken, createTest } from './api';
 import styles from './styles.module.css';
 
@@ -14,6 +14,7 @@ export default function SelfSelectionPage() {
     const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
+    const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
     const toggleKeyword = (keyword: string) => {
         if (selectedKeywords.includes(keyword)) {
@@ -21,6 +22,18 @@ export default function SelfSelectionPage() {
         } else if (selectedKeywords.length < HTSM_CONFIG.MAX_KEYWORD_SELECTION) {
             setSelectedKeywords([...selectedKeywords, keyword]);
         }
+    };
+
+    const toggleCategory = (categoryId: string) => {
+        setCollapsedCategories((prev) => {
+            const next = new Set(prev);
+            if (next.has(categoryId)) {
+                next.delete(categoryId);
+            } else {
+                next.add(categoryId);
+            }
+            return next;
+        });
     };
 
     const handleContinue = async () => {
@@ -86,25 +99,73 @@ export default function SelfSelectionPage() {
                         </p>
                     )}
 
-                    {/* Keyword Grid */}
-                    <div className={styles.keywordGrid}>
-                        {HTSM_KEYWORDS.map((keyword) => {
-                            const isSelected = selectedKeywords.includes(keyword);
-                            const isDisabled =
-                                !isSelected &&
-                                selectedKeywords.length >= HTSM_CONFIG.MAX_KEYWORD_SELECTION;
+                    {/* Categorized Keywords */}
+                    <div className={styles.categoryContainer}>
+                        {HTSM_KEYWORD_CATEGORIES.map((category) => {
+                            const isCollapsed = collapsedCategories.has(category.id);
+                            const selectedInCategory = category.keywords.filter(
+                                (k) => selectedKeywords.includes(k)
+                            ).length;
 
                             return (
-                                <button
-                                    key={keyword}
-                                    type="button"
-                                    onClick={() => toggleKeyword(keyword)}
-                                    disabled={isDisabled || isSubmitting}
-                                    className={`${styles.keywordChip} ${isSelected ? styles.keywordChipSelected : ''
-                                        } ${isDisabled ? styles.keywordChipDisabled : ''}`}
+                                <div
+                                    key={category.id}
+                                    className={`${styles.categorySection} ${styles[category.gradientClass] || ''}`}
                                 >
-                                    {t(`keywords.${keyword}`)}
-                                </button>
+                                    <button
+                                        type="button"
+                                        className={styles.categoryHeader}
+                                        onClick={() => toggleCategory(category.id)}
+                                        aria-expanded={!isCollapsed}
+                                    >
+                                        <div className={styles.categoryHeaderLeft}>
+                                            <span className={styles.categoryEmoji}>
+                                                {category.emoji}
+                                            </span>
+                                            <span className={styles.categoryName}>
+                                                {t(`categories.${category.id}`)}
+                                            </span>
+                                            {selectedInCategory > 0 && (
+                                                <span className={styles.categoryBadge}>
+                                                    {selectedInCategory}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <svg
+                                            className={`${styles.categoryChevron} ${isCollapsed ? styles.categoryChevronCollapsed : ''}`}
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 20 20"
+                                            fill="currentColor"
+                                        >
+                                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+
+                                    {!isCollapsed && (
+                                        <div className={styles.keywordGrid}>
+                                            {category.keywords.map((keyword) => {
+                                                const isSelected = selectedKeywords.includes(keyword);
+                                                const isDisabled =
+                                                    !isSelected &&
+                                                    selectedKeywords.length >= HTSM_CONFIG.MAX_KEYWORD_SELECTION;
+
+                                                return (
+                                                    <button
+                                                        key={keyword}
+                                                        type="button"
+                                                        onClick={() => toggleKeyword(keyword)}
+                                                        disabled={isDisabled || isSubmitting}
+                                                        className={`${styles.keywordChip} ${isSelected ? styles.keywordChipSelected : ''
+                                                            } ${isDisabled ? styles.keywordChipDisabled : ''}`}
+                                                    >
+                                                        {t(`keywords.${keyword}`)}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
                             );
                         })}
                     </div>
@@ -126,3 +187,4 @@ export default function SelfSelectionPage() {
         </div>
     );
 }
+

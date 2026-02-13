@@ -3,55 +3,61 @@
  * Johari Window 키워드 및 설정값
  */
 
-export const HTSM_KEYWORDS = [
-    'Creative',
-    'Funny',
-    'Kind',
-    'Energetic',
-    'Thoughtful',
-    'Organized',
-    'Adventurous',
-    'Loyal',
-    'Confident',
-    'Empathetic',
-    'Ambitious',
-    'Calm',
-    'Spontaneous',
-    'Patient',
-    'Optimistic',
-    'Analytical',
-    'Curious',
-    'Reliable',
-    'Friendly',
-    'Independent',
-    'Stubborn',
-    'Impulsive',
-    'Overthinking',
-    'Moody',
-    'Blunt',
-    'Perfectionist',
-    'Competitive',
-    'People-pleaser',
-    'Sarcastic',
-    'Forgetful',
-    'Lazy',
-    'Procrastinator',
-    'Messy',
-    'Sensitive',
-    'Shy',
-    'Secretive',
-    'Rebellious',
-    'Night-owl',
-    'Clumsy',
-    'Chaotic',
-    'Weirdly-lucky',
-    'Coffee-dependent',
-    'Late',
-    'Always-hungry',
-    'Over-apologetic',
-    'Golden-retriever-energy',
-    'Black-cat-energy',
+/** 카테고리별 키워드 분류 */
+export type KeywordCategory = {
+    id: string;
+    emoji: string;
+    gradientClass: string;
+    keywords: readonly string[];
+};
+
+export const HTSM_KEYWORD_CATEGORIES: readonly KeywordCategory[] = [
+    {
+        id: 'positiveTraits',
+        emoji: '✨',
+        gradientClass: 'categoryPositive',
+        keywords: [
+            'Creative', 'Funny', 'Kind', 'Energetic', 'Thoughtful',
+            'Organized', 'Adventurous', 'Loyal', 'Confident', 'Empathetic',
+            'Ambitious', 'Calm', 'Optimistic', 'Reliable', 'Friendly',
+        ],
+    },
+    {
+        id: 'boldPersonality',
+        emoji: '🔥',
+        gradientClass: 'categoryBold',
+        keywords: [
+            'Stubborn', 'Impulsive', 'Overthinking', 'Moody', 'Blunt',
+            'Perfectionist', 'Competitive', 'People-pleaser', 'Sarcastic', 'Forgetful',
+            'Talkative', 'Expressive', 'Opinionated', 'Chill', 'Direct',
+        ],
+    },
+    {
+        id: 'innerSelf',
+        emoji: '🌙',
+        gradientClass: 'categoryInner',
+        keywords: [
+            'Lazy', 'Procrastinator', 'Messy', 'Sensitive', 'Shy',
+            'Secretive', 'Rebellious', 'Emotional', 'Introverted', 'Extroverted',
+            'Dreamer', 'Realist', 'Sentimental', 'Indecisive', 'Homebody',
+        ],
+    },
+    {
+        id: 'vibes',
+        emoji: '⚡',
+        gradientClass: 'categoryVibes',
+        keywords: [
+            'Night-owl', 'Clumsy', 'Free-spirited', 'Weirdly-lucky', 'Coffee-dependent',
+            'Always-hungry', 'Sociable', 'Chic', 'Early-bird', 'Foodie',
+            'Gamer', 'Geek', 'Gym-rat', 'Bookworm', 'Stylish',
+        ],
+    },
 ] as const;
+
+/** 모든 키워드의 플랫 배열 (하위 호환성 유지) */
+export const HTSM_KEYWORDS = HTSM_KEYWORD_CATEGORIES.flatMap(
+    (cat) => [...cat.keywords]
+);
 
 export const HTSM_CONFIG = {
     MIN_KEYWORD_SELECTION: 3,
