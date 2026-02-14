@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useSession } from 'next-auth/react';
 import { HTSM_STORAGE_KEY } from './constants';
@@ -68,17 +69,50 @@ export default function LandingPage() {
             {/* Hero Section */}
             <section className={styles.heroSection}>
                 <div className={styles.heroContent}>
-                    <p className={styles.category}>성격 유형 분석</p>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                        <Image
+                            src="/htsm-logo-v6.png"
+                            alt="자아탐험 로고"
+                            width={120}
+                            height={120}
+                            priority
+                            style={{ objectFit: 'contain' }}
+                            unoptimized
+                        />
+                    </div>
                     <h1 className={styles.heroTitle}>자아탐험</h1>
                     <p className={styles.heroSubtitle}>
                         친구들이 보는 나는 어떤 모습일까?<br />
                         나도 몰랐던 &apos;진짜 나&apos;를 발견해보세요
                     </p>
 
+                    <div className={styles.heroCta}>
+                        <button
+                            className={`${styles.btnPrimary} ${styles.btnPrimaryLg}`}
+                            onClick={handleStart}
+                        >
+                            테스트 시작하기
+                        </button>
+
+                        {myShareId && (
+                            <button
+                                className={`${styles.btnSecondary} ${styles.btnPrimaryLg}`}
+                                onClick={handleContinue}
+                            >
+                                내 결과 이어보기
+                            </button>
+                        )}
+                    </div>
+
                 </div>
 
 
             </section>
+
+            {/* Keyword Cloud Section */}
+            <div className={styles.floatingContainer}>
+                <KeywordCloud3D />
+            </div>
 
             {/* How It Works Section */}
             <section className={styles.sectionBg} aria-labelledby="how-it-works-title">
