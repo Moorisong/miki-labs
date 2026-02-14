@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 import { HTSM_CONFIG } from './constants';
 import { fetchResult, HtsmResult } from './api';
+import ResultShareSection from './result-share-section';
 import JohariCard from './johari-card';
 import styles from './styles.module.css';
 
@@ -17,9 +18,6 @@ export default function ResultPage({ shareId }: ResultPageProps) {
     const [result, setResult] = useState<HtsmResult | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>('');
-
-    const [copiedShare, setCopiedShare] = useState<boolean>(false);
-    const [copiedPage, setCopiedPage] = useState<boolean>(false);
 
     useEffect(() => {
         const loadResult = async () => {
@@ -34,32 +32,6 @@ export default function ResultPage({ shareId }: ResultPageProps) {
         };
         loadResult();
     }, [shareId]);
-
-    const handleShare = () => {
-        const url = `${window.location.origin}/htsm/answer/${shareId}`;
-        navigator.clipboard.writeText(url).then(() => {
-            setCopiedShare(true);
-            setTimeout(() => setCopiedShare(false), 2000);
-        }).catch((err) => {
-            console.error('Failed to copy text: ', err);
-            if (navigator.share) {
-                navigator.share({ title: '남들이 보는 나는?', text: '내 이미지를 찾아줘! 나에게 어울리는 키워드 3~5개를 골라주세요.', url });
-            }
-        });
-    };
-
-    const handleSharePage = () => {
-        const url = window.location.href;
-        navigator.clipboard.writeText(url).then(() => {
-            setCopiedPage(true);
-            setTimeout(() => setCopiedPage(false), 2000);
-        }).catch((err) => {
-            console.error('Failed to copy text: ', err);
-            if (navigator.share) {
-                navigator.share({ title: '나의 조하리의 창 결과', text: '내가 보는 나 vs 남들이 보는 나', url });
-            }
-        });
-    };
 
     if (loading) {
         return (
@@ -151,45 +123,9 @@ export default function ResultPage({ shareId }: ResultPageProps) {
                         ))}
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className={styles.actionButtons}>
-                        <button className={styles.btnPrimary} onClick={handleShare} style={{ flex: 1 }}>
-                            {copiedShare ? (
-                                <>
-                                    <svg className={styles.btnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <polyline points="20 6 9 17 4 12" />
-                                    </svg>
-                                    복사 완료!
-                                </>
-                            ) : (
-                                <>
-                                    <svg className={styles.btnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                                    </svg>
-                                    링크 복사 - 다른 친구에게 요청하기
-                                </>
-                            )}
-                        </button>
-                        <button className={styles.btnSecondary} onClick={handleSharePage} style={{ flex: 1 }}>
-                            {copiedPage ? (
-                                <>
-                                    <svg className={styles.btnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <polyline points="20 6 9 17 4 12" />
-                                    </svg>
-                                    복사 완료!
-                                </>
-                            ) : (
-                                <>
-                                    <svg className={styles.btnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                                    </svg>
-                                    링크 복사 - 현재 페이지 보내기
-                                </>
-                            )}
-                        </button>
-                    </div>
+                    {/* New Share Section (Result Page Spec) */}
+                    <ResultShareSection shareId={shareId} />
+
 
                     {/* Johari Info */}
                     <div className={styles.infoCard}>

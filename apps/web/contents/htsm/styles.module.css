@@ -1277,3 +1277,63 @@
         font-size: 4.5rem;
     }
 }
+/* Share Section Component */
+.shareSection {
+    margin-bottom: 2rem;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.shareSectionTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1.25rem;
+}
+
+/* Result Share Tabs */
+.shareTabs {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    padding: 0 0.5rem;
+    width: 100%;
+}
+
+.shareTab {
+    flex: 1;
+    padding: 0.85rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #6b7280;
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.shareTabActive {
+    color: white;
+    background: #111827;
+    font-weight: 700;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.shareTab:not(.shareTabActive):hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #374151;
+}
+
+@media (max-width: 400px) {
+    .shareTab {
+        font-size: 0.85rem;
+        padding: 0.75rem 0.5rem;
+    }
+}

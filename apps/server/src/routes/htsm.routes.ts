@@ -14,13 +14,13 @@ const router = Router();
 
 // Rate Limiters (02_backend_agent.md 스펙 기반)
 
-/** 테스트 생성: IP당 5회/분 */
+/** 테스트 생성: IP당 5회/2시간 */
 const createIpLimiter = rateLimit({
-    windowMs: 60 * 1000,
+    windowMs: 2 * 60 * 60 * 1000,
     max: 5,
     message: {
         success: false,
-        error: '테스트 생성 요청이 너무 많습니다. 1분 후 다시 시도해주세요.',
+        error: '테스트 생성 요청이 너무 많습니다. 2시간 후 다시 시도해주세요.',
     },
     standardHeaders: true,
     legacyHeaders: false,

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { HTSM_MESSAGES } from './constants';
+import HtsmShareSection from './share-section';
 import styles from './styles.module.css';
 
 interface SharePageProps {
@@ -36,26 +37,17 @@ export default function SharePage({ shareId }: SharePageProps) {
 
     const handleKakaoShare = () => {
         if (!isKakaoInitialized || !window.Kakao) {
-            // SDK 로드 실패 시 클립보드 복사로 대체하거나 Web Share API 사용
-            if (typeof navigator !== 'undefined' && navigator.share && shareUrl) {
-                navigator.share({
-                    title: '테스트가 준비되었습니다',
-                    text: '친구들에게 공유해서 내가 어떻게 보이는지 알아보세요',
-                    url: shareUrl,
-                });
-            } else {
-                handleCopyLink();
-            }
+            handleCopyLink();
             return;
         }
 
-        const answerUrl = shareUrl || `${window.location.origin}/htsm/answer/${shareId}`;
+        const answerUrl = `${window.location.origin}/htsm/answer/${shareId}`;
 
         window.Kakao.Share.sendDefault({
             objectType: 'feed',
             content: {
-                title: '남들이 보는 나는?',
-                description: '내 이미지를 찾아줘! 나에게 어울리는 키워드 3~5개를 골라주세요.',
+                title: '당신이 보는 저의 모습이 궁금합니다',
+                description: '10명의 평가로 완성되는 성격 테스트입니다.\n잠시 시간을 내어 참여 부탁드립니다.',
                 imageUrl: 'https://box.haroo.site/htsm-logo-v6.png',
                 link: {
                     mobileWebUrl: answerUrl,
@@ -64,17 +56,10 @@ export default function SharePage({ shareId }: SharePageProps) {
             },
             buttons: [
                 {
-                    title: '답변 남기기',
+                    title: '참여하기',
                     link: {
                         mobileWebUrl: answerUrl,
                         webUrl: answerUrl,
-                    },
-                },
-                {
-                    title: '나도 만들기',
-                    link: {
-                        mobileWebUrl: 'https://box.haroo.site/htsm',
-                        webUrl: 'https://box.haroo.site/htsm',
                     },
                 },
             ],
@@ -94,36 +79,18 @@ export default function SharePage({ shareId }: SharePageProps) {
                         </p>
                     </div>
 
-                    {/* Share Card */}
-                    <div className={styles.glassCard} style={{ marginBottom: '3rem' }}>
-                        <div className={styles.shareCardContent}>
-                            <div className={styles.shareIconBox}>
-                                <svg
-                                    className={styles.shareIconBoxIcon}
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <circle cx="18" cy="5" r="3" />
-                                    <circle cx="6" cy="12" r="3" />
-                                    <circle cx="18" cy="19" r="3" />
-                                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-                                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-                                </svg>
-                            </div>
-                            <h2 className={styles.shareCardTitle}>남들이 보는 나는?</h2>
-                            <p className={styles.shareCardDescription}>
-                                내 이미지를 찾아줘! 나에게 어울리는 키워드 3~5개를 골라주세요.
-                            </p>
-                            <div className={styles.shareUrlBox}>{shareUrl}</div>
-                        </div>
-                    </div>
+                    {/* New Share Section (Request Page Spec) */}
+                    <HtsmShareSection
+                        title="친구랑 같이 해보기 👇"
+                        kakaoLabel="친구 초대"
+                        copyLabel="초대 링크 복사"
+                        onKakaoClick={handleKakaoShare}
+                        onCopyClick={handleCopyLink}
+                        isCopied={copied}
+                    />
 
-                    {/* View Result Button (Now emphasized at the bottom) */}
-                    <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+                    {/* View Result Button */}
+                    <div style={{ textAlign: 'center', marginBottom: '2rem', marginTop: '3rem' }}>
                         <button
                             className={styles.btnViewResult}
                             onClick={() => window.location.href = `/htsm/result/${shareId}`}
@@ -144,76 +111,12 @@ export default function SharePage({ shareId }: SharePageProps) {
                         </button>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className={styles.shareButtonGroup} style={{ marginBottom: '2rem' }}>
-                        <button
-                            className={`${styles.btnPrimary} ${styles.btnFull}`}
-                            onClick={handleKakaoShare}
-                        >
-                            <svg
-                                className={styles.btnIcon}
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <circle cx="18" cy="5" r="3" />
-                                <circle cx="6" cy="12" r="3" />
-                                <circle cx="18" cy="19" r="3" />
-                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-                            </svg>
-                            카카오톡으로 공유하기
-                        </button>
-
-                        <button
-                            className={`${styles.btnSecondary} ${styles.btnFull}`}
-                            onClick={handleCopyLink}
-                        >
-                            {copied ? (
-                                <>
-                                    <svg
-                                        className={styles.btnIcon}
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <polyline points="20 6 9 17 4 12" />
-                                    </svg>
-                                    복사 완료!
-                                </>
-                            ) : (
-                                <>
-                                    <svg
-                                        className={styles.btnIcon}
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                                    </svg>
-                                    링크 복사
-                                </>
-                            )}
-                        </button>
-                    </div>
-
-
                     {/* Helper Text */}
                     <div className={styles.infoCard}>
                         <p className={styles.shareHelperText}>
                             <strong>친구들이 익명으로 나에 대한 키워드 3~5개를 선택합니다.</strong>
                             <br />
-                            더 맋은 친구가 참여할수록 결과가 정확해집니다!
+                            더 많은 친구가 참여할수록 결과가 정확해집니다!
                         </p>
                     </div>
                 </div>
