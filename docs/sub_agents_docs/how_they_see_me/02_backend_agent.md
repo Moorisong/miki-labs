@@ -1,10 +1,10 @@
-# System Agent: HowTheySeeMe (HTSM) Backend
+# System Agent: 자아탐험 (구 HTSM) Backend
 
 ## 문서 위치
 `docs/sub_agents_docs/how_they_see_me/02_backend_agent.md`
 
 ## 개요
-HowTheySeeMe의 서버 로직과 API를 담당하는 백엔드 에이전트입니다.
+자아탐험의 서버 로직과 API를 담당하는 백엔드 에이전트입니다.
 안정적인 서비스 운영을 위해 Rate Limit, 보안 검증(Proof Token), 중복 응답 방지를 철저히 수행하며, Johari Window 계산 로직을 제공합니다.
 
 ## 역할 및 책임 (R&R)

@@ -68,37 +68,12 @@ export default function LandingPage() {
             {/* Hero Section */}
             <section className={styles.heroSection}>
                 <div className={styles.heroContent}>
-                    <h1 className={styles.heroTitle}>
-                        남들이 보는
-                        <span className={styles.heroGradientText}>진짜 나</span>
-                    </h1>
-                    <p className={styles.heroSubtitle} style={{ fontSize: '15px' }}>
-                        1분이면 충분해요.<br />친구들이 진짜 나를 찾아줍니다.
+                    <p className={styles.category}>성격 유형 분석</p>
+                    <h1 className={styles.heroTitle}>자아탐험</h1>
+                    <p className={styles.heroSubtitle}>
+                        친구들이 보는 나는 어떤 모습일까?<br />
+                        나도 몰랐던 &apos;진짜 나&apos;를 발견해보세요
                     </p>
-
-                    {/* Floating Keywords - 3D Cloud */}
-                    <div className={styles.floatingContainer}>
-                        <KeywordCloud3D />
-                    </div>
-
-                    <div className={styles.heroCta}>
-                        <button
-                            className={`${styles.btnPrimary} ${styles.btnPrimaryLg}`}
-                            onClick={handleStart}
-                        >
-                            테스트 시작하기
-                        </button>
-
-                        {myShareId && (
-                            <button
-                                className={`${styles.btnSecondary} ${styles.btnPrimaryLg}`}
-                                onClick={handleContinue}
-                            >
-                                내 결과 이어보기
-                            </button>
-                        )}
-                    </div>
-
 
                 </div>
 
