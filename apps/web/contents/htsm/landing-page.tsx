@@ -19,6 +19,11 @@ export default function LandingPage() {
     const [myShareId, setMyShareId] = useState<string | null>(null);
     const [stats, setStats] = useState<HtsmStats | null>(null);
 
+    // 통계 데이터 독립적으로 가져오기
+    useEffect(() => {
+        fetchStats().then(setStats).catch(console.error);
+    }, []);
+
     useEffect(() => {
         const initialize = async () => {
             // 1. LocalStorage 확인

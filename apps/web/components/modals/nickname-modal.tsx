@@ -193,7 +193,7 @@ export default function NicknameModal({
             <p className={styles.hint}>
               {isEditMode
                 ? '닉네임은 한 달에 한 번만 변경할 수 있습니다.'
-                : '닉네임을 설정하지 않으면 랭킹에 기록할 수 없습니다.'}
+                : '닉네임을 설정하지 않으면 이용할 수 없습니다.'}
             </p>
           </>
         )}
