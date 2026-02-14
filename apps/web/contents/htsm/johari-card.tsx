@@ -45,17 +45,7 @@ export default function JohariCard({ title, area, keywords, colorClass }: Johari
                 </p>
             </div>
 
-            <div className={styles.resultCardKeywords}>
-                {keywords.length > 0 ? (
-                    keywords.map((kw) => (
-                        <div key={kw} className={`${styles.resultCardKeyword} ${colorClass}`}>
-                            {getKoreanKeyword(kw)}
-                        </div>
-                    ))
-                ) : (
-                    <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>아직 키워드가 없습니다</p>
-                )}
-            </div>
+
         </div>
     );
 }
