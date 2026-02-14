@@ -81,9 +81,9 @@ export default function SharePage({ shareId }: SharePageProps) {
 
                     {/* New Share Section (Request Page Spec) */}
                     <HtsmShareSection
-                        title="친구랑 같이 해보기 👇"
-                        kakaoLabel="친구 초대"
-                        copyLabel="초대 링크 복사"
+                        title="친구에게 요청하기 👇"
+                        kakaoLabel="카카오톡 공유	"
+                        copyLabel="링크 복사"
                         onKakaoClick={handleKakaoShare}
                         onCopyClick={handleCopyLink}
                         isCopied={copied}
