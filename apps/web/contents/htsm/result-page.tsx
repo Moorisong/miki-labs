@@ -119,6 +119,7 @@ export default function ResultPage({ shareId }: ResultPageProps) {
                                 area={card.area}
                                 keywords={card.data.keywords}
                                 colorClass={card.colorClass}
+                                shareId={shareId}
                             />
                         ))}
                     </div>

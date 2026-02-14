@@ -10,6 +10,7 @@ interface JohariCardProps {
     area: 'open' | 'blind' | 'hidden' | 'unknown';
     keywords: string[];
     colorClass: string;
+    shareId?: string;
 }
 
 const SUBTITLES = {
@@ -19,14 +20,14 @@ const SUBTITLES = {
     unknown: "새로운 환경에서 드러날 가능성"
 };
 
-export default function JohariCard({ title, area, keywords, colorClass }: JohariCardProps) {
+export default function JohariCard({ title, area, keywords, colorClass, shareId }: JohariCardProps) {
     const localizedKeywords = useMemo(() => {
         return keywords.map(kw => getKoreanKeyword(kw));
     }, [keywords]);
 
     const description = useMemo(() => {
-        return generateDescription(area, localizedKeywords);
-    }, [area, localizedKeywords]);
+        return generateDescription(area, localizedKeywords, shareId);
+    }, [area, localizedKeywords, shareId]);
 
     const subtitle = SUBTITLES[area];
 
