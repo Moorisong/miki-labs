@@ -78,7 +78,7 @@ export default function ResultPage({ shareId }: ResultPageProps) {
                                 style={{ objectFit: 'contain' }}
                             />
                         </Link>
-                        <h1 className={styles.resultTitle}>나의 조하리의 창 결과</h1>
+                        <h1 className={styles.resultTitle}>나의 자아탐험 결과</h1>
                         <p className={styles.resultSubtitle}>
                             내가 보는 나 vs 남들이 보는 나
                         </p>
