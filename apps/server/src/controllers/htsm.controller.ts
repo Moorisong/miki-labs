@@ -11,6 +11,7 @@ import {
     HTSM_CONFIG,
     HTSM_ERRORS,
 } from '../services/htsm/constants';
+import { generateDescription } from '../services/htsm/utils/description-generator';
 
 const SHARE_ID_REGEX = /^[a-zA-Z0-9_-]+$/;
 
@@ -343,25 +344,29 @@ export async function getResult(req: Request, res: Response): Promise<void> {
                 title: '개방된 자아',
                 area: 'open',
                 theme: 'green',
-                keywords: johari.open.keywords
+                keywords: johari.open.keywords,
+                description: generateDescription('open', johari.open.keywords, shareId)
             },
             {
                 title: '눈먼 자아',
                 area: 'blind',
                 theme: 'blue',
-                keywords: johari.blind.keywords
+                keywords: johari.blind.keywords,
+                description: generateDescription('blind', johari.blind.keywords, shareId)
             },
             {
                 title: '숨겨진 자아',
                 area: 'hidden',
                 theme: 'purple',
-                keywords: johari.hidden.keywords
+                keywords: johari.hidden.keywords,
+                description: generateDescription('hidden', johari.hidden.keywords, shareId)
             },
             {
                 title: '미지의 자아',
                 area: 'unknown',
                 theme: 'cyan',
-                keywords: test.answerCount === 0 ? [] : johari.unknown.keywords
+                keywords: test.answerCount === 0 ? [] : johari.unknown.keywords,
+                description: generateDescription('unknown', test.answerCount === 0 ? [] : johari.unknown.keywords, shareId)
             }
         ];
 
