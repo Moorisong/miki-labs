@@ -80,18 +80,29 @@
         - **Blind**: Friend - Self (나는 모르는데, 남은 앎)
         - **Hidden**: Self - Friend (나만 알고, 남은 모름)
         - **Unknown**: 전체 키워드 풀 - Total Set (나도 모르고, 남도 모름)
-    3. **데이터 가공**: 각 영역별 { 퍼센트, 상위 3개 키워드 } 추출
+    3. **데이터 가공 & Description 생성**:
+        - 각 영역별 상위 키워드 추출
+        - `description-generator` 유틸을 사용하여 결과 텍스트 생성 (Template Engine)
+        - 참여율(`participationPercent`), 남은 친구 수(`friendsNeeded`) 계산
+        - 카드 렌더링용 데이터(`cards`) 배열 구성
 - **Output**:
     ```json
     {
       "answerCount": 5,
       "isClosed": false,
-      "johari": {
-        "open": { "percent": 30, "keywords": ["A", "B"] },
-        "blind": { "percent": 40, "keywords": ["C", "D"] },
-        "hidden": { "percent": 20, "keywords": ["E"] },
-        "unknown": { "percent": 10, "keywords": ["F"] }
-      }
+      "participationPercent": 60,
+      "friendsNeeded": 0,
+      "cards": [
+        {
+          "title": "개방된 자아",
+          "area": "open",
+          "theme": "green",
+          "keywords": ["A", "B"],
+          "description": "사람들이 당신을 볼 때..."
+        },
+        // ... (4개 영역)
+      ],
+      "johari": { ... } // (레거시 또는 디버깅용 유지)
     }
     ```
 
