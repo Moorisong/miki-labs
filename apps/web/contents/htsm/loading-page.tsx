@@ -1,48 +1,65 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import styles from './styles.module.css';
 
 const BackgroundSparkles = dynamic(() => import('./background-sparkles'), { ssr: false });
 
 export default function LoadingPage() {
-    const router = useRouter();
-    const [adClicked, setAdClicked] = useState(false);
+    // 광고 창이 떠서 문서가 숨겨졌었는지 체크 (ref로 불필요한 리렌더링 방지)
+    const hasLeftRef = useRef(false);
 
     useEffect(() => {
-        let intervalId: NodeJS.Timeout;
+        // 기존 스크립트가 있다면 제거 (중복 방지)
+        const existing = document.querySelector('script[data-zone="10587835"]');
+        if (existing) existing.remove();
 
-        if (adClicked) {
-            const checkAdDone = () => {
-                if (document.visibilityState === 'visible') {
-                    // 광고 보고 돌아오면 -> 테스트(키워드 선택) 페이지로 이동
-                    router.push('/htsm/start');
-                }
-            };
+        const script = document.createElement('script');
+        script.dataset.zone = '10587835';
+        script.src = 'https://al5sm.com/tag.min.js';
 
-            window.addEventListener('focus', checkAdDone);
-            window.addEventListener('visibilitychange', checkAdDone);
+        // body에 추가
+        document.body.appendChild(script);
 
-            intervalId = setInterval(() => {
-                if (document.visibilityState === 'visible') {
-                    checkAdDone();
-                }
-            }, 1000);
+        const checkAndMove = () => {
+            if (hasLeftRef.current) {
+                // 중요: SPA 라우팅(router.push) 대신 강제 새로고침 이동을 사용하여
+                // window 객체에 남은 광고 스크립트 리스너를 확실히 제거함
+                window.location.href = '/htsm/start';
+            }
+        };
 
-            return () => {
-                window.removeEventListener('focus', checkAdDone);
-                window.removeEventListener('visibilitychange', checkAdDone);
-                clearInterval(intervalId);
-            };
-        }
-    }, [adClicked, router]);
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                hasLeftRef.current = true;
+            } else {
+                checkAndMove();
+            }
+        };
 
-    const handleWatchAd = () => {
-        const adWindow = window.open('https://www.google.com', '_blank');
-        setAdClicked(true);
-    };
+        const handleBlur = () => {
+            hasLeftRef.current = true;
+        };
+
+        const handleFocus = () => {
+            checkAndMove();
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('blur', handleBlur);
+        window.addEventListener('focus', handleFocus);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('blur', handleBlur);
+            window.removeEventListener('focus', handleFocus);
+
+            // 언마운트 시 스크립트 태그 제거 (어차피 새로고침되지만 안전장치)
+            const remnants = document.querySelectorAll('script[data-zone="10587835"]');
+            remnants.forEach(el => el.remove());
+        };
+    }, []);
 
     return (
         <div className={styles.pageContainer}>
@@ -61,12 +78,10 @@ export default function LoadingPage() {
 
                     <button
                         className={`${styles.btnPrimary} ${styles.btnPrimaryLg}`}
-                        onClick={handleWatchAd}
                         style={{ width: '100%' }}
                     >
                         광고 보고 테스트 시작하기
                     </button>
-                    {/* 유저 요청: "광고 보고 결과 보기 버튼 클릭" -> 문맥상 테스트 시작이 맞음. */}
                 </div>
 
             </div>
