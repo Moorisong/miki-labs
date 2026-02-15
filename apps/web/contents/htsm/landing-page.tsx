@@ -56,7 +56,8 @@ export default function LandingPage() {
     }, [session, status]);
 
     const handleStart = () => {
-        router.push('/htsm/start');
+        // 테스트 시작 전 로딩(광고) 페이지로 이동
+        router.push('/htsm/loading');
     };
 
     const handleContinue = () => {
