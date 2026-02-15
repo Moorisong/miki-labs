@@ -136,12 +136,21 @@ function conjugateToModifier(word: string): string {
     return word;
 }
 
+const FALLBACK_MESSAGES = {
+    open: "아직 친구들과 내가 생각하는 나의 모습이 겹치지 않았나 봐요! 조금 더 솔직한 대화를 나눠보는 건 어떨까요?",
+    blind: "남들이 보는 나는 아직 베일에 싸여 있는 것 같아요.",
+    hidden: "나만의 비밀스러운 모습, 아직은 아무에게도 들키지 않았군요!",
+    unknown: "아직 발견되지 않은 미지의 영역이 가득해요. 어떤 모습이 숨어 있을지 궁금하지 않나요?"
+};
+
 export function generateDescription(
     area: 'open' | 'blind' | 'hidden' | 'unknown',
     keywords: string[],
     seedString?: string
 ): string {
-    if (!keywords || keywords.length === 0) return '';
+    if (!keywords || keywords.length === 0) {
+        return FALLBACK_MESSAGES[area] || "아직 데이터가 충분하지 않아요.";
+    }
 
     const templates = TEMPLATES[area];
 
