@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { decodeResultData, ELEMENTS } from '@/lib/pet-destiny/fortune';
 import { PetDestinyResult, Element } from '@/lib/pet-destiny/types';
 import styles from './styles.module.css';
-import CrossPromotionBanner from './cross-banner';
+import MyorokBanner from '@/components/common/banners/myorok-banner';
 
 interface ResultData extends PetDestinyResult {
     petType: string;
@@ -346,7 +346,7 @@ export default function ResultPage() {
                 </div>
 
                 {/* 묘록 추천 배너 (교차 홍보) */}
-                <CrossPromotionBanner />
+                <MyorokBanner />
 
                 {/* 푸터 */}
                 <div className={styles.resultFooter}>

@@ -125,6 +125,7 @@
 }
 
 /* 아주 작은 화면에서는 CTA 버튼 숨기고 전체 클릭 유도 */
+/* 아주 작은 화면에서는 CTA 버튼 숨기고 전체 클릭 유도 */
 @media (max-width: 360px) {
     .ctaSection {
         display: none;
@@ -134,5 +135,24 @@
         content: ' →';
         color: #7c3aed;
         font-weight: 600;
+    }
+}
+
+/* 반응형 텍스트 제어 */
+.mobileOnly {
+    display: none;
+}
+
+.desktopOnly {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .mobileOnly {
+        display: block;
+    }
+
+    .desktopOnly {
+        display: none;
     }
 }
