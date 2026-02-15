@@ -9,6 +9,8 @@ import { HTSM_STORAGE_KEY } from './constants';
 import { fetchStats, HtsmStats, fetchMyTest } from './api';
 import { generateFingerprint } from './utils/fingerprint';
 
+import MyorokBanner from '@/components/common/banners/myorok-banner';
+
 import styles from './styles.module.css';
 
 const KeywordCloud3D = dynamic(() => import('./keyword-cloud-3d'), { ssr: false });
@@ -208,6 +210,11 @@ export default function LandingPage() {
                         )}
                     </div>
                 </div>
+            </section>
+
+            {/* Myorok Banner (Cross Promotion) */}
+            <section style={{ maxWidth: '640px', width: '100%', margin: '0 auto', paddingBottom: '3rem', paddingLeft: '1rem', paddingRight: '1rem' }}>
+                <MyorokBanner />
             </section>
         </div>
     );

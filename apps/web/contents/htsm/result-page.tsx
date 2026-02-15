@@ -8,6 +8,7 @@ import { fetchResult, HtsmResult } from './api';
 import ResultShareSection from './result-share-section';
 import JohariCard from './johari-card';
 import styles from './styles.module.css';
+import MyorokBanner from '@/components/common/banners/myorok-banner';
 
 interface ResultPageProps {
     shareId: string;
@@ -84,6 +85,14 @@ export default function ResultPage({ shareId }: ResultPageProps) {
                         </p>
                     </div>
 
+                    {/* Johari Info - Moved Here */}
+                    <div className={styles.infoCard} style={{ marginBottom: '2rem' }}>
+                        <h3 className={styles.johariInfoTitle}>조하리의 창이란?</h3>
+                        <p className={styles.johariInfoText}>
+                            조하리의 창(Johari Window)은 1955년 심리학자 조셉 루프트와 해리 잉햄이 개발한 심리학 도구입니다. 나와 타인의 관계 속에서 내가 어떤 사람인지 이해하도록 도와줍니다. 내가 아는 나와 모르는 나, 타인이 아는 나와 모르는 나를 구분하여 4가지 영역(개방, 맹목, 숨겨진, 미지)으로 나눕니다.
+                        </p>
+                    </div>
+
                     {/* Participation Progress */}
                     <div className={`${styles.glassCard} ${styles.participationCard}`}>
                         <div className={styles.participationHeader}>
@@ -128,14 +137,10 @@ export default function ResultPage({ shareId }: ResultPageProps) {
                     {/* New Share Section (Result Page Spec) */}
                     <ResultShareSection shareId={shareId} />
 
+                    {/* Myorok Banner */}
+                    <MyorokBanner />
 
-                    {/* Johari Info */}
-                    <div className={styles.infoCard}>
-                        <h3 className={styles.johariInfoTitle}>조하리의 창이란?</h3>
-                        <p className={styles.johariInfoText}>
-                            조하리의 창(Johari Window)은 1955년 심리학자 조셉 루프트와 해리 잉햄이 개발한 심리학 도구입니다. 나와 타인의 관계 속에서 내가 어떤 사람인지 이해하도록 도와줍니다. 내가 아는 나와 모르는 나, 타인이 아는 나와 모르는 나를 구분하여 4가지 영역(개방, 맹목, 숨겨진, 미지)으로 나눕니다.
-                        </p>
-                    </div>
+
                 </div>
             </div>
         </div >
