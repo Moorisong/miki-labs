@@ -2,15 +2,13 @@
 
 import { useMemo } from 'react';
 import styles from './styles.module.css';
-import { generateDescription } from './utils/description-generator';
-import { getKoreanKeyword } from './keyword-map';
-
 interface JohariCardProps {
     title: string;
     area: 'open' | 'blind' | 'hidden' | 'unknown';
     keywords: string[];
     colorClass: string;
     shareId?: string;
+    description: string;
 }
 
 const SUBTITLES = {
@@ -20,15 +18,7 @@ const SUBTITLES = {
     unknown: "새로운 환경에서 드러날 가능성"
 };
 
-export default function JohariCard({ title, area, keywords, colorClass, shareId }: JohariCardProps) {
-    const localizedKeywords = useMemo(() => {
-        return keywords.map(kw => getKoreanKeyword(kw));
-    }, [keywords]);
-
-    const description = useMemo(() => {
-        return generateDescription(area, localizedKeywords, shareId);
-    }, [area, localizedKeywords, shareId]);
-
+export default function JohariCard({ title, area, description, colorClass }: JohariCardProps) {
     const subtitle = SUBTITLES[area];
 
     return (
@@ -45,8 +35,6 @@ export default function JohariCard({ title, area, keywords, colorClass, shareId 
                     {description}
                 </p>
             </div>
-
-
         </div>
     );
 }

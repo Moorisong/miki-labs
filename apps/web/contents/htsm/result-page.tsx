@@ -120,6 +120,7 @@ export default function ResultPage({ shareId }: ResultPageProps) {
                                 keywords={card.keywords}
                                 colorClass={getColorClass(card.theme)}
                                 shareId={shareId}
+                                description={card.description}
                             />
                         ))}
                     </div>

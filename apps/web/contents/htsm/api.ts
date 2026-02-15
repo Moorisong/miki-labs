@@ -70,6 +70,7 @@ export interface HtsmResultCard {
     area: 'open' | 'blind' | 'hidden' | 'unknown';
     theme: string;
     keywords: string[];
+    description: string;
 }
 
 export interface HtsmResult {
