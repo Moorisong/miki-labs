@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { HTSM_CONFIG } from './constants';
 import { fetchResult, HtsmResult } from './api';
 import ResultShareSection from './result-share-section';
 import JohariCard from './johari-card';
@@ -53,16 +52,17 @@ export default function ResultPage({ shareId }: ResultPageProps) {
         );
     }
 
-    const { answerCount, johari } = result;
-    const totalFriends = HTSM_CONFIG.MIN_FRIENDS_FOR_RESULT;
-    const percent = Math.min(Math.round((answerCount / totalFriends) * 100), 100);
+    const { answerCount, participationPercent, friendsNeeded, cards } = result;
 
-    const johariCards = [
-        { title: '개방된 자아', area: 'open' as const, data: johari.open, colorClass: styles.colorGreen },
-        { title: '눈먼 자아', area: 'blind' as const, data: johari.blind, colorClass: styles.colorBlue },
-        { title: '숨겨진 자아', area: 'hidden' as const, data: johari.hidden, colorClass: styles.colorPurple },
-        { title: '미지의 자아', area: 'unknown' as const, data: answerCount === 0 ? { keywords: [] } : johari.unknown, colorClass: styles.colorCyan },
-    ];
+    const getColorClass = (theme: string) => {
+        switch (theme) {
+            case 'green': return styles.colorGreen;
+            case 'blue': return styles.colorBlue;
+            case 'purple': return styles.colorPurple;
+            case 'cyan': return styles.colorCyan;
+            default: return styles.colorGreen;
+        }
+    };
 
     return (
         <div className={styles.pageContainer}>
@@ -98,27 +98,27 @@ export default function ResultPage({ shareId }: ResultPageProps) {
                                     {answerCount}명의 친구가 응답했습니다
                                 </span>
                             </div>
-                            <span className={styles.participationPercent}>{percent}%</span>
+                            <span className={styles.participationPercent}>{participationPercent}%</span>
                         </div>
                         <div className={styles.participationBar}>
-                            <div className={styles.participationBarFill} style={{ width: `${percent}%` }} />
+                            <div className={styles.participationBarFill} style={{ width: `${participationPercent}%` }} />
                         </div>
-                        {answerCount < totalFriends && (
+                        {friendsNeeded > 0 && (
                             <p className={styles.participationHint}>
-                                {totalFriends - answerCount}명만 더 응답하면 전체 결과가 공개됩니다
+                                {friendsNeeded}명만 더 응답하면 전체 결과가 공개됩니다
                             </p>
                         )}
                     </div>
 
                     {/* Johari Grid */}
                     <div className={styles.johariGrid}>
-                        {johariCards.map((card) => (
+                        {cards.map((card) => (
                             <JohariCard
                                 key={card.title}
                                 title={card.title}
-                                area={card.area}
-                                keywords={card.data.keywords}
-                                colorClass={card.colorClass}
+                                area={card.area as any}
+                                keywords={card.keywords}
+                                colorClass={getColorClass(card.theme)}
                                 shareId={shareId}
                             />
                         ))}

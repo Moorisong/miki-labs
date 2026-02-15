@@ -32,6 +32,7 @@ export const HTSM_CONFIG = {
     SHARE_ID_LENGTH: 10,
     PROOF_TOKEN_TTL_MS: 10 * 60 * 1000, // 10분
     MAX_FINGERPRINT_HASH_LENGTH: 200,
+    MIN_FRIENDS_FOR_RESULT: 3,
 } as const;
 
 export const HTSM_ERRORS = {

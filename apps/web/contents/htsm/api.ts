@@ -65,9 +65,19 @@ export interface JohariArea {
     keywords: string[];
 }
 
+export interface HtsmResultCard {
+    title: string;
+    area: 'open' | 'blind' | 'hidden' | 'unknown';
+    theme: string;
+    keywords: string[];
+}
+
 export interface HtsmResult {
     answerCount: number;
     isClosed: boolean;
+    participationPercent: number;
+    friendsNeeded: number;
+    cards: HtsmResultCard[];
     johari: {
         open: JohariArea;
         blind: JohariArea;

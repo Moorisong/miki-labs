@@ -333,6 +333,38 @@ export async function getResult(req: Request, res: Response): Promise<void> {
 
         const johari = calculateJohari(test.selfKeywords, friendAnswers);
 
+        // 결과 페이지용 추가 데이터 계산
+        const totalFriends = HTSM_CONFIG.MIN_FRIENDS_FOR_RESULT;
+        const participationPercent = Math.min(Math.round((test.answerCount / totalFriends) * 100), 100);
+        const friendsNeeded = Math.max(0, totalFriends - test.answerCount);
+
+        const cards = [
+            {
+                title: '개방된 자아',
+                area: 'open',
+                theme: 'green',
+                keywords: johari.open.keywords
+            },
+            {
+                title: '눈먼 자아',
+                area: 'blind',
+                theme: 'blue',
+                keywords: johari.blind.keywords
+            },
+            {
+                title: '숨겨진 자아',
+                area: 'hidden',
+                theme: 'purple',
+                keywords: johari.hidden.keywords
+            },
+            {
+                title: '미지의 자아',
+                area: 'unknown',
+                theme: 'cyan',
+                keywords: test.answerCount === 0 ? [] : johari.unknown.keywords
+            }
+        ];
+
         console.log(`[HTSM] Result viewed for test ${shareId} (answers: ${answers.length})`);
         res.json({
             success: true,
@@ -340,6 +372,9 @@ export async function getResult(req: Request, res: Response): Promise<void> {
                 answerCount: test.answerCount,
                 isClosed: test.isClosed,
                 johari,
+                participationPercent,
+                friendsNeeded,
+                cards,
             },
         });
     } catch (error) {
