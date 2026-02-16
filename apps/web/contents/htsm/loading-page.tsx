@@ -11,51 +11,88 @@ export default function LoadingPage() {
     const hasLeftRef = useRef(false);
 
     useEffect(() => {
-        // 기존 스크립트가 있다면 제거 (중복 방지)
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        /** [PC용 광고 로직] */
+        const setupPcAdFlow = () => {
+            console.log('HTSM: Loading PC Ad Flow');
+            const script = document.createElement('script');
+            script.dataset.zone = '10587835';
+            script.src = 'https://al5sm.com/tag.min.js';
+            document.body.appendChild(script);
+
+            const handlePcVisibilityChange = () => {
+                if (document.hidden) {
+                    hasLeftRef.current = true;
+                } else if (hasLeftRef.current) {
+                    window.location.href = '/htsm/start';
+                }
+            };
+
+            const handlePcBlur = () => {
+                hasLeftRef.current = true;
+            };
+
+            const handlePcFocus = () => {
+                if (hasLeftRef.current) {
+                    window.location.href = '/htsm/start';
+                }
+            };
+
+            document.addEventListener('visibilitychange', handlePcVisibilityChange);
+            window.addEventListener('blur', handlePcBlur);
+            window.addEventListener('focus', handlePcFocus);
+
+            return () => {
+                document.removeEventListener('visibilitychange', handlePcVisibilityChange);
+                window.removeEventListener('blur', handlePcBlur);
+                window.removeEventListener('focus', handlePcFocus);
+                script.remove();
+            };
+        };
+
+        /** [모바일용 광고 로직] */
+        const setupMobileAdFlow = () => {
+            console.log('HTSM: Loading Mobile Ad Flow');
+            // 모바일은 팝업 차단이 강력하므로 별도의 처리나 스크립트 설정이 필요할 수 있음
+            const script = document.createElement('script');
+            script.dataset.zone = '10587835'; // 현재 동일한 존 사용
+            script.src = 'https://al5sm.com/tag.min.js';
+            document.body.appendChild(script);
+
+            // 모바일은 visibilitychange가 더 신뢰도 높음
+            const handleMobileVisibility = () => {
+                if (document.hidden) {
+                    hasLeftRef.current = true;
+                    // 모바일의 경우 페이지가 완전히 비활성화되었다가 돌아오는 시점을 체크
+                    console.log('HTSM Mobile: User left page (ad opened)');
+                } else {
+                    if (hasLeftRef.current) {
+                        console.log('HTSM Mobile: User returned, navigating...');
+                        window.location.href = '/htsm/start';
+                    }
+                }
+            };
+
+            // 모바일은 blur보다는 visibilitychange와 pagehide를 주로 사용
+            document.addEventListener('visibilitychange', handleMobileVisibility);
+            window.addEventListener('pagehide', () => { hasLeftRef.current = true; });
+
+            return () => {
+                document.removeEventListener('visibilitychange', handleMobileVisibility);
+                script.remove();
+            };
+        };
+
+        // 기존 스크립트 제거 (중복 방지)
         const existing = document.querySelector('script[data-zone="10587835"]');
         if (existing) existing.remove();
 
-        const script = document.createElement('script');
-        script.dataset.zone = '10587835';
-        script.src = 'https://al5sm.com/tag.min.js';
-
-        // body에 추가
-        document.body.appendChild(script);
-
-        const checkAndMove = () => {
-            if (hasLeftRef.current) {
-                // 중요: SPA 라우팅(router.push) 대신 강제 새로고침 이동을 사용하여
-                // window 객체에 남은 광고 스크립트 리스너를 확실히 제거함
-                window.location.href = '/htsm/start';
-            }
-        };
-
-        const handleVisibilityChange = () => {
-            if (document.hidden) {
-                hasLeftRef.current = true;
-            } else {
-                checkAndMove();
-            }
-        };
-
-        const handleBlur = () => {
-            hasLeftRef.current = true;
-        };
-
-        const handleFocus = () => {
-            checkAndMove();
-        };
-
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        window.addEventListener('blur', handleBlur);
-        window.addEventListener('focus', handleFocus);
+        const cleanup = isMobile ? setupMobileAdFlow() : setupPcAdFlow();
 
         return () => {
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-            window.removeEventListener('blur', handleBlur);
-            window.removeEventListener('focus', handleFocus);
-
-            // 언마운트 시 스크립트 태그 제거 (어차피 새로고침되지만 안전장치)
+            cleanup();
+            // 전역 스크립트 잔재 제거
             const remnants = document.querySelectorAll('script[data-zone="10587835"]');
             remnants.forEach(el => el.remove());
         };
