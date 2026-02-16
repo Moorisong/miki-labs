@@ -48,7 +48,7 @@ export default function SelfSelectionPage() {
 
     const handleContinue = async () => {
         if (!name.trim()) {
-            setError('이름을 필수입니다.');
+            setError('이름을 입력해주세요.');
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
