@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ResultPage from '@/contents/htsm/result-page';
 
 export const metadata: Metadata = {
-    title: 'Johari Window 결과',
+    title: '[자아탐험] 숨겨진 성격 결과가 공개되었습니다',
     description:
-        '나와 친구들의 키워드를 비교한 Johari Window 결과를 확인하세요. Open, Blind, Hidden, Unknown 4가지 영역으로 분석됩니다.',
+        '주변 사람들이 본 나의 모습까지 포함된 결과입니다. 생각보다 정확하고, 조금 놀랄 수도 있습니다.',
     openGraph: {
-        title: 'Johari Window 결과 | 자아탐험',
-        description: '나와 친구들의 키워드를 비교한 Johari Window 결과를 확인하세요.',
+        title: '[자아탐험] 숨겨진 성격 결과가 공개되었습니다',
+        description: '주변 사람들이 본 나의 모습까지 포함된 결과입니다. 생각보다 정확하고, 조금 놀랄 수도 있습니다.',
         images: [
             {
                 url: 'https://box.haroo.site/htsm-og-result.png',
@@ -19,8 +19,8 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'Johari Window 결과 | 자아탐험',
-        description: '나와 친구들의 키워드를 비교한 Johari Window 결과를 확인하세요.',
+        title: '[자아탐험] 숨겨진 성격 결과가 공개되었습니다',
+        description: '주변 사람들이 본 나의 모습까지 포함된 결과입니다. 생각보다 정확하고, 조금 놀랄 수도 있습니다.',
         images: ['https://box.haroo.site/htsm-og-result.png'],
     },
 };
