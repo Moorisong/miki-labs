@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useSession } from 'next-auth/react';
@@ -23,12 +23,15 @@ export default function LandingPage() {
     const [myShareId, setMyShareId] = useState<string | null>(null);
     const [stats, setStats] = useState<HtsmStats | null>(null);
     const [showLoginModal, setShowLoginModal] = useState(false);
-    const [loginModalConfig, setLoginModalConfig] = useState({ title: '', description: '' });
+    const [loginModalConfig, setLoginModalConfig] = useState({ title: '', description: '', callbackUrl: '' });
 
     // 통계 데이터 독립적으로 가져오기
     useEffect(() => {
         fetchStats().then(setStats).catch(console.error);
     }, []);
+
+    const searchParams = useSearchParams();
+    const action = searchParams.get('action');
 
     useEffect(() => {
         const initialize = async () => {
@@ -38,6 +41,14 @@ export default function LandingPage() {
                     const dbShareId = await fetchMyTest(session.user.kakaoId);
                     if (dbShareId) {
                         setMyShareId(dbShareId);
+
+                        // 로그인 후 자동으로 이어보기 요청이 온 경우
+                        if (action === 'continue') {
+                            router.replace(`/htsm/result/${dbShareId}`);
+                        }
+                    } else if (action === 'continue') {
+                        // 결과가 없는데 이어보기로 온 경우 쿼리 파라미터 제거
+                        router.replace('/htsm');
                     }
                 } catch (err) {
                     console.error('Failed to fetch my test:', err);
@@ -46,13 +57,14 @@ export default function LandingPage() {
         };
 
         initialize();
-    }, [session, status]);
+    }, [session, status, action, router]);
 
     const handleStart = () => {
         if (status === 'unauthenticated') {
             setLoginModalConfig({
                 title: '자아탐험 시작하기',
-                description: '테스트를 생성하려면 로그인이 필요합니다.\n카카오 로그인으로 간편하게 시작하세요.'
+                description: '테스트를 생성하려면 로그인이 필요합니다.\n카카오 로그인으로 간편하게 시작하세요.',
+                callbackUrl: '/htsm/loading'
             });
             setShowLoginModal(true);
             return;
@@ -65,7 +77,8 @@ export default function LandingPage() {
         if (status === 'unauthenticated') {
             setLoginModalConfig({
                 title: '내 결과 이어보기',
-                description: '이전에 생성한 결과를 확인하려면 로그인이 필요합니다.\n카카오 로그인으로 간편하게 시작하세요.'
+                description: '이전에 생성한 결과를 확인하려면 로그인이 필요합니다.\n카카오 로그인으로 간편하게 시작하세요.',
+                callbackUrl: '/htsm?action=continue'
             });
             setShowLoginModal(true);
             return;
@@ -232,6 +245,7 @@ export default function LandingPage() {
                     onClose={() => setShowLoginModal(false)}
                     title={loginModalConfig.title}
                     description={loginModalConfig.description}
+                    callbackUrl={loginModalConfig.callbackUrl}
                 />
             )}
         </div>

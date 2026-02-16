@@ -34,6 +34,12 @@ export const metadata: Metadata = {
     },
 };
 
+import { Suspense } from 'react';
+
 export default function HtsmPage() {
-    return <LandingPage />;
+    return (
+        <Suspense fallback={null}>
+            <LandingPage />
+        </Suspense>
+    );
 }
