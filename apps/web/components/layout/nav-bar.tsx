@@ -55,7 +55,9 @@ export default function NavBar() {
 
   const handleSignOut = () => {
     closeMenu();
-    signOut({ callbackUrl: pathname });
+    // 자아탐험 관련 페이지에서 로그아웃 시 자아탐험 랜딩 페이지로 이동
+    const redirectUrl = pathname.startsWith('/htsm') ? '/htsm' : pathname;
+    signOut({ callbackUrl: redirectUrl });
   };
 
   const handleNicknameClick = () => {
