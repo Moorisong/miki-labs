@@ -2,7 +2,7 @@
 
 import React, { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Html, OrbitControls } from '@react-three/drei';
+import { Html } from '@react-three/drei';
 
 import type { Group } from 'three';
 
@@ -93,13 +93,6 @@ export default function KeywordCloud3D() {
                 <ambientLight intensity={1} />
 
                 <Cloud />
-
-                <OrbitControls
-                    enableZoom={false}
-                    enablePan={false}
-                    autoRotate
-                    autoRotateSpeed={0.4}
-                />
             </Canvas>
         </div>
     );
