@@ -137,7 +137,7 @@ export default function ResultPage({ shareId }: ResultPageProps) {
                     </div>
 
                     {/* New Share Section (Result Page Spec) */}
-                    <ResultShareSection shareId={shareId} />
+                    <ResultShareSection shareId={shareId} name={result.name} />
 
                     {/* Myorok Banner */}
                     <MyorokBanner />

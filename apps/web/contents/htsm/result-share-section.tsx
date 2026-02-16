@@ -5,9 +5,10 @@ import styles from './styles.module.css';
 
 interface ResultShareSectionProps {
     shareId: string;
+    name?: string;
 }
 
-export default function ResultShareSection({ shareId }: ResultShareSectionProps) {
+export default function ResultShareSection({ shareId, name }: ResultShareSectionProps) {
     const [activeTab, setActiveTab] = useState<'result' | 'invite'>('result');
     const [copied, setCopied] = useState<boolean>(false);
 
@@ -83,13 +84,13 @@ export default function ResultShareSection({ shareId }: ResultShareSectionProps)
                     className={`${styles.shareTab} ${activeTab === 'result' ? styles.shareTabActive : ''}`}
                     onClick={() => setActiveTab('result')}
                 >
-                    내 결과 공유
+                    {name ? `${name}의 결과 공유` : '내 결과 공유'}
                 </button>
                 <button
                     className={`${styles.shareTab} ${activeTab === 'invite' ? styles.shareTabActive : ''}`}
                     onClick={() => setActiveTab('invite')}
                 >
-                    친구 참여시키기
+                    참여 요청
                 </button>
             </div>
 
