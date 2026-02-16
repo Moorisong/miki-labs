@@ -48,7 +48,7 @@ export default function SharePage({ shareId }: SharePageProps) {
             content: {
                 title: '[자아탐험] 친구를 가장 잘 표현하는 키워드를 선택해주세요',
                 description: '당신의 선택 하나가 누군가의 ‘숨겨진 자아’를 완성합니다.',
-                imageUrl: 'https://box.haroo.site/htsm-og-base.png',
+                imageUrl: 'https://box.haroo.site/htsm-og-base.png?v=2',
                 link: {
                     mobileWebUrl: answerUrl,
                     webUrl: answerUrl,
