@@ -295,17 +295,19 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
 
                     <div className={styles.stickyBottom}>
                         <div className={styles.stickyBottomInner}>
-                            <button className={`${styles.btnPrimary} ${styles.btnFull}`} onClick={handleSubmit}
-                                disabled={selectedKeywords.length < HTSM_CONFIG.MIN_KEYWORD_SELECTION || isSubmitting}>
-                                {isSubmitting ? '제출 중...' : '답변 제출하기'}
-                            </button>
-                            <button
-                                className={`${styles.btnSecondary} ${styles.btnFull}`}
-                                onClick={() => router.push('/htsm')}
-                                style={{ marginTop: '0.75rem' }}
-                            >
-                                취소하기
-                            </button>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                <button className={`${styles.btnPrimary} ${styles.btnFull}`} onClick={handleSubmit}
+                                    disabled={selectedKeywords.length < HTSM_CONFIG.MIN_KEYWORD_SELECTION || isSubmitting}>
+                                    {isSubmitting ? '제출 중...' : '답변 제출하기'}
+                                </button>
+                                <button
+                                    className={`${styles.btnCancel} ${styles.btnFull}`}
+                                    onClick={() => router.push('/htsm')}
+                                    disabled={isSubmitting}
+                                >
+                                    취소하기
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

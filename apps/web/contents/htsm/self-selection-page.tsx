@@ -231,13 +231,22 @@ export default function SelfSelectionPage() {
                     {/* Sticky Bottom Button */}
                     <div className={styles.stickyBottom}>
                         <div className={styles.stickyBottomInner}>
-                            <button
-                                className={`${styles.btnPrimary} ${styles.btnFull}`}
-                                onClick={handleContinue}
-                                disabled={selectedKeywords.length < HTSM_CONFIG.MIN_KEYWORD_SELECTION || isSubmitting}
-                            >
-                                {isSubmitting ? '생성 중...' : '계속하기'}
-                            </button>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                <button
+                                    className={`${styles.btnPrimary} ${styles.btnFull}`}
+                                    onClick={handleContinue}
+                                    disabled={selectedKeywords.length < HTSM_CONFIG.MIN_KEYWORD_SELECTION || isSubmitting}
+                                >
+                                    {isSubmitting ? '생성 중...' : '계속하기'}
+                                </button>
+                                <button
+                                    className={`${styles.btnCancel} ${styles.btnFull}`}
+                                    onClick={() => router.push('/htsm')}
+                                    disabled={isSubmitting}
+                                >
+                                    취소하기
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

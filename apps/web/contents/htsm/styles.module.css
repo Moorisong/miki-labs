@@ -92,7 +92,7 @@
 .pageContainer {
     min-height: 100vh;
     background: linear-gradient(135deg, #f5f3ff 0%, #eff6ff 50%, #ecfeff 100%);
-    padding-bottom: 6rem;
+    padding-bottom: 12rem;
     position: relative;
     overflow-x: hidden;
 }
@@ -537,6 +537,32 @@
     cursor: not-allowed;
 }
 
+.btnCancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #6b7280;
+    background: #f3f4f6;
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all 200ms ease;
+}
+
+.btnCancel:hover:not(:disabled) {
+    background: #e5e7eb;
+    color: #374151;
+    transform: translateY(-2px);
+}
+
+.btnCancel:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
 .btnFull {
     width: 100%;
 }
@@ -583,7 +609,7 @@
     flex-direction: column;
     gap: 1.25rem;
     margin-bottom: 2rem;
-    padding-bottom: 5rem;
+    padding-bottom: 10rem;
 }
 
 .categorySection {
@@ -1277,6 +1303,7 @@
         font-size: 4.5rem;
     }
 }
+
 /* Share Section Component */
 .shareSection {
     margin-bottom: 2rem;
