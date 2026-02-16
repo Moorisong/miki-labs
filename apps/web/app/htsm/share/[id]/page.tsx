@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     description:
         '친구들에게 테스트를 공유하세요. 3명 이상의 친구가 응답하면 Johari Window 결과가 열립니다.',
     openGraph: {
-        title: '테스트 공유하기 | HowTheySeeMe',
+        title: '테스트 공유하기 | 자아탐험',
         description: '친구들에게 테스트를 공유하세요.',
     },
 };

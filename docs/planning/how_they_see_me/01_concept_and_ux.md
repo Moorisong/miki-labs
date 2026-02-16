@@ -1,4 +1,4 @@
-# 자아탐험 (구 HowTheySeeMe) UI/UX Planning - Part 1
+# 자아탐험 (구 자아탐험) UI/UX Planning - Part 1
 
 ## 1. 목표
 
