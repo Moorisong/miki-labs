@@ -44,6 +44,7 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
     const router = useRouter();
     const { data: session } = useSession();
     const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
+    const [name, setName] = useState<string>('');
     const [submitted, setSubmitted] = useState<boolean>(false);
     const [isClosed, setIsClosed] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -63,6 +64,8 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
                     fingerprint,
                     session?.user?.kakaoId
                 );
+
+                if (info.name) setName(info.name);
 
                 if (info.isCreator) {
                     setIsCreator(true);
@@ -212,7 +215,10 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
             <div className={styles.innerContainer}>
                 <div className={styles.friendPage}>
                     <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                        <h1 className={styles.friendTitle}>친구를 표현하는 단어 3~5개를 골라주세요</h1>
+                        <h1 className={styles.friendTitle}>
+                            <span style={{ color: '#6366f1' }}>{name || '친구'}</span>를
+                            표현하는 단어 3~5개를 골라주세요
+                        </h1>
                         <p className={styles.friendCount}>{count}/{HTSM_CONFIG.MAX_KEYWORD_SELECTION} 선택됨</p>
                         <div className={styles.trustIndicators}>
                             <div className={styles.trustItem}>

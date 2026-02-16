@@ -6,6 +6,7 @@ export interface IJohariTest {
     selfKeywords: string[];
     answerCount: number;
     isClosed: boolean;
+    name?: string; // 테스트 생성자 이름 (표시용) - 레거시는 없을 수 있음
     creatorFingerprint?: string; // 생성자 식별용 (레거시/보조)
     userId?: string; // 카카오 ID (주 식별자)
     createdIp?: string;
@@ -25,6 +26,11 @@ const johariTestSchema = new Schema<IJohariTest>(
         userId: {
             type: String,
             index: true, // 유저별 조회
+        },
+        name: {
+            type: String,
+            trim: true,
+            maxlength: 20,
         },
         createdIp: {
             type: String,

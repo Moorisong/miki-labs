@@ -21,6 +21,7 @@ export default function SelfSelectionPage() {
     const router = useRouter();
     const { data: session, status } = useSession();
     const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
+    const [name, setName] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
     const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
@@ -46,6 +47,11 @@ export default function SelfSelectionPage() {
     };
 
     const handleContinue = async () => {
+        if (!name.trim()) {
+            setError('이름을 필수입니다.');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
         if (selectedKeywords.length < HTSM_CONFIG.MIN_KEYWORD_SELECTION || selectedKeywords.length > HTSM_CONFIG.MAX_KEYWORD_SELECTION) return;
         if (isSubmitting) return;
 
@@ -64,7 +70,7 @@ export default function SelfSelectionPage() {
             if (!userId) {
                 throw new Error('로그인이 필요합니다.');
             }
-            const shareId = await createTest(selectedKeywords, proofToken, userId, fingerprint);
+            const shareId = await createTest(selectedKeywords, proofToken, userId, name, fingerprint);
 
             // 3. LocalStorage 저장 (재방문 UX)
             if (typeof window !== 'undefined') {
@@ -149,6 +155,23 @@ export default function SelfSelectionPage() {
                     <p className={styles.selectionCount}>
                         {selectionCount}/{HTSM_CONFIG.MAX_KEYWORD_SELECTION} 선택됨
                     </p>
+
+                    {/* Name Input */}
+                    <div className={styles.inputGroup}>
+                        <label className={styles.inputLabel}>
+                            이름 (닉네임)
+                            <span style={{ color: '#ef4444', marginLeft: '4px' }}>*</span>
+                        </label>
+                        <input
+                            type="text"
+                            className={styles.inputField}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="친구들이 알아볼 수 있는 이름을 입력하세요"
+                            maxLength={20}
+                            disabled={isSubmitting}
+                        />
+                    </div>
 
                     {/* Error */}
                     {error && (

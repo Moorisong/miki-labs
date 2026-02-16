@@ -24,12 +24,13 @@ export async function createTest(
     selfKeywords: string[],
     proofToken: string,
     userId: string,
+    name: string,
     fingerprintHash?: string
 ): Promise<string> {
     const res = await fetch(`${API_BASE}/tests`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ selfKeywords, proofToken, userId, fingerprintHash }),
+        body: JSON.stringify({ selfKeywords, proofToken, userId, name, fingerprintHash }),
     });
     const json: ApiResponse<{ shareId: string }> = await res.json();
     if (!json.success || !json.data) throw new Error(json.error || 'Failed to create test');
@@ -75,6 +76,7 @@ export interface HtsmResultCard {
 }
 
 export interface HtsmResult {
+    name?: string;
     answerCount: number;
     isClosed: boolean;
     participationPercent: number;
@@ -109,6 +111,7 @@ export async function fetchStats(): Promise<HtsmStats> {
 }
 
 export interface HtsmTestInfo {
+    name?: string;
     answerCount: number;
     isClosed: boolean;
     isCreator?: boolean;

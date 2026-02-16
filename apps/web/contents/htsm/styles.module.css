@@ -1505,3 +1505,30 @@
     color: #94a3b8 !important;
     font-weight: 400 !important;
 }
+
+.inputGroup {
+    margin-bottom: 2rem;
+}
+
+.inputLabel {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.inputField {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    transition: all 200ms ease;
+    outline: none;
+}
+
+.inputField:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}

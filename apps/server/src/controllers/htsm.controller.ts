@@ -77,7 +77,7 @@ export async function getProofToken(req: Request, res: Response): Promise<void> 
  */
 export async function createTest(req: Request, res: Response): Promise<void> {
     try {
-        const { selfKeywords, proofToken, fingerprintHash, userId } = req.body;
+        const { selfKeywords, proofToken, fingerprintHash, userId, name } = req.body;
 
         // 1. Proof Token 검증
         if (!proofToken || typeof proofToken !== 'string') {
@@ -107,10 +107,18 @@ export async function createTest(req: Request, res: Response): Promise<void> {
             res.status(400).json({ success: false, error: HTSM_ERRORS.INVALID_KEYWORDS });
             return;
         }
-
-        // 3. User ID 검증 (필수)
         if (!userId || typeof userId !== 'string') {
             res.status(400).json({ success: false, error: '로그인이 필요합니다.' });
+            return;
+        }
+
+        // 3.1 Name 검증 (필수)
+        if (!name || typeof name !== 'string' || name.trim().length === 0) {
+            res.status(400).json({ success: false, error: '이름을 입력해주세요.' });
+            return;
+        }
+        if (name.length > 20) {
+            res.status(400).json({ success: false, error: '이름은 20자 이내로 입력해주세요.' });
             return;
         }
 
@@ -138,6 +146,7 @@ export async function createTest(req: Request, res: Response): Promise<void> {
             shareId,
             selfKeywords,
             userId, // 카카오 ID 저장
+            name: name.trim(), // 이름 저장
             creatorFingerprint: fingerprintHash, // 보조 저장
             createdIp: ip,
             createdUserAgent: userAgent,
@@ -380,6 +389,7 @@ export async function getResult(req: Request, res: Response): Promise<void> {
         res.json({
             success: true,
             data: {
+                name: test.name,
                 answerCount: test.answerCount,
                 isClosed: test.isClosed,
                 johari,
@@ -422,6 +432,7 @@ export async function getTestInfo(req: Request, res: Response): Promise<void> {
         res.json({
             success: true,
             data: {
+                name: test.name,
                 answerCount: test.answerCount,
                 isClosed: test.isClosed,
                 isCreator,
