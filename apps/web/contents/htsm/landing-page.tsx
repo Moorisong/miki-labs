@@ -10,6 +10,7 @@ import { fetchStats, HtsmStats, fetchMyTest } from './api';
 import { generateFingerprint } from './utils/fingerprint';
 
 import MyorokBanner from '@/components/common/banners/myorok-banner';
+import HtsmLoginView from './components/htsm-login-view';
 
 import styles from './styles.module.css';
 
@@ -21,6 +22,8 @@ export default function LandingPage() {
     const { data: session, status } = useSession();
     const [myShareId, setMyShareId] = useState<string | null>(null);
     const [stats, setStats] = useState<HtsmStats | null>(null);
+    const [showLoginModal, setShowLoginModal] = useState(false);
+    const [loginModalConfig, setLoginModalConfig] = useState({ title: '', description: '' });
 
     // 통계 데이터 독립적으로 가져오기
     useEffect(() => {
@@ -29,22 +32,12 @@ export default function LandingPage() {
 
     useEffect(() => {
         const initialize = async () => {
-            // 1. LocalStorage 확인
-            if (typeof window !== 'undefined') {
-                const stored = localStorage.getItem(HTSM_STORAGE_KEY.SHARE_ID);
-                if (stored && stored !== 'null' && stored !== 'undefined') {
-                    setMyShareId(stored);
-                    return; // 이미 있으면 종료
-                }
-            }
-
-            // 2. 로그인 세션 확인
+            // 1. 로그인 세션 확인
             if (status === 'authenticated' && session?.user?.kakaoId) {
                 try {
                     const dbShareId = await fetchMyTest(session.user.kakaoId);
                     if (dbShareId) {
                         setMyShareId(dbShareId);
-                        localStorage.setItem(HTSM_STORAGE_KEY.SHARE_ID, dbShareId);
                     }
                 } catch (err) {
                     console.error('Failed to fetch my test:', err);
@@ -56,11 +49,27 @@ export default function LandingPage() {
     }, [session, status]);
 
     const handleStart = () => {
+        if (status === 'unauthenticated') {
+            setLoginModalConfig({
+                title: '자아탐험 시작하기',
+                description: '테스트를 생성하려면 로그인이 필요합니다.\n카카오 로그인으로 간편하게 시작하세요.'
+            });
+            setShowLoginModal(true);
+            return;
+        }
         // 테스트 시작 전 로딩(광고) 페이지로 이동
         router.push('/htsm/loading');
     };
 
     const handleContinue = () => {
+        if (status === 'unauthenticated') {
+            setLoginModalConfig({
+                title: '내 결과 이어보기',
+                description: '이전에 생성한 결과를 확인하려면 로그인이 필요합니다.\n카카오 로그인으로 간편하게 시작하세요.'
+            });
+            setShowLoginModal(true);
+            return;
+        }
         if (myShareId) {
             router.push(`/htsm/result/${myShareId}`);
         }
@@ -97,7 +106,7 @@ export default function LandingPage() {
                             테스트 시작하기
                         </button>
 
-                        {myShareId && (
+                        {(status === 'unauthenticated' || myShareId) && (
                             <button
                                 className={`${styles.btnSecondary} ${styles.btnPrimaryLg}`}
                                 onClick={handleContinue}
@@ -201,7 +210,7 @@ export default function LandingPage() {
                             테스트 시작하기
                         </button>
 
-                        {myShareId && (
+                        {(status === 'unauthenticated' || myShareId) && (
                             <button
                                 className={`${styles.btnSecondary} ${styles.btnPrimaryLg}`}
                                 onClick={handleContinue}
@@ -213,10 +222,18 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* Myorok Banner (Cross Promotion) */}
             <section style={{ maxWidth: '640px', width: '100%', margin: '0 auto', paddingBottom: '3rem', paddingLeft: '1rem', paddingRight: '1rem' }}>
                 <MyorokBanner />
             </section>
+
+            {/* Login Modal */}
+            {showLoginModal && (
+                <HtsmLoginView
+                    onClose={() => setShowLoginModal(false)}
+                    title={loginModalConfig.title}
+                    description={loginModalConfig.description}
+                />
+            )}
         </div>
     );
 }
