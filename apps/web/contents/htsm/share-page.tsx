@@ -46,9 +46,9 @@ export default function SharePage({ shareId }: SharePageProps) {
         window.Kakao.Share.sendDefault({
             objectType: 'feed',
             content: {
-                title: '당신이 보는 저의 모습이 궁금합니다',
-                description: '10명의 평가로 완성되는 성격 테스트입니다.\n잠시 시간을 내어 참여 부탁드립니다.',
-                imageUrl: 'https://box.haroo.site/htsm-logo-v6.png',
+                title: '[자아탐험] 친구의 키워드를 선택해주세요',
+                description: '당신의 선택 하나가 누군가의 ‘숨겨진 자아’를 완성합니다.',
+                imageUrl: 'https://box.haroo.site/htsm-og-base.png',
                 link: {
                     mobileWebUrl: answerUrl,
                     webUrl: answerUrl,

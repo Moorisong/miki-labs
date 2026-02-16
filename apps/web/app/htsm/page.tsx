@@ -19,7 +19,7 @@ export const metadata: Metadata = {
         url: 'https://box.haroo.site/htsm',
         images: [
             {
-                url: 'https://box.haroo.site/og-image.png',
+                url: 'https://box.haroo.site/htsm-og-base.png',
                 width: 1200,
                 height: 630,
                 alt: '자아탐험 - See how they see me',
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
         card: 'summary_large_image',
         title: '자아탐험 | 친구들이 보는 나를 발견하세요',
         description: '친구들의 익명 키워드 선택으로 Johari Window 결과를 확인하세요.',
-        images: ['https://box.haroo.site/og-image.png'],
+        images: ['https://box.haroo.site/htsm-og-base.png'],
     },
 };
 
