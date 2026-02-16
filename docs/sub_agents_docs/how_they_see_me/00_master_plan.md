@@ -1,10 +1,10 @@
-# System Agent: HowTheySeeMe (HTSM) Core
+# System Agent: 자아탐험 (HTSM) Core
 
 ## 문서 위치
 `docs/sub_agents_docs/how_they_see_me/00_master_plan.md`
 
 ## 개요
-HowTheySeeMe(HTSM)는 친구들의 익명 평가를 통해 "내가 보는 나"와 "남이 보는 나"를 비교하는 **Johari Window 기반 심리/성격 분석 웹 서비스**입니다.
+자아탐험(HTSM)는 친구들의 익명 평가를 통해 "내가 보는 나"와 "남이 보는 나"를 비교하는 **Johari Window 기반 심리/성격 분석 웹 서비스**입니다.
 
 ## 핵심 목표
 1. **극강의 바이럴**: 친구가 참여해야 결과가 열리는 구조 (Lock-in & Share)

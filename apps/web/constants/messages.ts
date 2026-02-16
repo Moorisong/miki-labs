@@ -128,6 +128,7 @@ export const NAV_LINKS = [
     { href: '/claw', label: '인형뽑기' },
     { href: 'https://r-paper-web.haroo.site/', label: '롤링페이퍼' },
     { href: '/pet-destiny', label: '운명연구소' },
+    { href: '/htsm', label: '자아탐험' },
 ] as const;
 
 // 메달 이모지

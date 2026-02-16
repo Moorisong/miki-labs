@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import ClawGame from '@contents/claw/app/claw-game';
 
+import MyorokBanner from '@/components/common/banners/myorok-banner';
 import RankingSection from '@contents/claw/app/ranking-section';
 import styles from '@contents/claw/app/page.module.css';
 
@@ -59,7 +60,7 @@ export default function ClawPage() {
   };
 
   return (
-    <main className={styles.main}>
+    <div className={styles.main}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -68,12 +69,13 @@ export default function ClawPage() {
       {/* 1. Game Section (Immediate Play) */}
       <ClawGame />
 
-
-
       {/* 3. Ranking Section */}
       <RankingSection />
 
-
-    </main>
+      {/* 4. Myorok Banner (Cross Promotion) */}
+      <div style={{ maxWidth: '480px', width: '100%', margin: '0 auto', paddingBottom: '2rem' }}>
+        <MyorokBanner />
+      </div>
+    </div>
   );
 }

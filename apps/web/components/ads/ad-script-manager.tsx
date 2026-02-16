@@ -1,9 +1,10 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import Script from 'next/script';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-import { CONFIG } from '@/constants';
+import { CONFIG, ROUTES } from '@/constants';
 
 const AD_SELECTORS = {
     SKELETON_CLASS: 'ad-skeleton',
@@ -82,6 +83,7 @@ const enforceAdStyles = (node: HTMLElement): void => {
 };
 
 export default function AdScriptManager() {
+    const pathname = usePathname();
     useEffect(() => {
         let observer: MutationObserver | null = null;
         let timeoutId: NodeJS.Timeout;

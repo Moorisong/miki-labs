@@ -43,12 +43,29 @@ export const metadata: Metadata = {
 export default function Home() {
     const contents = [
         {
+            id: 'pet-destiny',
+            title: '운명연구소',
+            description: '반려동물과 집사의 오행 궁합 분석.\n우리 아이와의 특별한 인연을 확인해보세요!',
+            image: '/pet-destiny-logo-transparent-v2.png',
+            link: '/pet-destiny',
+            badge: 'Hot',
+            active: true,
+        },
+        {
+            id: 'htsm',
+            title: 'HTSM',
+            description: '친구들의 익명 평가로 발견하는 나.\nJohari Window 기반 심리 분석!',
+            image: '/htsm-logo-v6.png',
+            link: '/htsm',
+            badge: 'New',
+            active: true,
+        },
+        {
             id: 'claw-machine',
             title: '인형뽑기',
             description: '리얼한 물리 엔진으로 즐기는 웹 인형뽑기 게임.\n실제 인형뽑기의 손맛을 느껴보세요!',
             image: '/hero_character.png',
             link: ROUTES.CLAW_HOME || '/claw', // Safe fallback if constant isn't updated yet
-            badge: 'Hot',
             active: true,
         },
         {
@@ -57,16 +74,6 @@ export default function Home() {
             description: '친구들과 추억을 나누는 롤링페이퍼',
             image: '/sample/r-paper-logo.png',
             link: 'https://r-paper-web.haroo.site',
-            badge: 'New',
-            active: true,
-        },
-        {
-            id: 'pet-destiny',
-            title: '운명연구소',
-            description: '반려동물과 집사의 오행 궁합 분석.\n우리 아이와의 특별한 인연을 확인해보세요!',
-            image: '/pet-destiny-logo-transparent-v2.png',
-            link: '/pet-destiny',
-            badge: 'New',
             active: true,
         },
     ];

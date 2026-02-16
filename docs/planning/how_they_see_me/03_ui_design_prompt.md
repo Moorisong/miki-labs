@@ -1,7 +1,7 @@
 # Figma Make 전달용 프롬프트 (한국어 버전 / 복사용)
 
 ## 프로젝트 이름
-**HowTheySeeMe (HTSM)**
+**자아탐험 (HTSM)**
 
 ## 목표
 React에서 바로 사용할 수 있는 UI 디자인을 생성해주세요.
@@ -33,7 +33,7 @@ t("start.button")
 ```ts
 export default {
   hero: {
-    title: "See how they see you.",
+    title: "See how they see me.",
     subtitle: "Friends help reveal the real you.",
     cta: "Start My Test"
   }
@@ -170,7 +170,7 @@ export default {
 ## 10. 로고 생성 요청
 서비스 로고도 함께 생성해주세요.
 
-- **텍스트**: HowTheySeeMe
+- **텍스트**: 자아탐험
 - **스타일**: 친근한 느낌, 둥근 타이포그래피, 작은 아이콘 포함
 - **용도**: 헤더 / 결과 카드 워터마크
 - **포맷**: React SVG 컴포넌트

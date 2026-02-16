@@ -32,7 +32,7 @@ src/i18n/
 ```javascript
 export default {
   hero: {
-    title: "See how they see you",
+    title: "See how they see me",
     subtitle: "Friends help reveal the real you",
     startButton: "Start My Test"
   }

@@ -1,4 +1,4 @@
-# HowTheySeeMe (HTSM) Backend & Security Planning - Part 2
+# 자아탐험 (HTSM) Backend & Security Planning - Part 2
 
 ## 1. 기술 스택
 
