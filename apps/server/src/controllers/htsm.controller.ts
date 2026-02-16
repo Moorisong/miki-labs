@@ -190,7 +190,7 @@ export async function getMyTest(req: Request, res: Response): Promise<void> {
  */
 export async function submitAnswer(req: Request, res: Response): Promise<void> {
     try {
-        const { shareId, keywords, fingerprintHash } = req.body;
+        const { shareId, keywords, fingerprintHash, userId } = req.body;
 
         // 1. shareId 검증
         if (!shareId || typeof shareId !== 'string' || !SHARE_ID_REGEX.test(shareId)) {
@@ -236,6 +236,12 @@ export async function submitAnswer(req: Request, res: Response): Promise<void> {
         }
         if (test.isClosed) {
             res.status(403).json({ success: false, error: HTSM_ERRORS.TEST_CLOSED });
+            return;
+        }
+        // 4.5 제작자 본인 여부 확인
+        const isCreator = (userId && test.userId === userId) || (fingerprintHash && test.creatorFingerprint === fingerprintHash);
+        if (isCreator) {
+            res.status(403).json({ success: false, error: '본인의 테스트에는 답변을 남길 수 없습니다.' });
             return;
         }
 

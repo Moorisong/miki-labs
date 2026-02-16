@@ -48,12 +48,13 @@ export async function fetchMyTest(userId: string): Promise<string | null> {
 export async function submitAnswer(
     shareId: string,
     keywords: string[],
-    fingerprintHash: string
+    fingerprintHash: string,
+    userId?: string
 ): Promise<{ isClosed: boolean }> {
     const res = await fetch(`${API_BASE}/answers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shareId, keywords, fingerprintHash }),
+        body: JSON.stringify({ shareId, keywords, fingerprintHash, userId }),
     });
     const json: ApiResponse<{ isClosed: boolean }> = await res.json();
     if (!json.success || !json.data) throw new Error(json.error || 'Failed to submit answer');

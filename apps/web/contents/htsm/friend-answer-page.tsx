@@ -54,6 +54,8 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
 
     useEffect(() => {
         const checkStatus = async () => {
+            if (status === 'loading') return;
+
             try {
                 const fingerprint = generateFingerprint();
                 const info = await fetchTestInfo(
@@ -62,9 +64,9 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
                     session?.user?.kakaoId
                 );
 
-
                 if (info.isCreator) {
                     setIsCreator(true);
+                    setIsLoading(false);
                     return;
                 }
 
@@ -79,7 +81,7 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
         };
 
         checkStatus();
-    }, [shareId]);
+    }, [shareId, session, status]);
 
     const toggleKeyword = (keyword: string) => {
         if (selectedKeywords.includes(keyword)) {
@@ -110,7 +112,7 @@ export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
 
         try {
             const fingerprintHash = generateFingerprint();
-            await submitAnswer(shareId, selectedKeywords, fingerprintHash);
+            await submitAnswer(shareId, selectedKeywords, fingerprintHash, session?.user?.kakaoId);
             setSubmitted(true);
         } catch (err) {
             const message = err instanceof Error ? err.message : '답변 제출에 실패했습니다.';
