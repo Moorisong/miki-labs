@@ -3,15 +3,17 @@
 import Image from 'next/image';
 import styles from './myorok-banner.module.css';
 
-const MYOROK_LANDING_URL = 'https://myorok.vercel.app';
+const MYOROK_LANDING_URL = 'https://myorok.vercel.app/';
 
 export default function MyorokBanner() {
-    const handleClick = () => {
-        window.open(MYOROK_LANDING_URL, '_blank', 'noopener,noreferrer');
-    };
-
     return (
-        <div className={styles.bannerContainer} onClick={handleClick}>
+        <a
+            href={MYOROK_LANDING_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.bannerContainer}
+            style={{ display: 'block', textDecoration: 'none' }}
+        >
             <div className={styles.bannerContent}>
                 {/* 앱 아이콘 */}
                 <div className={styles.iconSection}>
@@ -43,6 +45,6 @@ export default function MyorokBanner() {
                     </span>
                 </div>
             </div>
-        </div>
+        </a>
     );
 }
