@@ -6,7 +6,7 @@ import {
 } from './compatibility.service';
 import { calculateYearFortune } from './fortune.service';
 import { generateSeed } from './seed.service';
-import { calculateDailyAnimal, DailyAnimalResult } from './animal-destiny.service';
+
 
 // JSON 데이터 임포트
 import personalityData from '../../../data/personality.json';
@@ -39,7 +39,7 @@ export interface PetDestinyResult {
         element: Element;
         elementInfo: typeof ELEMENT_INFO[Element];
     };
-    dailyAnimal: DailyAnimalResult;
+
     health: {
         level: string;
         score: number;
@@ -116,8 +116,7 @@ export function calculatePetDestiny(request: PetDestinyRequest): PetDestinyResul
 
     const detailedDescription = descriptionParts.join(' ').replace(/{name}/g, petName);
 
-    // 오늘의 동물 운세 (New Logic)
-    const dailyAnimal = calculateDailyAnimal(cacheKey);
+
 
     // 건강 운 (Seed 기반 변형 적용)
     const healthRaw = (healthData as Record<Element, {
@@ -172,7 +171,7 @@ export function calculatePetDestiny(request: PetDestinyRequest): PetDestinyResul
             element: petElement,
             elementInfo: ELEMENT_INFO[petElement]
         },
-        dailyAnimal,
+
         health: {
             level: healthRaw.level,
             score: healthRaw.score,
