@@ -107,10 +107,10 @@ export default function LoadingPage() {
                     테스트 준비 중...
                 </h1>
 
-                <div className={styles.card} style={{ padding: '2rem', textAlign: 'center', background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)', borderRadius: '1rem' }}>
-                    <p style={{ marginBottom: '2rem', fontSize: '1.2rem', lineHeight: '1.6' }}>
+                <div className={styles.card} style={{ padding: '2rem', textAlign: 'center', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', borderRadius: '1rem', border: '1px solid rgba(255, 255, 255, 0.3)' }}>
+                    <p style={{ marginBottom: '2rem', fontSize: '1rem', lineHeight: '1.6', color: '#111827' }}>
                         자아 탐험을 시작할 준비가 되었습니다.<br />
-                        광고를 시청하면 테스트를 시작할 수 있습니다.
+                        광고를 클릭하면 테스트를 시작할 수 있습니다.
                     </p>
 
                     <button
