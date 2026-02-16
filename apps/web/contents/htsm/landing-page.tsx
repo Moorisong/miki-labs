@@ -202,7 +202,7 @@ export default function LandingPage() {
                     </div>
                     <div className={styles.card}>
                         <div className={styles.socialProofNumberAlt}>
-                            {stats ? stats.avgFriends : '...'}
+                            {stats ? Math.ceil(stats.avgFriends) : '...'}
                         </div>
                         <p className={styles.socialProofLabel}>평균 참여 친구 수</p>
                     </div>
