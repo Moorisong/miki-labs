@@ -233,7 +233,7 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            <section style={{ maxWidth: '640px', width: '100%', margin: '0 auto', paddingBottom: '3rem', paddingLeft: '1rem', paddingRight: '1rem' }}>
+            <section style={{ maxWidth: '640px', width: '100%', margin: '0 auto', paddingBottom: '3rem', paddingLeft: '1rem', paddingRight: '1rem', position: 'relative', zIndex: 2 }}>
                 <MyorokBanner />
             </section>
 
