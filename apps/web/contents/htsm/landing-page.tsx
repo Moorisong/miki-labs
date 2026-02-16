@@ -85,6 +85,8 @@ export default function LandingPage() {
         }
         if (myShareId) {
             router.push(`/htsm/result/${myShareId}`);
+        } else if (status === 'authenticated') {
+            alert('아직 생성된 테스트가 없습니다. 먼저 테스트를 시작해 보세요!');
         }
     };
 
@@ -119,14 +121,12 @@ export default function LandingPage() {
                             테스트 시작하기
                         </button>
 
-                        {(status === 'unauthenticated' || myShareId) && (
-                            <button
-                                className={`${styles.btnSecondary} ${styles.btnPrimaryLg}`}
-                                onClick={handleContinue}
-                            >
-                                내 결과 이어보기
-                            </button>
-                        )}
+                        <button
+                            className={`${styles.btnSecondary} ${styles.btnPrimaryLg}`}
+                            onClick={handleContinue}
+                        >
+                            내 결과 이어보기
+                        </button>
                     </div>
 
                 </div>
@@ -223,14 +223,12 @@ export default function LandingPage() {
                             테스트 시작하기
                         </button>
 
-                        {(status === 'unauthenticated' || myShareId) && (
-                            <button
-                                className={`${styles.btnSecondary} ${styles.btnPrimaryLg}`}
-                                onClick={handleContinue}
-                            >
-                                내 결과 이어보기
-                            </button>
-                        )}
+                        <button
+                            className={`${styles.btnSecondary} ${styles.btnPrimaryLg}`}
+                            onClick={handleContinue}
+                        >
+                            내 결과 이어보기
+                        </button>
                     </div>
                 </div>
             </section>
