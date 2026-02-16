@@ -13,9 +13,15 @@ export const metadata: Metadata = {
                 url: 'https://box.haroo.site/htsm-og-result.png',
                 width: 1200,
                 height: 630,
-                alt: 'HTSM Result',
+                alt: 'HTSM 결과 - See how they see me',
             },
         ],
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'Johari Window 결과 | 자아탐험',
+        description: '나와 친구들의 키워드를 비교한 Johari Window 결과를 확인하세요.',
+        images: ['https://box.haroo.site/htsm-og-result.png'],
     },
 };
 
