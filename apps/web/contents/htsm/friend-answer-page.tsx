@@ -42,7 +42,7 @@ function generateFingerprint(): string {
 
 export default function FriendAnswerPage({ shareId }: FriendAnswerPageProps) {
     const router = useRouter();
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
     const [name, setName] = useState<string>('');
     const [submitted, setSubmitted] = useState<boolean>(false);

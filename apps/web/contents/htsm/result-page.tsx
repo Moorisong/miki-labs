@@ -116,7 +116,7 @@ export default function ResultPage({ shareId }: ResultPageProps) {
                         </div>
                         {friendsNeeded > 0 && (
                             <p className={styles.participationHint}>
-                                {friendsNeeded}명만 더 응답하면 전체 결과가 공개됩니다
+                                {friendsNeeded}명만 더 응답하면 최종 결과가 공개됩니다
                             </p>
                         )}
                     </div>
