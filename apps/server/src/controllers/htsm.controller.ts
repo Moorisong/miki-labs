@@ -260,16 +260,7 @@ export async function submitAnswer(req: Request, res: Response): Promise<void> {
 
         const JohariAnswer = getJohariAnswerModel();
 
-        // 5.1 동일 IP 제한 (한 테스트당 2회까지만 허용)
-        const ipCount = await JohariAnswer.countDocuments({
-            testId: test._id,
-            ip: ip
-        });
 
-        if (ipCount >= 2) {
-            res.status(403).json({ success: false, error: '같은 네트워크에서 참여 가능한 인원이 모두 참여했어요 🙏 친구 결과를 확인해 보세요!' });
-            return;
-        }
 
         // 5.2 Fingerprint 중복 검사 (DB Unique Index가 잡지만 명시적 처리)
         const existingAnswer = await JohariAnswer.findOne({
