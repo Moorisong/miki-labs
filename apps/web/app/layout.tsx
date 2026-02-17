@@ -26,6 +26,7 @@ export const metadata: Metadata = {
     template: '%s | 하루상자',
   },
   description: '하루상자는 인형뽑기를 비롯해 다양한 미니콘텐츠를 즐길 수 있는 웹 플랫폼입니다.',
+  keywords: ['하루상자', '자아탐험', '롤링페이퍼', '운명연구소', '반려동물 사주', '반려동물 궁합', '조하리의 창', '성격 테스트', '심리 테스트', '친구 테스트', 'MBTI', '무료 테스트'],
   authors: [{ name: '하루상자' }],
   robots: {
     index: true,
@@ -40,7 +41,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: '하루상자 | 즐거움이 가득한 일일 콘텐츠 플랫폼',
-    description: '하루상자는 인형뽑기를 비롯해 다양한 미니콘텐츠를 즐길 수 있는 웹 플랫폼입니다.',
+    description: '하루상자는 자아탐험(조하리의 창), 인형뽑기 등 다양한 미니콘텐츠를 즐길 수 있는 웹 플랫폼입니다.',
     url: 'https://box.haroo.site',
     type: 'website',
     locale: 'ko_KR',
@@ -49,7 +50,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: '하루상자 | 즐거움이 가득한 일일 콘텐츠 플랫폼',
-    description: '하루상자는 인형뽑기를 비롯해 다양한 미니콘텐츠를 즐길 수 있는 웹 플랫폼입니다.',
+    description: '하루상자는 자아탐험(조하리의 창), 인형뽑기 등 다양한 미니콘텐츠를 즐길 수 있는 웹 플랫폼입니다.',
   },
   verification: {
     google: '46025c5df5a2c939',
