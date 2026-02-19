@@ -300,12 +300,9 @@ export default function InputPage() {
         setIsUnknownPetBirthday(isChecked);
 
         if (isChecked) {
-            // 이번 해 가져오기
+            // 내부 로직용 평균값 계산 (화면에는 표시하지 않음)
             const currentYear = new Date().getFullYear();
-            // 3살(만 2년?) -> currentYear - 3
-            // 월일은 06-01로 설정
             const calculatedYear = currentYear - 3;
-            // 202x-06-01
             setPetBirthDate(`${calculatedYear}-06-01`);
         } else {
             setPetBirthDate('');
@@ -373,14 +370,14 @@ export default function InputPage() {
                     {/* 반려동물 생년월일 */}
                     <div className={styles.formSection}>
                         <label className={styles.label} htmlFor="petBirthDate">
-                            반려동물 생년월일 {petBirthDate && calculateAge(petBirthDate)}
+                            반려동물 생년월일 {!isUnknownPetBirthday && petBirthDate && calculateAge(petBirthDate)}
                         </label>
                         <DateInputGroup
                             onChange={setPetBirthDate}
                             maxDate={today}
                             onError={(msg) => showToast(msg)}
                             disabled={isUnknownPetBirthday}
-                            value={petBirthDate}
+                            value={isUnknownPetBirthday ? '' : petBirthDate}
                         />
                         <div style={{ marginTop: '0.8rem', display: 'flex', alignItems: 'center' }}>
                             <div className={styles.checkboxWrapper} style={{ display: 'flex', alignItems: 'center' }}>
@@ -392,7 +389,7 @@ export default function InputPage() {
                                     style={{ width: '1.1rem', height: '1.1rem', marginRight: '0.5rem', accentColor: '#a78bfa', cursor: 'pointer' }}
                                 />
                                 <span style={{ fontSize: '0.95rem', color: '#4b5563' }}>
-                                    모름 (평균 나이를 기준으로 분석)
+                                    모름
                                 </span>
                             </div>
                         </div>

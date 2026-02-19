@@ -164,18 +164,7 @@ export default function ResultPage() {
                 </div>
 
                 {/* Summary */}
-                {searchParams.get('unknown') === 'true' && (
-                    <div className={styles.disclaimerBox}>
-                        💡 정확한 생년월일을 몰라서 <strong>평균 나이(3세)</strong>로 분석했어요.<br />
-                        생년월일을 알고 계시다면{' '}
-                        <span
-                            onClick={handleRetry}
-                            className={styles.disclaimerLink}
-                        >
-                            다시 분석하기
-                        </span>를 눌러 더 정확한 결과를 확인해 보세요!
-                    </div>
-                )}
+
                 <div className={styles.summaryCard}>
                     <p className={styles.summaryPetType}>
                         {data.petType} {data.petName && `'${data.petName}'`}
