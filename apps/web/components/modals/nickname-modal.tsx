@@ -144,7 +144,15 @@ export default function NicknameModal({
             <p className={styles.description}>
               {isEditMode
                 ? '새로운 닉네임을 입력해주세요.'
-                : '랭킹에 표시될 닉네임을 설정해주세요.'}
+                : (
+                  <>
+                    랭킹에 표시될 닉네임을 설정해주세요.
+                    <br />
+                    <span style={{ fontWeight: 700, color: '#0ea5e9', fontSize: '0.9rem' }}>
+                      광고창이 뜨면 닫고 돌아오세요 😊
+                    </span>
+                  </>
+                )}
             </p>
 
             <form onSubmit={handleSubmit} className={styles.form}>
