@@ -1,0 +1,207 @@
+.container {
+    min-height: 100vh;
+    padding: var(--space-2xl) var(--space-md);
+}
+
+.wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Header */
+.header {
+    margin-bottom: var(--space-2xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.title {
+    font-size: var(--font-size-2xl);
+    font-weight: 800;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: var(--space-sm);
+}
+
+.lastUpdated {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+}
+
+/* Notice box */
+.notice {
+    background: rgba(108, 92, 231, 0.1);
+    border: 1px solid rgba(108, 92, 231, 0.3);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    line-height: 1.7;
+}
+
+.notice strong {
+    color: var(--color-secondary);
+}
+
+/* Table of Contents */
+.toc {
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tocTitle {
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: var(--space-md);
+}
+
+.tocList {
+    list-style: decimal;
+    padding-left: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.tocList li {
+    font-size: var(--font-size-sm);
+}
+
+.tocList a {
+    color: var(--color-secondary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.tocList a:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+/* Content */
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+}
+
+/* Article */
+.article {
+    padding: var(--space-xl);
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: border-color var(--transition-normal);
+}
+
+.article:target {
+    border-color: rgba(108, 92, 231, 0.5);
+    box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.15);
+}
+
+.articleTitle {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.article p {
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    line-height: 1.8;
+    margin-bottom: var(--space-sm);
+}
+
+.article p:last-child {
+    margin-bottom: 0;
+}
+
+/* Lists */
+.orderedList {
+    list-style: decimal;
+    padding-left: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.orderedList li {
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    line-height: 1.8;
+}
+
+.orderedList strong {
+    color: var(--color-secondary);
+}
+
+.unorderedList {
+    list-style: disc;
+    padding-left: var(--space-lg);
+    margin-top: var(--space-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.unorderedList li {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: 1.7;
+}
+
+/* Footer */
+.footer {
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.footer p {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+}
+
+.footer strong {
+    color: var(--color-text);
+}
+
+.emailLink {
+    color: var(--color-secondary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.emailLink:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: var(--space-xl) var(--space-md);
+    }
+
+    .article {
+        padding: var(--space-lg);
+    }
+
+    .title {
+        font-size: var(--font-size-xl);
+    }
+}

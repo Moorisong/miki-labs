@@ -12,6 +12,8 @@ export const ROUTES = {
     MYPAGE: '/mypage',
     ROLLING_PAPER: 'https://r-paper-web.haroo.site/',
     HTSM: '/htsm',
+    TERMS: '/terms',
+    PRIVACY: '/privacy',
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;

@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Suspense } from 'react';
+import Link from 'next/link';
 
 import { ROUTES, MESSAGES } from '@/constants';
 
@@ -51,7 +52,11 @@ function LoginContent() {
         </div>
 
         <p className={styles.notice}>
-          {MESSAGES.AUTH.TERMS_NOTICE}
+          로그인 시{' '}
+          <Link href={ROUTES.TERMS} className={styles.noticeLink}>서비스 이용약관</Link>
+          {' '}및{' '}
+          <Link href={ROUTES.PRIVACY} className={styles.noticeLink}>개인정보처리방침</Link>
+          에 동의하게 됩니다.
         </p>
       </div>
     </div>
