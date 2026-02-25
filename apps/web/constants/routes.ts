@@ -12,6 +12,7 @@ export const ROUTES = {
     MYPAGE: '/mypage',
     ROLLING_PAPER: 'https://r-paper-web.haroo.site/',
     HTSM: '/htsm',
+    TOBY: 'https://toby-teacher.vercel.app',
     TERMS: '/terms',
     PRIVACY: '/privacy',
 } as const;

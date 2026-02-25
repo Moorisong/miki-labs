@@ -118,6 +118,7 @@ export default function NavBar() {
                         closeMenu();
                         setIsDropdownOpen(false);
                       }}
+                      {...(link.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                     >
                       {link.label}
                     </Link>
@@ -133,6 +134,7 @@ export default function NavBar() {
                   href={link.href}
                   className={`${styles.navLink} ${pathname === link.href ? styles.active : ''}`}
                   onClick={closeMenu}
+                  {...(link.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                 >
                   {link.label}
                 </Link>

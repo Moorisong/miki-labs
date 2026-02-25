@@ -61,11 +61,21 @@ export default function Home() {
             active: true,
         },
         {
+            id: 'toby',
+            title: 'TOBY',
+            description: '학교 선생님들을 위한 서비스 툴 모음.\n수업과 학급 관리에 유용한 도구들을 만나보세요!',
+            image: '/sample/toby-logo.png',
+            link: ROUTES.TOBY,
+            badge: 'New',
+            active: true,
+            external: true,
+        },
+        {
             id: 'claw-machine',
             title: '인형뽑기',
             description: '리얼한 물리 엔진으로 즐기는 웹 인형뽑기 게임.\n실제 인형뽑기의 손맛을 느껴보세요!',
             image: '/hero_character.png',
-            link: ROUTES.CLAW_HOME || '/claw', // Safe fallback if constant isn't updated yet
+            link: ROUTES.CLAW_HOME || '/claw',
             active: true,
         },
         {
@@ -88,7 +98,12 @@ export default function Home() {
             <div className={styles.grid}>
                 {contents.map((content) => (
                     content.active ? (
-                        <Link href={content.link} key={content.id} className={styles.card}>
+                        <Link
+                            href={content.link}
+                            key={content.id}
+                            className={styles.card}
+                            {...(content.link.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                        >
                             <div className={styles.cardImageWrapper}>
                                 {content.badge && <span className={styles.badge}>{content.badge}</span>}
                                 <Image
