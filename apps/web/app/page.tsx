@@ -43,21 +43,12 @@ export const metadata: Metadata = {
 export default function Home() {
     const contents = [
         {
-            id: 'pet-destiny',
-            title: '운명연구소',
-            description: '반려동물과 집사의 오행 궁합 분석.\n우리 아이와의 특별한 인연을 확인해보세요!',
-            image: '/pet-destiny-logo-transparent-v2.png',
-            link: '/pet-destiny',
-            badge: 'Hot',
-            active: true,
-        },
-        {
             id: 'htsm',
             title: '자아탐험',
             description: '친구들의 익명 평가로 발견하는 나.\nJohari Window 기반 심리 분석!',
             image: '/htsm-logo-v6.png',
             link: '/htsm',
-            badge: 'New',
+            badge: 'Hot',
             active: true,
         },
         {
@@ -67,8 +58,17 @@ export default function Home() {
             image: '/sample/toby-logo.png',
             link: ROUTES.TOBY,
             badge: 'New',
+            extraBadge: '웹 전용',
             active: true,
             external: true,
+        },
+        {
+            id: 'pet-destiny',
+            title: '운명연구소',
+            description: '반려동물과 집사의 오행 궁합 분석.\n우리 아이와의 특별한 인연을 확인해보세요!',
+            image: '/pet-destiny-logo-transparent-v2.png',
+            link: '/pet-destiny',
+            active: true,
         },
         {
             id: 'claw-machine',
@@ -105,7 +105,12 @@ export default function Home() {
                             {...(content.link.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                         >
                             <div className={styles.cardImageWrapper}>
-                                {content.badge && <span className={styles.badge}>{content.badge}</span>}
+                                {(content.badge || ('extraBadge' in content && content.extraBadge)) && (
+                                    <div className={styles.badgeGroup}>
+                                        {content.badge && <span className={styles.badge}>{content.badge}</span>}
+                                        {'extraBadge' in content && content.extraBadge && <span className={`${styles.badge} ${styles.badgeWebOnly}`}>{content.extraBadge}</span>}
+                                    </div>
+                                )}
                                 <Image
                                     src={content.image}
                                     alt={content.title}
