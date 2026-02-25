@@ -1,0 +1,203 @@
+/* ================================================
+   TOBY Loading Page Styles
+   ================================================ */
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Layout */
+.pageContainer {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #eff6ff 0%, #ecfeff 50%, #f0fdf4 100%);
+    position: relative;
+    overflow-x: hidden;
+}
+
+.innerContainer {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Title */
+.heroTitle {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 2rem;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.gradientText {
+    background: linear-gradient(to right, #2563eb, #0891b2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Card */
+.card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06);
+    padding: 1.5rem;
+}
+
+/* Buttons */
+.btnPrimary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: white;
+    background: #2563eb;
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+    transition: all 200ms ease;
+}
+
+.btnPrimary:hover:not(:disabled) {
+    background: #1d4ed8;
+    box-shadow: 0 12px 20px -5px rgba(37, 99, 235, 0.4);
+    transform: translateY(-2px);
+}
+
+.btnPrimary:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.btnPrimary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btnPrimaryLg {
+    padding: 1.1rem 2.5rem;
+    font-size: 1.25rem;
+    border-radius: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ready state button - green gradient */
+.btnReady {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.1rem 2.5rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, #059669, #0891b2);
+    border: none;
+    border-radius: 1.25rem;
+    cursor: pointer;
+    box-shadow: 0 10px 20px -5px rgba(5, 150, 105, 0.4);
+    transition: all 300ms ease;
+    animation: float 2s ease-in-out infinite;
+}
+
+.btnReady:hover {
+    background: linear-gradient(135deg, #047857, #0e7490);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 15px 25px -5px rgba(5, 150, 105, 0.5);
+}
+
+.btnReady:active {
+    transform: scale(0.98);
+    animation: none;
+}
+
+/* Loading dots animation */
+.loadingDots {
+    display: inline-flex;
+    gap: 4px;
+    margin-left: 4px;
+}
+
+.loadingDots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+    animation: pulse 1.4s ease-in-out infinite;
+}
+
+.loadingDots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.loadingDots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+/* Background decoration */
+.bgDecoration {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.bgBlue {
+    width: 300px;
+    height: 300px;
+    background: #3b82f6;
+    top: -50px;
+    right: -50px;
+}
+
+.bgCyan {
+    width: 250px;
+    height: 250px;
+    background: #06b6d4;
+    bottom: -30px;
+    left: -30px;
+}
+
+/* Logo animation */
+.logoWrapper {
+    margin-bottom: 1.5rem;
+    animation: float 3s ease-in-out infinite;
+}
