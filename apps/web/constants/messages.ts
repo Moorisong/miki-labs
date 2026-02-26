@@ -129,7 +129,7 @@ export const NAV_LINKS = [
     { href: 'https://r-paper-web.haroo.site/', label: '롤링페이퍼' },
     { href: '/pet-destiny', label: '운명연구소' },
     { href: '/htsm', label: '자아탐험' },
-    { href: 'https://toby-teacher.vercel.app', label: 'TOBY' },
+    { href: '/toby/loading', label: 'TOBY' },
 ] as const;
 
 // 메달 이모지
