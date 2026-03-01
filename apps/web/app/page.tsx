@@ -9,18 +9,21 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
     title: '하루상자 | 즐거움이 가득한 일일 콘텐츠 플랫폼',
-    description: '하루상자는 인형뽑기를 비롯해 다양한 미니콘텐츠를 즐길 수 있는 웹 플랫폼입니다. 매일 새로운 즐거움을 하루상자에서 만나보세요.',
+    description: '하루상자는 인형뽑기, 심리 분석 등 다양한 미니콘텐츠와 함께, 학교 선생님을 위한 교사 전용 서비스 툴(TOBY)을 제공하는 웹 플랫폼입니다. 수업과 학급 관리에 유용한 도구들과 매일 새로운 즐거움을 만나보세요.',
     keywords: [
         '하루상자', 'Haroo Box', 'Haroo App',
         '미니게임', '웹게임', '킬링타임', '심심풀이', '플랫폼',
-        '캐주얼 게임', '무료 게임', 'HTML5 게임'
+        '캐주얼 게임', '무료 게임', 'HTML5 게임',
+        'TOBY', '토비', '교사 도구', '교사 전용 툴', '선생님 도구',
+        '수업 도구', '학급 관리', '교육 도구', '학교 서비스',
+        '교사 서비스 툴', '수업 관리 도구', 'teacher tool'
     ],
     alternates: {
         canonical: '/',
     },
     openGraph: {
         title: '하루상자 | 즐거움이 가득한 일일 콘텐츠 플랫폼',
-        description: '하루상자는 인형뽑기를 비롯해 다양한 미니콘텐츠를 즐길 수 있는 웹 플랫폼입니다.',
+        description: '하루상자는 미니콘텐츠와 교사 전용 서비스 툴(TOBY)을 제공하는 웹 플랫폼입니다. 수업·학급 관리 도구와 다양한 즐거움을 만나보세요.',
         url: 'https://box.haroo.site',
         type: 'website',
         images: [
@@ -35,7 +38,7 @@ export const metadata: Metadata = {
     twitter: {
         card: 'summary_large_image',
         title: '하루상자 | 즐거움이 가득한 일일 콘텐츠 플랫폼',
-        description: '하루상자는 인형뽑기를 비롯해 다양한 미니콘텐츠를 즐길 수 있는 웹 플랫폼입니다.',
+        description: '하루상자는 미니콘텐츠와 교사 전용 서비스 툴(TOBY)을 제공하는 웹 플랫폼입니다. 수업·학급 관리 도구와 다양한 즐거움을 만나보세요.',
         images: ['/og-image.png'],
     },
 };
