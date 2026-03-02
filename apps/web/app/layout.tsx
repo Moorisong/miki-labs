@@ -6,7 +6,6 @@ import Footer from '@/components/layout/footer';
 import SessionProvider from '@/components/providers/session-provider';
 import NicknameProvider from '@/components/providers/nickname-provider';
 
-import AdScriptManager from '@/components/ads/ad-script-manager';
 import './globals.css';
 
 const geistSans = Geist({
@@ -72,7 +71,6 @@ export default async function RootLayout({
           src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
           strategy="lazyOnload"
         />
-        <AdScriptManager />
         <SessionProvider>
           <NicknameProvider>
             <NavBar />
