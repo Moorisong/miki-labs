@@ -14,7 +14,7 @@ ssh -p $SSH_PORT $REMOTE_USER@$REMOTE_HOST "mkdir -p $REMOTE_DIR"
 
 # 1. 로컬 백엔드 파일 서버로 동기화
 echo "📤 파일 동기화 중 (rsync)..."
-rsync -avz --progress -e "ssh -p $SSH_PORT" \
+rsync -avz --delete --progress -e "ssh -p $SSH_PORT" \
   --exclude 'node_modules' \
   --exclude 'dist' \
   --exclude '.git' \
