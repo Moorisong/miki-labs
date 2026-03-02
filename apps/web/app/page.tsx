@@ -46,15 +46,6 @@ export const metadata: Metadata = {
 export default function Home() {
     const contents = [
         {
-            id: 'htsm',
-            title: '자아탐험',
-            description: '친구들의 익명 평가로 발견하는 나.\nJohari Window 기반 심리 분석!',
-            image: '/htsm-logo-v6.png',
-            link: '/htsm',
-            badge: 'Hot',
-            active: true,
-        },
-        {
             id: 'toby',
             title: 'TOBY',
             description: '학교 선생님들을 위한 서비스 툴 모음.\n수업과 학급 관리에 유용한 도구들을 만나보세요!',
@@ -62,6 +53,15 @@ export default function Home() {
             link: 'https://toby-teacher.vercel.app',
             badge: 'New',
             extraBadge: '웹 전용',
+            active: true,
+        },
+        {
+            id: 'htsm',
+            title: '자아탐험',
+            description: '친구들의 익명 평가로 발견하는 나.\nJohari Window 기반 심리 분석!',
+            image: '/htsm-logo-v6.png',
+            link: '/htsm',
+            badge: 'Hot',
             active: true,
         },
         {

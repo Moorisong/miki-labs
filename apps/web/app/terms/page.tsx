@@ -103,8 +103,9 @@ export default function TermsPage() {
                             <li>
                                 현재 하루상자에서 제공하는 주요 서비스는 다음과 같으며, 이에 한정되지 않습니다.
                                 <ul className={styles.unorderedList}>
-                                    <li>롤링페이퍼 서비스</li>
+                                    <li>교사 전용 서비스 툴 (TOBY)</li>
                                     <li>성격 및 심리 테스트 (자아탐험 등)</li>
+                                    <li>롤링페이퍼 서비스</li>
                                     <li>기타 미니콘텐츠 (추가 예정 포함)</li>
                                 </ul>
                             </li>

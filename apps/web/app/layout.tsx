@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     template: '%s | 하루상자',
   },
   description: '하루상자는 다양한 미니콘텐츠를 즐길 수 있는 웹 플랫폼입니다.',
-  keywords: ['하루상자', '자아탐험', '롤링페이퍼', '조하리의 창', '성격 테스트', '심리 테스트', '친구 테스트', 'MBTI', '무료 테스트'],
+  keywords: ['하루상자', 'TOBY', '토비', '자아탐험', '롤링페이퍼', '조하리의 창', '성격 테스트', '심리 테스트', '친구 테스트', 'MBTI', '무료 테스트'],
   authors: [{ name: '하루상자' }],
   robots: {
     index: true,
