@@ -364,15 +364,6 @@
     display: flex;
   }
 
-  .header {
-    position: absolute;
-    top: var(--ad-height);
-    left: 0;
-    right: 0;
-    width: 100%;
-    z-index: var(--z-sticky);
-    transition: top var(--transition-normal);
-  }
 
   .navLinks {
     position: absolute;
