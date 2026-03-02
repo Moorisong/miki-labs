@@ -42,5 +42,5 @@ export default getClientPromise;
 
 export async function getDatabase(): Promise<Db> {
   const client = await getClientPromise();
-  return client.db('claw-addict');
+  return client.db('haroo-box');
 }

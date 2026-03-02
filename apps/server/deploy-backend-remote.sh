@@ -4,7 +4,7 @@
 REMOTE_USER="ksh"
 REMOTE_HOST="125.190.25.48"
 SSH_PORT="2222"
-REMOTE_DIR="~/claw-addict/apps/server"
+REMOTE_DIR="~/haroo-box/apps/server"
 LOCAL_SERVER_ROOT="."
 
 echo "🌐 홈서버($REMOTE_HOST:$SSH_PORT)로 백엔드 단독 배포를 시작합니다..."

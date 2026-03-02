@@ -5,7 +5,7 @@ let htsmConnection: Connection | null = null;
 
 /**
  * MONGODB_URI에서 DB명을 교체하여 HTSM 전용 URI 생성
- * 예: mongodb+srv://...mongodb.net/claw-addict?... → mongodb+srv://...mongodb.net/htsm?...
+ * 예: mongodb+srv://...mongodb.net/haroo-box?... → mongodb+srv://...mongodb.net/htsm?...
  */
 function buildHtsmUri(baseUri: string): string {
   // MONGODB_URI 환경변수에 HTSM 전용 URI가 있으면 우선 사용
@@ -25,7 +25,7 @@ export const connectDatabase = async (): Promise<void> => {
   }
 
   try {
-    // 기본 DB 연결 (claw-addict)
+    // 기본 DB 연결 (haroo-box)
     await mongoose.connect(mongoUri);
     console.log('Connected to MongoDB (main)');
 

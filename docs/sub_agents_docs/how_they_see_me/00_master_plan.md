@@ -61,6 +61,6 @@
 ---
 
 ## 중요 공통 규칙 (Ground Rules)
-1. **데이터 보존**: 기존 Claw Addict, Pet Destiny 등 다른 서비스의 코드/데이터에 영향을 주지 않는다. (`apps/web/contents/htsm`, `apps/server/src/routes/htsm` 등으로 격리)
+1. **데이터 보존**: 기존의 다른 서비스 코드나 데이터에 영향을 주지 않는다. (`apps/web/contents/htsm`, `apps/server/src/routes/htsm` 등으로 격리)
 2. **익명성 AI**: 개인식별정보(PII)는 절대 수집하지 않는다. (IP 해시만 중복 방지 용도로 사용)
 3. **확장성**: 추후 다른 심리 테스트가 추가될 것을 고려하여 컴포넌트나 유틸리티를 범용적으로 설계하려 노력한다 (필수는 아님).

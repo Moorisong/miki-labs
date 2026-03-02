@@ -44,7 +44,7 @@ app.get('/health', (req, res) => {
 
 // Root endpoint
 app.get('/', (req, res) => {
-  res.json({ message: 'Claw Addict API', version: '1.0.0' });
+  res.json({ message: 'Haroo Box API', version: '1.0.0' });
 });
 
 // API Routes

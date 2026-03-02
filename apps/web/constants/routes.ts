@@ -5,9 +5,6 @@
 
 export const ROUTES = {
     HOME: '/',
-    CLAW_HOME: '/claw',
-    GAME: '/claw/game',
-    RANKING: '/claw/ranking',
     LOGIN: '/login',
     MYPAGE: '/mypage',
     ROLLING_PAPER: 'https://r-paper-web.haroo.site/',
