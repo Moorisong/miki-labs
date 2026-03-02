@@ -64,13 +64,13 @@ export default function LandingPage() {
             setLoginModalConfig({
                 title: '자아탐험 시작하기',
                 description: '테스트를 생성하려면 로그인이 필요합니다.\n카카오 로그인으로 간편하게 시작하세요.',
-                callbackUrl: '/htsm/loading'
+                callbackUrl: '/htsm/start'
             });
             setShowLoginModal(true);
             return;
         }
-        // 테스트 시작 전 로딩(광고) 페이지로 이동
-        router.push('/htsm/loading');
+        // 바로 테스트 시작
+        router.push('/htsm/start');
     };
 
     const handleContinue = () => {
