@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid';
 import { getJohariTestModel } from '../models/johari-test.model';
 import { getJohariAnswerModel } from '../models/johari-answer.model';
 import { getHtsmStatsModel } from '../models/htsm-stats.model';
+import { getUserModel } from '../models/user.model';
 import { calculateJohari } from '../services/htsm/johari.service';
 import { generateProofToken, verifyProofToken } from '../services/htsm/proof-token.service';
 import {
@@ -376,11 +377,20 @@ export async function getResult(req: Request, res: Response): Promise<void> {
             }
         ];
 
+        // 유저 정보 연동 (최신 닉네임 반영)
+        let displayName = test.name;
+        if (test.userId) {
+            const user = await getUserModel().findOne({ providerId: test.userId });
+            if (user) {
+                displayName = user.nickname;
+            }
+        }
+
         console.log(`[HTSM] Result viewed for test ${shareId} (answers: ${answers.length})`);
         res.json({
             success: true,
             data: {
-                name: test.name,
+                name: displayName,
                 answerCount: test.answerCount,
                 isClosed: test.isClosed,
                 johari,
@@ -419,11 +429,20 @@ export async function getTestInfo(req: Request, res: Response): Promise<void> {
 
         const isCreator = (userId && test.userId === userId) || (fingerprintHash && test.creatorFingerprint === fingerprintHash);
 
+        // 유저 정보 연동 (최신 닉네임 반영)
+        let displayName = test.name;
+        if (test.userId) {
+            const user = await getUserModel().findOne({ providerId: test.userId });
+            if (user) {
+                displayName = user.nickname;
+            }
+        }
+
         console.log(`[HTSM] Test info viewed for ${shareId} (isCreator: ${isCreator})`);
         res.json({
             success: true,
             data: {
-                name: test.name,
+                name: displayName,
                 answerCount: test.answerCount,
                 isClosed: test.isClosed,
                 isCreator,
