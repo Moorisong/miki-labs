@@ -164,9 +164,10 @@ const Home: React.FC = () => {
             {/* 하단 푸터 */}
             <div style={{
                 marginTop: '3rem',
-                marginBottom: '3rem',
+                paddingBottom: 'calc(2rem + env(safe-area-inset-bottom))',
                 color: '#aaa',
-                fontSize: '0.85rem'
+                fontSize: '0.85rem',
+                textAlign: 'center'
             }}>
                 Made with ❤️ for teachers
             </div>
