@@ -1,0 +1,398 @@
+:root {
+  --primary-color: #4A90E2;
+  --secondary-color: #50E3C2;
+  --bg-color: #F5F7FA;
+  --text-color: #333333;
+  --font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: opacity 0.2s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+h1,
+h2,
+h3 {
+  margin-bottom: 1rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* Utility for full screen center */
+.center-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+@keyframes pulse-hint {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(74, 144, 226, 0.7);
+  }
+
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 0 12px rgba(74, 144, 226, 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(74, 144, 226, 0);
+  }
+}
+
+.btn-pulse-hint {
+  animation: pulse-hint 0.9s ease-in-out infinite;
+}
+
+/* 이름 입력 유도 애니메이션 */
+@keyframes name-nudge {
+  0% {
+    transform: scale(1) translateY(0);
+    box-shadow: 0 0 0 0 rgba(226, 74, 144, 0.5);
+  }
+
+  20% {
+    transform: scale(1.07) translateY(-2px);
+    box-shadow: 0 0 0 8px rgba(226, 74, 144, 0);
+  }
+
+  40% {
+    transform: scale(1) translateY(0);
+    box-shadow: 0 0 0 0 rgba(226, 74, 144, 0);
+  }
+
+  100% {
+    transform: scale(1) translateY(0);
+    box-shadow: 0 0 0 0 rgba(226, 74, 144, 0);
+  }
+}
+
+@keyframes name-nudge-arrow {
+
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+
+  20%,
+  80% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(4px);
+  }
+}
+
+.btn-name-nudge {
+  animation: name-nudge 2s ease-in-out infinite;
+  position: relative;
+}
+
+.btn-name-nudge::after {
+  content: '👆 여기를 눌러 이름을 입력하세요!';
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #E24A90;
+  background: #fff0f6;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #f5c2d4;
+  box-shadow: 0 2px 8px rgba(226, 74, 144, 0.15);
+  animation: name-nudge-arrow 2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ── 묘록(Myorok) 광고 배너 ── */
+.myorok-banner {
+  display: block;
+  text-decoration: none;
+  background: #f7f7f7;
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+.myorok-banner:hover {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.myorok-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.myorok-icon-section {
+  flex-shrink: 0;
+}
+
+.myorok-app-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  object-fit: contain;
+}
+
+.myorok-text-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.myorok-label {
+  display: block;
+  font-size: 0.7rem;
+  color: #9ca3af;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+.myorok-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 0.25rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.myorok-description {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.myorok-cta-section {
+  flex-shrink: 0;
+}
+
+.myorok-cta-button {
+  display: inline-block;
+  background: linear-gradient(to right, #22c55e, #10b981);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.5rem 0.875rem;
+  border-radius: 20px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.myorok-banner:hover .myorok-cta-button {
+  background: linear-gradient(to right, #16a34a, #059669);
+}
+
+.myorok-mobile-only {
+  display: none;
+}
+
+.myorok-desktop-only {
+  display: inline;
+}
+
+@media (max-width: 768px) {
+  .myorok-mobile-only {
+    display: inline;
+  }
+
+  .myorok-desktop-only {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .myorok-banner {
+    padding: 0.875rem 1rem;
+  }
+
+  .myorok-banner-content {
+    gap: 0.75rem;
+  }
+
+  .myorok-app-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .myorok-label {
+    font-size: 0.65rem;
+  }
+
+  .myorok-title {
+    font-size: 0.875rem;
+  }
+
+  .myorok-description {
+    font-size: 0.7rem;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
+
+  .myorok-cta-button {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .myorok-cta-section {
+    display: none;
+  }
+
+  .myorok-description::after {
+    content: ' →';
+    color: #7c3aed;
+    font-weight: 600;
+  }
+}
+
+/* ══════════════════════════════════════════════
+   반응형 레이아웃
+   ══════════════════════════════════════════════ */
+
+/* ── Header CSS 클래스 ── */
+.toby-header {
+  padding: 0.8rem 1.5rem;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.toby-header-logo {
+  margin: 0;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.toby-header-nav {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.toby-header-nav a {
+  text-decoration: none;
+  color: #555;
+  padding: 0.4rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.toby-header-nav a:hover {
+  background: #f0f0f0;
+}
+
+/* ── 캔버스 반응형 ── */
+#ball-canvas {
+  max-width: 100%;
+  display: block;
+}
+
+/* ── 좌석 그리드 가로 스크롤 ── */
+.seat-grid-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.5rem;
+}
+
+/* 태블릿 (max-width: 768px) */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  /* Header 폰트/패딩 */
+  .toby-header {
+    padding: 0.7rem 1rem;
+  }
+
+  .toby-header-logo {
+    font-size: 1.3rem;
+  }
+
+  .toby-header-nav a {
+    font-size: 0.82rem;
+    padding: 0.35rem 0.55rem;
+  }
+}
+
+/* 모바일 (max-width: 480px) */
+@media (max-width: 480px) {
+  .container {
+    padding: 0.75rem;
+  }
+
+  .toby-header {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .toby-header-logo {
+    font-size: 1.2rem;
+  }
+
+  .toby-header-nav a {
+    font-size: 0.78rem;
+    padding: 0.3rem 0.45rem;
+  }
+}
