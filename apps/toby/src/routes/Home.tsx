@@ -150,14 +150,12 @@ const Home: React.FC = () => {
             </div>
 
             {/* 광고 및 묘록 배너 */}
-            <div style={{ marginTop: '7rem', width: '100%', display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
-                <div style={{ width: '100%', maxWidth: '800px', padding: '0 1rem' }}>
-                    <KakaoAdfit
-                        unit={ADFIT_UNITS.MAIN_BANNER}
-                        width="100%"
-                        height={ADFIT_SIZES.BANNER_320x100.height}
-                    />
-                </div>
+            <div style={{ marginTop: '7rem', width: '100%', display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}>
+                <KakaoAdfit
+                    unit={ADFIT_UNITS.MAIN_BANNER}
+                    width={ADFIT_SIZES.BANNER_320x100.width}
+                    height={ADFIT_SIZES.BANNER_320x100.height}
+                />
                 <MyorokBanner />
             </div>
 
