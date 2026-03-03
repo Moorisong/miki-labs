@@ -53,7 +53,6 @@ export default function Home() {
             link: '/toby',
             newTab: true,
             badge: 'New',
-            extraBadge: '웹 전용',
             active: true,
         },
         {
