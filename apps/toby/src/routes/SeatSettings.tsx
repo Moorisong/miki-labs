@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
-import KakaoAdfit, { ADFIT_UNITS, ADFIT_SIZES } from '../components/KakaoAdFit';
 
 type SeatMode = 'number' | 'name';
 
@@ -179,15 +178,6 @@ const SeatSettings: React.FC = () => {
                     <p style={{ color: '#888', marginTop: '0.3rem', fontSize: '0.9rem' }}>
                         아래 좌석을 직접 클릭하여 설정하세요 (브라우저 탭을 닫으면 초기화)
                     </p>
-                </div>
-
-                {/* 광고 배너 */}
-                <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>
-                    <KakaoAdfit
-                        unit={ADFIT_UNITS.MAIN_BANNER}
-                        width={ADFIT_SIZES.BANNER_320x100.width}
-                        height={ADFIT_SIZES.BANNER_320x100.height}
-                    />
                 </div>
 
                 {/* 기본 설정 */}

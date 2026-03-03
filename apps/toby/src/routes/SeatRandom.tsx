@@ -331,15 +331,6 @@ const SeatRandom: React.FC = () => {
                     </p>
                 </div>
 
-                {/* 광고 배너 */}
-                <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>
-                    <KakaoAdfit
-                        unit={ADFIT_UNITS.MAIN_BANNER}
-                        width={ADFIT_SIZES.BANNER_320x100.width}
-                        height={ADFIT_SIZES.BANNER_320x100.height}
-                    />
-                </div>
-
                 {/* 설정 영역 */}
                 <div className="seat-config-panel" style={{
                     display: 'flex',
@@ -800,6 +791,11 @@ const SeatRandom: React.FC = () => {
                 </div>
 
                 <div style={{ marginTop: '3rem', marginBottom: '3rem', display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
+                    <KakaoAdfit
+                        unit={ADFIT_UNITS.MAIN_BANNER}
+                        width={ADFIT_SIZES.BANNER_320x100.width}
+                        height={ADFIT_SIZES.BANNER_320x100.height}
+                    />
                     <MyorokBanner />
                 </div>
             </div>
