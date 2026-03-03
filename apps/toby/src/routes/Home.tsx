@@ -32,12 +32,13 @@ const tools = [
 const Home: React.FC = () => {
     return (
         <div style={{
-            minHeight: '100vh',
+            minHeight: 'calc(100vh - var(--header-height))',
             background: 'linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
+            paddingTop: '5rem', // Added margin above logo
+            paddingBottom: '2rem'
         }}>
 
             {/* 로고 & 타이틀 */}
