@@ -1,9 +1,18 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ROUTES } from '@/constants';
 import styles from './footer.module.css';
 
 export default function Footer() {
+  const pathname = usePathname();
   const currentYear = new Date().getFullYear();
+
+  // Toby 서비스에서는 푸터를 보이지 않게 처리
+  if (pathname.startsWith('/toby')) {
+    return null;
+  }
 
   return (
     <footer className={styles.footer}>

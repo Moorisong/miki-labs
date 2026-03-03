@@ -73,6 +73,11 @@ export default function NavBar() {
     });
   };
 
+  // Toby 서비스에서는 헤더를 보이지 않게 처리
+  if (pathname.startsWith('/toby')) {
+    return null;
+  }
+
   return (
     <>
       <header className={styles.header}>
@@ -118,7 +123,7 @@ export default function NavBar() {
                         closeMenu();
                         setIsDropdownOpen(false);
                       }}
-                      {...(link.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      {...((link as any).newTab || link.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                     >
                       {link.label}
                     </Link>
@@ -134,7 +139,7 @@ export default function NavBar() {
                   href={link.href}
                   className={`${styles.navLink} ${pathname === link.href ? styles.active : ''}`}
                   onClick={closeMenu}
-                  {...(link.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                  {...((link as any).newTab || link.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                 >
                   {link.label}
                 </Link>
