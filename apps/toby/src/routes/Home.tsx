@@ -44,7 +44,7 @@ const Home: React.FC = () => {
                 <div style={{
                     filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))'
                 }}>
-                    <img src="/logo.png" alt="Toby Logo" style={{ width: '120px', height: '120px', objectFit: 'contain' }} />
+                    <img src="/toby/logo.png" alt="Toby Logo" style={{ width: '120px', height: '120px', objectFit: 'contain' }} />
                 </div>
                 <h1 style={{
                     fontSize: '2.5rem',

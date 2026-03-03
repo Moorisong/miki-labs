@@ -18,7 +18,7 @@ const MyorokBanner: React.FC = () => {
                     {/* 앱 아이콘 */}
                     <div className="myorok-icon-section">
                         <img
-                            src="/myorok-icon.png"
+                            src="/toby/myorok-icon.png"
                             alt="묘록 앱 아이콘"
                             className="myorok-app-icon"
                         />

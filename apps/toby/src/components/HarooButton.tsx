@@ -61,7 +61,7 @@ const HarooButton: React.FC = () => {
 
             {/* 로고 이미지 */}
             <img
-                src="/haroo-logo.png"
+                src="/toby/haroo-logo.png"
                 alt="하루상자 로고"
                 style={{
                     position: 'relative',
