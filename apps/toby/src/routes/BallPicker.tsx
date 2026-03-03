@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Header from '../components/Header';
 import MyorokBanner from '../components/MyorokBanner';
+import KakaoAdfit, { ADFIT_UNITS, ADFIT_SIZES } from '../components/KakaoAdFit';
 import { PhysicsEngine } from '../canvas/PhysicsEngine';
 import { Ball } from '../canvas/Ball';
 import { APP_TITLES } from '../constants/app';
@@ -432,8 +433,13 @@ const BallPicker: React.FC = () => {
                     )}
                 </div>
 
-                {/* 묘록 광고 배너 */}
-                <div style={{ marginTop: '2.5rem', marginBottom: '2rem' }}>
+                {/* 묘록 광고 배너 및 카카오 애드핏 */}
+                <div style={{ marginTop: '2.5rem', marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
+                    <KakaoAdfit
+                        unit={ADFIT_UNITS.MAIN_BANNER}
+                        width={ADFIT_SIZES.BANNER_320x100.width}
+                        height={ADFIT_SIZES.BANNER_320x100.height}
+                    />
                     <MyorokBanner />
                 </div>
             </div>

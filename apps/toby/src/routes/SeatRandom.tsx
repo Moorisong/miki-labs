@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import MyorokBanner from '../components/MyorokBanner';
+import KakaoAdfit, { ADFIT_UNITS, ADFIT_SIZES } from '../components/KakaoAdFit';
 import { toPng } from 'html-to-image';
 import { APP_TITLES } from '../constants/app';
 
@@ -789,7 +790,12 @@ const SeatRandom: React.FC = () => {
                     <Link to="/seat/settings" style={{ color: '#aaa', textDecoration: 'none' }}>Setting</Link>
                 </div>
 
-                <div style={{ marginTop: '3rem', marginBottom: '3rem' }}>
+                <div style={{ marginTop: '3rem', marginBottom: '3rem', display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
+                    <KakaoAdfit
+                        unit={ADFIT_UNITS.MAIN_BANNER}
+                        width={ADFIT_SIZES.BANNER_320x100.width}
+                        height={ADFIT_SIZES.BANNER_320x100.height}
+                    />
                     <MyorokBanner />
                 </div>
             </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/global.css';
 import MyorokBanner from '../components/MyorokBanner';
+import KakaoAdfit, { ADFIT_UNITS, ADFIT_SIZES } from '../components/KakaoAdFit';
 import { APP_TITLES } from '../constants/app';
 
 const tools = [
@@ -148,8 +149,13 @@ const Home: React.FC = () => {
                 ))}
             </div>
 
-            {/* 묘록 배너 */}
-            <div style={{ marginTop: '7rem', width: '100%' }}>
+            {/* 광고 및 묘록 배너 */}
+            <div style={{ marginTop: '7rem', width: '100%', display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
+                <KakaoAdfit
+                    unit={ADFIT_UNITS.MAIN_BANNER}
+                    width={ADFIT_SIZES.BANNER_320x100.width}
+                    height={ADFIT_SIZES.BANNER_320x100.height}
+                />
                 <MyorokBanner />
             </div>
 

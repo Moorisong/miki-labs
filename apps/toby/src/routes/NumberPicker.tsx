@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import NumberSlot from '../components/NumberSlot';
 import MyorokBanner from '../components/MyorokBanner';
+import KakaoAdfit, { ADFIT_UNITS, ADFIT_SIZES } from '../components/KakaoAdFit';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from '../utils/storage';
 import { pickRandomNumbers } from '../utils/random';
 import { APP_TITLES } from '../constants/app';
@@ -288,8 +289,13 @@ const NumberPicker: React.FC = () => {
                     설정값은 브라우저에 자동으로 안전하게 보관됩니다
                 </div>
 
-                {/* 하단 배너 */}
-                <div style={{ marginTop: '3.5rem', marginBottom: '2.5rem' }}>
+                {/* 하단 배너 및 광고 */}
+                <div style={{ marginTop: '3.5rem', marginBottom: '2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
+                    <KakaoAdfit
+                        unit={ADFIT_UNITS.MAIN_BANNER}
+                        width={ADFIT_SIZES.BANNER_320x100.width}
+                        height={ADFIT_SIZES.BANNER_320x100.height}
+                    />
                     <MyorokBanner />
                 </div>
             </div>
