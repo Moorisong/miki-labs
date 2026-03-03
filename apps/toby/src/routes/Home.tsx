@@ -32,7 +32,7 @@ const tools = [
 const Home: React.FC = () => {
     return (
         <div style={{
-            minHeight: 'calc(100vh - var(--header-height))',
+            minHeight: '100vh',
             background: 'linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%)',
             display: 'flex',
             flexDirection: 'column',

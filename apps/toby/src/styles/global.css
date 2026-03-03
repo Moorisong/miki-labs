@@ -47,9 +47,6 @@
   --z-sticky: 3000;
   --z-dropdown: 3100;
 
-  /* Header */
-  --header-height: 64px;
-
   /* Legacy Toby Variables */
   --primary-color: #4A90E2;
   --secondary-color: #50E3C2;
@@ -87,7 +84,6 @@ body {
 }
 
 .main-content {
-  padding-top: var(--header-height);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -375,231 +371,10 @@ h3 {
   }
 }
 
-/* ══════════════════════════════════════════════
-   반응형 레이아웃
-   ══════════════════════════════════════════════ */
-
-/* ── Haroo Global Header (NavBar Replica) ── */
-.haroo-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: var(--z-sticky);
-  background: rgba(26, 26, 46, 1);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(162, 155, 254, 0.1);
-}
-
-.haroo-nav {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 var(--space-lg);
-  height: var(--header-height);
-  gap: var(--space-xl);
-}
-
-.haroo-logo {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  color: var(--color-text);
-  text-decoration: none;
-}
-
-.haroo-logo-icon {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-}
-
-.haroo-logo-text {
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.haroo-nav-links {
-  display: flex;
-  align-items: center;
-  gap: var(--space-lg);
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.haroo-dropdown-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.haroo-dropdown-toggle {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-md);
-  font-weight: 500;
-  padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
-}
-
-.haroo-dropdown-toggle:hover {
-  color: var(--color-text);
-  background: rgba(108, 92, 231, 0.1);
-}
-
-.haroo-dropdown-toggle.active {
-  color: var(--color-primary);
-}
-
-.haroo-arrow {
-  font-size: 1.2rem;
-  transition: transform var(--transition-fast);
-  color: var(--color-text-muted);
-  margin-left: 4px;
-}
-
-.haroo-arrow-rotate {
-  transform: rotate(180deg);
-}
-
-.haroo-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 12px);
-  left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  background: rgba(30, 30, 55, 0.98);
-  backdrop-filter: blur(24px);
-  border: 1px solid rgba(162, 155, 254, 0.3);
-  border-radius: var(--radius-md);
-  min-width: 200px;
-  padding: 8px 0;
-  display: none;
-  flex-direction: column;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-  z-index: var(--z-dropdown);
-  opacity: 0;
-  transition: all var(--transition-fast);
-}
-
-/* 마우스가 버튼에서 드롭다운으로 이동할 때 끊기지 않도록 투명 브릿지 추가 */
-.haroo-dropdown-menu::before {
-  content: '';
-  position: absolute;
-  top: -15px;
-  left: 0;
-  right: 0;
-  height: 15px;
-  background: transparent;
-}
-
-.haroo-dropdown-menu.show {
-  display: flex;
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-.haroo-dropdown-item {
+/* ── 캔버스 반응형 ── */
+#ball-canvas {
+  max-width: 100%;
   display: block;
-  padding: 10px 20px;
-  margin: 0 8px;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-md);
-  transition: all var(--transition-fast);
-  white-space: nowrap;
-  text-align: center;
-  text-decoration: none;
-}
-
-.haroo-dropdown-item:hover {
-  background: rgba(108, 92, 231, 0.15);
-  color: var(--color-primary);
-}
-
-.haroo-dropdown-item-active {
-  color: var(--color-primary);
-  font-weight: 600;
-  background: rgba(108, 92, 231, 0.05);
-}
-
-.haroo-auth-item {
-  display: flex;
-  align-items: center;
-  margin-left: auto;
-}
-
-.haroo-login-button {
-  padding: var(--space-sm) var(--space-lg);
-  background: var(--gradient-primary);
-  color: var(--color-text);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  border-radius: var(--radius-full);
-  transition: all var(--transition-fast);
-  text-decoration: none;
-}
-
-.haroo-login-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 20px rgba(108, 92, 231, 0.4);
-  color: var(--color-text);
-}
-
-@media (max-width: 768px) {
-  .haroo-nav {
-    padding: 0 var(--space-md);
-    gap: var(--space-md);
-  }
-
-  .haroo-auth-item {
-    display: none;
-    /* Hide login on mobile for now as simple replica */
-  }
-
-  .haroo-logo-text {
-    font-size: var(--font-size-md);
-  }
-
-  .haroo-dropdown-toggle {
-    font-size: var(--font-size-sm);
-    padding: var(--space-sm) var(--space-sm);
-  }
-
-  .haroo-dropdown-menu {
-    position: fixed;
-    top: var(--header-height);
-    left: 0;
-    right: 0;
-    transform: none;
-    width: 100%;
-    border-top: 1px solid rgba(162, 155, 254, 0.1);
-    box-shadow: none;
-    border-radius: 0;
-    background: rgba(26, 26, 46, 0.98);
-  }
-
-  .haroo-dropdown-menu.show {
-    transform: none;
-  }
-}
-
-/* ── Legacy Haroo Header (Removing) ── */
-.haroo-global-header {
-  display: none;
 }
 
 /* ── Header CSS 클래스 ── */
@@ -640,12 +415,6 @@ h3 {
   background: #f0f0f0;
 }
 
-/* ── 캔버스 반응형 ── */
-#ball-canvas {
-  max-width: 100%;
-  display: block;
-}
-
 /* ── 좌석 그리드 가로 스크롤 ── */
 .seat-grid-scroll {
   overflow-x: auto;
@@ -658,46 +427,11 @@ h3 {
   .container {
     padding: 1rem;
   }
-
-  .haroo-global-header {
-    padding: 0.4rem 1rem;
-  }
-
-  /* Header 폰트/패딩 */
-  .toby-header {
-    padding: 0.7rem 1rem;
-  }
-
-  .toby-header-logo {
-    font-size: 1.3rem;
-  }
-
-  .toby-header-nav a {
-    font-size: 0.82rem;
-    padding: 0.35rem 0.55rem;
-  }
 }
 
 /* 모바일 (max-width: 480px) */
 @media (max-width: 480px) {
   .container {
     padding: 0.75rem;
-  }
-
-  .haroo-global-header {
-    padding: 0.4rem 0.75rem;
-  }
-
-  .toby-header {
-    padding: 0.6rem 0.75rem;
-  }
-
-  .toby-header-logo {
-    font-size: 1.2rem;
-  }
-
-  .toby-header-nav a {
-    font-size: 0.78rem;
-    padding: 0.3rem 0.45rem;
   }
 }
