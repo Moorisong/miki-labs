@@ -4,12 +4,10 @@ import NumberPicker from './routes/NumberPicker';
 import BallPicker from './routes/BallPicker';
 import SeatRandom from './routes/SeatRandom';
 import SeatSettings from './routes/SeatSettings';
-import HarooHeader from './components/HarooHeader';
 
 function App() {
   return (
     <BrowserRouter basename="/toby">
-      <HarooHeader />
       <div className="main-content">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -24,3 +22,4 @@ function App() {
 }
 
 export default App;
+
