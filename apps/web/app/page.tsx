@@ -50,7 +50,7 @@ export default function Home() {
             title: 'TOBY',
             description: '학교 선생님들을 위한 서비스 툴 모음.\n수업과 학급 관리에 유용한 도구들을 만나보세요!',
             image: '/sample/toby-logo.png',
-            link: 'https://toby-teacher.vercel.app',
+            link: '/toby',
             badge: 'New',
             extraBadge: '웹 전용',
             active: true,
