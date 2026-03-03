@@ -10,11 +10,13 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/toby',
-        destination: 'http://localhost:5173/toby/',
+        destination: '/toby/index.html',
       },
       {
         source: '/toby/:path*',
-        destination: 'http://localhost:5173/toby/:path*',
+        destination: (process.env.NODE_ENV === 'production'
+          ? '/toby/:path*'
+          : 'http://localhost:5173/toby/:path*'),
       },
     ];
   },

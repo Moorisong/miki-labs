@@ -14,5 +14,6 @@ build
 .idea
 ecosystem.config.js
 .vite
+apps/web/public/toby
 
 /sample
