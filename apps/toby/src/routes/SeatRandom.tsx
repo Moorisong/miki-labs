@@ -790,13 +790,17 @@ const SeatRandom: React.FC = () => {
                     <Link to="/seat/settings" style={{ color: '#aaa', textDecoration: 'none' }}>Setting</Link>
                 </div>
 
-                <div style={{ marginTop: '3rem', marginBottom: '3rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}>
-                    <KakaoAdfit
-                        unit={ADFIT_UNITS.MAIN_BANNER}
-                        width={ADFIT_SIZES.BANNER_320x100.width}
-                        height={ADFIT_SIZES.BANNER_320x100.height}
-                    />
-                    <MyorokBanner />
+                <div style={{ marginTop: '3rem', marginBottom: '3rem', display: 'flex', justifyContent: 'center' }}>
+                    <div style={{ width: '100%', maxWidth: '800px', display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '0 1rem' }}>
+                        <KakaoAdfit
+                            unit={ADFIT_UNITS.MAIN_BANNER}
+                            width="100%"
+                            height={ADFIT_SIZES.BANNER_320x100.height}
+                        />
+                        <div style={{ width: '100%', margin: '0' }}>
+                            <MyorokBanner />
+                        </div>
+                    </div>
                 </div>
             </div>
 

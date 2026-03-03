@@ -7,7 +7,7 @@ import React from 'react';
  */
 const MyorokBanner: React.FC = () => {
     return (
-        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 1rem' }}>
+        <div style={{ width: '100%', margin: '0 auto' }}>
             <a
                 href="https://myorok.vercel.app/"
                 target="_blank"
