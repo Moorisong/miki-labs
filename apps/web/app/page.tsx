@@ -51,6 +51,7 @@ export default function Home() {
             description: '학교 선생님들을 위한 서비스 툴 모음.\n수업과 학급 관리에 유용한 도구들을 만나보세요!',
             image: '/sample/toby-logo.png',
             link: '/toby',
+            newTab: true,
             badge: 'New',
             extraBadge: '웹 전용',
             active: true,
@@ -88,7 +89,7 @@ export default function Home() {
                             href={content.link}
                             key={content.id}
                             className={styles.card}
-                            {...(content.link.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                            {...((content as any).newTab || content.link.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                         >
                             <div className={styles.cardImageWrapper}>
                                 {(content.badge || ('extraBadge' in content && content.extraBadge)) && (
