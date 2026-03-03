@@ -91,7 +91,7 @@ const NumberPicker: React.FC = () => {
             fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif"
         }}>
             <Header />
-            <div className="container" style={{ maxWidth: '640px', padding: '2.5rem 1.5rem' }}>
+            <div className="container" style={{ maxWidth: '900px', padding: '2rem 1.5rem' }}>
                 {/* 타이틀 */}
                 <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                     <h1 style={{
