@@ -4,17 +4,21 @@ import NumberPicker from './routes/NumberPicker';
 import BallPicker from './routes/BallPicker';
 import SeatRandom from './routes/SeatRandom';
 import SeatSettings from './routes/SeatSettings';
+import HarooHeader from './components/HarooHeader';
 
 function App() {
   return (
     <BrowserRouter basename="/toby">
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/number" element={<NumberPicker />} />
-        <Route path="/ball" element={<BallPicker />} />
-        <Route path="/seat" element={<SeatRandom />} />
-        <Route path="/seat/settings" element={<SeatSettings />} />
-      </Routes>
+      <HarooHeader />
+      <div className="main-content">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/number" element={<NumberPicker />} />
+          <Route path="/ball" element={<BallPicker />} />
+          <Route path="/seat" element={<SeatRandom />} />
+          <Route path="/seat/settings" element={<SeatSettings />} />
+        </Routes>
+      </div>
     </BrowserRouter>
   );
 }
