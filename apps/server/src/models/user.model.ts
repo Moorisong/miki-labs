@@ -1,4 +1,5 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import { Document, Schema } from 'mongoose';
+import { getHtsmConnection } from '../config/database';
 
 export interface IUser extends Document {
   providerId: string;
@@ -36,4 +37,9 @@ const userSchema = new Schema<IUser>(
   }
 );
 
-export const User = mongoose.model<IUser>('User', userSchema);
+/** HTSM 전용 DB 커넥션에서 모델 반환 */
+export const getUserModel = () => {
+  const conn = getHtsmConnection();
+  return conn.models.User || conn.model<IUser>('User', userSchema);
+};
+

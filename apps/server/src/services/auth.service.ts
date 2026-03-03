@@ -1,5 +1,5 @@
 import mongoose, { Types } from 'mongoose';
-import { User, IUser } from '../models/user.model';
+import { getUserModel, IUser } from '../models/user.model';
 
 export interface OAuthUserData {
   providerId: string;
@@ -9,6 +9,7 @@ export interface OAuthUserData {
 }
 
 export const findOrCreateUser = async (userData: OAuthUserData): Promise<IUser> => {
+  const User = getUserModel();
   const existingUser = await User.findOne({ providerId: userData.providerId });
 
   if (existingUser) {
@@ -45,6 +46,7 @@ export const createGuestUser = async (nickname: string, tempId: string): Promise
     } as unknown as IUser;
   }
 
+  const User = getUserModel();
   // Check if guest with this tempId already exists (unlikely given timestamp, but good for idempotency)
   // Check if guest with this tempId already exists
   const existingUser = await User.findOne({ providerId: tempId });
@@ -71,9 +73,10 @@ export const createGuestUser = async (nickname: string, tempId: string): Promise
 };
 
 export const findUserById = async (userId: string): Promise<IUser | null> => {
-  return User.findById(userId);
+  return getUserModel().findById(userId);
 };
 
 export const findUserByProviderId = async (providerId: string): Promise<IUser | null> => {
-  return User.findOne({ providerId });
+  return getUserModel().findOne({ providerId });
 };
+
