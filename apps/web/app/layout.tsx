@@ -5,7 +5,7 @@ import NavBar from '@/components/layout/nav-bar';
 import Footer from '@/components/layout/footer';
 import MainLayoutWrapper from '@/components/layout/main-layout-wrapper';
 import SessionProvider from '@/components/providers/session-provider';
-import NicknameProvider from '@/components/providers/nickname-provider';
+
 import './globals.css';
 
 const geistSans = Geist({
@@ -85,14 +85,13 @@ export default async function RootLayout({
           strategy="lazyOnload"
         />
         <SessionProvider>
-          <NicknameProvider>
-            <NavBar />
-            <MainLayoutWrapper>
-              {children}
-            </MainLayoutWrapper>
-            <Footer />
-          </NicknameProvider>
+          <NavBar />
+          <MainLayoutWrapper>
+            {children}
+          </MainLayoutWrapper>
+          <Footer />
         </SessionProvider>
+
       </body>
     </html>
   );

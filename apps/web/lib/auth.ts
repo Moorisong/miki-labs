@@ -56,8 +56,8 @@ export const authOptions: NextAuthOptions = {
                 createdAt: new Date(),
                 highScore: 0,
                 totalGames: 0,
-                nickname: null, // 처음 가입 시 닉네임 없음
               },
+
             },
             { upsert: true }
           );
@@ -85,18 +85,7 @@ export const authOptions: NextAuthOptions = {
         }
       }
 
-      // 세션 업데이트 트리거 시 DB에서 닉네임 다시 조회
-      if (trigger === 'update' && token.kakaoId) {
-        try {
-          const db = await getDatabase();
-          const users = db.collection('users');
-          const dbUser = await users.findOne({ kakaoId: token.kakaoId });
-          token.nickname = dbUser?.nickname || null;
-          token.nicknameUpdatedAt = dbUser?.nicknameUpdatedAt?.toISOString() || null;
-        } catch (error) {
-          console.error('닉네임 업데이트 조회 오류:', error);
-        }
-      }
+
 
       if (user) {
         token.name = user.name;

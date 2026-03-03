@@ -6,10 +6,10 @@
 export const TOAST_MESSAGES = {
     // 네트워크/API 실패
     NETWORK: {
-        NICKNAME_FAILED: '닉네임 설정 실패',
         CONNECTION_ERROR: '연결이 불안정해요',
         SERVER_ERROR: '서버 오류가 발생했어요',
     },
+
 
     // 일반 에러
     ERROR: {

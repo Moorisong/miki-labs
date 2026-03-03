@@ -4,11 +4,8 @@
  */
 
 export const API = {
-    // 사용자 API
-    USER: {
-        NICKNAME: '/api/user/nickname',
-    },
 } as const;
+
 
 // 외부 API URL
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
