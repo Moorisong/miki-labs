@@ -435,11 +435,13 @@ const BallPicker: React.FC = () => {
 
                 {/* 묘록 광고 배너 및 카카오 애드핏 */}
                 <div style={{ marginTop: '2.5rem', marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
-                    <KakaoAdfit
-                        unit={ADFIT_UNITS.MAIN_BANNER}
-                        width={ADFIT_SIZES.BANNER_320x100.width}
-                        height={ADFIT_SIZES.BANNER_320x100.height}
-                    />
+                    <div style={{ width: '100%', maxWidth: '800px', padding: '0 1rem' }}>
+                        <KakaoAdfit
+                            unit={ADFIT_UNITS.MAIN_BANNER}
+                            width="100%"
+                            height={ADFIT_SIZES.BANNER_320x100.height}
+                        />
+                    </div>
                     <MyorokBanner />
                 </div>
             </div>

@@ -601,11 +601,13 @@ const SeatSettings: React.FC = () => {
 
                 {/* 하단 배너 및 광고 */}
                 <div style={{ marginTop: '3.5rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
-                    <KakaoAdfit
-                        unit={ADFIT_UNITS.MAIN_BANNER}
-                        width={ADFIT_SIZES.BANNER_320x100.width}
-                        height={ADFIT_SIZES.BANNER_320x100.height}
-                    />
+                    <div style={{ width: '100%', maxWidth: '800px', padding: '0 1rem' }}>
+                        <KakaoAdfit
+                            unit={ADFIT_UNITS.MAIN_BANNER}
+                            width="100%"
+                            height={ADFIT_SIZES.BANNER_320x100.height}
+                        />
+                    </div>
                     <MyorokBanner />
                 </div>
             </div>

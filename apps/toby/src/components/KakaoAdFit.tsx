@@ -2,8 +2,8 @@ import { useEffect, useRef } from 'react';
 
 interface KakaoAdfitProps {
     unit: string;
-    width: number;
-    height: number;
+    width: number | string;
+    height: number | string;
     className?: string;
 }
 
@@ -22,8 +22,8 @@ export default function KakaoAdfit({ unit, width, height, className }: KakaoAdfi
         iframe.style.height = '100%';
         iframe.style.border = 'none';
         iframe.style.overflow = 'hidden';
-        iframe.width = String(width);
-        iframe.height = String(height);
+        iframe.width = String(width === '100%' ? '100%' : width);
+        iframe.height = String(height === '100%' ? '100%' : height);
 
         container.appendChild(iframe);
 
@@ -64,11 +64,13 @@ export default function KakaoAdfit({ unit, width, height, className }: KakaoAdfi
             ref={containerRef}
             className={className}
             style={{
-                width: `${width}px`,
-                height: `${height}px`,
+                width: typeof width === 'number' ? `${width}px` : width,
+                height: typeof height === 'number' ? `${height}px` : height,
                 margin: '0 auto',
                 overflow: 'hidden',
                 maxWidth: '100%',
+                display: 'flex',
+                justifyContent: 'center',
             }}
         />
     );
