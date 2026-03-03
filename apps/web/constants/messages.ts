@@ -39,7 +39,7 @@ export const MESSAGES = {
 
 // 네비게이션 링크
 export const NAV_LINKS = [
-    { href: 'https://toby-teacher.vercel.app', label: 'TOBY' },
+    { href: '/toby', label: 'TOBY' },
     { href: '/htsm', label: '자아탐험' },
     { href: 'https://r-paper-web.haroo.site/', label: '롤링페이퍼' },
 ] as const;

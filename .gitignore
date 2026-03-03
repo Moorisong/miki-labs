@@ -13,5 +13,6 @@ build
 .vscode
 .idea
 ecosystem.config.js
+.vite
 
 /sample
