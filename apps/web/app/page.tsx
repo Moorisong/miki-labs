@@ -91,12 +91,13 @@ export default function Home() {
                             {...((content as any).newTab || content.link.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                         >
                             <div className={styles.cardImageWrapper}>
-                                {(content.badge || ('extraBadge' in content && content.extraBadge)) && (
+                                {(content.badge || ('extraBadge' in content && (content as any).extraBadge)) && (
                                     <div className={styles.badgeGroup}>
                                         {content.badge && <span className={styles.badge}>{content.badge}</span>}
-                                        {'extraBadge' in content && content.extraBadge && <span className={`${styles.badge} ${styles.badgeWebOnly}`}>{content.extraBadge}</span>}
+                                        {'extraBadge' in content && (content as any).extraBadge && <span className={`${styles.badge} ${styles.badgeWebOnly}`}>{(content as any).extraBadge}</span>}
                                     </div>
                                 )}
+
                                 <Image
                                     src={content.image}
                                     alt={content.title}
