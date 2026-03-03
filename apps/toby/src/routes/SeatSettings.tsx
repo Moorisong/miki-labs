@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
+import MyorokBanner from '../components/MyorokBanner';
+import KakaoAdfit, { ADFIT_UNITS, ADFIT_SIZES } from '../components/KakaoAdFit';
 
 type SeatMode = 'number' | 'name';
 
@@ -596,6 +598,27 @@ const SeatSettings: React.FC = () => {
                 <div style={{ marginTop: '1.5rem', textAlign: 'center', color: '#999', fontSize: '0.85rem' }}>
                     ⚠️ 브라우저 탭을 닫으면 보든 설정 값이 초기화됩니다
                 </div>
+
+                {/* 하단 배너 및 광고 */}
+                <div style={{ marginTop: '3.5rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
+                    <KakaoAdfit
+                        unit={ADFIT_UNITS.MAIN_BANNER}
+                        width={ADFIT_SIZES.BANNER_320x100.width}
+                        height={ADFIT_SIZES.BANNER_320x100.height}
+                    />
+                    <MyorokBanner />
+                </div>
+            </div>
+
+            {/* 하단 푸터 */}
+            <div style={{
+                marginTop: '1rem',
+                marginBottom: '3rem',
+                color: '#aaa',
+                fontSize: '0.85rem',
+                textAlign: 'center'
+            }}>
+                Made with ❤️ for teachers
             </div>
         </div>
     );

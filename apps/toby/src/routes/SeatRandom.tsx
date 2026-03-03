@@ -799,6 +799,18 @@ const SeatRandom: React.FC = () => {
                     <MyorokBanner />
                 </div>
             </div>
+
+            {/* 하단 푸터 */}
+            <div style={{
+                marginTop: '1rem',
+                marginBottom: '3rem',
+                color: '#aaa',
+                fontSize: '0.85rem',
+                textAlign: 'center'
+            }}>
+                Made with ❤️ for teachers
+            </div>
+
             {/* 모바일 최적화 스타일 */}
             <style>{`
                 @media (max-width: 600px) {

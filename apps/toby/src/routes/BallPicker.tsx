@@ -444,6 +444,17 @@ const BallPicker: React.FC = () => {
                 </div>
             </div>
 
+            {/* 하단 푸터 */}
+            <div style={{
+                marginTop: '1rem',
+                marginBottom: '3rem',
+                color: '#aaa',
+                fontSize: '0.85rem',
+                textAlign: 'center'
+            }}>
+                Made with ❤️ for teachers
+            </div>
+
             {/* CSS 애니메이션 */}
             <style>{`
                 @keyframes popIn {
