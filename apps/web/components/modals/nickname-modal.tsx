@@ -146,7 +146,7 @@ export default function NicknameModal({
                 ? '새로운 닉네임을 입력해주세요.'
                 : (
                   <>
-                    랭킹에 표시될 닉네임을 설정해주세요.
+                    사용할 닉네임을 설정해주세요.
                   </>
                 )}
             </p>
