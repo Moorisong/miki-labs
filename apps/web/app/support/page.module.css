@@ -158,6 +158,7 @@
 @media (max-width: 768px) {
     .container {
         padding: 3rem 1.5rem;
+        justify-content: flex-start;
     }
 
     .messageLine {
