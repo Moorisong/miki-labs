@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Metadata } from 'next';
 import { ROUTES } from '@/constants';
+import { SUPPORT_CONFIG } from '@/constants/support';
 import AdBanner from '@/components/ads/ad-banner';
 import styles from './page.module.css';
 
@@ -139,6 +140,12 @@ export default function Home() {
 
             <footer style={{ marginTop: 'auto', paddingTop: '2rem', color: 'var(--color-text-muted)', fontSize: '0.875rem', textAlign: 'center' }}>
                 <p>하루상자는 하루의 소소한 재미를 담아두는 작은 놀이 상자입니다.</p>
+
+                {SUPPORT_CONFIG.showOnMain && (
+                    <Link href={ROUTES.SUPPORT} className={styles.supportLink} id="main-support-link">
+                        {SUPPORT_CONFIG.mainLabel}
+                    </Link>
+                )}
             </footer>
         </div>
     );

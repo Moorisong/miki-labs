@@ -161,3 +161,24 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* 후원 링크 */
+.supportLink {
+    display: inline-block;
+    margin-top: 2.5rem;
+    padding: 10px 24px;
+    border-radius: var(--radius-full);
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all var(--transition-normal);
+    text-decoration: none;
+}
+
+.supportLink:hover {
+    color: var(--color-secondary);
+    border-color: rgba(108, 92, 231, 0.25);
+    background: rgba(108, 92, 231, 0.06);
+}
