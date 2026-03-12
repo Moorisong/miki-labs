@@ -12,6 +12,7 @@ export const ROUTES = {
     TOBY: '/toby',
     TERMS: '/terms',
     PRIVACY: '/privacy',
+    SUPPORT: '/support',
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;

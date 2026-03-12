@@ -9,3 +9,4 @@ export * from './storage';
 export * from './config';
 export * from './messages';
 export * from './toast-messages';
+export * from './support';
