@@ -40,6 +40,10 @@ export const authOptions: NextAuthOptions = {
           const db = await getDatabase();
           const users = db.collection('users');
 
+          // 카카오 프로필에서 이름(실명) 또는 닉네임 추출
+          const kakaoProfile = profile as any;
+          const kakaoName = kakaoProfile?.kakao_account?.name || kakaoProfile?.kakao_account?.profile?.nickname || user.name;
+
           // 통합 유저 스키마에 맞춰 upsert
           await users.updateOne(
             { providerId: account.providerAccountId },
@@ -47,7 +51,7 @@ export const authOptions: NextAuthOptions = {
               $set: {
                 providerId: account.providerAccountId,
                 provider: 'kakao',
-                name: user.name,
+                name: kakaoName,
                 profileImage: user.image,
                 updatedAt: new Date(),
               },
