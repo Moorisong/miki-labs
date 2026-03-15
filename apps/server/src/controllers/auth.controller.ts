@@ -12,7 +12,7 @@ interface LoginRequestBody {
 interface LoginResponseData {
   user: {
     id: string;
-    nickname: string;
+    nickname?: string;
     profileImage?: string;
     provider: string;
   };

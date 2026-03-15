@@ -1,11 +1,15 @@
-import { Document, Schema } from 'mongoose';
-import { getHtsmConnection } from '../config/database';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IUser extends Document {
   providerId: string;
   provider: 'kakao' | 'google' | 'guest';
-  nickname: string;
+  email?: string;
+  name?: string;
+  nickname?: string;
+  nicknameUpdatedAt?: Date;
   profileImage?: string;
+  highScore?: number;
+  totalGames?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,23 +27,39 @@ const userSchema = new Schema<IUser>(
       required: true,
       enum: ['kakao', 'google', 'guest']
     },
+    email: {
+      type: String,
+    },
+    name: {
+      type: String,
+    },
     nickname: {
       type: String,
-      required: true,
-      unique: true
+    },
+    nicknameUpdatedAt: {
+      type: Date,
     },
     profileImage: {
-      type: String
-    }
+      type: String,
+    },
+    highScore: {
+      type: Number,
+      default: 0,
+    },
+    totalGames: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true
   }
 );
 
-/** HTSM 전용 DB 커넥션에서 모델 반환 */
+/**
+ * 메인 DB(haroo-box) 커넥션에서 User 모델 반환
+ * - 기존에는 HTSM DB에 저장했으나, 유저는 서비스 공통 자원이므로 메인 DB로 통합
+ */
 export const getUserModel = () => {
-  const conn = getHtsmConnection();
-  return conn.models.User || conn.model<IUser>('User', userSchema);
+  return mongoose.models.User || mongoose.model<IUser>('User', userSchema);
 };
-

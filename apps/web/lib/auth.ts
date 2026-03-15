@@ -41,15 +41,16 @@ export const authOptions: NextAuthOptions = {
           const db = await getDatabase();
           const users = db.collection('users');
 
-          // 기존 유저 확인 또는 새 유저 생성
+          // 통합 유저 스키마에 맞춰 upsert
           await users.updateOne(
-            { kakaoId: account.providerAccountId },
+            { providerId: account.providerAccountId },
             {
               $set: {
-                kakaoId: account.providerAccountId,
+                providerId: account.providerAccountId,
+                provider: 'kakao',
                 email: user.email,
                 name: user.name,
-                image: user.image,
+                profileImage: user.image,
                 updatedAt: new Date(),
               },
               $setOnInsert: {
@@ -57,7 +58,6 @@ export const authOptions: NextAuthOptions = {
                 highScore: 0,
                 totalGames: 0,
               },
-
             },
             { upsert: true }
           );
@@ -75,7 +75,7 @@ export const authOptions: NextAuthOptions = {
         try {
           const db = await getDatabase();
           const users = db.collection('users');
-          const dbUser = await users.findOne({ kakaoId: account.providerAccountId });
+          const dbUser = await users.findOne({ providerId: account.providerAccountId });
           token.nickname = dbUser?.nickname || null;
           token.nicknameUpdatedAt = dbUser?.nicknameUpdatedAt?.toISOString() || null;
         } catch (error) {
@@ -84,8 +84,6 @@ export const authOptions: NextAuthOptions = {
           token.nicknameUpdatedAt = null;
         }
       }
-
-
 
       if (user) {
         token.name = user.name;
