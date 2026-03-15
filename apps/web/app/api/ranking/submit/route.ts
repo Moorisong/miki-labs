@@ -180,22 +180,7 @@ export async function POST(request: NextRequest) {
       // Initial values are already set above
     }
 
-    // 사용자의 누적 점수 업데이트 (통합 스키마: providerId 기준)
-    await users.updateOne(
-      {
-        $or: [
-          { providerId: session.user.kakaoId },
-          { kakaoId: session.user.kakaoId }
-        ]
-      },
-      {
-        $inc: {
-          highScore: score,
-          totalGames: 1
-        },
-        $set: { updatedAt: new Date() },
-      }
-    );
+    // 참고: 미니게임 미출시 및 데이터 단순화를 위해 users 컬렉션의 highScore/totalGames 업데이트는 제거되었습니다.
 
     return NextResponse.json({
       success: true,

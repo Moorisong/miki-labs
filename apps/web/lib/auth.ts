@@ -6,7 +6,6 @@ declare module 'next-auth' {
   interface Session {
     user: {
       name?: string | null;
-      email?: string | null;
       image?: string | null;
       kakaoId?: string;
       nickname?: string | null;
@@ -48,15 +47,12 @@ export const authOptions: NextAuthOptions = {
               $set: {
                 providerId: account.providerAccountId,
                 provider: 'kakao',
-                email: user.email,
                 name: user.name,
                 profileImage: user.image,
                 updatedAt: new Date(),
               },
               $setOnInsert: {
                 createdAt: new Date(),
-                highScore: 0,
-                totalGames: 0,
               },
             },
             { upsert: true }

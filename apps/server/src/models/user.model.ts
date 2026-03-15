@@ -3,13 +3,10 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IUser extends Document {
   providerId: string;
   provider: 'kakao' | 'google' | 'guest';
-  email?: string;
   name?: string;
   nickname?: string;
   nicknameUpdatedAt?: Date;
   profileImage?: string;
-  highScore?: number;
-  totalGames?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,9 +24,6 @@ const userSchema = new Schema<IUser>(
       required: true,
       enum: ['kakao', 'google', 'guest']
     },
-    email: {
-      type: String,
-    },
     name: {
       type: String,
     },
@@ -41,14 +35,6 @@ const userSchema = new Schema<IUser>(
     },
     profileImage: {
       type: String,
-    },
-    highScore: {
-      type: Number,
-      default: 0,
-    },
-    totalGames: {
-      type: Number,
-      default: 0,
     },
   },
   {
