@@ -1,26 +1,40 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import styles from "./page.module.css";
-import Link from "next/link";
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import styles from './page.module.css';
+import Link from 'next/link';
+import { CHICORUN_API, CHICORUN_ROUTES } from '@/constants/chicorun';
 
+// ─── 타입 ──────────────────────────────────────────────────────────────────────
+interface ClassItem {
+    id: string;
+    classCode: string;
+    title: string;
+    studentCount: number;
+    createdAt: string;
+}
+
+// ─── 아이콘 ──────────────────────────────────────────────────────────────────────
 const IconPlus = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <line x1="12" y1="5" x2="12" y2="19"></line>
         <line x1="5" y1="12" x2="19" y2="12"></line>
     </svg>
 );
 
 const IconCopy = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
     </svg>
 );
 
 const IconUsers = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
         <circle cx="9" cy="7" r="4"></circle>
         <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -29,45 +43,118 @@ const IconUsers = () => (
 );
 
 const IconBook = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
         <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
     </svg>
 );
 
 const IconChevronRight = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="9 18 15 12 9 6"></polyline>
     </svg>
 );
 
 const IconGraduationCap = () => (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563eb"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
         <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
     </svg>
 );
 
+// ─── Mock 토큰 (하루상자 카카오 로그인 연동 전까지 임시) ──────────────────────
+function getTeacherToken(): string | null {
+    // 실제 운영: 하루상자 로그인 세션의 JWT를 치코런 교사 JWT로 교환하는 API 필요
+    // 현재: 하드코딩 mock 처리
+    return localStorage.getItem('chicorun_teacher_token');
+}
+
 export default function TeacherClassManagePage() {
     const router = useRouter();
-    const [classes, setClasses] = useState([
-        { id: 1, name: "오전 기초반", code: "7F2K9", studentCount: 15 },
-        { id: 2, name: "오후 심화반", code: "3A9M1", studentCount: 22 },
-    ]);
+    const [classes, setClasses] = useState<ClassItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [newClassName, setNewClassName] = useState("");
+    const [newClassName, setNewClassName] = useState('');
+    const [isCreating, setIsCreating] = useState(false);
+    const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
-    const handleCreateClass = () => {
+    const fetchClasses = useCallback(async () => {
+        const token = getTeacherToken();
+        if (!token) {
+            alert('하루상자 선생님 로그인이 필요합니다.');
+            router.push('/login');
+            return;
+        }
+
+        try {
+            const res = await fetch(CHICORUN_API.CLASS, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await res.json();
+            if (data.success) {
+                setClasses(data.data);
+            } else if (res.status === 401) {
+                alert('로그인이 만료되었습니다.');
+                router.push('/login');
+            } else {
+                setClasses([]);
+            }
+        } catch {
+            setClasses([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [router]);
+
+    useEffect(() => {
+        fetchClasses();
+    }, [fetchClasses]);
+
+    const handleCreateClass = async () => {
         if (!newClassName.trim()) return;
-        const newCode = Math.random().toString(36).substring(2, 7).toUpperCase();
-        setClasses([...classes, { id: Date.now(), name: newClassName, code: newCode, studentCount: 0 }]);
-        setIsModalOpen(false);
-        setNewClassName("");
+
+        const token = getTeacherToken();
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
+
+        setIsCreating(true);
+        try {
+            const res = await fetch(CHICORUN_API.CLASS, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ title: newClassName.trim() }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                await fetchClasses();
+                setIsModalOpen(false);
+                setNewClassName('');
+            } else {
+                alert(data.error || '클래스 생성에 실패했습니다.');
+            }
+        } catch (err) {
+            console.error('Failed to create class:', err);
+        } finally {
+            setIsCreating(false);
+        }
     };
 
-    const copyToClipboard = (text: string) => {
-        navigator.clipboard.writeText(text);
-        alert("클래스 코드가 복사되었습니다: " + text);
+    const copyToClipboard = async (code: string) => {
+        try {
+            await navigator.clipboard.writeText(code);
+            setCopiedCode(code);
+            setTimeout(() => setCopiedCode(null), 2000);
+        } catch {
+            alert('복사에 실패했습니다: ' + code);
+        }
     };
 
     return (
@@ -78,13 +165,15 @@ export default function TeacherClassManagePage() {
                         <IconBook />
                     </div>
                     <span>하루상자</span>
-                    <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 'normal' }}>Haroo Box</span>
+                    <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 'normal' }}>Chicorun</span>
                 </div>
-                <nav style={{ display: 'flex', gap: '1rem' }}>
-                    <Link href="/chicorun" style={{ color: '#64748b', fontSize: '0.9rem', textDecoration: 'none' }}>랜딩으로 가기</Link>
+                <nav style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <Link href={CHICORUN_ROUTES.LANDING}
+                        style={{ color: '#64748b', fontSize: '0.9rem', textDecoration: 'none' }}>
+                        랜딩으로 가기
+                    </Link>
                 </nav>
             </header>
-
             <main className={styles.main}>
                 <div className={styles.titleArea}>
                     <div>
@@ -100,68 +189,81 @@ export default function TeacherClassManagePage() {
                     </button>
                 </div>
 
-                <div className={styles.grid}>
-                    {classes.map((cls, i) => (
-                        <div key={cls.id} className={styles.card} style={{ animationDelay: `${i * 0.1}s` }}>
-                            <div>
-                                <h2 className={styles.cardTitle}>{cls.name}</h2>
-                                <div className={styles.codeBox}>
-                                    <span className={styles.codeLabel}>클래스 코드</span>
-                                    <span className={styles.codeValue}>{cls.code}</span>
+                {isLoading ? (
+                    <div style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>
+                        클래스 불러오는 중...
+                    </div>
+                ) : classes.length === 0 ? (
+                    <div style={{
+                        textAlign: 'center', padding: '4rem', color: '#64748b',
+                        background: 'white', borderRadius: '1rem',
+                    }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎓</div>
+                        <p>아직 클래스가 없습니다. 첫 클래스를 만들어보세요!</p>
+                    </div>
+                ) : (
+                    <div className={styles.grid}>
+                        {classes.map((cls, i) => (
+                            <div key={cls.id} className={styles.card} style={{ animationDelay: `${i * 0.1}s` }}>
+                                <div>
+                                    <h2 className={styles.cardTitle}>{cls.title}</h2>
+                                    <div className={styles.codeBox}>
+                                        <span className={styles.codeLabel}>클래스 코드</span>
+                                        <span className={styles.codeValue}>{cls.classCode}</span>
+                                        <button
+                                            className={styles.btnCopy}
+                                            onClick={() => copyToClipboard(cls.classCode)}
+                                            title="코드 복사"
+                                        >
+                                            {copiedCode === cls.classCode ? '✅' : <IconCopy />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className={styles.cardFooter}>
+                                    <div className={styles.studentCount}>
+                                        <IconUsers />
+                                        <span>학생 <strong>{cls.studentCount}</strong>명</span>
+                                    </div>
                                     <button
-                                        className={styles.btnCopy}
-                                        onClick={() => copyToClipboard(cls.code)}
-                                        title="코드 복사"
+                                        className={styles.btnManage}
+                                        onClick={() => router.push(CHICORUN_ROUTES.TEACHER_STUDENT(cls.id))}
                                     >
-                                        <IconCopy />
+                                        학생 관리
+                                        <IconChevronRight />
                                     </button>
                                 </div>
                             </div>
-
-                            <div className={styles.cardFooter}>
-                                <div className={styles.studentCount}>
-                                    <IconUsers />
-                                    <span>학생 <strong>{cls.studentCount}</strong>명</span>
-                                </div>
-                                <button
-                                    className={styles.btnManage}
-                                    onClick={() => router.push(`/chicorun/teacher/student/${cls.id}`)}
-                                >
-                                    학생 관리
-                                    <IconChevronRight />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </main>
 
-            {/* 모달 (Confirm) */}
+            {/* 새 클래스 생성 모달 */}
             {isModalOpen && (
-                <div className={styles.modalOverlay}>
+                <div className={styles.modalOverlay} onClick={e => e.target === e.currentTarget && setIsModalOpen(false)}>
                     <div className={styles.modal}>
                         <h3>새 클래스 생성</h3>
-                        <p>새로운 영어 학습 클래스를 생성합니다. 클래스 이름(예: 기초반)을 입력하세요.</p>
+                        <p>새로운 영어 학습 클래스를 생성합니다. 클래스 이름을 입력하세요.</p>
                         <input
                             type="text"
                             value={newClassName}
-                            onChange={(e) => setNewClassName(e.target.value)}
-                            placeholder="클래스 이름 입력"
+                            onChange={e => setNewClassName(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && handleCreateClass()}
+                            placeholder="예: 오전 기초반"
                             className={styles.modalInput}
                             autoFocus
                         />
                         <div className={styles.modalActions}>
-                            <button
-                                className={styles.btnCancel}
-                                onClick={() => setIsModalOpen(false)}
-                            >
+                            <button className={styles.btnCancel} onClick={() => setIsModalOpen(false)}>
                                 취소
                             </button>
                             <button
                                 className={styles.btnConfirm}
                                 onClick={handleCreateClass}
+                                disabled={isCreating || !newClassName.trim()}
                             >
-                                생성하기
+                                {isCreating ? '생성 중...' : '생성하기'}
                             </button>
                         </div>
                     </div>

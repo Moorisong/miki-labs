@@ -244,6 +244,100 @@
     gap: 1rem;
 }
 
+/* 확인 모달 */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 1rem;
+}
+
+.modal {
+    background: white;
+    width: 100%;
+    max-width: 380px;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+    animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal h3 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem 0;
+}
+
+.modal p {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin: 0 0 1.5rem 0;
+    line-height: 1.6;
+}
+
+.modalActions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btnModalCancel {
+    flex: 1;
+    background: #f1f5f9;
+    color: #475569;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btnModalCancel:hover {
+    background: #e2e8f0;
+}
+
+.btnModalConfirm {
+    flex: 1;
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btnModalConfirm:hover:not(:disabled) {
+    background: #1d4ed8;
+}
+
+.btnModalConfirm:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btnModalDanger {
+    flex: 1;
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btnModalDanger:hover {
+    background: #dc2626;
+}
+
 @keyframes slideDown {
     from {
         opacity: 0;
@@ -253,5 +347,17 @@
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
     }
 }
