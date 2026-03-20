@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
 import { CHICORUN_API, CHICORUN_ROUTES, CHICORUN_STORAGE_KEY } from '@/constants/chicorun';
 
@@ -109,15 +109,24 @@ function ProfileCard({ nickname, badge, cardStyle, nicknameStyle }: {
     );
 }
 
-export default function RankingPage() {
-    const pathname = usePathname();
+function RankingContent() {
+    const searchParams = useSearchParams();
+    const urlClassCode = searchParams.get('classCode');
+
     const [rankings, setRankings] = useState<RankingEntry[]>([]);
     const [classCode, setClassCode] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
 
     useEffect(() => {
-        // 로그인된 학생의 classCode로 랭킹 자동 조회
+        // 1. URL 파라미터 확인 (교사가 특정 클래스 랭킹을 볼 때 등)
+        if (urlClassCode) {
+            setClassCode(urlClassCode);
+            fetchRanking(urlClassCode);
+            return;
+        }
+
+        // 2. 로그인된 학생의 classCode로 랭킹 자동 조회
         const studentInfo = localStorage.getItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
         if (studentInfo) {
             try {
@@ -130,7 +139,7 @@ export default function RankingPage() {
                 // ignore
             }
         }
-    }, []);
+    }, [urlClassCode]);
 
     const fetchRanking = async (code: string) => {
         if (!code.trim()) return;
@@ -156,7 +165,7 @@ export default function RankingPage() {
 
             <main className={styles.main}>
                 <div className={styles.titleArea}>
-                    <h1 className={styles.title}>🏆 랭킹</h1>
+                    <h1 className={styles.title}>🏆 랭킹 {classCode && <span style={{ fontSize: '1rem', color: '#64748b', fontWeight: 500 }}>({classCode})</span>}</h1>
                     <p className={styles.subtitle}>최고 점수를 향해 달려보세요!</p>
                 </div>
 
@@ -204,5 +213,19 @@ export default function RankingPage() {
                 </div>
             </main>
         </div>
+    );
+}
+
+export default function RankingPage() {
+    return (
+        <Suspense fallback={
+            <div className={styles.container}>
+                <main className={styles.main}>
+                    <p style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>랭킹 불러오는 중...</p>
+                </main>
+            </div>
+        }>
+            <RankingContent />
+        </Suspense>
     );
 }

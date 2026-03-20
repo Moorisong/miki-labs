@@ -264,13 +264,21 @@ export default function TeacherClassManagePage() {
                                         <IconUsers />
                                         <span>학생 <strong>{cls.studentCount}</strong>명</span>
                                     </div>
-                                    <button
-                                        className={styles.btnManage}
-                                        onClick={() => router.push(CHICORUN_ROUTES.TEACHER_STUDENT(cls.id))}
-                                    >
-                                        학생 관리
-                                        <IconChevronRight />
-                                    </button>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <button
+                                            className={styles.btnRanking}
+                                            onClick={() => router.push(`${CHICORUN_ROUTES.RANKING}?classCode=${cls.classCode}`)}
+                                        >
+                                            🏆 랭킹
+                                        </button>
+                                        <button
+                                            className={styles.btnManage}
+                                            onClick={() => router.push(CHICORUN_ROUTES.TEACHER_STUDENT(cls.id))}
+                                        >
+                                            학생 관리
+                                            <IconChevronRight />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
