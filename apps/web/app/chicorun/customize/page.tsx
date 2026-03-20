@@ -231,18 +231,6 @@ function CustomizeContent() {
 
     return (
         <div className={styles.container}>
-            <header className={styles.header}>
-                <Link href={CHICORUN_ROUTES.LANDING} className={styles.headerLogo}>
-                    <div className={styles.iconBox}><IconBook /></div>
-                    <span>하루상자</span>
-                    <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 'normal' }}>Chicorun</span>
-                </Link>
-                <nav className={styles.navLinks}>
-                    <Link href={CHICORUN_ROUTES.LANDING} className={pathname === CHICORUN_ROUTES.LANDING ? styles.activeLink : styles.navLink}>홈</Link>
-                    <Link href={CHICORUN_ROUTES.RANKING} className={pathname === CHICORUN_ROUTES.RANKING ? styles.activeLink : styles.navLink}>랭킹</Link>
-                    <Link href={CHICORUN_ROUTES.CUSTOMIZE} className={pathname === CHICORUN_ROUTES.CUSTOMIZE ? styles.activeLink : styles.navLink}>꾸미기</Link>
-                </nav>
-            </header>
 
             <main className={styles.main}>
                 <div className={styles.titleArea}>

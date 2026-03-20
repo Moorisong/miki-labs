@@ -317,30 +317,6 @@ export default function StudentLearnPage() {
 
     return (
         <div className={styles.container}>
-            <header className={styles.header}>
-                <div className={styles.headerLogo}>
-                    <div className={styles.iconBox}>
-                        <IconBook />
-                    </div>
-                    <span>하루상자</span>
-                    <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 'normal' }}>Chicorun</span>
-                </div>
-                <nav style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <Link
-                        href={CHICORUN_ROUTES.RANKING}
-                        style={{ color: '#64748b', fontSize: '0.9rem', textDecoration: 'none' }}>
-                        랭킹
-                    </Link>
-                    <button
-                        onClick={handleLogout}
-                        style={{
-                            color: '#ef4444', fontSize: '0.85rem', background: 'none',
-                            border: 'none', cursor: 'pointer', fontWeight: 600,
-                        }}>
-                        나가기
-                    </button>
-                </nav>
-            </header>
 
             <main className={styles.main}>
                 {/* 상단 정보 패널 */}
@@ -423,10 +399,6 @@ export default function StudentLearnPage() {
                                 if (selectedIndex === idx) {
                                     if (feedback === 'correct') btnClass += ` ${styles.correct}`;
                                     else if (feedback === 'wrong') btnClass += ` ${styles.wrong}`;
-                                } else if (
-                                    answerResult?.correctIndex === idx && feedback === 'wrong'
-                                ) {
-                                    btnClass += ` ${styles.highlightCorrect}`;
                                 }
 
                                 return (

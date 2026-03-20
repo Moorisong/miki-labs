@@ -230,19 +230,6 @@ export default function TeacherStudentManagePage() {
 
     return (
         <div className={styles.container}>
-            <header className={styles.header}>
-                <div className={styles.headerLogo}>
-                    <div className={styles.iconBox}><IconBook /></div>
-                    <span>하루상자</span>
-                    <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 'normal' }}>Chicorun</span>
-                </div>
-                <nav style={{ display: 'flex', gap: '1rem' }}>
-                    <Link href={CHICORUN_ROUTES.LANDING}
-                        style={{ color: '#64748b', fontSize: '0.9rem', textDecoration: 'none' }}>
-                        랜딩으로 가기
-                    </Link>
-                </nav>
-            </header>
 
             <main className={styles.main}>
                 <button className={styles.btnBack}

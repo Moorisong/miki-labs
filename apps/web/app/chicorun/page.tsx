@@ -30,20 +30,6 @@ export default function ChicorunLandingPage() {
 
     return (
         <div className={styles.container}>
-            <header className={styles.header}>
-                <Link href="/chicorun" className={styles.headerLogo}>
-                    <div className={styles.iconBox}>
-                        <IconBook />
-                    </div>
-                    <span>하루상자</span>
-                    <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 'normal' }}>Haroo Box</span>
-                </Link>
-                <nav className={styles.navLinks}>
-                    <Link href="/chicorun" className={pathname === "/chicorun" ? styles.activeLink : styles.navLink}>홈</Link>
-                    <Link href="/chicorun/ranking" className={pathname === "/chicorun/ranking" ? styles.activeLink : styles.navLink}>랭킹</Link>
-                    <Link href="/chicorun/customize" className={pathname === "/chicorun/customize" ? styles.activeLink : styles.navLink}>꾸미기</Link>
-                </nav>
-            </header>
 
             <main className={styles.main}>
                 <div className={styles.contentBox}>
