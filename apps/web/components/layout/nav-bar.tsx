@@ -77,18 +77,19 @@ export default function NavBar() {
 
   // Chicorun 바로가기 링크 (로그인 상태에 따라 학생/선생님 버튼 필터링)
   const CHICORUN_LINKS = [
-    { href: '/chicorun', label: '학습홈' },
-    { href: '/chicorun/ranking', label: '랭킹' },
-    { href: '/chicorun/customize', label: '꾸미기' },
+    { href: '/chicorun', label: '홈' },
+    // 학생 로그인 시에만 랭킹 버튼 표시
+    ...(studentNickname ? [{ href: '/chicorun/ranking', label: '랭킹' }] : []),
     // 선생님이 로그인한 경우 학생 입장 버튼 숨김
+    // 학생 로그인 시 꾸미기 페이지로 이동, 미로그인 시 참여 페이지로 이동
     ...(!teacherName ? [{
-      href: '/chicorun/join',
-      label: studentNickname ? `학생(${studentNickname})` : '학생'
+      href: studentNickname ? '/chicorun/customize' : '/chicorun/join',
+      label: studentNickname ? `학생(${studentNickname})` : '학생이에요'
     }] : []),
     // 학생이 로그인한 경우 선생님 대시보드 버튼 숨김
     ...(!studentNickname ? [{
       href: '/chicorun/teacher/dashboard',
-      label: teacherName ? `선생님(${teacherName})` : '선생님'
+      label: teacherName ? `선생님(${teacherName})` : '선생님이에요'
     }] : []),
   ];
 
