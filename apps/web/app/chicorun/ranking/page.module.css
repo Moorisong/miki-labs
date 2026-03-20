@@ -189,6 +189,128 @@
     font-size: 0.95rem;
 }
 
+/* 클래스 코드 검색 */
+.classSearch {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.classInput {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.classInput:focus {
+    border-color: #3b82f6;
+}
+
+.btnSearch {
+    padding: 0.75rem 1.25rem;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btnSearch:hover:not(:disabled) {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.btnSearch:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.mockNotice {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+}
+
+/* 랭킹 아이템 레이아웃 */
+.rankingItem {
+    background: white;
+    border-radius: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: slideUp 0.5s ease-out forwards;
+}
+
+.rankingItem:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.rankBadgeBox {
+    width: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.rankNumber {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #94a3b8;
+}
+
+.rankInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.rankNickname {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1e293b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rankBadgeEmoji {
+    font-size: 1.25rem;
+    margin-top: 2px;
+}
+
+.pointsBox {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: linear-gradient(90deg, #ffedd5, #fef3c7);
+    padding: 0.625rem 1rem;
+    border-radius: 0.875rem;
+    flex-shrink: 0;
+}
+
+.points {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #ea580c;
+}
+
 @keyframes slideDown {
     from {
         opacity: 0;

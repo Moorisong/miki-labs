@@ -1,30 +1,39 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import styles from "./page.module.css";
-import { usePathname } from "next/navigation";
+import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import styles from './page.module.css';
+import { CHICORUN_API, CHICORUN_ROUTES, CHICORUN_STORAGE_KEY } from '@/constants/chicorun';
 
-// 샘플 랭킹 데이터
-const rankings = [
-    { rank: 1, nickname: "영어왕", badge: "👑", points: 1250, borderColor: "linear-gradient(135deg, #facc15, #f97316)" },
-    { rank: 2, nickname: "공부벌레", badge: "🔥", points: 1180, borderColor: "linear-gradient(135deg, #9ca3af, #6b7280)" },
-    { rank: 3, nickname: "달리기선수", badge: "⚡", points: 1050, borderColor: "linear-gradient(135deg, #fb923c, #d97706)" },
-    { rank: 4, nickname: "책벌레", badge: "📚", points: 980, borderColor: "linear-gradient(135deg, #60a5fa, #06b6d4)" },
-    { rank: 5, nickname: "열정맨", badge: "💪", points: 920, borderColor: "linear-gradient(135deg, #c084fc, #ec4899)" },
-    { rank: 6, nickname: "스타", badge: "⭐", points: 850, borderColor: "linear-gradient(135deg, #4ade80, #14b8a6)" },
-    { rank: 7, nickname: "치코런", badge: "🎯", points: 780, borderColor: "linear-gradient(135deg, #f87171, #f43f5e)" },
-    { rank: 8, nickname: "파이터", badge: "🥊", points: 720, borderColor: "linear-gradient(135deg, #818cf8, #3b82f6)" },
-];
+// ─── 타입 ──────────────────────────────────────────────────────────────────────
+interface RankingEntry {
+    rank: number;
+    id: string;
+    nickname: string;
+    point: number;
+    badge: string;
+    nicknameStyle: {
+        color: string;
+        bold: boolean;
+        italic: boolean;
+        underline: boolean;
+    };
+    cardStyle: string;
+}
 
+// ─── 아이콘 ──────────────────────────────────────────────────────────────────────
 const IconBook = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
         <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
     </svg>
 );
 
 const IconTrophy = () => (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="#eab308" stroke="#ca8a04" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="#eab308" stroke="#ca8a04"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
         <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
         <path d="M4 22h16"></path>
@@ -35,102 +44,202 @@ const IconTrophy = () => (
 );
 
 const IconMedal = () => (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="#64748b" stroke="#475569" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"></path>
-        <path d="M11 12 5.12 2.2"></path>
-        <path d="m13 12 5.88-9.8"></path>
-        <path d="M8 7h8"></path>
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="#9ca3af" stroke="#6b7280"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="17" r="5"></circle>
         <polyline points="12 18 10.5 16.5 12 15 13.5 16.5 12 18"></polyline>
+        <path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"></path>
     </svg>
 );
 
 const IconAward = () => (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="#ea580c" stroke="#c2410c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="#fb923c" stroke="#c2410c"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="8" r="6"></circle>
         <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
     </svg>
 );
 
 const IconZap = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="#f97316" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="#f97316" stroke="#ea580c"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
     </svg>
 );
 
-const getRankIcon = (rank: number) => {
+function getRankIcon(rank: number) {
     switch (rank) {
         case 1: return <IconTrophy />;
         case 2: return <IconMedal />;
         case 3: return <IconAward />;
         default: return <span className={styles.rankNumber}>#{rank}</span>;
     }
-};
+}
+
+// 프로필 카드 렌더링 컴포넌트
+function ProfileCard({ nickname, badge, cardStyle, nicknameStyle }: {
+    nickname: string;
+    badge: string;
+    cardStyle: string;
+    nicknameStyle: RankingEntry['nicknameStyle'];
+}) {
+    return (
+        <div style={{
+            width: '72px', height: '72px', borderRadius: '1rem',
+            background: cardStyle || 'linear-gradient(135deg, #60a5fa, #06b6d4)', padding: '3px',
+            flexShrink: 0,
+        }}>
+            <div style={{
+                width: '100%', height: '100%', borderRadius: '0.75rem',
+                background: 'white', display: 'flex',
+                flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                gap: '2px',
+            }}>
+                <span style={{ fontSize: '1.5rem' }}>{badge || '⭐'}</span>
+                <span style={{
+                    fontSize: '0.5rem', fontWeight: nicknameStyle?.bold ? 700 : 500,
+                    fontStyle: nicknameStyle?.italic ? 'italic' : 'normal',
+                    color: (nicknameStyle?.color === '#ffffff' || !nicknameStyle?.color) ? '#1e293b' : nicknameStyle.color,
+                    maxWidth: '60px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                    {nickname}
+                </span>
+            </div>
+        </div>
+    );
+}
 
 export default function RankingPage() {
     const pathname = usePathname();
+    const [rankings, setRankings] = useState<RankingEntry[]>([]);
+    const [classCode, setClassCode] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
+
+    useEffect(() => {
+        // 로그인된 학생의 classCode로 랭킹 자동 조회
+        const studentInfo = localStorage.getItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
+        if (studentInfo) {
+            try {
+                const info = JSON.parse(studentInfo);
+                if (info.classCode) {
+                    setClassCode(info.classCode);
+                    fetchRanking(info.classCode);
+                }
+            } catch {
+                // ignore
+            }
+        }
+    }, []);
+
+    const fetchRanking = async (code: string) => {
+        if (!code.trim()) return;
+        setIsLoading(true);
+        setHasSearched(true);
+        try {
+            const res = await fetch(CHICORUN_API.CLASS_RANKING(code.toUpperCase()));
+            const data = await res.json();
+            if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                setRankings(data.data);
+            } else {
+                setRankings([]);
+            }
+        } catch {
+            setRankings([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <div className={styles.container}>
             <header className={styles.header}>
-                <Link href="/chicorun" className={styles.headerLogo}>
+                <Link href={CHICORUN_ROUTES.LANDING} className={styles.headerLogo}>
                     <div className={styles.iconBox}>
                         <IconBook />
                     </div>
                     <span>하루상자</span>
-                    <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 'normal' }}>Haroo Box</span>
+                    <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 'normal' }}>Chicorun</span>
                 </Link>
                 <nav className={styles.navLinks}>
-                    <Link href="/chicorun" className={pathname === "/chicorun" ? styles.activeLink : styles.navLink}>홈</Link>
-                    <Link href="/chicorun/ranking" className={pathname === "/chicorun/ranking" ? styles.activeLink : styles.navLink}>랭킹</Link>
-                    <Link href="/chicorun/customize" className={pathname === "/chicorun/customize" ? styles.activeLink : styles.navLink}>꾸미기</Link>
+                    <Link href={CHICORUN_ROUTES.LANDING}
+                        className={pathname === CHICORUN_ROUTES.LANDING ? styles.activeLink : styles.navLink}>
+                        홈
+                    </Link>
+                    <Link href={CHICORUN_ROUTES.RANKING}
+                        className={pathname === CHICORUN_ROUTES.RANKING ? styles.activeLink : styles.navLink}>
+                        랭킹
+                    </Link>
+                    <Link href={CHICORUN_ROUTES.CUSTOMIZE}
+                        className={pathname === CHICORUN_ROUTES.CUSTOMIZE ? styles.activeLink : styles.navLink}>
+                        꾸미기
+                    </Link>
                 </nav>
             </header>
 
             <main className={styles.main}>
-                {/* 타이틀 */}
                 <div className={styles.titleArea}>
                     <h1 className={styles.title}>🏆 랭킹</h1>
                     <p className={styles.subtitle}>최고 점수를 향해 달려보세요!</p>
                 </div>
 
+                {/* 클래스 코드 입력 */}
+                <div className={styles.classSearch}>
+                    <input
+                        type="text"
+                        value={classCode}
+                        onChange={e => setClassCode(e.target.value.toUpperCase())}
+                        placeholder="클래스 코드 입력 (예: ABC12)"
+                        className={styles.classInput}
+                        maxLength={5}
+                    />
+                    <button
+                        className={styles.btnSearch}
+                        onClick={() => fetchRanking(classCode)}
+                        disabled={isLoading || !classCode.trim()}
+                    >
+                        {isLoading ? '조회 중...' : '조회'}
+                    </button>
+                </div>
+
+                {hasSearched && !isLoading && rankings.length === 0 && (
+                    <p className={styles.mockNotice}>
+                        해당 클래스의 랭킹 데이터가 없거나 코드가 올바르지 않습니다.
+                    </p>
+                )}
+
                 {/* 랭킹 리스트 */}
                 <div className={styles.rankingList}>
                     {rankings.map((user, index) => (
                         <div
-                            key={user.rank}
+                            key={user.id ?? user.rank}
                             className={styles.rankingItem}
                             style={{ animationDelay: `${index * 0.05}s` }}
                         >
-                            <div style={{ background: user.borderColor, padding: "4px" }}>
-                                <div className={styles.itemInner} style={{ background: "white", borderRadius: "1.25rem" }}>
+                            <div className={styles.rankBadgeBox}>
+                                {getRankIcon(user.rank)}
+                            </div>
 
-                                    {/* 순위 아이콘 */}
-                                    <div className={styles.rankBadgeBox}>
-                                        {getRankIcon(user.rank)}
-                                    </div>
+                            <ProfileCard
+                                nickname={user.nickname}
+                                badge={user.badge}
+                                cardStyle={user.cardStyle}
+                                nicknameStyle={user.nicknameStyle}
+                            />
 
-                                    {/* 프로필 카드 미리보기 */}
-                                    <div className={styles.profilePreview} style={{ background: user.borderColor }}>
-                                        <div className={styles.profilePreviewInner}>
-                                            <span className={styles.badge}>{user.badge}</span>
-                                            <span className={styles.nickname}>{user.nickname}</span>
-                                        </div>
-                                    </div>
+                            <div className={styles.rankInfo}>
+                                <div className={styles.rankNickname}>{user.nickname}</div>
+                                <div className={styles.rankBadgeEmoji}>{user.badge}</div>
+                            </div>
 
-                                    {/* 포인트 */}
-                                    <div className={styles.pointsBox}>
-                                        <IconZap />
-                                        <span className={styles.points}>{user.points}P</span>
-                                    </div>
-
-                                </div>
+                            <div className={styles.pointsBox}>
+                                <IconZap />
+                                <span className={styles.points}>{user.point.toLocaleString()}P</span>
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {/* 하단 정보 */}
                 <div className={styles.hintText}>
                     💡 더 많은 문제를 풀고 랭킹을 올려보세요!
                 </div>
