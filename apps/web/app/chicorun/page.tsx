@@ -1,8 +1,10 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { CHICORUN_STORAGE_KEY, CHICORUN_ROUTES } from "@/constants/chicorun";
 import styles from "./page.module.css";
-import Link from "next/link";
 
 const IconBook = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -13,7 +15,29 @@ const IconBook = () => (
 
 export default function ChicorunLandingPage() {
     const router = useRouter();
-    const pathname = usePathname();
+    const { data: session, status } = useSession();
+    const [isChecking, setIsChecking] = useState(true);
+
+    useEffect(() => {
+        if (status === "loading") return;
+
+        const studentToken = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
+        const teacherToken = localStorage.getItem(CHICORUN_STORAGE_KEY.TEACHER_TOKEN);
+
+        // 학생 로그인 상태면 학습 페이지로 이동
+        if (studentToken) {
+            router.replace(CHICORUN_ROUTES.LEARN);
+            return;
+        }
+
+        // 교사 로그인 상태면 대시보드로 이동
+        if (teacherToken || session) {
+            router.replace(CHICORUN_ROUTES.TEACHER_DASHBOARD);
+            return;
+        }
+
+        setIsChecking(false);
+    }, [router, session, status]);
 
     const IconZap = () => (
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -27,6 +51,10 @@ export default function ChicorunLandingPage() {
             <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
         </svg>
     );
+
+    if (isChecking || status === "loading") {
+        return null;
+    }
 
     return (
         <div className={styles.container}>
