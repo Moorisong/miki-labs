@@ -40,6 +40,7 @@ export const CHICORUN_ROUTES = {
 export const CHICORUN_STORAGE_KEY = {
     TOKEN: 'chicorun_student_token',
     STUDENT_INFO: 'chicorun_student_info',
+    TEACHER_TOKEN: 'chicorun_teacher_token',
 } as const;
 
 /**
