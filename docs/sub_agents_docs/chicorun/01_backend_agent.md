@@ -8,7 +8,7 @@
 ### 1. DB 모델(Schema) 구현
 - `Teacher`: kakaoId, name, createdAt.
 - `Class`: classCode, teacherId, title.
-- `Student`: studentId, classCode, nickname, passwordHash, progressIndex, point, badge, nicknameStyle, cardStyle, customize. 커스터마이징 데이터는 `students` 다큐먼트에 임베디드로 작성.
+- `Student`: studentId, classCode, nickname, passwordHash, progressIndex, point, badge, nicknameStyle, cardStyle, customize. **학생은 시스템 내 하나의 클래스에만 소속될 수 있으며, classCode + nickname 조합으로 식별.** 커스터마이징 데이터는 `students` 다큐먼트에 임베디드로 작성.
 
 ### 2. 인증 미들웨어
 - 학생 인증(`studentAuth`) 및 교사 인증(`teacherAuth`) 분리. 

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import styles from './page.module.css';
 import Link from 'next/link';
 import { CHICORUN_API, CHICORUN_ROUTES } from '@/constants/chicorun';
@@ -65,14 +66,13 @@ const IconGraduationCap = () => (
     </svg>
 );
 
-// ─── Mock 토큰 (하루상자 카카오 로그인 연동 전까지 임시) ──────────────────────
-function getTeacherToken(): string | null {
-    // 실제 운영: 하루상자 로그인 세션의 JWT를 치코런 교사 JWT로 교환하는 API 필요
-    // 현재: 하드코딩 mock 처리
+function getTeacherTokenFromLocal(): string | null {
+    if (typeof window === 'undefined') return null;
     return localStorage.getItem('chicorun_teacher_token');
 }
 
 export default function TeacherClassManagePage() {
+    const { data: session, status } = useSession();
     const router = useRouter();
     const [classes, setClasses] = useState<ClassItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -81,14 +81,9 @@ export default function TeacherClassManagePage() {
     const [isCreating, setIsCreating] = useState(false);
     const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
-    const fetchClasses = useCallback(async () => {
-        const token = getTeacherToken();
-        if (!token) {
-            alert('하루상자 선생님 로그인이 필요합니다.');
-            router.push('/login');
-            return;
-        }
+    const isExchanging = useRef(false);
 
+    const fetchClasses = useCallback(async (token: string) => {
         try {
             const res = await fetch(CHICORUN_API.CLASS, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -97,8 +92,9 @@ export default function TeacherClassManagePage() {
             if (data.success) {
                 setClasses(data.data);
             } else if (res.status === 401) {
-                alert('로그인이 만료되었습니다.');
-                router.push('/login');
+                localStorage.removeItem('chicorun_teacher_token');
+                // 토큰 만료 시 재인증 로직을 타게 함
+                window.location.reload();
             } else {
                 setClasses([]);
             }
@@ -107,20 +103,57 @@ export default function TeacherClassManagePage() {
         } finally {
             setIsLoading(false);
         }
-    }, [router]);
+    }, []);
 
     useEffect(() => {
-        fetchClasses();
-    }, [fetchClasses]);
+        if (status === 'loading') return;
+
+        if (status === 'unauthenticated') {
+            router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
+            return;
+        }
+
+        const token = getTeacherTokenFromLocal();
+        if (token) {
+            fetchClasses(token);
+        } else if (!isExchanging.current && session?.user) {
+            isExchanging.current = true;
+            // ─── 토큰 브릿지: NextAuth 세션을 ChicoRun 교사 토큰으로 교환 ────────────────
+            const exchangeToken = async () => {
+                try {
+                    const res = await fetch(CHICORUN_API.TEACHER_LOGIN, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            teacherId: session.user.kakaoId,
+                            name: session.user.nickname || session.user.name,
+                            signature: process.env.NEXT_PUBLIC_SIGNATURE_SECRET
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success && data.data.token) {
+                        localStorage.setItem('chicorun_teacher_token', data.data.token);
+                        fetchClasses(data.data.token);
+                    } else {
+                        alert('치코런 교사 권한을 가져오는데 실패했습니다.');
+                        router.push(CHICORUN_ROUTES.LANDING);
+                    }
+                } catch (err) {
+                    console.error('Exchange failed:', err);
+                    router.push(CHICORUN_ROUTES.LANDING);
+                } finally {
+                    isExchanging.current = false;
+                }
+            };
+            exchangeToken();
+        }
+    }, [status, session, fetchClasses, router]);
 
     const handleCreateClass = async () => {
         if (!newClassName.trim()) return;
 
-        const token = getTeacherToken();
-        if (!token) {
-            alert('로그인이 필요합니다.');
-            return;
-        }
+        const token = getTeacherTokenFromLocal();
+        if (!token) return;
 
         setIsCreating(true);
         try {
@@ -134,7 +167,7 @@ export default function TeacherClassManagePage() {
             });
             const data = await res.json();
             if (data.success) {
-                await fetchClasses();
+                await fetchClasses(token);
                 setIsModalOpen(false);
                 setNewClassName('');
             } else {
@@ -208,15 +241,36 @@ export default function TeacherClassManagePage() {
                                 <div>
                                     <h2 className={styles.cardTitle}>{cls.title}</h2>
                                     <div className={styles.codeBox}>
-                                        <span className={styles.codeLabel}>클래스 코드</span>
-                                        <span className={styles.codeValue}>{cls.classCode}</span>
-                                        <button
-                                            className={styles.btnCopy}
-                                            onClick={() => copyToClipboard(cls.classCode)}
-                                            title="코드 복사"
-                                        >
-                                            {copiedCode === cls.classCode ? '✅' : <IconCopy />}
-                                        </button>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <span className={styles.codeLabel}>클래스 코드</span>
+                                                <span className={styles.codeValue}>{cls.classCode}</span>
+                                                <button
+                                                    className={styles.btnCopy}
+                                                    onClick={() => copyToClipboard(cls.classCode)}
+                                                    title="코드 복사"
+                                                >
+                                                    {copiedCode === cls.classCode ? '✅' : <IconCopy />}
+                                                </button>
+                                            </div>
+                                            <button
+                                                className={styles.btnCopyLink}
+                                                style={{
+                                                    fontSize: '0.75rem', padding: '0.4rem 0.6rem',
+                                                    background: '#ebf2ff', color: '#2563eb',
+                                                    border: 'none', borderRadius: '0.4rem',
+                                                    cursor: 'pointer', fontWeight: 600,
+                                                    display: 'flex', alignItems: 'center', gap: '4px',
+                                                    width: 'fit-content'
+                                                }}
+                                                onClick={() => {
+                                                    const link = `${window.location.origin}${CHICORUN_ROUTES.JOIN}?classCode=${cls.classCode}`;
+                                                    copyToClipboard(link);
+                                                }}
+                                            >
+                                                {copiedCode?.startsWith('http') ? '링크 복사됨 ✅' : '🔗 참여 링크 복사'}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 

@@ -1,23 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
 import Link from 'next/link';
 import { CHICORUN_API, CHICORUN_STORAGE_KEY, CHICORUN_ROUTES } from '@/constants/chicorun';
 
 // ─── 아이콘 ──────────────────────────────────────────────────────────────────────
-const IconHash = () => (
-    <svg className={styles.icon} xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-        viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-        strokeLinecap="round" strokeLinejoin="round">
-        <line x1="4" y1="9" x2="20" y2="9"></line>
-        <line x1="4" y1="15" x2="20" y2="15"></line>
-        <line x1="10" y1="3" x2="8" y2="21"></line>
-        <line x1="16" y1="3" x2="14" y2="21"></line>
-    </svg>
-);
-
 const IconUser = () => (
     <svg className={styles.icon} xmlns="http://www.w3.org/2000/svg" width="24" height="24"
         viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
@@ -53,36 +42,39 @@ const IconBook = () => (
     </svg>
 );
 
-// ─── 학생 정보 타입 ────────────────────────────────────────────────────────────
-interface StudentInfo {
-    id: string;
-    nickname: string;
-    classCode: string;
-    progressIndex: number;
-    point: number;
-    badge: string;
-    level: number;
-}
-
-export default function StudentEnterPage() {
+function JoinForm() {
     const router = useRouter();
-    const [classCode, setClassCode] = useState('');
+    const searchParams = useSearchParams();
+    const urlClassCode = searchParams.get('classCode') || '';
+
     const [nickname, setNickname] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // 이미 로그인된 경우 학습 페이지로 리다이렉트
+    // 이미 로그인된 경우 학습 페이지로 리다이렉트 (링크의 클래스코드와 일치할 때만)
     useEffect(() => {
         const token = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
-        if (token) {
-            router.replace(CHICORUN_ROUTES.LEARN);
+        const studentInfoStr = localStorage.getItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
+
+        if (token && studentInfoStr) {
+            try {
+                const info = JSON.parse(studentInfoStr);
+                // URL에 특정 클래스 코드가 상주하는데, 현재 토큰의 클래스와 다르다면 리다이렉트 하지 않음 (새 가입 유도)
+                if (urlClassCode && info.classCode !== urlClassCode.toUpperCase()) {
+                    return;
+                }
+                router.replace(CHICORUN_ROUTES.LEARN);
+            } catch {
+                // ignore
+            }
         }
-    }, [router]);
+    }, [router, urlClassCode]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!classCode || !nickname || !password) return;
+
+        if (!nickname || !password) return;
 
         setIsLoading(true);
         setError('');
@@ -92,7 +84,7 @@ export default function StudentEnterPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    classCode: classCode.toUpperCase().trim(),
+                    classCode: urlClassCode ? urlClassCode.toUpperCase().trim() : undefined,
                     nickname: nickname.trim(),
                     password,
                 }),
@@ -106,6 +98,8 @@ export default function StudentEnterPage() {
                     setError('존재하지 않는 클래스 코드입니다. 담당 선생님께 확인하세요.');
                 } else if (msg.includes('ERROR_WRONG_PASSWORD')) {
                     setError('비밀번호가 틀렸어요. 다시 시도하거나 선생님께 초기화를 요청하세요.');
+                } else if (msg.includes('ERROR_CLASS_CODE_REQUIRED')) {
+                    setError('등록되지 않은 닉네임입니다. 오타가 없는지 확인하거나, 처음 방문하셨다면 선생님이 공유해주신 "전체 링크"로 접속해 주세요.');
                 } else {
                     setError(msg);
                 }
@@ -113,7 +107,7 @@ export default function StudentEnterPage() {
             }
 
             // 토큰 및 학생 정보 저장
-            const { token, student } = data.data as { token: string; student: StudentInfo };
+            const { token, student } = data.data as { token: string; student: any };
             localStorage.setItem(CHICORUN_STORAGE_KEY.TOKEN, token);
             localStorage.setItem(CHICORUN_STORAGE_KEY.STUDENT_INFO, JSON.stringify(student));
 
@@ -126,6 +120,96 @@ export default function StudentEnterPage() {
     };
 
     return (
+        <form onSubmit={handleSubmit} className={styles.form}>
+            {/* 닉네임 */}
+            <div className={styles.inputGroup}>
+                <label className={styles.label}>닉네임</label>
+                <div className={styles.inputWrapper}>
+                    <IconUser />
+                    <input
+                        type="text"
+                        value={nickname}
+                        onChange={e => setNickname(e.target.value)}
+                        placeholder="게임에서 사용할 이름"
+                        className={styles.input}
+                        required
+                        maxLength={10}
+                        autoComplete="nickname"
+                    />
+                </div>
+            </div>
+
+            {/* 비밀번호 */}
+            <div className={styles.inputGroup}>
+                <label className={styles.label}>비밀번호</label>
+                <div className={styles.inputWrapper}>
+                    <IconLock />
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        placeholder="숫자 4~8자리"
+                        className={styles.input}
+                        required
+                        autoComplete="current-password"
+                    />
+                </div>
+                <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: '0.5rem 0 0' }}>
+                    💡 처음이면 자동 가입, 기존 사용자는 로그인됩니다
+                </p>
+            </div>
+
+            {/* 에러 메시지 */}
+            {error && (
+                <div style={{
+                    padding: '0.875rem 1rem',
+                    background: '#fee2e2',
+                    color: '#991b1b',
+                    borderRadius: '0.75rem',
+                    fontSize: '0.9rem',
+                    fontWeight: 600,
+                }}>
+                    ⚠️ {error}
+                </div>
+            )}
+
+            {/* 입장 버튼 */}
+            <button
+                type="submit"
+                className={styles.btnSubmit}
+                disabled={isLoading}
+            >
+                {isLoading ? (
+                    <span>로딩 중...</span>
+                ) : (
+                    <>
+                        <IconLogIn />
+                        입장하기
+                    </>
+                )}
+            </button>
+
+            {!urlClassCode && (
+                <div style={{
+                    marginTop: '0.5rem',
+                    padding: '0.875rem 1rem',
+                    background: '#f8fafc',
+                    color: '#64748b',
+                    borderRadius: '0.75rem',
+                    fontSize: '0.8rem',
+                    lineHeight: 1.5,
+                    border: '1px solid #e2e8f0'
+                }}>
+                    ℹ️ <b>처음 방문하시나요?</b><br />
+                    새로운 클래스에 참여하려면 선생님이 보내주신 <b>전체 링크</b>를 눌러 접속하세요.
+                </div>
+            )}
+        </form>
+    );
+}
+
+export default function StudentEnterPage() {
+    return (
         <div className={styles.container}>
             <header className={styles.header}>
                 <Link href={CHICORUN_ROUTES.LANDING} className={styles.headerLogo}>
@@ -135,12 +219,6 @@ export default function StudentEnterPage() {
                     <span>하루상자</span>
                     <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 'normal' }}>Chicorun</span>
                 </Link>
-                <nav style={{ display: 'flex', gap: '1rem' }}>
-                    <Link href={CHICORUN_ROUTES.LANDING}
-                        style={{ color: '#64748b', fontSize: '0.9rem', textDecoration: 'none' }}>
-                        랜딩으로 가기
-                    </Link>
-                </nav>
             </header>
 
             <main className={styles.main}>
@@ -150,93 +228,9 @@ export default function StudentEnterPage() {
                         <p className={styles.subtitle}>정보를 입력하고 바로 시작하세요!</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className={styles.form}>
-                        {/* 클래스 코드 */}
-                        <div className={styles.inputGroup}>
-                            <label className={styles.label}>클래스 코드</label>
-                            <div className={styles.inputWrapper}>
-                                <IconHash />
-                                <input
-                                    type="text"
-                                    value={classCode}
-                                    onChange={e => setClassCode(e.target.value.toUpperCase())}
-                                    placeholder="예: ABC12"
-                                    className={styles.input}
-                                    required
-                                    maxLength={5}
-                                    autoComplete="off"
-                                />
-                            </div>
-                        </div>
-
-                        {/* 닉네임 */}
-                        <div className={styles.inputGroup}>
-                            <label className={styles.label}>닉네임</label>
-                            <div className={styles.inputWrapper}>
-                                <IconUser />
-                                <input
-                                    type="text"
-                                    value={nickname}
-                                    onChange={e => setNickname(e.target.value)}
-                                    placeholder="게임에서 사용할 이름"
-                                    className={styles.input}
-                                    required
-                                    maxLength={10}
-                                    autoComplete="nickname"
-                                />
-                            </div>
-                        </div>
-
-                        {/* 비밀번호 */}
-                        <div className={styles.inputGroup}>
-                            <label className={styles.label}>비밀번호</label>
-                            <div className={styles.inputWrapper}>
-                                <IconLock />
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={e => setPassword(e.target.value)}
-                                    placeholder="처음이면 사용할 비밀번호 입력"
-                                    className={styles.input}
-                                    required
-                                    autoComplete="current-password"
-                                />
-                            </div>
-                            <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: '0.5rem 0 0' }}>
-                                💡 처음 입력 시 자동으로 계정이 생성됩니다
-                            </p>
-                        </div>
-
-                        {/* 에러 메시지 */}
-                        {error && (
-                            <div style={{
-                                padding: '0.875rem 1rem',
-                                background: '#fee2e2',
-                                color: '#991b1b',
-                                borderRadius: '0.75rem',
-                                fontSize: '0.9rem',
-                                fontWeight: 600,
-                            }}>
-                                ⚠️ {error}
-                            </div>
-                        )}
-
-                        {/* 입장 버튼 */}
-                        <button
-                            type="submit"
-                            className={styles.btnSubmit}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? (
-                                <span>로딩 중...</span>
-                            ) : (
-                                <>
-                                    <IconLogIn />
-                                    입장하기
-                                </>
-                            )}
-                        </button>
-                    </form>
+                    <Suspense fallback={<div>로딩 중...</div>}>
+                        <JoinForm />
+                    </Suspense>
                 </div>
             </main>
         </div>

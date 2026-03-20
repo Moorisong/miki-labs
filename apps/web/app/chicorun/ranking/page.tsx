@@ -183,24 +183,6 @@ export default function RankingPage() {
                     <p className={styles.subtitle}>최고 점수를 향해 달려보세요!</p>
                 </div>
 
-                {/* 클래스 코드 입력 */}
-                <div className={styles.classSearch}>
-                    <input
-                        type="text"
-                        value={classCode}
-                        onChange={e => setClassCode(e.target.value.toUpperCase())}
-                        placeholder="클래스 코드 입력 (예: ABC12)"
-                        className={styles.classInput}
-                        maxLength={5}
-                    />
-                    <button
-                        className={styles.btnSearch}
-                        onClick={() => fetchRanking(classCode)}
-                        disabled={isLoading || !classCode.trim()}
-                    >
-                        {isLoading ? '조회 중...' : '조회'}
-                    </button>
-                </div>
 
                 {hasSearched && !isLoading && rankings.length === 0 && (
                     <p className={styles.mockNotice}>

@@ -37,6 +37,12 @@ export const chicorunTeacherAuth = (
             throw new AppError(401, 'ERROR_INVALID_TOKEN: 유효하지 않은 교사 토큰입니다.');
         }
 
+        // 기존의 numeric numeric ID(예: 4708331286) 등이 teacherId에 들어있는 "구버전" 토큰을 필터링하여 
+        // 클라이언트에서 재발급 로직을 타게 만듭니다.
+        if (!/^[0-9a-fA-F]{24}$/.test(payload.teacherId)) {
+            throw new AppError(401, 'ERROR_INVALID_TOKEN: 구형 토큰입니다. 다시 로드하여 인증을 갱신하세요.');
+        }
+
         req.chicoTeacher = payload;
         next();
     } catch (error) {

@@ -180,8 +180,11 @@ export default function StudentLearnPage() {
             const data = await res.json();
 
             if (!data.success) {
-                if (data.error?.includes('ERROR_UNAUTHORIZED') || res.status === 401) {
+                if (data.error?.includes('ERROR_UNAUTHORIZED') ||
+                    data.error?.includes('ERROR_STUDENT_NOT_FOUND') ||
+                    res.status === 401 || res.status === 404) {
                     localStorage.removeItem(CHICORUN_STORAGE_KEY.TOKEN);
+                    localStorage.removeItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
                     router.replace(CHICORUN_ROUTES.JOIN);
                     return;
                 }

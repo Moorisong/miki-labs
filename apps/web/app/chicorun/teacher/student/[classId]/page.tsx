@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import styles from './page.module.css';
 import Link from 'next/link';
@@ -8,6 +8,7 @@ import {
     CHICORUN_API,
     CHICORUN_ROUTES,
 } from '@/constants/chicorun';
+import { useSession } from 'next-auth/react';
 
 // ─── 타입 ──────────────────────────────────────────────────────────────────────
 interface StudentItem {
@@ -64,11 +65,13 @@ function getLevelBadgeStyle(level: number): React.CSSProperties {
     return { borderColor: '#86efac', color: '#16a34a', background: '#dcfce7' };
 }
 
-function getTeacherToken(): string | null {
+function getTeacherTokenFromLocal(): string | null {
+    if (typeof window === 'undefined') return null;
     return localStorage.getItem('chicorun_teacher_token');
 }
 
 export default function TeacherStudentManagePage() {
+    const { data: session, status } = useSession();
     const router = useRouter();
     const params = useParams();
     const classId = String(params.classId ?? '');
@@ -83,22 +86,22 @@ export default function TeacherStudentManagePage() {
     const [confirmReset, setConfirmReset] = useState<StudentItem | null>(null);
     const [confirmNickname, setConfirmNickname] = useState<{ student: StudentItem; name: string } | null>(null);
 
-    const fetchStudents = useCallback(async () => {
-        const token = getTeacherToken();
+    const isExchanging = useRef(false);
 
-        if (!token) {
-            alert('하루상자 선생님 로그인이 필요합니다.');
-            router.push('/login');
-            return;
-        }
-
+    const fetchStudents = useCallback(async (token: string) => {
         try {
             const classListRes = await fetch(CHICORUN_API.CLASS, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const classListData = await classListRes.json();
 
-            if (!classListData.success) throw new Error('클래스 목록 조회 실패');
+            if (!classListData.success) {
+                if (classListRes.status === 401) {
+                    localStorage.removeItem('chicorun_teacher_token');
+                    window.location.reload();
+                }
+                throw new Error('클래스 목록 조회 실패');
+            }
 
             const targetClass = classListData.data.find((c: { id: string; classCode: string; title: string }) => c.id === classId);
             if (!targetClass) {
@@ -123,14 +126,53 @@ export default function TeacherStudentManagePage() {
         } finally {
             setIsLoading(false);
         }
-    }, [classId, router]);
+    }, [classId]);
 
     useEffect(() => {
-        fetchStudents();
-    }, [fetchStudents]);
+        if (status === 'loading') return;
+
+        if (status === 'unauthenticated') {
+            router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
+            return;
+        }
+
+        const token = getTeacherTokenFromLocal();
+        if (token) {
+            fetchStudents(token);
+        } else if (!isExchanging.current && session?.user) {
+            isExchanging.current = true;
+            const exchangeToken = async () => {
+                try {
+                    const res = await fetch(CHICORUN_API.TEACHER_LOGIN, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            teacherId: session.user.kakaoId,
+                            name: session.user.nickname || session.user.name,
+                            signature: process.env.NEXT_PUBLIC_SIGNATURE_SECRET
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success && data.data.token) {
+                        localStorage.setItem('chicorun_teacher_token', data.data.token);
+                        fetchStudents(data.data.token);
+                    } else {
+                        alert('치코런 교사 권한을 가져오는데 실패했습니다.');
+                        router.push(CHICORUN_ROUTES.LANDING);
+                    }
+                } catch (err) {
+                    console.error('Exchange failed:', err);
+                    router.push(CHICORUN_ROUTES.LANDING);
+                } finally {
+                    isExchanging.current = false;
+                }
+            };
+            exchangeToken();
+        }
+    }, [status, session, fetchStudents, router]);
 
     const handleResetPassword = async (student: StudentItem) => {
-        const token = getTeacherToken();
+        const token = getTeacherTokenFromLocal();
         if (!classInfo || !token) return;
 
         try {
@@ -159,7 +201,7 @@ export default function TeacherStudentManagePage() {
         if (!newNickname.trim() || !editTarget || !classInfo) return;
         setConfirmNickname(null);
 
-        const token = getTeacherToken();
+        const token = getTeacherTokenFromLocal();
         if (!token) return;
 
         setIsSaving(true);
@@ -174,9 +216,7 @@ export default function TeacherStudentManagePage() {
             });
             const data = await res.json();
             if (data.success) {
-                setStudents(prev => prev.map(s =>
-                    s.id === editTarget ? { ...s, nickname: data.data.nickname } : s
-                ));
+                await fetchStudents(token);
                 setEditTarget(null);
             } else {
                 alert(data.error?.includes('DUPLICATE') ? '이미 사용 중인 닉네임입니다.' : '닉네임 변경에 실패했습니다.');

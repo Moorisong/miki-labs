@@ -8,7 +8,7 @@
 ### 1. 클래스 관리 대시보드 (Teacher Only)
 - 교사 소유의 `classes` 리스트 출력.
 - [클래스 생성] 버튼 구현 (Unique Code 모달 팝업 및 Confirm).
-- 각 개별 클래스의 코드 복사 기능(Clipboard) 구현.
+- 각 개별 클래스의 **참여 링크(URL) 복사 및 코드 복사** 기능(Clipboard) 구현.
 
 ### 2. 학생 관리 테이블 (Teacher Only)
 - 해당 클래스에 속한 `students` 리스트 데이터 호출 및 렌더.

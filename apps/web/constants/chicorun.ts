@@ -18,6 +18,7 @@ export const CHICORUN_API = {
         `${API_BASE}/api/chicorun/class/${classCode}/reset-password`,
     CLASS_UPDATE_NICKNAME: (classCode: string, studentId: string) =>
         `${API_BASE}/api/chicorun/class/${classCode}/students/${studentId}/nickname`,
+    TEACHER_LOGIN: `${API_BASE}/api/chicorun/teacher/login`,
 } as const;
 
 /**

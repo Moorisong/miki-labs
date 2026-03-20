@@ -19,46 +19,87 @@ export const studentLogin = async (
 ): Promise<void> => {
     try {
         const { classCode, nickname, password } = req.body as {
-            classCode: string;
+            classCode?: string;
             nickname: string;
             password: string;
         };
 
-        if (!classCode || !nickname || !password) {
-            throw new AppError(400, 'ERROR_INVALID_INPUT: 클래스 코드, 닉네임, 비밀번호가 필요합니다.');
+        if (!nickname || !password) {
+            throw new AppError(400, 'ERROR_INVALID_INPUT: 닉네임과 비밀번호가 필요합니다.');
         }
-
-        const upperClassCode = classCode.toUpperCase().trim();
-
-        // 클래스 존재 확인
-        const classDoc = await ChicorunClassModel.findOne({ classCode: upperClassCode }).lean();
-        if (!classDoc) {
-            throw new AppError(404, 'ERROR_CLASS_NOT_FOUND: 존재하지 않는 클래스 코드입니다.');
-        }
-
-        const existingStudent = await ChicorunStudentModel.findOne({
-            classCode: upperClassCode,
-            nickname: nickname.trim(),
-        });
 
         let student;
 
-        if (existingStudent) {
-            // 기존 학생: 비밀번호 검증
-            const isPasswordValid = await bcrypt.compare(password, existingStudent.passwordHash);
-            if (!isPasswordValid) {
-                throw new AppError(401, 'ERROR_WRONG_PASSWORD: 비밀번호가 올바르지 않습니다.');
+        if (classCode) {
+            const upperClassCode = classCode.toUpperCase().trim();
+
+            // 클래스 존재 확인
+            const classDoc = await ChicorunClassModel.findOne({ classCode: upperClassCode }).lean();
+            if (!classDoc) {
+                throw new AppError(404, 'ERROR_CLASS_NOT_FOUND: 존재하지 않는 클래스 코드입니다.');
             }
-            student = existingStudent;
-        } else {
-            // 신규 학생: 가입 처리
-            const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-            const newStudent = new ChicorunStudentModel({
+
+            const existingStudent = await ChicorunStudentModel.findOne({
                 classCode: upperClassCode,
                 nickname: nickname.trim(),
-                passwordHash,
             });
-            student = await newStudent.save();
+
+            if (existingStudent) {
+                // 기존 학생: 비밀번호 검증
+                const isPasswordValid = await bcrypt.compare(password, existingStudent.passwordHash);
+                if (!isPasswordValid) {
+                    throw new AppError(401, 'ERROR_WRONG_PASSWORD: 비밀번호가 올바르지 않습니다.');
+                }
+                student = existingStudent;
+            } else {
+                // 신규 학생: 1인 1클래스 원칙 확인 (동일 닉네임/비번이 다른 클래스에 있는지)
+                const sameNicknameStudents = await ChicorunStudentModel.find({
+                    nickname: nickname.trim(),
+                });
+
+                for (const other of sameNicknameStudents) {
+                    const match = await bcrypt.compare(password, other.passwordHash);
+                    if (match) {
+                        throw new AppError(400, `ERROR_ALREADY_JOINED: 이미 다른 클래스(${other.classCode})에 소속되어 있습니다. 해당 클래스 링크로 접속하세요.`);
+                    }
+                }
+
+                // 가입 처리
+                const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+                const newStudent = new ChicorunStudentModel({
+                    classCode: upperClassCode,
+                    nickname: nickname.trim(),
+                    passwordHash,
+                });
+                student = await newStudent.save();
+            }
+        } else {
+            // 클래스 코드 없이 닉네임/비번만으로 로그인 시도 (기존 학생 전용)
+            const candidates = await ChicorunStudentModel.find({
+                nickname: nickname.trim(),
+            });
+
+            if (candidates.length === 0) {
+                throw new AppError(400, 'ERROR_CLASS_CODE_REQUIRED: 등록되지 않은 닉네임입니다. 오타를 확인하거나 전체 참여 링크로 접속하세요.');
+            }
+
+            const matches = [];
+            for (const cand of candidates) {
+                const isValid = await bcrypt.compare(password, cand.passwordHash);
+                if (isValid) {
+                    matches.push(cand);
+                }
+            }
+
+            if (matches.length === 0) {
+                throw new AppError(401, 'ERROR_WRONG_PASSWORD: 비밀번호가 올바르지 않습니다.');
+            }
+
+            if (matches.length > 1) {
+                throw new AppError(400, 'ERROR_MULTIPLE_CLASSES: 여러 클래스에 등록되어 있습니다. 선생님이 공유해주신 전체 링크로 접속하세요.');
+            }
+
+            student = matches[0];
         }
 
         const secret = process.env.JWT_SECRET ?? 'chicorun-default-secret';

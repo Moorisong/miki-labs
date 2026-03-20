@@ -10,12 +10,14 @@ import {
     resetStudentPassword,
     updateStudentNickname,
     getClassRanking,
+    loginTeacher,
 } from '../controllers/chicorun-class.controller';
 
 const router = Router();
 
 // ─── 학생 인증 API ──────────────────────────────────────────────────────────────
 router.post('/student/login', studentLogin);
+router.post('/teacher/login', loginTeacher);
 
 // ─── 학생 학습 API (studentAuth 필요) ───────────────────────────────────────────
 router.get('/question', chicorunStudentAuth, getQuestion);

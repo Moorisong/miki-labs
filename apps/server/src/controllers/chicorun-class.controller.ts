@@ -4,6 +4,8 @@ import { ApiResponse } from '../types/api.types';
 import { AppError } from '../middlewares/error-handler';
 import { ChicorunClassModel } from '../models/chicorun-class.model';
 import { ChicorunStudentModel } from '../models/chicorun-student.model';
+import { getUserModel } from '../models/user.model';
+import jwt from 'jsonwebtoken';
 
 const BCRYPT_ROUNDS = 10;
 const DEFAULT_RESET_PASSWORD = '0000';
@@ -301,6 +303,46 @@ export const getClassRanking = async (
         res.json({
             success: true,
             data: ranking,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// POST /api/chicorun/teacher/login
+export const loginTeacher = async (
+    req: Request,
+    res: Response<ApiResponse>,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { teacherId, name, signature } = req.body;
+
+        if (!teacherId || !name) {
+            throw new AppError(400, 'ERROR_INVALID_INPUT: teacherId와 name이 필요합니다.');
+        }
+
+        // MVP: 환경변수에 설정된 SIGNATURE_SECRET으로 요청 검증 (클라이언트-서버 간 신뢰)
+        const expectedSignature = process.env.SIGNATURE_SECRET;
+        if (signature !== expectedSignature) {
+            throw new AppError(401, 'ERROR_UNAUTHORIZED: 유효하지 않은 요청 서명입니다.');
+        }
+
+        // providerId(kakaoId)로 실제 유저를 찾아 MongoDB ObjectId(._id)를 가져옴
+        const UserModel = getUserModel();
+        const user = await UserModel.findOne({ providerId: teacherId }).lean();
+
+        if (!user) {
+            throw new AppError(404, 'ERROR_USER_NOT_FOUND: 해당 교사를 찾을 수 없습니다.');
+        }
+
+        const secret = process.env.JWT_SECRET || 'chicorun-default-secret';
+        const payload = { teacherId: user._id.toString(), name: user.nickname || user.name || name };
+        const token = jwt.sign(payload, secret, { expiresIn: '7d' });
+
+        res.json({
+            success: true,
+            data: { token },
         });
     } catch (error) {
         next(error);
