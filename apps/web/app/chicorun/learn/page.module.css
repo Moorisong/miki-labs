@@ -102,7 +102,7 @@
     height: 100%;
     background: linear-gradient(90deg, #3b82f6, #06b6d4);
     border-radius: 1rem;
-    transition: width 0.5s ease;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .questionCard {
@@ -187,6 +187,7 @@
     border-color: #60a5fa;
     background: #eff6ff;
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
 
 .btnOption.correct {
@@ -194,6 +195,7 @@
     border-color: #22c55e;
     color: white;
     box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);
+    animation: correctBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .btnOption.wrong {
@@ -201,6 +203,7 @@
     border-color: #ef4444;
     color: white;
     box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+    animation: wrongShake 0.4s ease-in-out;
 }
 
 .btnOption.highlightCorrect {
@@ -216,6 +219,97 @@
     font-weight: 500;
 }
 
+/* ─── 콤보 오버레이 ─────────────────────────────────────────────────────────── */
+.comboOverlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 100;
+    backdrop-filter: blur(4px);
+}
+
+.comboCard {
+    background: rgba(255, 255, 255, 0.97);
+    border-radius: 2rem;
+    padding: 3rem 4rem;
+    text-align: center;
+    border: 4px solid;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    animation: comboPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.comboEmoji {
+    font-size: 4rem;
+    margin-bottom: 0.5rem;
+    animation: comboBounce 0.6s ease-in-out infinite alternate;
+}
+
+.comboText {
+    font-size: 2.25rem;
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+}
+
+.comboSub {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.1em;
+}
+
+/* ─── 레벨 클리어 ──────────────────────────────────────────────────────────── */
+.levelClearCard {
+    background: white;
+    border-radius: 2rem;
+    padding: 3rem 4rem;
+    text-align: center;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    animation: comboPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.levelClearTitle {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #1e293b;
+    margin: 0.5rem 0 1rem;
+}
+
+.levelClearQuote {
+    font-size: 1rem;
+    color: #64748b;
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 1rem;
+    border-left: 4px solid #3b82f6;
+}
+
+.btnLevelNext {
+    margin-top: 1.5rem;
+    padding: 1rem 2.5rem;
+    background: linear-gradient(90deg, #3b82f6, #06b6d4);
+    color: white;
+    border: none;
+    border-radius: 1rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btnLevelNext:hover {
+    transform: scale(1.05);
+}
+
+/* ─── 키프레임 ────────────────────────────────────────────────────────────── */
 @keyframes slideDown {
     from {
         opacity: 0;
@@ -249,5 +343,79 @@
     to {
         opacity: 1;
         transform: scale(1);
+    }
+}
+
+@keyframes comboPop {
+    from {
+        opacity: 0;
+        transform: scale(0.5) rotate(-10deg);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+@keyframes comboBounce {
+    from {
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        transform: translateY(-12px) scale(1.1);
+    }
+}
+
+@keyframes correctBounce {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes wrongShake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-8px);
+    }
+
+    40% {
+        transform: translateX(8px);
+    }
+
+    60% {
+        transform: translateX(-6px);
+    }
+
+    80% {
+        transform: translateX(6px);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
     }
 }

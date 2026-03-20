@@ -1,94 +1,316 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import styles from "./page.module.css";
-import Link from "next/link";
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import styles from './page.module.css';
+import Link from 'next/link';
+import {
+    CHICORUN_API,
+    CHICORUN_STORAGE_KEY,
+    CHICORUN_ROUTES,
+    CHICORUN_CONFIG,
+} from '@/constants/chicorun';
 
+// ─── 타입 ──────────────────────────────────────────────────────────────────────
+interface QuestionData {
+    questionId: string;
+    seed: string;
+    question: string;
+    options: string[];
+    level: number;
+    questionNumber: number;
+    progressIndex: number;
+    point: number;
+}
+
+interface AnswerResult {
+    isCorrect: boolean;
+    explanation: string;
+    correctIndex?: number;
+    newProgressIndex: number;
+    newPoint: number;
+    isLevelComplete: boolean;
+    isFinalComplete: boolean;
+    level: number;
+}
+
+type FeedbackType = 'correct' | 'wrong' | null;
+
+// 콤보 연출 타입
+type ComboType = 'combo3' | 'combo5' | 'combo10' | null;
+
+// ─── 아이콘 ──────────────────────────────────────────────────────────────────────
 const IconBook = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
         <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
     </svg>
 );
 
 const IconStar = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="#eab308" stroke="#ca8a04" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="#eab308" stroke="#ca8a04"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
     </svg>
 );
 
 const IconZap = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="#f97316" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="#f97316" stroke="#ea580c"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
     </svg>
 );
 
-const questions = [
-    {
-        id: 1,
-        question: "She ___ to school every day.",
-        options: ["go", "goes", "going", "went"],
-        correct: 1,
-        explanation: "she면 s 붙이는 거 국룰 👍"
-    },
-    {
-        id: 2,
-        question: "I ___ a book right now.",
-        options: ["read", "reading", "am reading", "reads"],
-        correct: 2,
-        explanation: "right now는 현재진행형 신호! 🎯"
-    },
-    {
-        id: 3,
-        question: "They ___ pizza yesterday.",
-        options: ["eat", "ate", "eaten", "eating"],
-        correct: 1,
-        explanation: "yesterday = 과거형 필수 ⏰"
-    },
-];
+// ─── 유틸 함수 ─────────────────────────────────────────────────────────────────
+function getAuthHeader(): Record<string, string> {
+    const token = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
+    return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
-type FeedbackType = "correct" | "wrong" | null;
+// ─── 콤보 오버레이 컴포넌트 ────────────────────────────────────────────────────
+function ComboOverlay({ combo, onDone }: { combo: ComboType; onDone: () => void }) {
+    useEffect(() => {
+        if (!combo) return;
+        const timer = setTimeout(onDone, 1800);
+        return () => clearTimeout(timer);
+    }, [combo, onDone]);
 
+    if (!combo) return null;
+
+    const comboMessages = {
+        combo3: { emoji: '🔥', text: '3연속 정답!', color: '#f97316', sub: 'HOT STREAK' },
+        combo5: { emoji: '⚡', text: '5연속 정답!', color: '#eab308', sub: 'POWER SURGE' },
+        combo10: {
+            emoji: '💎', text: '10연속 완벽!', color: '#a855f7',
+            sub: `PERFECT +${CHICORUN_CONFIG.COMBO_BONUS_POINT}P`,
+        },
+    };
+
+    const { emoji, text, color, sub } = comboMessages[combo];
+
+    return (
+        <div className={styles.comboOverlay}>
+            <div className={styles.comboCard} style={{ borderColor: color }}>
+                <div className={styles.comboEmoji}>{emoji}</div>
+                <div className={styles.comboText} style={{ color }}>{text}</div>
+                <div className={styles.comboSub}>{sub}</div>
+            </div>
+        </div>
+    );
+}
+
+// ─── 레벨 클리어 오버레이 ──────────────────────────────────────────────────────
+function LevelClearOverlay({
+    level, isFinal, onNext, onRestart,
+}: {
+    level: number;
+    isFinal: boolean;
+    onNext: () => void;
+    onRestart: () => void;
+}) {
+    const quotes = [
+        '"천 리 길도 한 걸음부터." - 노자',
+        '"불가능이란 단어는 바보들의 사전에나 있다." - 나폴레옹',
+        '"성공의 비결은 단 한 가지, 잘할 수 있는 일에 광적으로 집중하는 것이다." - 빌 게이츠',
+        '"실패는 성공의 어머니다." - 토마스 에디슨',
+        '"배움에는 끝이 없다." - 퇴계 이황',
+    ];
+    const quote = quotes[(level - 1) % quotes.length];
+
+    return (
+        <div className={styles.comboOverlay} style={{ background: 'rgba(0,0,0,0.85)' }}>
+            <div className={styles.levelClearCard}>
+                {isFinal ? (
+                    <>
+                        <div className={styles.comboEmoji}>🏆</div>
+                        <div className={styles.levelClearTitle}>100레벨 달성!</div>
+                        <div className={styles.levelClearQuote}>
+                            모든 레벨을 완주했습니다! 정말 대단해요! 🎉
+                        </div>
+                        <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                            <button className={styles.btnLevelNext} onClick={onRestart}
+                                style={{ background: 'linear-gradient(90deg, #a855f7, #ec4899)' }}>
+                                🔄 처음부터 다시
+                            </button>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div className={styles.comboEmoji}>🎉</div>
+                        <div className={styles.levelClearTitle}>레벨 {level - 1} 클리어!</div>
+                        <div className={styles.levelClearQuote}>{quote}</div>
+                        <button className={styles.btnLevelNext} onClick={onNext}>
+                            다음 레벨 도전 →
+                        </button>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+}
+
+// ─── 메인 학습 페이지 ──────────────────────────────────────────────────────────
 export default function StudentLearnPage() {
     const router = useRouter();
-    const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [level, setLevel] = useState(1);
-    const [progress, setProgress] = useState(23);
-    const [points, setPoints] = useState(120);
-    const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+    const [question, setQuestion] = useState<QuestionData | null>(null);
     const [feedback, setFeedback] = useState<FeedbackType>(null);
-    const [showExplanation, setShowExplanation] = useState("");
+    const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+    const [answerResult, setAnswerResult] = useState<AnswerResult | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [comboCount, setComboCount] = useState(0);
+    const [activeCombo, setActiveCombo] = useState<ComboType>(null);
+    const [showLevelClear, setShowLevelClear] = useState(false);
+    const [failCount, setFailCount] = useState(0);
+    const [showZeroPointMsg, setShowZeroPointMsg] = useState(false);
+    const answerLockRef = useRef(false);
 
-    const question = questions[currentQuestion % questions.length];
-
-    const handleAnswer = (index: number) => {
-        if (feedback !== null) return;
-
-        setSelectedAnswer(index);
-
-        if (index === question.correct) {
-            setFeedback("correct");
-            setPoints(prev => prev + 10);
-            setProgress(prev => prev + 1);
-        } else {
-            setFeedback("wrong");
-            setShowExplanation(question.explanation);
+    const fetchQuestion = useCallback(async () => {
+        const token = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
+        if (!token) {
+            router.replace(CHICORUN_ROUTES.JOIN);
+            return;
         }
 
-        setTimeout(() => {
-            if (currentQuestion + 1 >= 3) {
-                // 실제 운영에서는 레벨 클리어 연출 화면으로 넘어갑니다.
-                alert("레벨 클리어!");
-                router.push("/chicorun");
-            } else {
-                setCurrentQuestion(prev => prev + 1);
-                setSelectedAnswer(null);
-                setFeedback(null);
-                setShowExplanation("");
+        setIsLoading(true);
+        try {
+            const res = await fetch(CHICORUN_API.QUESTION, {
+                headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+            });
+            const data = await res.json();
+
+            if (!data.success) {
+                if (data.error?.includes('ERROR_UNAUTHORIZED') || res.status === 401) {
+                    localStorage.removeItem(CHICORUN_STORAGE_KEY.TOKEN);
+                    router.replace(CHICORUN_ROUTES.JOIN);
+                    return;
+                }
+                throw new Error(data.error);
             }
-        }, 1500);
+
+            setQuestion(data.data as QuestionData);
+            setFeedback(null);
+            setSelectedIndex(null);
+            setAnswerResult(null);
+            setFailCount(0);
+            setShowZeroPointMsg(false);
+            answerLockRef.current = false;
+        } catch (err) {
+            console.error('Failed to fetch question:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [router]);
+
+    useEffect(() => {
+        fetchQuestion();
+    }, [fetchQuestion]);
+
+    const handleAnswer = async (index: number) => {
+        if (answerLockRef.current || feedback === 'correct' || !question) return;
+
+        answerLockRef.current = true;
+        setSelectedIndex(index);
+
+        try {
+            const res = await fetch(CHICORUN_API.ANSWER, {
+                method: 'POST',
+                headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    questionId: question.questionId,
+                    seed: question.seed,
+                    selectedIndex: index,
+                }),
+            });
+
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error);
+
+            const result = data.data as AnswerResult;
+            setAnswerResult(result);
+
+            if (result.isCorrect) {
+                setFeedback('correct');
+                const newCombo = comboCount + 1;
+                setComboCount(newCombo);
+
+                // 콤보 연출
+                if (newCombo >= 10 && newCombo % 10 === 0) {
+                    setActiveCombo('combo10');
+                } else if (newCombo >= 5 && newCombo % 5 === 0) {
+                    setActiveCombo('combo5');
+                } else if (newCombo >= 3 && newCombo % 3 === 0) {
+                    setActiveCombo('combo3');
+                }
+
+                // 0점 상황 위로 메시지
+                if (question.point === 0 && result.newPoint === 0) {
+                    setShowZeroPointMsg(true);
+                }
+
+                // 레벨 클리어 또는 다음 문제
+                if (result.isLevelComplete || result.isFinalComplete) {
+                    setTimeout(() => {
+                        setShowLevelClear(true);
+                    }, activeCombo ? 2000 : 800);
+                } else {
+                    if (!activeCombo) {
+                        setTimeout(fetchQuestion, 1200);
+                    }
+                }
+            } else {
+                setFeedback('wrong');
+                setComboCount(0);
+                setFailCount(prev => prev + 1);
+                answerLockRef.current = false;
+            }
+        } catch (err) {
+            console.error('Failed to submit answer:', err);
+            answerLockRef.current = false;
+        }
     };
+
+    const handleResetProgress = async () => {
+        try {
+            await fetch(CHICORUN_API.RESET_PROGRESS, {
+                method: 'POST',
+                headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+            });
+            setShowLevelClear(false);
+            fetchQuestion();
+        } catch (err) {
+            console.error('Failed to reset progress:', err);
+        }
+    };
+
+    const handleNextLevel = () => {
+        setShowLevelClear(false);
+        fetchQuestion();
+    };
+
+    const handleComboAnimationDone = useCallback(() => {
+        setActiveCombo(null);
+        // 콤보 애니메이션 후 다음 문제로
+        if (feedback === 'correct' && answerResult) {
+            if (!answerResult.isLevelComplete && !answerResult.isFinalComplete) {
+                fetchQuestion();
+            } else {
+                setShowLevelClear(true);
+            }
+        }
+    }, [feedback, answerResult, fetchQuestion]);
+
+    const handleLogout = () => {
+        localStorage.removeItem(CHICORUN_STORAGE_KEY.TOKEN);
+        localStorage.removeItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
+        router.replace(CHICORUN_ROUTES.JOIN);
+    };
+
+    const currentLevel = answerResult?.level ?? question?.level ?? 1;
+    const currentPoint = answerResult?.newPoint ?? question?.point ?? 0;
+    const progressIndex = answerResult?.newProgressIndex ?? question?.progressIndex ?? 0;
+    const progressInLevel = progressIndex % CHICORUN_CONFIG.QUESTIONS_PER_LEVEL;
+    const progressPercent = (progressIndex / CHICORUN_CONFIG.MAX_LEVEL) * 100;
 
     return (
         <div className={styles.container}>
@@ -98,10 +320,22 @@ export default function StudentLearnPage() {
                         <IconBook />
                     </div>
                     <span>하루상자</span>
-                    <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 'normal' }}>Haroo Box</span>
+                    <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 'normal' }}>Chicorun</span>
                 </div>
-                <nav style={{ display: 'flex', gap: '1rem' }}>
-                    <Link href="/chicorun" style={{ color: '#64748b', fontSize: '0.9rem', textDecoration: 'none' }}>나가기</Link>
+                <nav style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <Link
+                        href={CHICORUN_ROUTES.RANKING}
+                        style={{ color: '#64748b', fontSize: '0.9rem', textDecoration: 'none' }}>
+                        랭킹
+                    </Link>
+                    <button
+                        onClick={handleLogout}
+                        style={{
+                            color: '#ef4444', fontSize: '0.85rem', background: 'none',
+                            border: 'none', cursor: 'pointer', fontWeight: 600,
+                        }}>
+                        나가기
+                    </button>
                 </nav>
             </header>
 
@@ -111,82 +345,119 @@ export default function StudentLearnPage() {
                     <div className={styles.infoRow}>
                         <div className={styles.levelBadge}>
                             <IconStar />
-                            <span>Lv.{level}</span>
+                            <span>Lv.{currentLevel}</span>
                         </div>
+                        {comboCount >= 3 && (
+                            <div style={{
+                                display: 'flex', alignItems: 'center', gap: '0.25rem',
+                                color: '#f97316', fontWeight: 800, fontSize: '0.95rem',
+                                animation: 'pulse 1s ease-in-out infinite',
+                            }}>
+                                🔥 {comboCount}연속
+                            </div>
+                        )}
                         <div className={styles.pointBadge}>
                             <IconZap />
-                            <span>{points}P</span>
+                            <span>{currentPoint}P</span>
                         </div>
                     </div>
 
                     <div className={styles.progressContainer}>
                         <div className={styles.progressLabels}>
-                            <span>진행도</span>
-                            <span>{progress} / 100</span>
+                            <span>레벨 {currentLevel} 진행 ({progressInLevel}/{CHICORUN_CONFIG.QUESTIONS_PER_LEVEL})</span>
+                            <span>전체 {Math.round(progressPercent)}%</span>
                         </div>
                         <div className={styles.progressBarTrack}>
                             <div
                                 className={styles.progressBarFill}
-                                style={{ width: `${progress}%` }}
+                                style={{ width: `${progressPercent}%` }}
                             />
                         </div>
                     </div>
                 </div>
 
-                {/* 메인 퀴즈 카드 */}
-                <div key={currentQuestion} className={styles.questionCard}>
-                    <div className={styles.questionHeader}>
-                        <div className={styles.questionCounter}>
-                            문제 {currentQuestion + 1} / {questions.length}
-                        </div>
-                        <h2 className={styles.questionText}>
-                            {question.question}
-                        </h2>
+                {/* 문제 카드 */}
+                {isLoading ? (
+                    <div className={styles.questionCard} style={{ textAlign: 'center', padding: '4rem' }}>
+                        <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
+                        <p style={{ color: '#64748b', fontWeight: 600 }}>문제 불러오는 중...</p>
                     </div>
-
-                    {/* 피드백 박스 */}
-                    {feedback && (
-                        <div className={`${styles.feedbackBox} ${feedback === "correct" ? styles.feedbackCorrect : styles.feedbackWrong}`}>
-                            <div className={styles.feedbackTitle}>
-                                {feedback === "correct" ? "🎉 정답!" : "😅 오답!"}
+                ) : question ? (
+                    <div key={question.questionId} className={styles.questionCard}>
+                        <div className={styles.questionHeader}>
+                            <div className={styles.questionCounter}>
+                                레벨 {question.level} · 문제 {question.questionNumber} / {CHICORUN_CONFIG.QUESTIONS_PER_LEVEL}
                             </div>
-                            {showExplanation && (
-                                <div className={styles.feedbackDesc}>{showExplanation}</div>
-                            )}
+                            <h2 className={styles.questionText}>{question.question}</h2>
                         </div>
-                    )}
 
-                    {/* 객관식 옵션 */}
-                    <div className={styles.optionsGrid}>
-                        {question.options.map((option, index) => {
-                            let btnClass = styles.btnOption;
+                        {/* 피드백 박스 */}
+                        {feedback && (
+                            <div className={`${styles.feedbackBox} ${feedback === 'correct' ? styles.feedbackCorrect : styles.feedbackWrong}`}>
+                                <div className={styles.feedbackTitle}>
+                                    {feedback === 'correct' ? '🎉 정답!' : '😅 오답!'}
+                                </div>
+                                {answerResult?.explanation && (
+                                    <div className={styles.feedbackDesc}>{answerResult.explanation}</div>
+                                )}
+                                {showZeroPointMsg && (
+                                    <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#92400e' }}>
+                                        😢 3번 시도해서 포인트가 0점이에요. 괜찮아! 다음엔 잘 할 수 있어!
+                                    </div>
+                                )}
+                                {failCount >= 3 && feedback === 'wrong' && (
+                                    <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#92400e' }}>
+                                        💪 {failCount}번째 도전 중! 포기하지 마세요!
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
-                            if (selectedAnswer === index) {
-                                if (feedback === "correct") btnClass += ` ${styles.correct}`;
-                                else if (feedback === "wrong") btnClass += ` ${styles.wrong}`;
-                            } else if (index === question.correct && feedback === "wrong") {
-                                // 오답을 고른 경우 정답 항목 하이라이트
-                                btnClass += ` ${styles.highlightCorrect}`;
-                            }
+                        {/* 선택지 */}
+                        <div className={styles.optionsGrid}>
+                            {question.options.map((option, idx) => {
+                                let btnClass = styles.btnOption;
+                                if (selectedIndex === idx) {
+                                    if (feedback === 'correct') btnClass += ` ${styles.correct}`;
+                                    else if (feedback === 'wrong') btnClass += ` ${styles.wrong}`;
+                                } else if (
+                                    answerResult?.correctIndex === idx && feedback === 'wrong'
+                                ) {
+                                    btnClass += ` ${styles.highlightCorrect}`;
+                                }
 
-                            return (
-                                <button
-                                    key={index}
-                                    className={btnClass}
-                                    onClick={() => handleAnswer(index)}
-                                    disabled={feedback !== null}
-                                >
-                                    {option}
-                                </button>
-                            );
-                        })}
+                                return (
+                                    <button
+                                        key={idx}
+                                        className={btnClass}
+                                        onClick={() => handleAnswer(idx)}
+                                        disabled={feedback === 'correct'}
+                                    >
+                                        {option}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
-                </div>
+                ) : null}
 
                 <div className={styles.hintText}>
-                    💡 선택하면 채점 후 바로 다음 문제로 넘어갑니다
+                    💡 정답을 선택하면 자동으로 다음 문제로 넘어갑니다
                 </div>
             </main>
+
+            {/* 콤보 오버레이 */}
+            <ComboOverlay combo={activeCombo} onDone={handleComboAnimationDone} />
+
+            {/* 레벨 클리어 오버레이 */}
+            {showLevelClear && answerResult && (
+                <LevelClearOverlay
+                    level={answerResult.level}
+                    isFinal={answerResult.isFinalComplete}
+                    onNext={handleNextLevel}
+                    onRestart={handleResetProgress}
+                />
+            )}
         </div>
     );
 }
