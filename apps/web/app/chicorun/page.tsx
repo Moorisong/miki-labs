@@ -1,10 +1,19 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import styles from "./page.module.css";
+import Link from "next/link";
+
+const IconBook = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+    </svg>
+);
 
 export default function ChicorunLandingPage() {
     const router = useRouter();
+    const pathname = usePathname();
 
     const IconZap = () => (
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -21,6 +30,21 @@ export default function ChicorunLandingPage() {
 
     return (
         <div className={styles.container}>
+            <header className={styles.header}>
+                <Link href="/chicorun" className={styles.headerLogo}>
+                    <div className={styles.iconBox}>
+                        <IconBook />
+                    </div>
+                    <span>하루상자</span>
+                    <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 'normal' }}>Haroo Box</span>
+                </Link>
+                <nav className={styles.navLinks}>
+                    <Link href="/chicorun" className={pathname === "/chicorun" ? styles.activeLink : styles.navLink}>홈</Link>
+                    <Link href="/chicorun/ranking" className={pathname === "/chicorun/ranking" ? styles.activeLink : styles.navLink}>랭킹</Link>
+                    <Link href="/chicorun/customize" className={pathname === "/chicorun/customize" ? styles.activeLink : styles.navLink}>꾸미기</Link>
+                </nav>
+            </header>
+
             <main className={styles.main}>
                 <div className={styles.contentBox}>
 
