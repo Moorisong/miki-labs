@@ -1009,11 +1009,10 @@ function CustomizeContent() {
                         <div className={styles.optionsContainer} style={{ marginTop: '2rem' }} onClick={(e) => { e.stopPropagation(); setActivePickerId(null); }}>
                             {/* 아무것도 선택되지 않았을 때 */}
                             {(!selectedElement) && (
-                                <div style={{ textAlign: 'center', padding: '3rem 1.5rem', background: '#f8fafc', borderRadius: '1.5rem', border: '2px dashed #cbd5e1' }}>
-                                    <h3 style={{ color: '#1e293b', fontSize: '1.1rem', fontWeight: 800, marginBottom: '1rem' }}>🎨 꾸미기 가이드</h3>
-                                    <p style={{ color: '#64748b', fontSize: '0.95rem', fontWeight: 600, margin: '0 0 0.5rem 0' }}>카드 중앙/가장자리를 클릭해 <b>배경과 테두리</b>를 꾸며보세요!</p>
-                                    <p style={{ color: '#64748b', fontSize: '0.95rem', fontWeight: 600, margin: '0 0 0.5rem 0' }}>모든 요소는 개별적으로 <b>스타일 수정 및 드래그</b>를 할 수 있습니다.</p>
-                                    <p style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 500, margin: '0' }}>스티커는 톡톡 두 번 눌러서 삭제할 수 있어요.</p>
+                                <div style={{ textAlign: 'center', padding: '2.25rem 1.25rem', background: '#f8fafc', borderRadius: '1.25rem', border: '2px dashed #cbd5e1' }}>
+                                    <h3 style={{ color: '#1e293b', fontSize: '1.05rem', fontWeight: 800, marginBottom: '0.5rem' }}>🎨 편집할 요소를 클릭해보세요!</h3>
+                                    <p style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 600, margin: '0 0 0.4rem 0' }}>자유로운 배치와 스타일 수정이 가능합니다.</p>
+                                    <p style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 500, margin: '0' }}>스티커는 더블 클릭(톡톡)하여 삭제하세요!</p>
                                 </div>
                             )}
 
