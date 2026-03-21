@@ -20,6 +20,16 @@ interface RankingEntry {
         underline: boolean;
     };
     cardStyle: string;
+    customize?: {
+        stickers?: {
+            id: string;
+            emoji: string;
+            x: number;
+            y: number;
+            scale?: number;
+            rotate?: number;
+        }[];
+    };
 }
 
 // ─── 아이콘 ──────────────────────────────────────────────────────────────────────
@@ -31,91 +41,30 @@ const IconBook = () => (
     </svg>
 );
 
-const IconTrophy = () => (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="#eab308" stroke="#ca8a04"
-        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
-        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
-        <path d="M4 22h16"></path>
-        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
-        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
-        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
-    </svg>
-);
-
-const IconMedal = () => (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="#9ca3af" stroke="#6b7280"
-        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="17" r="5"></circle>
-        <polyline points="12 18 10.5 16.5 12 15 13.5 16.5 12 18"></polyline>
-        <path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"></path>
-    </svg>
-);
-
-const IconAward = () => (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="#fb923c" stroke="#c2410c"
-        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="8" r="6"></circle>
-        <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
-    </svg>
-);
-
 const IconZap = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="#f97316" stroke="#ea580c"
-        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="#f97316" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
     </svg>
 );
 
 const IconClass = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb"
-        strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
         <path d="M6 12v5c3 3 9 3 12 0v-5" />
     </svg>
 );
 
 function getRankIcon(rank: number) {
-    switch (rank) {
-        case 1: return <IconTrophy />;
-        case 2: return <IconMedal />;
-        case 3: return <IconAward />;
-        default: return <span className={styles.rankNumber}>#{rank}</span>;
+    if (rank === 1) {
+        return <span className={styles.rankNumber} style={{ color: '#ca8a04', fontSize: '1.75rem' }}>#{rank}</span>;
     }
+    if (rank === 2 || rank === 3) {
+        return <span className={styles.rankNumber} style={{ color: '#ca8a04' }}>#{rank}</span>;
+    }
+    return <span className={styles.rankNumber}>#{rank}</span>;
 }
 
-// 프로필 카드 렌더링 컴포넌트
-function ProfileCard({ nickname, badge, cardStyle, nicknameStyle }: {
-    nickname: string;
-    badge: string;
-    cardStyle: string;
-    nicknameStyle: RankingEntry['nicknameStyle'];
-}) {
-    return (
-        <div style={{
-            width: '72px', height: '72px', borderRadius: '1rem',
-            background: cardStyle || 'linear-gradient(135deg, #60a5fa, #06b6d4)', padding: '3px',
-            flexShrink: 0,
-        }}>
-            <div style={{
-                width: '100%', height: '100%', borderRadius: '0.75rem',
-                background: 'white', display: 'flex',
-                flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                gap: '2px',
-            }}>
-                <span style={{ fontSize: '1.5rem' }}>{badge || '⭐'}</span>
-                <span style={{
-                    fontSize: '0.5rem', fontWeight: nicknameStyle?.bold ? 700 : 500,
-                    fontStyle: nicknameStyle?.italic ? 'italic' : 'normal',
-                    color: (nicknameStyle?.color === '#ffffff' || !nicknameStyle?.color) ? '#1e293b' : nicknameStyle.color,
-                    maxWidth: '60px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                }}>
-                    {nickname}
-                </span>
-            </div>
-        </div>
-    );
-}
+
 
 function RankingContent() {
     const searchParams = useSearchParams();
@@ -202,34 +151,92 @@ function RankingContent() {
 
                 {/* 랭킹 리스트 */}
                 <div className={styles.rankingList}>
-                    {rankings.map((user, index) => (
-                        <div
-                            key={user.id ?? user.rank}
-                            className={styles.rankingItem}
-                            style={{ animationDelay: `${index * 0.05}s` }}
-                        >
-                            <div className={styles.rankBadgeBox}>
-                                {getRankIcon(user.rank)}
-                            </div>
+                    {rankings.map((user, index) => {
+                        const isFirst = user.rank === 1;
+                        return (
+                            <div
+                                key={user.id ?? user.rank}
+                                className={styles.rankingItem}
+                                style={{
+                                    animationDelay: `${index * 0.05}s`,
+                                    background: user.cardStyle || 'white',
+                                    position: 'relative',
+                                    overflow: isFirst ? 'visible' : 'hidden', // 1등 뱃지가 잘리지 않게 visible 처리
+                                    transform: isFirst ? 'scale(1.05)' : 'translateZ(0)',
+                                    zIndex: isFirst ? 10 : 1, // 크기가 커지므로 zIndex 높임
+                                    margin: isFirst ? '1rem 0' : '0', // 커진 만큼 마진 추가
+                                    border: isFirst ? '3px solid #facc15' : 'none', // 1등 테두리 금색 하이라이트
+                                    boxShadow: isFirst ? '0 20px 25px -5px rgba(250, 204, 21, 0.4)' : undefined,
+                                }}
+                            >
+                                {/* 1등 좌측 상단 강조 뱃지 스티커 */}
+                                {isFirst && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '-15px',
+                                        left: '-15px',
+                                        background: 'linear-gradient(135deg, #fef08a, #ca8a04)',
+                                        color: '#fff',
+                                        padding: '0.25rem 0.75rem',
+                                        borderRadius: '1rem',
+                                        fontWeight: 900,
+                                        fontSize: '1rem',
+                                        boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
+                                        transform: 'rotate(-10deg)',
+                                        zIndex: 20,
+                                        border: '2px solid white',
+                                        pointerEvents: 'none',
+                                    }}>
+                                        👑 TOP 1
+                                    </div>
+                                )}
 
-                            <ProfileCard
-                                nickname={user.nickname}
-                                badge={user.badge}
-                                cardStyle={user.cardStyle}
-                                nicknameStyle={user.nicknameStyle}
-                            />
+                                {/* 장식용 스티커 */}
+                                {user.customize?.stickers?.map((sticker) => (
+                                    <div
+                                        key={sticker.id}
+                                        style={{
+                                            position: 'absolute',
+                                            left: sticker.x,
+                                            top: sticker.y,
+                                            fontSize: '2rem',
+                                            userSelect: 'none',
+                                            pointerEvents: 'none',
+                                            zIndex: 0,
+                                            transform: `scale(${sticker.scale || 1}) rotate(${sticker.rotate || 0}deg)`,
+                                        }}
+                                    >
+                                        {sticker.emoji}
+                                    </div>
+                                ))}
 
-                            <div className={styles.rankInfo}>
-                                <div className={styles.rankNickname}>{user.nickname}</div>
-                                <div className={styles.rankBadgeEmoji}>{user.badge}</div>
-                            </div>
+                                <div className={styles.rankBadgeBox} style={{ position: 'relative', zIndex: 1 }}>
+                                    {getRankIcon(user.rank)}
+                                </div>
 
-                            <div className={styles.pointsBox}>
-                                <IconZap />
-                                <span className={styles.points}>{user.point.toLocaleString()}P</span>
+                                <div className={styles.rankInfo} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'relative', zIndex: 1 }}>
+                                    <div className={styles.rankBadgeEmoji} style={{ fontSize: '1.5rem', marginTop: 0 }}>{user.badge || '⭐'}</div>
+                                    <div
+                                        className={styles.rankNickname}
+                                        style={{
+                                            color: user.nicknameStyle?.color || '#1e293b',
+                                            fontWeight: user.nicknameStyle?.bold ? 800 : 500,
+                                            fontStyle: user.nicknameStyle?.italic ? 'italic' : 'normal',
+                                            textDecoration: user.nicknameStyle?.underline ? 'underline' : 'none',
+                                            textShadow: user.cardStyle && user.cardStyle !== 'white' && (!user.nicknameStyle?.color || user.nicknameStyle.color === '#ffffff') ? '0 1px 3px rgba(0,0,0,0.5)' : 'none',
+                                        }}
+                                    >
+                                        {user.nickname}
+                                    </div>
+                                </div>
+
+                                <div className={styles.pointsBox} style={{ position: 'relative', zIndex: 1 }}>
+                                    <IconZap />
+                                    <span className={styles.points}>{user.point.toLocaleString()}P</span>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 <div className={styles.hintText}>
