@@ -65,7 +65,6 @@
     flex-direction: column;
     gap: 1rem;
     width: 100%;
-    overflow-x: hidden;
 }
 
 .rankingItem {

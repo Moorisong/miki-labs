@@ -69,7 +69,6 @@
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
-    overflow-x: hidden;
 }
 
 .panelTitle {
