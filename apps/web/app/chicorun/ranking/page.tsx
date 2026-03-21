@@ -1,175 +1,193 @@
 'use client';
 
-import Link from 'next/link';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
-import { CHICORUN_API, CHICORUN_ROUTES, CHICORUN_STORAGE_KEY } from '@/constants/chicorun';
+import { CHICORUN_API, CHICORUN_STORAGE_KEY } from '@/constants/chicorun';
 
-// ─── 타입 ──────────────────────────────────────────────────────────────────────
+// Defaults matching the customize page
+const DEFAULTS = {
+    rank: { x: 24, y: 20 },
+    badge: { x: 80, y: 20 },
+    nickname: { x: 120, y: 25 },
+    point: { x: 580, y: 20 }
+};
+
 interface RankingEntry {
-    rank: number;
     id: string;
+    rank: number;
     nickname: string;
     point: number;
-    badge: string;
-    nicknameStyle: {
+    badge?: string;
+    cardStyle?: string;
+    nicknameStyle?: {
         color: string;
         bold: boolean;
         italic: boolean;
         underline: boolean;
+        fontSize?: number;
+        x?: number;
+        y?: number;
     };
-    cardStyle: string;
     customize?: {
-        stickers?: {
-            id: string;
-            emoji: string;
+        stickers?: { id: string; emoji: string; x: number; y: number; scale?: number; rotate?: number }[];
+        borderStyle?: {
+            color: string;
+            width: number;
+            style: string;
+            radius: number;
+        };
+        pointStyle?: {
+            color: string;
+            background: string;
+            borderWidth: number;
+            borderColor: string;
+            fontSize: number;
             x: number;
             y: number;
-            scale?: number;
-            rotate?: number;
-        }[];
+        };
+        rankStyle?: {
+            color: string;
+            fontSize: number;
+            x: number;
+            y: number;
+        };
+        badgeStyle?: {
+            fontSize: number;
+            x: number;
+            y: number;
+        };
     };
 }
 
-// ─── 아이콘 ──────────────────────────────────────────────────────────────────────
-const IconBook = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-    </svg>
-);
-
-const IconZap = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="#f97316" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const IconZap = ({ color = '#ea580c' }: { color?: string }) => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill={color} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
     </svg>
 );
 
-const IconClass = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-        <path d="M6 12v5c3 3 9 3 12 0v-5" />
-    </svg>
-);
-
-function getRankIcon(rank: number) {
-    if (rank === 1) {
-        return <span className={styles.rankNumber} style={{ color: '#ca8a04', fontSize: '1.75rem' }}>#{rank}</span>;
-    }
-    if (rank === 2 || rank === 3) {
-        return <span className={styles.rankNumber} style={{ color: '#ca8a04' }}>#{rank}</span>;
-    }
-    return <span className={styles.rankNumber}>#{rank}</span>;
-}
-
-
-
 function RankingContent() {
     const searchParams = useSearchParams();
-    const urlClassCode = searchParams.get('classCode');
+    const [classCode, setClassCode] = useState<string | null>(null);
 
     const [rankings, setRankings] = useState<RankingEntry[]>([]);
-    const [classCode, setClassCode] = useState('');
     const [className, setClassName] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [hasSearched, setHasSearched] = useState(false);
 
+    // Initial class code detection
     useEffect(() => {
-        // 1. URL 파라미터 확인 (교사가 특정 클래스 랭킹을 볼 때 등)
-        if (urlClassCode) {
-            setClassCode(urlClassCode);
-            fetchRanking(urlClassCode);
-            return;
-        }
-
-        // 2. 로그인된 학생의 classCode로 랭킹 자동 조회
-        const studentInfo = localStorage.getItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
-        if (studentInfo) {
-            try {
-                const info = JSON.parse(studentInfo);
-                if (info.classCode) {
-                    setClassCode(info.classCode);
-                    fetchRanking(info.classCode);
+        const urlCode = searchParams.get('classCode');
+        if (urlCode) {
+            setClassCode(urlCode);
+        } else {
+            // Try localStorage if URL is missing code
+            const studentInfo = localStorage.getItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
+            if (studentInfo) {
+                try {
+                    const info = JSON.parse(studentInfo);
+                    if (info.classCode) setClassCode(info.classCode);
+                } catch (e) {
+                    console.error('Failed to parse student info', e);
                 }
-            } catch {
-                // ignore
             }
         }
-    }, [urlClassCode]);
+    }, [searchParams]);
 
-    const fetchRanking = async (code: string) => {
-        if (!code.trim()) return;
+    useEffect(() => {
+        if (classCode) {
+            fetchRankings(classCode);
+        } else {
+            setIsLoading(false); // Stop loading if no code is found
+        }
+    }, [classCode]);
+
+    const fetchRankings = async (code: string) => {
         setIsLoading(true);
         setHasSearched(true);
         try {
-            const res = await fetch(CHICORUN_API.CLASS_RANKING(code.toUpperCase()));
+            const res = await fetch(CHICORUN_API.CLASS_RANKING(code));
             const data = await res.json();
-            if (data.success && data.data) {
-                if (Array.isArray(data.data)) {
-                    setRankings(data.data);
-                } else if (data.data.ranking && Array.isArray(data.data.ranking)) {
+            if (data.success) {
+                if (data.data.ranking) {
                     setRankings(data.data.ranking);
                     setClassName(data.data.className || '');
-                } else {
-                    setRankings([]);
+                } else if (Array.isArray(data.data)) {
+                    setRankings(data.data);
                 }
-            } else {
-                setRankings([]);
             }
-        } catch {
-            setRankings([]);
+        } catch (err) {
+            console.error('Failed to fetch rankings:', err);
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div className={styles.container}>
-
-            <main className={styles.main}>
-                <div className={styles.titleArea}>
-                    {className && (
-                        <div className={styles.classInfoContainer}>
-                            <div className={styles.classInfoBadge}>
-                                <IconClass />
-                                {className}
-                            </div>
-                        </div>
-                    )}
-                    <h1 className={styles.title}>🏆 랭킹</h1>
-                    <p className={styles.subtitle}>최고 점수를 향해 달려보세요!</p>
+        <main className={styles.main}>
+            <div className={styles.classInfoContainer}>
+                <div className={styles.classInfoBadge}>
+                    🏫 {className || (classCode ? `${classCode} 클래스` : '클래스를 선택해주세요')}
                 </div>
+            </div>
 
+            <div className={styles.titleArea}>
+                <h1 className={styles.title}>실시간 랭킹 보드</h1>
+                <p className={styles.subtitle}>최고 점수를 향해 달려보세요!</p>
+            </div>
 
-                {hasSearched && !isLoading && rankings.length === 0 && (
-                    <p className={styles.mockNotice}>
-                        해당 클래스의 랭킹 데이터가 없거나 코드가 올바르지 않습니다.
-                    </p>
-                )}
+            {isLoading && (
+                <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
+                    <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
+                    <p>랭킹 정보를 불러오는 중입니다...</p>
+                </div>
+            )}
 
-                {/* 랭킹 리스트 */}
+            {!isLoading && hasSearched && rankings.length === 0 && (
+                <p className={styles.mockNotice}>
+                    해당 클래스의 랭킹 데이터가 없거나 코드가 올바르지 않습니다.
+                </p>
+            )}
+
+            {!isLoading && classCode && rankings.length > 0 && (
                 <div className={styles.rankingList}>
                     {rankings.map((user, index) => {
+                        if (!user) return null;
+
                         const isFirst = user.rank === 1;
+
+                        // Decide if we should use absolute layout
+                        // Uninitialized or 0,0 users will get the defaults
+                        const rX = user.customize?.rankStyle?.x || DEFAULTS.rank.x;
+                        const rY = user.customize?.rankStyle?.y || DEFAULTS.rank.y;
+                        const bX = user.customize?.badgeStyle?.x || DEFAULTS.badge.x;
+                        const bY = user.customize?.badgeStyle?.y || DEFAULTS.badge.y;
+                        const nX = user.nicknameStyle?.x || DEFAULTS.nickname.x;
+                        const nY = user.nicknameStyle?.y || DEFAULTS.nickname.y;
+                        const pX = user.customize?.pointStyle?.x || DEFAULTS.point.x;
+                        const pY = user.customize?.pointStyle?.y || DEFAULTS.point.y;
+
                         return (
                             <div
-                                key={user.id ?? user.rank}
+                                key={user.id || index.toString()}
                                 className={styles.rankingItem}
                                 style={{
                                     animationDelay: `${index * 0.05}s`,
                                     background: user.cardStyle || 'white',
                                     position: 'relative',
-                                    overflow: isFirst ? 'visible' : 'hidden', // 1등 뱃지가 잘리지 않게 visible 처리
+                                    overflow: isFirst ? 'visible' : 'hidden',
                                     transform: isFirst ? 'scale(1.05)' : 'translateZ(0)',
-                                    zIndex: isFirst ? 10 : 1, // 크기가 커지므로 zIndex 높임
-                                    margin: isFirst ? '1rem 0' : '0', // 커진 만큼 마진 추가
-                                    border: isFirst ? '3px solid #facc15' : 'none', // 1등 테두리 금색 하이라이트
+                                    zIndex: isFirst ? 10 : 1,
+                                    margin: isFirst ? '1rem 0' : '0',
+                                    border: user.customize?.borderStyle?.width
+                                        ? `${user.customize.borderStyle.width}px ${user.customize.borderStyle.style} ${user.customize.borderStyle.color}`
+                                        : (isFirst ? '3px solid #facc15' : 'none'),
                                     boxShadow: isFirst ? '0 20px 25px -5px rgba(250, 204, 21, 0.4)' : undefined,
+                                    borderRadius: user.customize?.borderStyle?.radius !== undefined ? `${user.customize.borderStyle.radius}px` : '1.5rem',
+                                    height: '80px',
+                                    display: 'block',
                                 }}
                             >
-                                {/* 1등 좌측 상단 강조 뱃지 스티커 */}
                                 {isFirst && (
                                     <div style={{
                                         position: 'absolute',
@@ -183,7 +201,7 @@ function RankingContent() {
                                         fontSize: '1rem',
                                         boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
                                         transform: 'rotate(-10deg)',
-                                        zIndex: 20,
+                                        zIndex: 30,
                                         border: '2px solid white',
                                         pointerEvents: 'none',
                                     }}>
@@ -191,7 +209,6 @@ function RankingContent() {
                                     </div>
                                 )}
 
-                                {/* 장식용 스티커 */}
                                 {user.customize?.stickers?.map((sticker) => (
                                     <div
                                         key={sticker.id}
@@ -200,9 +217,7 @@ function RankingContent() {
                                             left: sticker.x,
                                             top: sticker.y,
                                             fontSize: '2rem',
-                                            userSelect: 'none',
-                                            pointerEvents: 'none',
-                                            zIndex: 0,
+                                            zIndex: 5,
                                             transform: `scale(${sticker.scale || 1}) rotate(${sticker.rotate || 0}deg)`,
                                         }}
                                     >
@@ -210,12 +225,26 @@ function RankingContent() {
                                     </div>
                                 ))}
 
-                                <div className={styles.rankBadgeBox} style={{ position: 'relative', zIndex: 1 }}>
-                                    {getRankIcon(user.rank)}
+                                {/* Rank */}
+                                <div style={{ position: 'absolute', left: rX, top: rY, zIndex: 10 }}>
+                                    <span className={styles.rankNumber} style={{
+                                        color: user.customize?.rankStyle?.color || (user.rank <= 3 ? '#ca8a04' : '#94a3b8'),
+                                        fontSize: user.customize?.rankStyle?.fontSize ? `${user.customize.rankStyle.fontSize}px` : (isFirst ? '1.75rem' : '1.25rem'),
+                                        lineHeight: 1
+                                    }}>
+                                        #{user.rank}
+                                    </span>
                                 </div>
 
-                                <div className={styles.rankInfo} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'relative', zIndex: 1 }}>
-                                    <div className={styles.rankBadgeEmoji} style={{ fontSize: '1.5rem', marginTop: 0 }}>{user.badge || '⭐'}</div>
+                                {/* Badge */}
+                                <div style={{ position: 'absolute', left: bX, top: bY, zIndex: 10 }}>
+                                    <div style={{ fontSize: user.customize?.badgeStyle?.fontSize ? `${user.customize.badgeStyle.fontSize}px` : '1.5rem', lineHeight: 1 }}>
+                                        {user.badge || '⭐'}
+                                    </div>
+                                </div>
+
+                                {/* Nickname */}
+                                <div style={{ position: 'absolute', left: nX, top: nY, zIndex: 10 }}>
                                     <div
                                         className={styles.rankNickname}
                                         style={{
@@ -223,40 +252,63 @@ function RankingContent() {
                                             fontWeight: user.nicknameStyle?.bold ? 800 : 500,
                                             fontStyle: user.nicknameStyle?.italic ? 'italic' : 'normal',
                                             textDecoration: user.nicknameStyle?.underline ? 'underline' : 'none',
-                                            textShadow: user.cardStyle && user.cardStyle !== 'white' && (!user.nicknameStyle?.color || user.nicknameStyle.color === '#ffffff') ? '0 1px 3px rgba(0,0,0,0.5)' : 'none',
+                                            fontSize: user.nicknameStyle?.fontSize ? `${user.nicknameStyle.fontSize}px` : '1.1rem',
+                                            lineHeight: 1,
+                                            whiteSpace: 'nowrap'
                                         }}
                                     >
                                         {user.nickname}
                                     </div>
                                 </div>
 
-                                <div className={styles.pointsBox} style={{ position: 'relative', zIndex: 1 }}>
-                                    <IconZap />
-                                    <span className={styles.points}>{user.point.toLocaleString()}P</span>
+                                {/* Points */}
+                                <div style={{ position: 'absolute', left: pX, top: pY, zIndex: 10 }}>
+                                    <div className={styles.pointsBox} style={{
+                                        background: user.customize?.pointStyle?.background || 'linear-gradient(90deg, #ffedd5, #fef3c7)',
+                                        color: user.customize?.pointStyle?.color || '#ea580c',
+                                        border: user.customize?.pointStyle?.borderWidth ? `${user.customize.pointStyle.borderWidth}px solid ${user.customize.pointStyle.borderColor}` : 'none',
+                                        padding: '0.5rem 0.8rem',
+                                        margin: 0
+                                    }}>
+                                        <IconZap color={user.customize?.pointStyle?.color || '#ea580c'} />
+                                        <span className={styles.points} style={{
+                                            color: user.customize?.pointStyle?.color || '#ea580c',
+                                            fontSize: user.customize?.pointStyle?.fontSize ? `${user.customize.pointStyle.fontSize}px` : '1.1rem'
+                                        }}>{user.point.toLocaleString()}P</span>
+                                    </div>
                                 </div>
                             </div>
                         );
                     })}
                 </div>
+            )}
 
-                <div className={styles.hintText}>
-                    💡 더 많은 문제를 풀고 랭킹을 올려보세요!
+            {!isLoading && !classCode && (
+                <div style={{ textAlign: 'center', padding: '3rem', background: 'white', borderRadius: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+                    <p style={{ color: '#64748b' }}>
+                        로그인 정보가 없거나 잘못된 접근입니다.<br />
+                        선생님이 공유해주신 링크로 다시 접속해 주세요.
+                    </p>
                 </div>
-            </main>
-        </div>
+            )}
+
+            <div className={styles.hintText}>
+                💡 더 많은 문제를 풀고 랭킹을 올려보세요!
+            </div>
+        </main>
     );
 }
 
 export default function RankingPage() {
     return (
-        <Suspense fallback={
-            <div className={styles.container}>
-                <main className={styles.main}>
-                    <p style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>랭킹 불러오는 중...</p>
-                </main>
-            </div>
-        }>
-            <RankingContent />
-        </Suspense>
+        <div className={styles.container}>
+            <Suspense fallback={
+                <div style={{ textAlign: 'center', padding: '5rem', color: '#64748b' }}>
+                    <p>로딩 중...</p>
+                </div>
+            }>
+                <RankingContent />
+            </Suspense>
+        </div>
     );
 }
