@@ -235,6 +235,8 @@ function RankingContent() {
                                     position: 'relative',
                                     animation: `${styles.slideUp} 0.5s ease-out forwards`,
                                     animationDelay: `${index * 0.05}s`,
+                                    // 1등 카드의 왕관 아이콘이나 리본이 잘리지 않도록 overflow visible 허용
+                                    overflow: isFirst || user.customize?.borderStyle?.style === 'ribbon' ? 'visible' : 'hidden'
                                 }}
                             >
                                 <div

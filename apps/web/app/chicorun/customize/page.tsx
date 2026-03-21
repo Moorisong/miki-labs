@@ -862,6 +862,8 @@ function CustomizeContent() {
                                     height: `${80 * scale * (isFirst ? 1.05 : 1)}px`,
                                     position: 'relative',
                                     margin: isFirst ? `${16 * scale}px auto` : '0 auto',
+                                    // 1등 카드의 장식 요소가 잘리지 않도록 수정
+                                    overflow: isFirst || borderStyle.style === 'ribbon' ? 'visible' : 'hidden'
                                 }}>
                                     <div
                                         ref={(node) => {
