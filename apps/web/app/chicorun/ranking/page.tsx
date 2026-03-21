@@ -115,6 +115,7 @@ function RankingContent() {
 
     const [rankings, setRankings] = useState<RankingEntry[]>([]);
     const [classCode, setClassCode] = useState('');
+    const [className, setClassName] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
 
@@ -148,8 +149,15 @@ function RankingContent() {
         try {
             const res = await fetch(CHICORUN_API.CLASS_RANKING(code.toUpperCase()));
             const data = await res.json();
-            if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-                setRankings(data.data);
+            if (data.success && data.data) {
+                if (Array.isArray(data.data)) {
+                    setRankings(data.data);
+                } else if (data.data.ranking && Array.isArray(data.data.ranking)) {
+                    setRankings(data.data.ranking);
+                    setClassName(data.data.className || '');
+                } else {
+                    setRankings([]);
+                }
             } else {
                 setRankings([]);
             }
@@ -165,7 +173,7 @@ function RankingContent() {
 
             <main className={styles.main}>
                 <div className={styles.titleArea}>
-                    <h1 className={styles.title}>🏆 랭킹 {classCode && <span style={{ fontSize: '1rem', color: '#64748b', fontWeight: 500 }}>({classCode})</span>}</h1>
+                    <h1 className={styles.title}>🏆 랭킹 {className && <span style={{ fontSize: '1rem', color: '#64748b', fontWeight: 500 }}>({className})</span>}</h1>
                     <p className={styles.subtitle}>최고 점수를 향해 달려보세요!</p>
                 </div>
 

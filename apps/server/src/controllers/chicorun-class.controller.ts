@@ -300,9 +300,14 @@ export const getClassRanking = async (
             customize: s.customize,
         }));
 
+        const classDoc = await ChicorunClassModel.findOne({ classCode: upperClassCode }).lean();
+
         res.json({
             success: true,
-            data: ranking,
+            data: {
+                ranking,
+                className: classDoc ? classDoc.title : '치코런 클래스',
+            },
         });
     } catch (error) {
         next(error);
@@ -343,6 +348,45 @@ export const loginTeacher = async (
         res.json({
             success: true,
             data: { token },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// PATCH /api/chicorun/class/:classCode/title
+export const updateClassTitle = async (
+    req: Request,
+    res: Response<ApiResponse>,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const teacher = req.chicoTeacher;
+        if (!teacher) {
+            throw new AppError(401, 'ERROR_UNAUTHORIZED: 교사 인증이 필요합니다.');
+        }
+
+        const classCode = String(req.params.classCode);
+        const upperClassCode = classCode.toUpperCase();
+        const { title } = req.body as { title: string };
+
+        if (!title || !title.trim()) {
+            throw new AppError(400, 'ERROR_INVALID_INPUT: 새 클래스 이름이 필요합니다.');
+        }
+
+        const updatedClass = await ChicorunClassModel.findOneAndUpdate(
+            { classCode: upperClassCode, teacherId: teacher.teacherId },
+            { $set: { title: title.trim() } },
+            { new: true }
+        ).lean();
+
+        if (!updatedClass) {
+            throw new AppError(404, 'ERROR_CLASS_NOT_FOUND: 클래스를 찾을 수 없거나 접근 권한이 없습니다.');
+        }
+
+        res.json({
+            success: true,
+            data: { id: updatedClass._id.toString(), title: updatedClass.title },
         });
     } catch (error) {
         next(error);

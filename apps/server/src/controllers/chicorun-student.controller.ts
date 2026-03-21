@@ -111,6 +111,12 @@ export const studentLogin = async (
 
         const token = jwt.sign(payload, secret, { expiresIn: JWT_EXPIRES_IN });
 
+        let className = '치코런 클래스';
+        const classDocForName = await ChicorunClassModel.findOne({ classCode: student.classCode }).lean();
+        if (classDocForName) {
+            className = classDocForName.title;
+        }
+
         res.json({
             success: true,
             data: {
@@ -119,6 +125,7 @@ export const studentLogin = async (
                     id: (student._id as mongoose.Types.ObjectId).toString(),
                     nickname: student.nickname,
                     classCode: student.classCode,
+                    className,
                     progressIndex: student.progressIndex,
                     point: student.point,
                     badge: student.badge,
@@ -151,12 +158,19 @@ export const getStudentMe = async (
             throw new AppError(404, 'ERROR_STUDENT_NOT_FOUND: 학생 정보를 찾을 수 없습니다.');
         }
 
+        let className = '치코런 클래스';
+        const classDocForName = await ChicorunClassModel.findOne({ classCode: studentDoc.classCode }).lean();
+        if (classDocForName) {
+            className = classDocForName.title;
+        }
+
         res.json({
             success: true,
             data: {
                 id: studentDoc._id.toString(),
                 nickname: studentDoc.nickname,
                 classCode: studentDoc.classCode,
+                className,
                 progressIndex: studentDoc.progressIndex,
                 point: studentDoc.point,
                 badge: studentDoc.badge,
@@ -211,6 +225,47 @@ export const updateCustomize = async (
                 customize: updatedStudent.customize,
             },
         });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// PATCH /api/chicorun/student/password
+export const changeStudentPassword = async (
+    req: Request,
+    res: Response<ApiResponse>,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const student = req.chicoStudent;
+        if (!student) {
+            throw new AppError(401, 'ERROR_UNAUTHORIZED: 학생 인증이 필요합니다.');
+        }
+
+        const { currentPassword, newPassword } = req.body;
+        if (!currentPassword || !newPassword) {
+            throw new AppError(400, 'ERROR_INVALID_INPUT: 현재 비밀번호와 새 비밀번호가 필요합니다.');
+        }
+
+        if (newPassword.length < 4 || newPassword.length > 8) {
+            throw new AppError(400, 'ERROR_INVALID_INPUT: 새 비밀번호는 4~8자리여야 합니다.');
+        }
+
+        const studentDoc = await ChicorunStudentModel.findById(student.studentId);
+        if (!studentDoc) {
+            throw new AppError(404, 'ERROR_STUDENT_NOT_FOUND: 학생 정보를 찾을 수 없습니다.');
+        }
+
+        const isPasswordValid = await bcrypt.compare(currentPassword, studentDoc.passwordHash);
+        if (!isPasswordValid) {
+            throw new AppError(401, 'ERROR_WRONG_PASSWORD: 현재 비밀번호가 일치하지 않습니다.');
+        }
+
+        const newPasswordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+        studentDoc.passwordHash = newPasswordHash;
+        await studentDoc.save();
+
+        res.json({ success: true, data: { message: '비밀번호가 성공적으로 변경되었습니다.' } });
     } catch (error) {
         next(error);
     }

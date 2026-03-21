@@ -163,7 +163,20 @@ export default function StudentLearnPage() {
     const [showLevelClear, setShowLevelClear] = useState(false);
     const [failCount, setFailCount] = useState(0);
     const [showZeroPointMsg, setShowZeroPointMsg] = useState(false);
+    const [className, setClassName] = useState<string>('');
     const answerLockRef = useRef(false);
+
+    useEffect(() => {
+        const studentInfoStr = localStorage.getItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
+        if (studentInfoStr) {
+            try {
+                const info = JSON.parse(studentInfoStr);
+                setClassName(info.className || info.classCode || '');
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    }, []);
 
     const fetchQuestion = useCallback(async () => {
         const token = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
@@ -317,8 +330,12 @@ export default function StudentLearnPage() {
 
     return (
         <div className={styles.container}>
-
             <main className={styles.main}>
+                {className && (
+                    <div className={styles.classInfoBadge}>
+                        🏫 {className}
+                    </div>
+                )}
                 {/* 상단 정보 패널 */}
                 <div className={styles.topInfoPanel}>
                     <div className={styles.infoRow}>
