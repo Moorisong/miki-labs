@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/lib/hooks/use-toast';
+import Toast from '@/components/ui/toast';
 import styles from './page.module.css';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { TouchBackend } from 'react-dnd-touch-backend';
@@ -56,6 +58,7 @@ interface NicknameStyleType {
     fontSize: number;
     x: number;
     y: number;
+    rotate: number;
 }
 interface BorderStyleType {
     color: string;
@@ -71,17 +74,20 @@ interface PointStyleType {
     fontSize: number;
     x: number;
     y: number;
+    rotate: number;
 }
 interface RankStyleType {
     x: number;
     y: number;
     color: string;
     fontSize: number;
+    rotate: number;
 }
 interface BadgeStyleType {
     x: number;
     y: number;
     fontSize: number;
+    rotate: number;
 }
 
 // ─── Icons ─────────────────────────────────────────────────────────────────
@@ -99,6 +105,14 @@ const IconSave = () => (
     </svg>
 );
 
+const IconClass = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb"
+        strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+        <path d="M6 12v5c3 3 9 3 12 0v-5" />
+    </svg>
+);
+
 const IconZap = ({ color = '#ea580c' }: { color?: string }) => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill={color} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
@@ -112,7 +126,12 @@ function DraggableElement({
     position,
     children,
     style: extraStyles = {},
-    title = "드래그해서 이동"
+    title = "드래그해서 이동",
+    rotate = 0,
+    scale = 1,
+    isSelected = false,
+    onSelect,
+    onUpdate
 }: {
     type: string;
     id?: string;
@@ -120,7 +139,16 @@ function DraggableElement({
     children: React.ReactNode;
     style?: React.CSSProperties;
     title?: string;
+    rotate?: number;
+    scale?: number;
+    isSelected?: boolean;
+    onSelect?: () => void;
+    onUpdate?: (updates: { scale?: number; rotate?: number; fontSize?: number }) => void;
 }) {
+    const elementRef = useRef<HTMLDivElement>(null);
+    const [isResizing, setIsResizing] = useState(false);
+    const [isRotating, setIsRotating] = useState(false);
+    const [initialState, setInitialState] = useState<{ angle: number; distance: number; rotate: number; scale: number; fontSize: number } | null>(null);
     const [{ isDragging, offset }, drag] = useDrag(() => ({
         type,
         item: { id, x: position.x, y: position.y },
@@ -128,33 +156,178 @@ function DraggableElement({
             isDragging: !!monitor.isDragging(),
             offset: monitor.getDifferenceFromInitialOffset(),
         }),
-    }), [type, id, position.x, position.y]);
+        canDrag: !isResizing && !isRotating, // Disable move drag when resizing/rotating
+    }), [type, id, position.x, position.y, isResizing, isRotating]);
+
+    const handleHandleMouseDown = (e: React.MouseEvent | React.TouchEvent, action: 'resize' | 'rotate') => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        const rect = elementRef.current?.getBoundingClientRect();
+        if (!rect) return;
+
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
+        const angle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
+        const distance = Math.sqrt(Math.pow(clientX - centerX, 2) + Math.pow(clientY - centerY, 2));
+
+        // Get current fontSize if it's a text element
+        let currentFontSize = 0;
+        if (type !== 'sticker') {
+            const childDiv = elementRef.current?.querySelector('div, span') as HTMLElement;
+            if (childDiv) currentFontSize = parseInt(window.getComputedStyle(childDiv).fontSize);
+        }
+
+        setInitialState({ angle, distance, rotate, scale, fontSize: currentFontSize });
+        if (action === 'resize') setIsResizing(true);
+        else setIsRotating(true);
+    };
+
+    useEffect(() => {
+        if (!isResizing && !isRotating) return;
+
+        const handleMove = (e: MouseEvent | TouchEvent) => {
+            if (!initialState || !elementRef.current) return;
+
+            const rect = elementRef.current.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const clientX = 'touches' in e ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
+            const clientY = 'touches' in e ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
+
+            if (isRotating) {
+                const currentAngle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
+                let deltaRotate = currentAngle - initialState.angle;
+                onUpdate?.({ rotate: Math.round(initialState.rotate + deltaRotate) });
+            } else if (isResizing) {
+                const currentDistance = Math.sqrt(Math.pow(clientX - centerX, 2) + Math.pow(clientY - centerY, 2));
+                const scaleFactor = currentDistance / initialState.distance;
+
+                if (type === 'sticker') {
+                    onUpdate?.({ scale: Number((initialState.scale * scaleFactor).toFixed(2)) });
+                } else {
+                    const newFontSize = Math.round(initialState.fontSize * scaleFactor);
+                    onUpdate?.({ fontSize: Math.max(8, Math.min(200, newFontSize)) });
+                }
+            }
+        };
+
+        const handleUp = () => {
+            setIsResizing(false);
+            setIsRotating(false);
+            setInitialState(null);
+        };
+
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleUp);
+        window.addEventListener('touchmove', handleMove);
+        window.addEventListener('touchend', handleUp);
+
+        return () => {
+            window.removeEventListener('mousemove', handleMove);
+            window.removeEventListener('mouseup', handleUp);
+            window.removeEventListener('touchmove', handleMove);
+            window.removeEventListener('touchend', handleUp);
+        };
+    }, [isResizing, isRotating, initialState, type, onUpdate]);
+
+    useEffect(() => {
+        drag(elementRef);
+    }, [drag]);
 
     return (
         <div
-            ref={drag as any}
+            ref={elementRef}
             title={title}
+            onClick={(e) => {
+                e.stopPropagation();
+                onSelect?.();
+            }}
             style={{
                 position: 'absolute',
                 left: position.x + (isDragging && offset ? offset.x : 0),
                 top: position.y + (isDragging && offset ? offset.y : 0),
-                cursor: 'move',
+                cursor: (isResizing || isRotating) ? 'crosshair' : 'move',
                 opacity: isDragging ? 0.3 : 1,
                 userSelect: 'none',
-                zIndex: 20,
+                zIndex: isSelected ? 100 : (isResizing || isRotating ? 101 : 20),
                 touchAction: 'none', // Mobile dragging fix
+                transform: `rotate(${rotate}deg) scale(${scale})`,
+                outline: isSelected ? '2px solid #3b82f6' : 'none',
+                outlineOffset: '2px',
+                borderRadius: '4px',
+                transition: isDragging || isResizing || isRotating ? 'none' : 'outline 0.2s',
                 ...extraStyles,
             }}
         >
             {children}
+
+            {/* Transform Handles */}
+            {isSelected && (
+                <>
+                    {/* Rotation Handle (Top) */}
+                    <div
+                        onMouseDown={(e) => handleHandleMouseDown(e, 'rotate')}
+                        onTouchStart={(e) => handleHandleMouseDown(e, 'rotate')}
+                        style={{
+                            position: 'absolute',
+                            top: '-24px',
+                            left: '50%',
+                            width: '20px',
+                            height: '20px',
+                            background: '#3b82f6',
+                            border: '2px solid white',
+                            borderRadius: '50%',
+                            transform: 'translateX(-50%)',
+                            cursor: 'alias',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                            zIndex: 102
+                        }}
+                    >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>
+                    </div>
+
+                    {/* Resize Handle (Bottom Right) */}
+                    <div
+                        onMouseDown={(e) => handleHandleMouseDown(e, 'resize')}
+                        onTouchStart={(e) => handleHandleMouseDown(e, 'resize')}
+                        style={{
+                            position: 'absolute',
+                            bottom: '-10px',
+                            right: '-10px',
+                            width: '20px',
+                            height: '20px',
+                            background: '#3b82f6',
+                            border: '2px solid white',
+                            borderRadius: '50%',
+                            cursor: 'nwse-resize',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                            zIndex: 102
+                        }}
+                    >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m15 15 6 6m-6-6v6m0-6h6M9 9 3 3m6 6V3m0 6H3"></path></svg>
+                    </div>
+                </>
+            )}
         </div>
     );
 }
 
 function CustomizeContent() {
     const router = useRouter();
+    const { toast, showToast, hideToast } = useToast();
 
     const [nickname, setNickname] = useState('치코런');
+    const [className, setClassName] = useState<string>('');
     const [selectedBadge, setSelectedBadge] = useState(AVAILABLE_BADGES[0]);
     const [cardStyle, setCardStyle] = useState(AVAILABLE_BACKGROUNDS[1].value);
     const [stickers, setStickers] = useState<StickerItem[]>([]);
@@ -167,6 +340,7 @@ function CustomizeContent() {
         fontSize: 20,
         x: 120,
         y: 25,
+        rotate: 0,
     });
 
     const [borderStyle, setBorderStyle] = useState<BorderStyleType>({
@@ -184,6 +358,7 @@ function CustomizeContent() {
         fontSize: 18,
         x: 580,
         y: 20,
+        rotate: 0,
     });
 
     const [rankStyle, setRankStyle] = useState<RankStyleType>({
@@ -191,12 +366,14 @@ function CustomizeContent() {
         fontSize: 24,
         x: 24,
         y: 20,
+        rotate: 0,
     });
 
     const [badgeStyle, setBadgeStyle] = useState<BadgeStyleType>({
         fontSize: 32,
         x: 80,
         y: 20,
+        rotate: 0,
     });
 
     const [pointInfo, setPointInfo] = useState(0);
@@ -204,6 +381,51 @@ function CustomizeContent() {
 
     const [isSaving, setIsSaving] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+
+    const [selectedElement, setSelectedElement] = useState<string | null>(null);
+
+    const updateSelectedElement = (updates: { fontSize?: number; scale?: number; rotate?: number }) => {
+        if (!selectedElement) return;
+
+        if (selectedElement.startsWith('sticker-')) {
+            const id = selectedElement.replace('sticker-', '');
+            setStickers(prev => prev.map(s => s.id === id ? { ...s, scale: updates.scale ?? s.scale, rotate: updates.rotate ?? s.rotate } : s));
+        } else if (selectedElement === 'nickname') {
+            setNicknameStyle(prev => ({ ...prev, fontSize: updates.fontSize ?? prev.fontSize, rotate: updates.rotate ?? prev.rotate }));
+        } else if (selectedElement === 'rank') {
+            setRankStyle(prev => ({ ...prev, fontSize: updates.fontSize ?? prev.fontSize, rotate: updates.rotate ?? prev.rotate }));
+        } else if (selectedElement === 'badge') {
+            setBadgeStyle(prev => ({ ...prev, fontSize: updates.fontSize ?? prev.fontSize, rotate: updates.rotate ?? prev.rotate }));
+        } else if (selectedElement === 'point') {
+            setPointStyle(prev => ({ ...prev, fontSize: updates.fontSize ?? prev.fontSize, rotate: updates.rotate ?? prev.rotate }));
+        }
+    };
+
+    const getSelectedValue = () => {
+        if (!selectedElement) return null;
+        if (selectedElement.startsWith('sticker-')) {
+            const id = selectedElement.replace('sticker-', '');
+            const s = stickers.find(st => st.id === id);
+            return { size: s?.scale || 1, rotate: s?.rotate || 0, isSticker: true };
+        }
+        if (selectedElement === 'nickname') return { size: nicknameStyle.fontSize, rotate: nicknameStyle.rotate, isSticker: false };
+        if (selectedElement === 'rank') return { size: rankStyle.fontSize, rotate: rankStyle.rotate, isSticker: false };
+        if (selectedElement === 'badge') return { size: badgeStyle.fontSize, rotate: badgeStyle.rotate, isSticker: false };
+        if (selectedElement === 'point') return { size: pointStyle.fontSize, rotate: pointStyle.rotate, isSticker: false };
+        return null;
+    };
+
+    useEffect(() => {
+        const studentInfoStr = localStorage.getItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
+        if (studentInfoStr) {
+            try {
+                const info = JSON.parse(studentInfoStr);
+                setClassName(info.className || info.classCode || '');
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    }, []);
 
     const fetchMyInfo = useCallback(async () => {
         const token = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
@@ -323,6 +545,7 @@ function CustomizeContent() {
             rotate: Math.random() * 60 - 30,
         };
         setStickers(prev => [...prev, newSticker]);
+        setSelectedElement(`sticker-${newSticker.id}`);
     };
 
     const removeSticker = (id: string) => {
@@ -364,9 +587,9 @@ function CustomizeContent() {
 
             const data = await res.json();
             if (data.success) {
-                alert('랭킹 꾸미기가 저장되었습니다! 화려해진 랭킹 리스트를 확인해 보세요.');
+                showToast('랭킹 꾸미기가 저장되었습니다! 화려해진 랭킹 리스트를 확인해 보세요.', 'success');
             } else {
-                alert('저장 실패');
+                showToast('저장 실패', 'error');
             }
         } catch (err) {
             console.error('Failed to save customization:', err);
@@ -392,13 +615,24 @@ function CustomizeContent() {
 
     const isFirst = myRank === 1;
 
+    const selectedData = getSelectedValue();
+
     return (
-        <div className={styles.container}>
+        <div className={styles.container} onClick={() => setSelectedElement(null)}>
             <main className={styles.main}>
                 <div className={styles.titleArea}>
                     <h1 className={styles.title}><IconSparkles /> 랭킹 꾸미기</h1>
                     <p className={styles.subtitle}>랭킹 리스트에 나타나는 나의 랭킹 영역을 자유롭게 꾸며보세요!</p>
                 </div>
+
+                {className && (
+                    <div className={styles.classInfoContainer}>
+                        <div className={styles.classInfoBadge}>
+                            <IconClass />
+                            {className || '내 클래스'}
+                        </div>
+                    </div>
+                )}
 
                 <div className={styles.layoutGrid}>
                     <div className={styles.previewPanel}>
@@ -460,15 +694,27 @@ function CustomizeContent() {
                                             type="sticker"
                                             id={sticker.id}
                                             position={{ x: sticker.x, y: sticker.y }}
-                                            style={{ fontSize: '2rem', zIndex: 10, transform: `scale(${sticker.scale || 1}) rotate(${sticker.rotate || 0}deg)` }}
-                                            title="더블클릭/더블탭해서 삭제"
+                                            rotate={sticker.rotate}
+                                            scale={sticker.scale}
+                                            isSelected={selectedElement === `sticker-${sticker.id}`}
+                                            onSelect={() => setSelectedElement(`sticker-${sticker.id}`)}
+                                            onUpdate={updateSelectedElement}
+                                            style={{ fontSize: '2rem', zIndex: 10 }}
+                                            title="클릭해서 편집 / 더블탭해서 삭제"
                                         >
                                             <div onDoubleClick={() => removeSticker(sticker.id)} onClick={() => handleTouchSticker(sticker.id)}>{sticker.emoji}</div>
                                         </DraggableElement>
                                     ))}
 
                                     {/* 랭크 번호 */}
-                                    <DraggableElement type="rank" position={{ x: rankStyle.x, y: rankStyle.y }}>
+                                    <DraggableElement
+                                        type="rank"
+                                        position={{ x: rankStyle.x, y: rankStyle.y }}
+                                        rotate={rankStyle.rotate}
+                                        isSelected={selectedElement === 'rank'}
+                                        onSelect={() => setSelectedElement('rank')}
+                                        onUpdate={updateSelectedElement}
+                                    >
                                         <span className={styles.rankNumber} style={{
                                             color: rankStyle.color,
                                             fontSize: `${rankStyle.fontSize}px`,
@@ -480,12 +726,26 @@ function CustomizeContent() {
                                     </DraggableElement>
 
                                     {/* 뱃지 */}
-                                    <DraggableElement type="badge" position={{ x: badgeStyle.x, y: badgeStyle.y }}>
+                                    <DraggableElement
+                                        type="badge"
+                                        position={{ x: badgeStyle.x, y: badgeStyle.y }}
+                                        rotate={badgeStyle.rotate}
+                                        isSelected={selectedElement === 'badge'}
+                                        onSelect={() => setSelectedElement('badge')}
+                                        onUpdate={updateSelectedElement}
+                                    >
                                         <div style={{ fontSize: `${badgeStyle.fontSize}px`, lineHeight: 1 }}>{selectedBadge}</div>
                                     </DraggableElement>
 
                                     {/* 닉네임 */}
-                                    <DraggableElement type="nickname" position={{ x: nicknameStyle.x, y: nicknameStyle.y }}>
+                                    <DraggableElement
+                                        type="nickname"
+                                        position={{ x: nicknameStyle.x, y: nicknameStyle.y }}
+                                        rotate={nicknameStyle.rotate}
+                                        isSelected={selectedElement === 'nickname'}
+                                        onSelect={() => setSelectedElement('nickname')}
+                                        onUpdate={updateSelectedElement}
+                                    >
                                         <div
                                             style={{
                                                 color: nicknameStyle.color,
@@ -503,7 +763,14 @@ function CustomizeContent() {
                                     </DraggableElement>
 
                                     {/* 포인트 */}
-                                    <DraggableElement type="point" position={{ x: pointStyle.x, y: pointStyle.y }}>
+                                    <DraggableElement
+                                        type="point"
+                                        position={{ x: pointStyle.x, y: pointStyle.y }}
+                                        rotate={pointStyle.rotate}
+                                        isSelected={selectedElement === 'point'}
+                                        onSelect={() => setSelectedElement('point')}
+                                        onUpdate={updateSelectedElement}
+                                    >
                                         <div className={styles.pointsBox} style={{
                                             background: pointStyle.background,
                                             color: pointStyle.color,
@@ -541,16 +808,12 @@ function CustomizeContent() {
                                     <button className={`${styles.btnTextStyle} ${nicknameStyle.italic ? styles.active : ''}`} onClick={() => toggleStyle('italic')}>Italic</button>
                                     <button className={`${styles.btnTextStyle} ${nicknameStyle.underline ? styles.active : ''}`} onClick={() => toggleStyle('underline')}>Underline</button>
                                 </div>
-                                <div className={styles.sliderGroup}>
-                                    <div className={styles.sliderLabel}><span>크기 (Size)</span> <span>{nicknameStyle.fontSize}px</span></div>
-                                    <input type="range" min="10" max="60" value={nicknameStyle.fontSize} onChange={e => setNicknameStyle(p => ({ ...p, fontSize: Number(e.target.value) }))} className={styles.sliderInput} />
-                                </div>
                             </div>
 
                             {/* 등수 및 뱃지 설정 */}
                             <div className={styles.optionSection}>
-                                <div className={styles.sectionTitle}>🎖️ 대표 뱃지 및 크기</div>
-                                <div className={styles.gridEmojis} style={{ marginBottom: '1rem' }}>
+                                <div className={styles.sectionTitle}>🎖️ 대표 뱃지 설정</div>
+                                <div className={styles.gridEmojis}>
                                     {AVAILABLE_BADGES.map(badge => (
                                         <button
                                             key={badge}
@@ -560,12 +823,6 @@ function CustomizeContent() {
                                             {badge}
                                         </button>
                                     ))}
-                                </div>
-                                <div className={styles.sliderGroup}>
-                                    <div className={styles.sliderLabel}><span>뱃지 크기</span> <span>{badgeStyle.fontSize}px</span></div>
-                                    <input type="range" min="10" max="80" value={badgeStyle.fontSize} onChange={e => setBadgeStyle(p => ({ ...p, fontSize: Number(e.target.value) }))} className={styles.sliderInput} />
-                                    <div className={styles.sliderLabel} style={{ marginTop: '0.5rem' }}><span>등수 글자 크기</span> <span>{rankStyle.fontSize}px</span></div>
-                                    <input type="range" min="10" max="60" value={rankStyle.fontSize} onChange={e => setRankStyle(p => ({ ...p, fontSize: Number(e.target.value) }))} className={styles.sliderInput} />
                                 </div>
                             </div>
 
@@ -594,7 +851,7 @@ function CustomizeContent() {
 
                             {/* 포인트 영역 설정 */}
                             <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
-                                <div className={styles.sectionTitle}>💎 포인트 영역 스타일</div>
+                                <div className={styles.sectionTitle}>💎 포인트 영역 색상</div>
                                 <div className={styles.gridColor}>
                                     {AVAILABLE_NICKNAME_COLORS.map(color => (
                                         <div
@@ -604,10 +861,6 @@ function CustomizeContent() {
                                             onClick={() => setPointStyle(prev => ({ ...prev, color }))}
                                         />
                                     ))}
-                                </div>
-                                <div className={styles.sliderGroup} style={{ marginTop: '1rem' }}>
-                                    <div className={styles.sliderLabel}><span>점수 크기</span> <span>{pointStyle.fontSize}px</span></div>
-                                    <input type="range" min="10" max="40" value={pointStyle.fontSize} onChange={e => setPointStyle(p => ({ ...p, fontSize: Number(e.target.value) }))} className={styles.sliderInput} />
                                 </div>
                             </div>
 
@@ -641,6 +894,7 @@ function CustomizeContent() {
                     </div>
                 </div>
             </main>
+            <Toast toast={toast} onHide={hideToast} />
         </div>
     );
 }

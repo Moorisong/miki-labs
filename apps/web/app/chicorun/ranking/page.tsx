@@ -66,6 +66,14 @@ const IconZap = ({ color = '#ea580c' }: { color?: string }) => (
     </svg>
 );
 
+const IconClass = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb"
+        strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+        <path d="M6 12v5c3 3 9 3 12 0v-5" />
+    </svg>
+);
+
 function RankingContent() {
     const searchParams = useSearchParams();
     const [classCode, setClassCode] = useState<string | null>(null);
@@ -127,7 +135,8 @@ function RankingContent() {
         <main className={styles.main}>
             <div className={styles.classInfoContainer}>
                 <div className={styles.classInfoBadge}>
-                    🏫 {className || (classCode ? `${classCode} 클래스` : '클래스를 선택해주세요')}
+                    <IconClass />
+                    {className || (classCode ? `${classCode} 클래스` : '클래스를 선택해주세요')}
                 </div>
             </div>
 
