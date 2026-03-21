@@ -5,27 +5,6 @@
     flex-direction: column;
 }
 
-
-
-
-
-
-.navLink:hover {
-    color: #0f172a;
-}
-
-
-.activeLink::after {
-    content: "";
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: #d946ef;
-    border-radius: 2px;
-}
-
 .main {
     max-width: 1024px;
     margin: 0 auto;
@@ -57,16 +36,9 @@
 }
 
 .layoutGrid {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 2rem;
-}
-
-@media (min-width: 768px) {
-    .layoutGrid {
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-    }
 }
 
 .previewPanel {
@@ -87,48 +59,87 @@
 .previewContainer {
     display: flex;
     justify-content: center;
+    overflow-x: auto;
+    /* In case screen is small */
+    padding-bottom: 1rem;
 }
 
-.cardBorder {
+/* Identical layout to rankingItem */
+.rankingItemPreview {
     position: relative;
     border-radius: 1.5rem;
-    padding: 0.5rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    width: 320px;
-    height: 256px;
-    transition: background 0.3s;
-}
-
-.cardInner {
-    background: white;
-    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
     width: 100%;
-    height: 100%;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
+    max-width: 800px;
+    min-height: 80px;
     overflow: hidden;
+    transition: background 0.3s;
+    touch-action: none;
 }
 
-.cardInnerContent {
+.rankBadgeBox {
+    width: 3rem;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    z-index: 1;
+    flex-shrink: 0;
 }
 
-.cardBadge {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-}
-
-.cardNickname {
-    font-size: 1.75rem;
+.rankNumber {
+    font-size: 1.25rem;
     font-weight: 900;
+    color: #94a3b8;
+}
+
+.rankInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.rankNickname {
+    font-size: 1.1rem;
+    font-weight: 800;
     color: #1e293b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rankBadgeEmoji {
+    font-size: 1.5rem;
+    margin-top: 0;
+}
+
+.pointsBox {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: linear-gradient(90deg, #ffedd5, #fef3c7);
+    padding: 0.625rem 1rem;
+    border-radius: 0.875rem;
+    flex-shrink: 0;
+}
+
+.points {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #ea580c;
+}
+
+.optionsContainer {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+    .optionsContainer {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 .optionSection {
@@ -136,7 +147,6 @@
     border-radius: 1.5rem;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     padding: 1.5rem;
-    margin-bottom: 1.5rem;
     animation: slideLeft 0.5s ease-out forwards;
 }
 
@@ -144,6 +154,9 @@
     font-weight: 800;
     color: #1e293b;
     margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .inputNickname {
@@ -162,13 +175,61 @@
     border-color: #d946ef;
 }
 
-.grid5 {
+.textStyleControls {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.btnTextStyle {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    background: #f1f5f9;
+    border: 2px solid transparent;
+    cursor: pointer;
+    font-weight: 700;
+    color: #475569;
+    transition: all 0.2s;
+}
+
+.btnTextStyle.active {
+    background: #e0e7ff;
+    border-color: #6366f1;
+    color: #4f46e5;
+}
+
+.gridColor {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.colorCircle {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.colorCircle:hover {
+    transform: scale(1.1);
+}
+
+.colorCircle.selected {
+    border-color: #1e293b;
+    transform: scale(1.1);
+}
+
+.gridEmojis {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(3.5rem, 1fr));
     gap: 0.5rem;
 }
 
-.btnSelect {
+.btnEmoji {
     font-size: 2rem;
     padding: 0.5rem;
     border-radius: 0.75rem;
@@ -176,69 +237,57 @@
     background: #f8fafc;
     border: 2px solid transparent;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.btnSelect:hover {
+.btnEmoji:hover {
     background: #f1f5f9;
+    transform: scale(1.1);
 }
 
-.btnSelect.selected {
+.btnEmoji.selected {
     background: #fae8ff;
-    transform: scale(1.1);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     border-color: #e879f9;
-}
-
-.grid2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-}
-
-.btnBorder {
-    padding: 0.5rem;
-    border-radius: 0.75rem;
-    transition: all 0.2s;
-    cursor: pointer;
-    border: 2px solid transparent;
-}
-
-.btnBorder:hover {
-    transform: scale(1.02);
-}
-
-.btnBorder.selected {
-    transform: scale(1.05);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.btnBorderInner {
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-}
-
-.btnBorderText {
-    background: white;
-    border-radius: 0.25rem;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: #1e293b;
-}
-
-.btnSticker {
-    font-size: 1.75rem;
-    padding: 0.5rem;
-    border-radius: 0.75rem;
-    background: #f8fafc;
-    transition: all 0.2s;
-    cursor: pointer;
-    border: none;
-}
-
-.btnSticker:hover {
-    background: #fae8ff;
     transform: scale(1.1);
+}
+
+.gridBackgrounds {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+    .gridBackgrounds {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.btnBackground {
+    height: 4rem;
+    border-radius: 0.75rem;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: 3px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #1e293b;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btnBackground:hover {
+    transform: scale(1.05);
+}
+
+.btnBackground.selected {
+    border-color: #3b82f6;
+    transform: scale(1.05);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
 }
 
 .btnSave {
@@ -247,8 +296,8 @@
     color: white;
     padding: 1.25rem;
     border-radius: 1rem;
-    font-size: 1.125rem;
-    font-weight: 800;
+    font-size: 1.25rem;
+    font-weight: 900;
     border: none;
     cursor: pointer;
     display: flex;
@@ -257,19 +306,22 @@
     gap: 0.5rem;
     box-shadow: 0 10px 15px -3px rgba(168, 85, 247, 0.3);
     transition: transform 0.2s, box-shadow 0.2s;
-    margin-top: 1.5rem;
+    margin-top: 1rem;
 }
 
 .btnSave:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 20px -3px rgba(168, 85, 247, 0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(168, 85, 247, 0.4);
 }
 
 .hintText {
     margin-top: 1rem;
     text-align: center;
-    font-size: 0.875rem;
+    font-size: 0.95rem;
     color: #64748b;
+    background: #f8fafc;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
 }
 
 @keyframes slideDown {
