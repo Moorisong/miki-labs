@@ -41,6 +41,12 @@ const AVAILABLE_NICKNAME_COLORS = [
     '#ec4899', // Pink
 ];
 
+const AVAILABLE_BORDER_TYPES = [
+    { name: '실선', value: 'solid', icon: '➖' },
+    { name: '대시', value: 'dashed', icon: '---' },
+    { name: '리본', value: 'ribbon', icon: '🎀' },
+];
+
 // ─── Types ─────────────────────────────────────────────────────────────────
 interface StickerItem {
     id: string;
@@ -96,6 +102,19 @@ const IconSparkles = () => (
         <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"></path>
     </svg>
 );
+
+const getCardBorderStyle = (borderStyle: BorderStyleType) => {
+    const { color, width, style, radius } = borderStyle;
+    const baseStyle: React.CSSProperties = {
+        borderRadius: `${radius}px`,
+        borderWidth: `${width}px`,
+        borderColor: color,
+        borderStyle: ['solid', 'dashed', 'dotted'].includes(style) ? (style as any) : 'none',
+        backgroundClip: 'padding-box',
+    };
+
+    return baseStyle;
+};
 
 const IconSave = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -322,12 +341,115 @@ function DraggableElement({
     );
 }
 
+// Reusable Color Picker Component
+const SpectrumBar = ({ value, onChange, onClose }: any) => {
+    const barRef = useRef<HTMLDivElement>(null);
+
+    let initialHue = 0;
+    const hueMatch = value && typeof value === 'string' ? value.match(/hsl\((\d+)/) : null;
+    if (hueMatch) initialHue = parseInt(hueMatch[1]);
+
+    const updateColor = (clientX: number) => {
+        if (!barRef.current) return;
+        const rect = barRef.current.getBoundingClientRect();
+        const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+        const percent = x / rect.width;
+        const hue = Math.floor(percent * 360);
+        onChange(`hsl(${hue}, 75%, 50%)`);
+    };
+
+    const onPointerDown = (e: React.PointerEvent) => {
+        e.stopPropagation();
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+        updateColor(e.clientX);
+    };
+
+    const onPointerMove = (e: React.PointerEvent) => {
+        if (e.buttons > 0) {
+            e.stopPropagation();
+            updateColor(e.clientX);
+        }
+    };
+
+    const onPointerUp = (e: React.PointerEvent) => {
+        e.stopPropagation();
+        updateColor(e.clientX);
+        onClose();
+    };
+
+    return (
+        <div
+            ref={barRef}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            style={{
+                background: 'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)',
+                height: '2.5rem',
+                width: '100%',
+                borderRadius: '0.8rem',
+                cursor: 'crosshair',
+                position: 'relative',
+                marginTop: '0.5rem',
+                touchAction: 'none',
+                boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
+            }}
+        >
+            <div style={{
+                position: 'absolute',
+                top: '-2px',
+                bottom: '-2px',
+                width: '6px',
+                background: 'white',
+                boxShadow: '0 0 4px rgba(0,0,0,0.4)',
+                borderRadius: '3px',
+                left: `${(initialHue / 360) * 100}%`,
+                pointerEvents: 'none',
+                transform: 'translateX(-50%)'
+            }} />
+        </div>
+    );
+};
+
+const ColorControl = ({ id, value, onChange, activePickerId, setActivePickerId, showGradientOption = false }: any) => {
+    const isOpen = activePickerId === id;
+
+    return (
+        <div className={styles.colorPickerSection}>
+            <div
+                className={styles.colorSwatchWrapper}
+                onClick={(e) => { e.stopPropagation(); setActivePickerId(isOpen ? null : id); }}
+            >
+                <div className={styles.colorSwatch} style={{ background: value }} />
+                <span className={styles.colorHexCode}>{value.includes('gradient') ? 'Gradient' : value}</span>
+            </div>
+            {isOpen && (
+                <div
+                    className={styles.customPickerPopover}
+                    onClick={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                >
+                    <div style={{ fontWeight: 700, fontSize: '0.8rem', color: '#64748b', marginBottom: '0.4rem' }}>드래그 도중에 떼면 저장됩니다!</div>
+                    <SpectrumBar
+                        value={value}
+                        onChange={onChange}
+                        onClose={() => setActivePickerId(null)}
+                    />
+                    {showGradientOption && (
+                        <button className={styles.btnResetGradient} style={{ width: '100%', marginTop: '1rem' }} onClick={() => { onChange('linear-gradient(90deg, #ffedd5, #fef3c7)'); setActivePickerId(null); }}>기본 그라데이션 복구</button>
+                    )}
+                    <button className={styles.btnPickerDone} style={{ marginTop: '0.75rem', background: '#f8fafc', color: '#94a3b8', border: '1px solid #f1f5f9' }} onClick={() => setActivePickerId(null)}>닫기</button>
+                </div>
+            )}
+        </div>
+    );
+};
+
 function CustomizeContent() {
     const router = useRouter();
     const { toast, showToast, hideToast } = useToast();
 
     const [nickname, setNickname] = useState('치코런');
-    const [className, setClassName] = useState<string>('');
     const [selectedBadge, setSelectedBadge] = useState(AVAILABLE_BADGES[0]);
     const [cardStyle, setCardStyle] = useState(AVAILABLE_BACKGROUNDS[1].value);
     const [stickers, setStickers] = useState<StickerItem[]>([]);
@@ -383,6 +505,14 @@ function CustomizeContent() {
     const [isLoading, setIsLoading] = useState(true);
 
     const [selectedElement, setSelectedElement] = useState<string | null>(null);
+    const [activePickerId, setActivePickerId] = useState<string | null>(null);
+
+
+    // Reset picker when element changes
+    useEffect(() => {
+        setActivePickerId(null);
+    }, [selectedElement]);
+
 
     const updateSelectedElement = (updates: { fontSize?: number; scale?: number; rotate?: number }) => {
         if (!selectedElement) return;
@@ -414,18 +544,6 @@ function CustomizeContent() {
         if (selectedElement === 'point') return { size: pointStyle.fontSize, rotate: pointStyle.rotate, isSticker: false };
         return null;
     };
-
-    useEffect(() => {
-        const studentInfoStr = localStorage.getItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
-        if (studentInfoStr) {
-            try {
-                const info = JSON.parse(studentInfoStr);
-                setClassName(info.className || info.classCode || '');
-            } catch (e) {
-                console.error(e);
-            }
-        }
-    }, []);
 
     const fetchMyInfo = useCallback(async () => {
         const token = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
@@ -618,34 +736,33 @@ function CustomizeContent() {
     const selectedData = getSelectedValue();
 
     return (
-        <div className={styles.container} onClick={() => setSelectedElement(null)}>
-            <main className={styles.main}>
+        <div className={styles.container} onClick={() => { setSelectedElement(null); setActivePickerId(null); }}>
+            <main className={styles.main} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.titleArea}>
                     <h1 className={styles.title}><IconSparkles /> 랭킹 꾸미기</h1>
                     <p className={styles.subtitle}>랭킹 리스트에 나타나는 나의 랭킹 영역을 자유롭게 꾸며보세요!</p>
                 </div>
 
-                {className && (
-                    <div className={styles.classInfoContainer}>
-                        <div className={styles.classInfoBadge}>
-                            <IconClass />
-                            {className || '내 클래스'}
-                        </div>
-                    </div>
-                )}
-
                 <div className={styles.layoutGrid}>
                     <div className={styles.previewPanel}>
                         <div className={styles.previewHeader}>
                             <h2 className={styles.panelTitle} style={{ marginBottom: '0.5rem' }}>현재 내 랭킹 영역 미리보기</h2>
-                            <div className={styles.hintText} style={{ marginTop: 0 }}>
-                                💡 <b>직접 드래그</b>하여 위치를 옮겨보세요. 모바일에선 <b>한번 터치해 드래그</b>할 수 있으며, 스티커는 <b>두 번 톡톡 터치</b>하면 삭제됩니다.
-                            </div>
                         </div>
 
                         {/* 미리보기영역 - 픽스 상태일때는 이 부분만 고정됨 */}
                         <div className={styles.stickyPreviewWrapper}>
                             <div className={styles.previewContainer} style={{ paddingBottom: 0 }}>
+                                <button
+                                    className={styles.btnStickerFAB}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedElement('sticker-picker');
+                                    }}
+                                    title="스티커 추가하기"
+                                >
+                                    ✨
+                                </button>
+
                                 <div
                                     ref={(node) => {
                                         drop(node);
@@ -653,18 +770,55 @@ function CustomizeContent() {
                                     }}
                                     className={styles.rankingItemPreview}
                                     style={{
-                                        background: cardStyle,
-                                        border: `${borderStyle.width}px ${borderStyle.style} ${borderStyle.color}`,
-                                        borderRadius: `${borderStyle.radius}px`,
-                                        overflow: isFirst ? 'visible' : 'hidden',
+                                        ...(cardStyle.startsWith('linear-gradient') ? { backgroundImage: cardStyle } : { backgroundColor: cardStyle }),
+                                        ...getCardBorderStyle(borderStyle),
+                                        overflow: isFirst || borderStyle.style === 'ribbon' ? 'visible' : 'hidden',
                                         transform: isFirst ? 'scale(1.05)' : 'translateZ(0)',
                                         zIndex: isFirst ? 10 : 1,
                                         margin: isFirst ? '1rem 0' : '0',
-                                        boxShadow: isFirst ? '0 20px 25px -5px rgba(250, 204, 21, 0.4)' : undefined,
+                                        boxShadow: isFirst && borderStyle.style !== 'neon' ? '0 20px 25px -5px rgba(0, 204, 21, 0.4)' : undefined,
                                         height: '80px',
                                         display: 'block',
+                                        position: 'relative'
                                     }}
                                 >
+                                    {/* 배경 클릭 영역 (안쪽 영역 - 사용자가 더 잘 누를 수 있도록 더 높은 우선순위) */}
+                                    <div
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedElement('base-card-bg');
+                                        }}
+                                        style={{
+                                            position: 'absolute',
+                                            inset: '10px',
+                                            borderRadius: `${borderStyle.radius}px`,
+                                            zIndex: 2,
+                                            cursor: 'pointer'
+                                        }}
+                                        title="배경 바꾸기"
+                                    />
+                                    {/* 테두리 클릭 영역 (외곽 테두리 영역) */}
+                                    <div
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedElement('base-card-border');
+                                        }}
+                                        style={{
+                                            position: 'absolute',
+                                            inset: 0,
+                                            borderRadius: `${borderStyle.radius}px`,
+                                            zIndex: 1,
+                                            cursor: 'pointer'
+                                        }}
+                                        title="테두리 꾸미기"
+                                    />
+                                    {/* 리본 스타일 장식 */}
+                                    {borderStyle.style === 'ribbon' && (
+                                        <>
+                                            <div style={{ position: 'absolute', top: -10, left: -10, fontSize: '1.5rem', transform: 'rotate(-45deg)', zIndex: 100 }}>🎀</div>
+                                            <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '1.5rem', transform: 'rotate(45deg)', zIndex: 100 }}>🎀</div>
+                                        </>
+                                    )}
                                     {/* 탑강조 뱃지 */}
                                     {isFirst && (
                                         <div style={{
@@ -772,7 +926,7 @@ function CustomizeContent() {
                                         onUpdate={updateSelectedElement}
                                     >
                                         <div className={styles.pointsBox} style={{
-                                            background: pointStyle.background,
+                                            ...(pointStyle.background.startsWith('linear-gradient') ? { backgroundImage: pointStyle.background } : { backgroundColor: pointStyle.background }),
                                             color: pointStyle.color,
                                             border: `${pointStyle.borderWidth}px solid ${pointStyle.borderColor}`,
                                             margin: 0,
@@ -788,106 +942,184 @@ function CustomizeContent() {
                             </div>
                         </div>
 
-                        {/* 옵션 컨트롤 - 이제 미리보기 패널 안으로 들어와서 카드가 스크롤 끝까지 고정될 수 있게 함 */}
-                        <div className={styles.optionsContainer} style={{ marginTop: '2rem' }}>
-                            {/* 닉네임 설정 */}
-                            <div className={styles.optionSection}>
-                                <div className={styles.sectionTitle}>📝 닉네임 스타일</div>
-                                <div className={styles.gridColor}>
-                                    {AVAILABLE_NICKNAME_COLORS.map(color => (
-                                        <div
-                                            key={color}
-                                            className={`${styles.colorCircle} ${nicknameStyle.color === color ? styles.selected : ''}`}
-                                            style={{ background: color, border: nicknameStyle.color === color ? '3px solid #6366f1' : '3px solid #cbd5e1' }}
-                                            onClick={() => setNicknameStyle(prev => ({ ...prev, color }))}
+                        {/* 옵션 컨트롤 - 이제 선택된 요소에 따라 다르게 보임 */}
+                        <div className={styles.optionsContainer} style={{ marginTop: '2rem' }} onClick={(e) => e.stopPropagation()}>
+                            {/* 아무것도 선택되지 않았을 때 */}
+                            {(!selectedElement) && (
+                                <div style={{ textAlign: 'center', padding: '3rem 1.5rem', background: '#f8fafc', borderRadius: '1.5rem', border: '2px dashed #cbd5e1' }}>
+                                    <h3 style={{ color: '#1e293b', fontSize: '1.1rem', fontWeight: 800, marginBottom: '1rem' }}>🎨 꾸미기 가이드</h3>
+                                    <p style={{ color: '#64748b', fontSize: '0.95rem', fontWeight: 600, margin: '0 0 0.5rem 0' }}>카드 중앙/가장자리를 클릭해 <b>배경과 테두리</b>를 꾸며보세요!</p>
+                                    <p style={{ color: '#64748b', fontSize: '0.95rem', fontWeight: 600, margin: '0 0 0.5rem 0' }}>모든 요소는 개별적으로 <b>스타일 수정 및 드래그</b>를 할 수 있습니다.</p>
+                                    <p style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 500, margin: '0' }}>스티커는 톡톡 두 번 눌러서 삭제할 수 있어요.</p>
+                                </div>
+                            )}
+
+                            {/* 배경 수정 메뉴 */}
+                            {selectedElement === 'base-card-bg' && (
+                                <div className={styles.optionSection}>
+                                    <div className={styles.sectionTitleWithBack}>
+                                        <button onClick={() => setSelectedElement(null)} className={styles.btnBack}>←</button>
+                                        🎨 랭킹 배경
+                                    </div>
+                                    <div className={styles.gridBackgrounds}>
+                                        {AVAILABLE_BACKGROUNDS.map(bg => (
+                                            <div
+                                                key={bg.name}
+                                                onClick={() => setCardStyle(bg.value)}
+                                                className={`${styles.btnBackground} ${cardStyle === bg.value ? styles.selected : ''}`}
+                                                style={{ background: bg.value, border: cardStyle === bg.value ? '4px solid #3b82f6' : '3px solid #e2e8f0', color: bg.value === 'white' || bg.value === 'transparent' ? '#1e293b' : 'white' }}
+                                            >
+                                                {bg.name}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 테두리 수정 메뉴 */}
+                            {selectedElement === 'base-card-border' && (
+                                <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
+                                    <div className={styles.sectionTitleWithBack}>
+                                        <button onClick={() => setSelectedElement(null)} className={styles.btnBack}>←</button>
+                                        🖼️ 테두리 스타일
+                                    </div>
+                                    <div className={styles.gridBorderTypes}>
+                                        {AVAILABLE_BORDER_TYPES.map(type => (
+                                            <button
+                                                key={type.value}
+                                                onClick={() => setBorderStyle(p => ({ ...p, style: type.value }))}
+                                                className={`${styles.btnBorderType} ${borderStyle.style === type.value ? styles.selected : ''}`}
+                                            >
+                                                <span style={{ fontSize: '1.2rem', marginBottom: '4px' }}>{type.icon}</span>
+                                                <span style={{ fontSize: '0.8rem' }}>{type.name}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <ColorControl id="border-color" value={borderStyle.color} onChange={(val: string) => setBorderStyle(p => ({ ...p, color: val }))} activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
+
+                                    <div className={styles.sliderGroup} style={{ marginTop: '1.5rem' }}>
+                                        <div className={styles.sliderLabel}><span>테두리 두께</span> <span>{borderStyle.width}px</span></div>
+                                        <input type="range" min="0" max="15" value={borderStyle.width} onChange={e => setBorderStyle(p => ({ ...p, width: Number(e.target.value) }))} className={styles.sliderInput} />
+                                        <div className={styles.sliderLabel}><span>둥글기</span> <span>{borderStyle.radius}px</span></div>
+                                        <input type="range" min="0" max="100" value={borderStyle.radius} onChange={e => setBorderStyle(p => ({ ...p, radius: Number(e.target.value) }))} className={styles.sliderInput} />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 스티커 추가 메뉴 */}
+                            {selectedElement === 'sticker-picker' && (
+                                <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
+                                    <div className={styles.sectionTitleWithBack}>
+                                        <button onClick={() => setSelectedElement(null)} className={styles.btnBack}>←</button>
+                                        ✨ 장식 스티커 추가
+                                    </div>
+                                    <div className={styles.gridEmojis}>
+                                        {AVAILABLE_STICKERS.map(sticker => (
+                                            <button
+                                                key={sticker}
+                                                onClick={() => addSticker(sticker)}
+                                                className={styles.btnEmoji}
+                                            >
+                                                {sticker}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 닉네임 선택 시 */}
+                            {selectedElement === 'nickname' && (
+                                <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
+                                    <div className={styles.sectionTitle}>📝 닉네임 스타일</div>
+                                    <ColorControl id="nick-color" value={nicknameStyle.color} onChange={(val: string) => setNicknameStyle(p => ({ ...p, color: val }))} activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
+
+                                    <div className={styles.textStyleControls}>
+                                        <button className={`${styles.btnTextStyle} ${nicknameStyle.bold ? styles.active : ''}`} onClick={() => toggleStyle('bold')}>Bold</button>
+                                        <button className={`${styles.btnTextStyle} ${nicknameStyle.italic ? styles.active : ''}`} onClick={() => toggleStyle('italic')}>Italic</button>
+                                        <button className={`${styles.btnTextStyle} ${nicknameStyle.underline ? styles.active : ''}`} onClick={() => toggleStyle('underline')}>Underline</button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 뱃지 선택 시 */}
+                            {selectedElement === 'badge' && (
+                                <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
+                                    <div className={styles.sectionTitle}>🎖️ 대표 뱃지 설정</div>
+                                    <div className={styles.gridEmojis}>
+                                        {AVAILABLE_BADGES.map(badge => (
+                                            <button
+                                                key={badge}
+                                                onClick={() => setSelectedBadge(badge)}
+                                                className={`${styles.btnEmoji} ${selectedBadge === badge ? styles.selected : ''}`}
+                                            >
+                                                {badge}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 포인트 선택 시 */}
+                            {selectedElement === 'point' && (
+                                <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
+                                    <div className={styles.sectionTitle}>💎 포인트 스타일 편집</div>
+
+                                    <div style={{ marginBottom: '1.5rem' }}>
+                                        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '0.5rem' }}>글자 색상</div>
+                                        <ColorControl id="p-text-color" value={pointStyle.color} onChange={(val: string) => setPointStyle(p => ({ ...p, color: val }))} activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
+
+                                    </div>
+
+                                    <div style={{ marginBottom: '1.5rem' }}>
+                                        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '0.5rem' }}>배경 색상</div>
+                                        <ColorControl id="p-bg-color" value={pointStyle.background} onChange={(val: string) => setPointStyle(p => ({ ...p, background: val }))} showGradientOption activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
+
+                                    </div>
+
+                                    <div style={{ marginBottom: '1.5rem' }}>
+                                        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '0.5rem' }}>테두리 색상</div>
+                                        <ColorControl id="p-border-color" value={pointStyle.borderColor} onChange={(val: string) => setPointStyle(p => ({ ...p, borderColor: val }))} activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
+
+                                    </div>
+
+                                    <div className={styles.sliderGroup}>
+                                        <div className={styles.sliderLabel}><span>테두리 두께</span> <span>{pointStyle.borderWidth}px</span></div>
+                                        <input
+                                            type="range"
+                                            min="0" max="8"
+                                            value={pointStyle.borderWidth}
+                                            onChange={e => setPointStyle(p => ({ ...p, borderWidth: Number(e.target.value) }))}
+                                            className={styles.sliderInput}
                                         />
-                                    ))}
+                                    </div>
                                 </div>
-                                <div className={styles.textStyleControls}>
-                                    <button className={`${styles.btnTextStyle} ${nicknameStyle.bold ? styles.active : ''}`} onClick={() => toggleStyle('bold')}>Bold</button>
-                                    <button className={`${styles.btnTextStyle} ${nicknameStyle.italic ? styles.active : ''}`} onClick={() => toggleStyle('italic')}>Italic</button>
-                                    <button className={`${styles.btnTextStyle} ${nicknameStyle.underline ? styles.active : ''}`} onClick={() => toggleStyle('underline')}>Underline</button>
-                                </div>
-                            </div>
+                            )}
 
-                            {/* 등수 및 뱃지 설정 */}
-                            <div className={styles.optionSection}>
-                                <div className={styles.sectionTitle}>🎖️ 대표 뱃지 설정</div>
-                                <div className={styles.gridEmojis}>
-                                    {AVAILABLE_BADGES.map(badge => (
-                                        <button
-                                            key={badge}
-                                            onClick={() => setSelectedBadge(badge)}
-                                            className={`${styles.btnEmoji} ${selectedBadge === badge ? styles.selected : ''}`}
-                                        >
-                                            {badge}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
+                            {/* 등수 선택 시 */}
+                            {selectedElement === 'rank' && (
+                                <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
+                                    <div className={styles.sectionTitle}>#{myRank} 등수 표시 스타일</div>
+                                    <ColorControl id="rank-color" value={rankStyle.color} onChange={(val: string) => setRankStyle(p => ({ ...p, color: val }))} activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
 
-                            {/* 테두리(배경) 및 테두리 설정 */}
-                            <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
-                                <div className={styles.sectionTitle}>🎨 랭킹 배경 및 테두리</div>
-                                <div className={styles.gridBackgrounds}>
-                                    {AVAILABLE_BACKGROUNDS.map(bg => (
-                                        <div
-                                            key={bg.name}
-                                            onClick={() => setCardStyle(bg.value)}
-                                            className={`${styles.btnBackground} ${cardStyle === bg.value ? styles.selected : ''}`}
-                                            style={{ background: bg.value, border: cardStyle === bg.value ? '4px solid #3b82f6' : '3px solid #e2e8f0', color: bg.value === 'white' || bg.value === 'transparent' ? '#1e293b' : 'white' }}
-                                        >
-                                            {bg.name}
-                                        </div>
-                                    ))}
                                 </div>
-                                <div className={styles.sliderGroup} style={{ marginTop: '1.5rem' }}>
-                                    <div className={styles.sliderLabel}><span>테두리 두께</span> <span>{borderStyle.width}px</span></div>
-                                    <input type="range" min="0" max="15" value={borderStyle.width} onChange={e => setBorderStyle(p => ({ ...p, width: Number(e.target.value) }))} className={styles.sliderInput} />
-                                    <div className={styles.sliderLabel}><span>둥글기</span> <span>{borderStyle.radius}px</span></div>
-                                    <input type="range" min="0" max="100" value={borderStyle.radius} onChange={e => setBorderStyle(p => ({ ...p, radius: Number(e.target.value) }))} className={styles.sliderInput} />
-                                </div>
-                            </div>
+                            )}
 
-                            {/* 포인트 영역 설정 */}
-                            <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
-                                <div className={styles.sectionTitle}>💎 포인트 영역 색상</div>
-                                <div className={styles.gridColor}>
-                                    {AVAILABLE_NICKNAME_COLORS.map(color => (
-                                        <div
-                                            key={color}
-                                            className={`${styles.colorCircle} ${pointStyle.color === color ? styles.selected : ''}`}
-                                            style={{ background: color, border: pointStyle.color === color ? '3px solid #6366f1' : '3px solid #cbd5e1' }}
-                                            onClick={() => setPointStyle(prev => ({ ...prev, color }))}
-                                        />
-                                    ))}
+                            {/* 스티커 선택 시 - 삭제 팁 정도만 */}
+                            {selectedElement?.toString().startsWith('sticker-') && (
+                                <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
+                                    <div className={styles.sectionTitle}>✨ 선택된 스티커</div>
+                                    <p style={{ color: '#64748b' }}>스티커를 두 번 빠르게 터치/클릭하면 삭제할 수 있습니다.</p>
                                 </div>
-                            </div>
+                            )}
 
-                            {/* 스티커 설정 */}
-                            <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
-                                <div className={styles.sectionTitle}>✨ 장식 스티커 추가</div>
-                                <div className={styles.gridEmojis}>
-                                    {AVAILABLE_STICKERS.map(sticker => (
-                                        <button
-                                            key={sticker}
-                                            onClick={() => addSticker(sticker)}
-                                            className={styles.btnEmoji}
-                                        >
-                                            {sticker}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* 저장 버튼 */}
+                            {/* 저장 버튼은 항상 하단에 */}
                             <div style={{ gridColumn: '1 / -1' }}>
                                 <button
                                     className={styles.btnSave}
                                     onClick={handleSave}
                                     disabled={isSaving}
                                 >
-                                    {isSaving ? '저장 중...' : <><IconSave /> 변화된 랭킹 영역 저장하기</>}
+                                    {isSaving ? '저장 중...' : <><IconSave /> 저장하기</>}
                                 </button>
                             </div>
                         </div>
