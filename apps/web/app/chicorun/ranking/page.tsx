@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
 import { CHICORUN_API, CHICORUN_STORAGE_KEY } from '@/constants/chicorun';
@@ -96,6 +96,41 @@ function RankingContent() {
     const [isLoading, setIsLoading] = useState(true);
     const [hasSearched, setHasSearched] = useState(false);
 
+    const [scale, setScale] = useState(1);
+    const [isMounted, setIsMounted] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const updateScale = useCallback(() => {
+        if (!containerRef.current) return;
+        const rectWidth = containerRef.current.clientWidth;
+        const winWidth = window.innerWidth;
+        const docWidth = document.documentElement.clientWidth;
+
+        const availableWidth = Math.min(rectWidth > 0 ? rectWidth : winWidth, winWidth, docWidth) - 32;
+        const baseWidth = 800;
+
+        if (availableWidth < baseWidth) {
+            const newScale = availableWidth / baseWidth;
+            setScale(newScale);
+        } else {
+            setScale(1);
+        }
+    }, [containerRef]);
+
+    useEffect(() => {
+        setIsMounted(true);
+        updateScale();
+
+        window.addEventListener('resize', updateScale);
+        const observer = new ResizeObserver(updateScale);
+        if (containerRef.current) observer.observe(containerRef.current);
+
+        return () => {
+            window.removeEventListener('resize', updateScale);
+            observer.disconnect();
+        };
+    }, [updateScale, isLoading, rankings]);
+
     // Initial class code detection
     useEffect(() => {
         const urlCode = searchParams.get('classCode');
@@ -172,7 +207,7 @@ function RankingContent() {
             )}
 
             {!isLoading && classCode && rankings.length > 0 && (
-                <div className={styles.rankingList}>
+                <div className={styles.rankingList} ref={containerRef}>
                     {rankings.map((user, index) => {
                         if (!user) return null;
 
@@ -192,117 +227,132 @@ function RankingContent() {
                         return (
                             <div
                                 key={user.id || index.toString()}
-                                className={styles.rankingItem}
                                 style={{
-                                    animationDelay: `${index * 0.05}s`,
-                                    ...((user.cardStyle || 'white').startsWith('linear-gradient')
-                                        ? { backgroundImage: user.cardStyle || 'white' }
-                                        : { backgroundColor: user.cardStyle || 'white' }),
-                                    position: 'relative',
-                                    overflow: isFirst || user.customize?.borderStyle?.style === 'ribbon' ? 'visible' : 'hidden',
-                                    transform: isFirst ? 'scale(1.05)' : 'translateZ(0)',
+                                    width: `${800 * scale * (isFirst ? 1.05 : 1)}px`,
+                                    height: `${80 * scale * (isFirst ? 1.05 : 1)}px`,
+                                    margin: isFirst ? `${16 * scale}px auto` : '0 auto',
                                     zIndex: isFirst ? 10 : 1,
-                                    margin: isFirst ? '1rem 0' : '0',
-                                    ...getCardBorderStyle(user.customize?.borderStyle),
-                                    boxShadow: isFirst && user.customize?.borderStyle?.style !== 'neon' ? '0 20px 25px -5px rgba(250, 204, 21, 0.4)' : undefined,
-                                    height: '80px',
-                                    display: 'block',
+                                    position: 'relative',
+                                    animation: `${styles.slideUp} 0.5s ease-out forwards`,
+                                    animationDelay: `${index * 0.05}s`,
                                 }}
                             >
-                                {user.customize?.borderStyle?.style === 'ribbon' && (
-                                    <>
-                                        <div style={{ position: 'absolute', top: -10, left: -10, fontSize: '1.5rem', transform: 'rotate(-45deg)', zIndex: 100 }}>🎀</div>
-                                        <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '1.5rem', transform: 'rotate(45deg)', zIndex: 100 }}>🎀</div>
-                                    </>
-                                )}
-                                {isFirst && (
-                                    <div style={{
+                                <div
+                                    className={styles.rankingItem}
+                                    style={{
+                                        width: '800px',
+                                        height: '80px',
+                                        minWidth: '800px',
+                                        ...((user.cardStyle || 'white').startsWith('linear-gradient')
+                                            ? { backgroundImage: user.cardStyle || 'white' }
+                                            : { backgroundColor: user.cardStyle || 'white' }),
                                         position: 'absolute',
-                                        top: '-15px',
-                                        left: '-15px',
-                                        background: 'linear-gradient(135deg, #fef08a, #ca8a04)',
-                                        color: '#fff',
-                                        padding: '0.25rem 0.75rem',
-                                        borderRadius: '1rem',
-                                        fontWeight: 900,
-                                        fontSize: '1rem',
-                                        boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
-                                        transform: 'rotate(-10deg)',
-                                        zIndex: 30,
-                                        border: '2px solid white',
-                                        pointerEvents: 'none',
-                                    }}>
-                                        👑 TOP 1
-                                    </div>
-                                )}
-
-                                {user.customize?.stickers?.map((sticker) => (
-                                    <div
-                                        key={sticker.id}
-                                        style={{
+                                        left: 0,
+                                        top: 0,
+                                        overflow: isFirst || user.customize?.borderStyle?.style === 'ribbon' ? 'visible' : 'hidden',
+                                        transformOrigin: 'top left',
+                                        transform: `scale(${scale * (isFirst ? 1.05 : 1)})`,
+                                        ...getCardBorderStyle(user.customize?.borderStyle),
+                                        boxShadow: isFirst && user.customize?.borderStyle?.style !== 'neon' ? '0 20px 25px -5px rgba(250, 204, 21, 0.4)' : undefined,
+                                        display: 'block',
+                                        margin: 0,
+                                    }}
+                                >
+                                    {user.customize?.borderStyle?.style === 'ribbon' && (
+                                        <>
+                                            <div style={{ position: 'absolute', top: -10, left: -10, fontSize: '1.5rem', transform: 'rotate(-45deg)', zIndex: 100 }}>🎀</div>
+                                            <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '1.5rem', transform: 'rotate(45deg)', zIndex: 100 }}>🎀</div>
+                                        </>
+                                    )}
+                                    {isFirst && (
+                                        <div style={{
                                             position: 'absolute',
-                                            left: sticker.x,
-                                            top: sticker.y,
-                                            fontSize: '2rem',
-                                            zIndex: 5,
-                                            transform: `scale(${sticker.scale || 1}) rotate(${sticker.rotate || 0}deg)`,
-                                        }}
-                                    >
-                                        {sticker.emoji}
+                                            top: '-15px',
+                                            left: '-15px',
+                                            background: 'linear-gradient(135deg, #fef08a, #ca8a04)',
+                                            color: '#fff',
+                                            padding: '0.25rem 0.75rem',
+                                            borderRadius: '1rem',
+                                            fontWeight: 900,
+                                            fontSize: '1rem',
+                                            boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
+                                            transform: 'rotate(-10deg)',
+                                            zIndex: 30,
+                                            border: '2px solid white',
+                                            pointerEvents: 'none',
+                                        }}>
+                                            👑 TOP 1
+                                        </div>
+                                    )}
+
+                                    {user.customize?.stickers?.map((sticker) => (
+                                        <div
+                                            key={sticker.id}
+                                            style={{
+                                                position: 'absolute',
+                                                left: sticker.x,
+                                                top: sticker.y,
+                                                fontSize: '2rem',
+                                                zIndex: 5,
+                                                transform: `scale(${sticker.scale || 1}) rotate(${sticker.rotate || 0}deg)`,
+                                            }}
+                                        >
+                                            {sticker.emoji}
+                                        </div>
+                                    ))}
+
+                                    {/* Rank */}
+                                    <div style={{ position: 'absolute', left: rX, top: rY, zIndex: 10 }}>
+                                        <span className={styles.rankNumber} style={{
+                                            color: user.customize?.rankStyle?.color || (user.rank <= 3 ? '#ca8a04' : '#94a3b8'),
+                                            fontSize: user.customize?.rankStyle?.fontSize ? `${user.customize.rankStyle.fontSize}px` : (isFirst ? '1.75rem' : '1.25rem'),
+                                            lineHeight: 1
+                                        }}>
+                                            #{user.rank}
+                                        </span>
                                     </div>
-                                ))}
 
-                                {/* Rank */}
-                                <div style={{ position: 'absolute', left: rX, top: rY, zIndex: 10 }}>
-                                    <span className={styles.rankNumber} style={{
-                                        color: user.customize?.rankStyle?.color || (user.rank <= 3 ? '#ca8a04' : '#94a3b8'),
-                                        fontSize: user.customize?.rankStyle?.fontSize ? `${user.customize.rankStyle.fontSize}px` : (isFirst ? '1.75rem' : '1.25rem'),
-                                        lineHeight: 1
-                                    }}>
-                                        #{user.rank}
-                                    </span>
-                                </div>
-
-                                {/* Badge */}
-                                <div style={{ position: 'absolute', left: bX, top: bY, zIndex: 10 }}>
-                                    <div style={{ fontSize: user.customize?.badgeStyle?.fontSize ? `${user.customize.badgeStyle.fontSize}px` : '1.5rem', lineHeight: 1 }}>
-                                        {user.badge || '⭐'}
+                                    {/* Badge */}
+                                    <div style={{ position: 'absolute', left: bX, top: bY, zIndex: 10 }}>
+                                        <div style={{ fontSize: user.customize?.badgeStyle?.fontSize ? `${user.customize.badgeStyle.fontSize}px` : '1.5rem', lineHeight: 1 }}>
+                                            {user.badge || '⭐'}
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Nickname */}
-                                <div style={{ position: 'absolute', left: nX, top: nY, zIndex: 10 }}>
-                                    <div
-                                        className={styles.rankNickname}
-                                        style={{
-                                            color: user.nicknameStyle?.color || '#1e293b',
-                                            fontWeight: user.nicknameStyle?.bold ? 800 : 500,
-                                            fontStyle: user.nicknameStyle?.italic ? 'italic' : 'normal',
-                                            textDecoration: user.nicknameStyle?.underline ? 'underline' : 'none',
-                                            fontSize: user.nicknameStyle?.fontSize ? `${user.nicknameStyle.fontSize}px` : '1.1rem',
-                                            lineHeight: 1,
-                                            whiteSpace: 'nowrap',
-                                            paddingRight: user.nicknameStyle?.italic ? '0.2em' : '0'
-                                        }}
-                                    >
-                                        {user.nickname}
+                                    {/* Nickname */}
+                                    <div style={{ position: 'absolute', left: nX, top: nY, zIndex: 10 }}>
+                                        <div
+                                            className={styles.rankNickname}
+                                            style={{
+                                                color: user.nicknameStyle?.color || '#1e293b',
+                                                fontWeight: user.nicknameStyle?.bold ? 800 : 500,
+                                                fontStyle: user.nicknameStyle?.italic ? 'italic' : 'normal',
+                                                textDecoration: user.nicknameStyle?.underline ? 'underline' : 'none',
+                                                fontSize: user.nicknameStyle?.fontSize ? `${user.nicknameStyle.fontSize}px` : '1.1rem',
+                                                lineHeight: 1,
+                                                whiteSpace: 'nowrap',
+                                                paddingRight: user.nicknameStyle?.italic ? '0.2em' : '0'
+                                            }}
+                                        >
+                                            {user.nickname}
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Points */}
-                                <div style={{ position: 'absolute', left: pX, top: pY, zIndex: 10 }}>
-                                    <div className={styles.pointsBox} style={{
-                                        background: user.customize?.pointStyle?.background || 'linear-gradient(90deg, #ffedd5, #fef3c7)',
-                                        color: user.customize?.pointStyle?.color || '#ea580c',
-                                        border: user.customize?.pointStyle?.borderWidth ? `${user.customize.pointStyle.borderWidth}px solid ${user.customize.pointStyle.borderColor}` : 'none',
-                                        padding: '0.5rem 0.8rem',
-                                        margin: 0
-                                    }}>
-                                        <IconZap color={user.customize?.pointStyle?.color || '#ea580c'} />
-                                        <span className={styles.points} style={{
+                                    {/* Points */}
+                                    <div style={{ position: 'absolute', left: pX, top: pY, zIndex: 10 }}>
+                                        <div className={styles.pointsBox} style={{
+                                            background: user.customize?.pointStyle?.background || 'linear-gradient(90deg, #ffedd5, #fef3c7)',
                                             color: user.customize?.pointStyle?.color || '#ea580c',
-                                            fontSize: user.customize?.pointStyle?.fontSize ? `${user.customize.pointStyle.fontSize}px` : '1.1rem'
-                                        }}>{user.point.toLocaleString()}P</span>
+                                            border: user.customize?.pointStyle?.borderWidth ? `${user.customize.pointStyle.borderWidth}px solid ${user.customize.pointStyle.borderColor}` : 'none',
+                                            padding: '0.5rem 0.8rem',
+                                            margin: 0
+                                        }}>
+                                            <IconZap color={user.customize?.pointStyle?.color || '#ea580c'} />
+                                            <span className={styles.points} style={{
+                                                color: user.customize?.pointStyle?.color || '#ea580c',
+                                                fontSize: user.customize?.pointStyle?.fontSize ? `${user.customize.pointStyle.fontSize}px` : '1.1rem'
+                                            }}>{user.point.toLocaleString()}P</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

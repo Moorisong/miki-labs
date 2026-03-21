@@ -149,6 +149,7 @@ function DraggableElement({
     rotate = 0,
     scale = 1,
     isSelected = false,
+    parentScale = 1,
     onSelect,
     onUpdate
 }: {
@@ -161,6 +162,7 @@ function DraggableElement({
     rotate?: number;
     scale?: number;
     isSelected?: boolean;
+    parentScale?: number;
     onSelect?: () => void;
     onUpdate?: (updates: { scale?: number; rotate?: number; fontSize?: number }) => void;
 }) {
@@ -267,8 +269,8 @@ function DraggableElement({
             }}
             style={{
                 position: 'absolute',
-                left: position.x + (isDragging && offset ? offset.x : 0),
-                top: position.y + (isDragging && offset ? offset.y : 0),
+                left: position.x + (isDragging && offset ? offset.x / parentScale : 0),
+                top: position.y + (isDragging && offset ? offset.y / parentScale : 0),
                 cursor: (isResizing || isRotating) ? 'crosshair' : 'pointer',
                 opacity: isDragging ? 0.3 : 1,
                 userSelect: 'none',
@@ -565,6 +567,41 @@ function CustomizeContent() {
     const [selectedElement, setSelectedElement] = useState<string | null>(null);
     const [activePickerId, setActivePickerId] = useState<string | null>(null);
 
+    const [scale, setScale] = useState(1);
+    const [isMounted, setIsMounted] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const updateScale = useCallback(() => {
+        if (!containerRef.current) return;
+        const rectWidth = containerRef.current.clientWidth;
+        const winWidth = window.innerWidth;
+        const docWidth = document.documentElement.clientWidth;
+
+        const availableWidth = Math.min(rectWidth > 0 ? rectWidth : winWidth, winWidth, docWidth) - 48;
+        const baseWidth = 800;
+
+        if (availableWidth < baseWidth) {
+            const newScale = availableWidth / baseWidth;
+            setScale(newScale);
+        } else {
+            setScale(1);
+        }
+    }, [containerRef]);
+
+    useEffect(() => {
+        setIsMounted(true);
+        updateScale();
+
+        window.addEventListener('resize', updateScale);
+        const observer = new ResizeObserver(updateScale);
+        if (containerRef.current) observer.observe(containerRef.current);
+
+        return () => {
+            window.removeEventListener('resize', updateScale);
+            observer.disconnect();
+        };
+    }, [updateScale, isLoading]);
+
     // Reset picker when element changes
     useEffect(() => {
         setActivePickerId(null);
@@ -698,8 +735,8 @@ function CustomizeContent() {
         drop: (item: any, monitor) => {
             const delta = monitor.getDifferenceFromInitialOffset();
             if (!delta) return;
-            const newX = Math.round(item.x + delta.x);
-            const newY = Math.round(item.y + delta.y);
+            const newX = Math.round(item.x + delta.x / scale);
+            const newY = Math.round(item.y + delta.y / scale);
             const type = monitor.getItemType();
 
             if (type === 'sticker') moveSticker(item.id, newX, newY);
@@ -807,7 +844,7 @@ function CustomizeContent() {
                         </div>
 
                         {/* 미리보기영역 - 픽스 상태일때는 이 부분만 고정됨 */}
-                        <div className={styles.stickyPreviewWrapper}>
+                        <div className={styles.stickyPreviewWrapper} ref={containerRef}>
                             <div className={styles.previewContainer} style={{ paddingBottom: 0 }}>
                                 <button
                                     className={styles.btnStickerFAB}
@@ -820,187 +857,200 @@ function CustomizeContent() {
                                     ✨
                                 </button>
 
-                                <div
-                                    ref={(node) => {
-                                        drop(node);
-                                        (previewContainerRef as any).current = node;
-                                    }}
-                                    className={styles.rankingItemPreview}
-                                    style={{
-                                        backgroundColor: cardStyle.includes('gradient') ? undefined : cardStyle,
-                                        backgroundImage: cardStyle.includes('gradient') ? cardStyle : undefined,
-                                        ...getCardBorderStyle(borderStyle),
-                                        overflow: isFirst || borderStyle.style === 'ribbon' ? 'visible' : 'hidden',
-                                        transform: isFirst ? 'scale(1.05)' : 'translateZ(0)',
-                                        zIndex: isFirst ? 10 : 1,
-                                        margin: isFirst ? '1rem 0' : '0',
-                                        boxShadow: isFirst && borderStyle.style !== 'neon' ? '0 20px 25px -5px rgba(0, 204, 21, 0.4)' : undefined,
-                                        height: '80px',
-                                        display: 'block',
-                                        position: 'relative'
-                                    }}
-                                >
-                                    {/* 배경 클릭 영역 (안쪽 영역 - 사용자가 더 잘 누를 수 있도록 더 높은 우선순위) */}
+                                <div style={{
+                                    width: `${800 * scale * (isFirst ? 1.05 : 1)}px`,
+                                    height: `${80 * scale * (isFirst ? 1.05 : 1)}px`,
+                                    position: 'relative',
+                                    margin: isFirst ? `${16 * scale}px auto` : '0 auto',
+                                }}>
                                     <div
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedElement('base-card-bg');
+                                        ref={(node) => {
+                                            drop(node);
+                                            (previewContainerRef as any).current = node;
                                         }}
-                                        className={styles.backgroundClickArea}
+                                        className={styles.rankingItemPreview}
                                         style={{
+                                            backgroundColor: cardStyle.includes('gradient') ? undefined : cardStyle,
+                                            backgroundImage: cardStyle.includes('gradient') ? cardStyle : undefined,
+                                            ...getCardBorderStyle(borderStyle),
+                                            overflow: isFirst || borderStyle.style === 'ribbon' ? 'visible' : 'hidden',
+                                            transformOrigin: 'top left',
+                                            transform: `scale(${scale * (isFirst ? 1.05 : 1)})`,
                                             position: 'absolute',
-                                            inset: '15px',
-                                            borderRadius: `${borderStyle.radius}px`,
-                                            zIndex: 2,
-                                        }}
-                                        title="배경 바꾸기"
-                                    />
-                                    {/* 테두리 클릭 영역 (외곽 테두리 영역) */}
-                                    <div
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedElement('base-card-border');
-                                        }}
-                                        className={styles.borderClickArea}
-                                        style={{
-                                            position: 'absolute',
-                                            inset: 0,
-                                            borderRadius: `${borderStyle.radius}px`,
-                                            zIndex: 1,
-                                        }}
-                                        title="테두리 꾸미기"
-                                    />
-                                    {/* 리본 스타일 장식 */}
-                                    {borderStyle.style === 'ribbon' && (
-                                        <>
-                                            <div style={{ position: 'absolute', top: -10, left: -10, fontSize: '1.5rem', transform: 'rotate(-45deg)', zIndex: 100 }}>🎀</div>
-                                            <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '1.5rem', transform: 'rotate(45deg)', zIndex: 100 }}>🎀</div>
-                                        </>
-                                    )}
-                                    {/* 탑강조 뱃지 */}
-                                    {isFirst && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            top: '-15px',
-                                            left: '-15px',
-                                            background: 'linear-gradient(135deg, #fef08a, #ca8a04)',
-                                            color: '#fff',
-                                            padding: '0.25rem 0.75rem',
-                                            borderRadius: '1rem',
-                                            fontWeight: 900,
-                                            fontSize: '1rem',
-                                            boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
-                                            transform: 'rotate(-10deg)',
-                                            zIndex: 40,
-                                            border: '2px solid white',
-                                            pointerEvents: 'none',
-                                        }}>
-                                            👑 TOP 1
-                                        </div>
-                                    )}
-
-                                    {/* 스티커들 */}
-                                    {stickers.map(sticker => (
-                                        <DraggableElement
-                                            key={sticker.id}
-                                            type="sticker"
-                                            id={sticker.id}
-                                            position={{ x: sticker.x, y: sticker.y }}
-                                            rotate={sticker.rotate}
-                                            scale={sticker.scale}
-                                            isSelected={selectedElement === `sticker-${sticker.id}`}
-                                            onSelect={() => setSelectedElement(`sticker-${sticker.id}`)}
-                                            onUpdate={updateSelectedElement}
-                                            style={{ fontSize: '2rem', zIndex: 10 }}
-                                            title="클릭해서 편집 / 더블탭해서 삭제"
-                                        >
-                                            <div onDoubleClick={() => removeSticker(sticker.id)} onClick={() => handleTouchSticker(sticker.id)}>{sticker.emoji}</div>
-                                        </DraggableElement>
-                                    ))}
-
-                                    {/* 랭크 번호 */}
-                                    <DraggableElement
-                                        type="rank"
-                                        position={{ x: rankStyle.x, y: rankStyle.y }}
-                                        rotate={rankStyle.rotate}
-                                        isSelected={selectedElement === 'rank'}
-                                        onSelect={() => setSelectedElement('rank')}
-                                        onUpdate={updateSelectedElement}
-                                        title="클릭해서 등수 스타일 편집 / 드래그해서 이동"
-                                    >
-                                        <span className={styles.rankNumber} style={{
-                                            color: rankStyle.color,
-                                            fontSize: `${rankStyle.fontSize}px`,
+                                            left: 0,
+                                            top: 0,
+                                            width: '800px',
+                                            height: '80px',
+                                            minWidth: '800px',
+                                            zIndex: isFirst ? 10 : 1,
                                             margin: 0,
-                                            lineHeight: 1
-                                        }}>
-                                            #{myRank > 0 ? myRank : '-'}
-                                        </span>
-                                    </DraggableElement>
-
-                                    {/* 뱃지 */}
-                                    <DraggableElement
-                                        type="badge"
-                                        position={{ x: badgeStyle.x, y: badgeStyle.y }}
-                                        rotate={badgeStyle.rotate}
-                                        isSelected={selectedElement === 'badge'}
-                                        onSelect={() => setSelectedElement('badge')}
-                                        onUpdate={updateSelectedElement}
-                                        title="클릭해서 뱃지 변경 / 드래그해서 이동"
+                                            boxShadow: isFirst && borderStyle.style !== 'neon' ? '0 20px 25px -5px rgba(250, 204, 21, 0.4)' : undefined,
+                                            display: 'block',
+                                        }}
                                     >
-                                        <div style={{ fontSize: `${badgeStyle.fontSize}px`, lineHeight: 1 }}>{selectedBadge}</div>
-                                    </DraggableElement>
-
-                                    {/* 닉네임 */}
-                                    <DraggableElement
-                                        type="nickname"
-                                        position={{ x: nicknameStyle.x, y: nicknameStyle.y }}
-                                        rotate={nicknameStyle.rotate}
-                                        isSelected={selectedElement === 'nickname'}
-                                        onSelect={() => setSelectedElement('nickname')}
-                                        onUpdate={updateSelectedElement}
-                                        title="클릭해서 닉네임 스타일 편집 / 드래그해서 이동"
-                                    >
+                                        {/* 배경 클릭 영역 (안쪽 영역 - 사용자가 더 잘 누를 수 있도록 더 높은 우선순위) */}
                                         <div
-                                            style={{
-                                                color: nicknameStyle.color,
-                                                fontWeight: nicknameStyle.bold ? 800 : 500,
-                                                fontStyle: nicknameStyle.italic ? 'italic' : 'normal',
-                                                textDecoration: nicknameStyle.underline ? 'underline' : 'none',
-                                                textShadow: cardStyle !== 'white' && nicknameStyle.color === '#ffffff' ? '0 1px 3px rgba(0,0,0,0.5)' : 'none',
-                                                fontSize: `${nicknameStyle.fontSize}px`,
-                                                whiteSpace: 'nowrap',
-                                                lineHeight: 1,
-                                                paddingRight: nicknameStyle.italic ? '0.2em' : '0'
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedElement('base-card-bg');
                                             }}
-                                        >
-                                            {nickname}
-                                        </div>
-                                    </DraggableElement>
+                                            className={styles.backgroundClickArea}
+                                            style={{
+                                                position: 'absolute',
+                                                inset: '15px',
+                                                borderRadius: `${borderStyle.radius}px`,
+                                                zIndex: 2,
+                                            }}
+                                            title="배경 바꾸기"
+                                        />
+                                        {/* 테두리 클릭 영역 (외곽 테두리 영역) */}
+                                        <div
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedElement('base-card-border');
+                                            }}
+                                            className={styles.borderClickArea}
+                                            style={{
+                                                position: 'absolute',
+                                                inset: 0,
+                                                borderRadius: `${borderStyle.radius}px`,
+                                                zIndex: 1,
+                                            }}
+                                            title="테두리 꾸미기"
+                                        />
+                                        {/* 리본 스타일 장식 */}
+                                        {borderStyle.style === 'ribbon' && (
+                                            <>
+                                                <div style={{ position: 'absolute', top: -10, left: -10, fontSize: '1.5rem', transform: 'rotate(-45deg)', zIndex: 100 }}>🎀</div>
+                                                <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '1.5rem', transform: 'rotate(45deg)', zIndex: 100 }}>🎀</div>
+                                            </>
+                                        )}
+                                        {/* 탑강조 뱃지 */}
+                                        {isFirst && (
+                                            <div style={{
+                                                position: 'absolute',
+                                                top: '-15px',
+                                                left: '-15px',
+                                                background: 'linear-gradient(135deg, #fef08a, #ca8a04)',
+                                                color: '#fff',
+                                                padding: '0.25rem 0.75rem',
+                                                borderRadius: '1rem',
+                                                fontWeight: 900,
+                                                fontSize: '1rem',
+                                                boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
+                                                transform: 'rotate(-10deg)',
+                                                zIndex: 40,
+                                                border: '2px solid white',
+                                                pointerEvents: 'none',
+                                            }}>
+                                                👑 TOP 1
+                                            </div>
+                                        )}
 
-                                    {/* 포인트 */}
-                                    <DraggableElement
-                                        type="point"
-                                        position={{ x: pointStyle.x, y: pointStyle.y }}
-                                        rotate={pointStyle.rotate}
-                                        isSelected={selectedElement === 'point'}
-                                        onSelect={() => setSelectedElement('point')}
-                                        onUpdate={updateSelectedElement}
-                                        title="클릭해서 포인트 스타일 편집 / 드래그해서 이동"
-                                    >
-                                        <div className={styles.pointsBox} style={{
-                                            background: pointStyle.background,
-                                            color: pointStyle.color,
-                                            border: `${pointStyle.borderWidth}px solid ${pointStyle.borderColor}`,
-                                            margin: 0,
-                                            padding: '0.4rem 0.8rem'
-                                        }}>
-                                            <IconZap color={pointStyle.color} />
-                                            <span className={styles.points} style={{ color: pointStyle.color, fontSize: `${pointStyle.fontSize}px` }}>
-                                                {pointInfo.toLocaleString()}P
+                                        {/* 스티커들 */}
+                                        {stickers.map(sticker => (
+                                            <DraggableElement
+                                                key={sticker.id}
+                                                type="sticker"
+                                                id={sticker.id}
+                                                position={{ x: sticker.x, y: sticker.y }}
+                                                rotate={sticker.rotate}
+                                                scale={sticker.scale}
+                                                isSelected={selectedElement === `sticker-${sticker.id}`}
+                                                onSelect={() => setSelectedElement(`sticker-${sticker.id}`)}
+                                                onUpdate={updateSelectedElement}
+                                                style={{ fontSize: '2rem', zIndex: 10 }}
+                                                title="클릭해서 편집 / 더블탭해서 삭제"
+                                            >
+                                                <div onDoubleClick={() => removeSticker(sticker.id)} onClick={() => handleTouchSticker(sticker.id)}>{sticker.emoji}</div>
+                                            </DraggableElement>
+                                        ))}
+
+                                        {/* 랭크 번호 */}
+                                        <DraggableElement
+                                            type="rank"
+                                            position={{ x: rankStyle.x, y: rankStyle.y }}
+                                            rotate={rankStyle.rotate}
+                                            isSelected={selectedElement === 'rank'}
+                                            onSelect={() => setSelectedElement('rank')}
+                                            onUpdate={updateSelectedElement}
+                                            title="클릭해서 등수 스타일 편집 / 드래그해서 이동"
+                                        >
+                                            <span className={styles.rankNumber} style={{
+                                                color: rankStyle.color,
+                                                fontSize: `${rankStyle.fontSize}px`,
+                                                margin: 0,
+                                                lineHeight: 1
+                                            }}>
+                                                #{myRank > 0 ? myRank : '-'}
                                             </span>
-                                        </div>
-                                    </DraggableElement>
+                                        </DraggableElement>
+
+                                        {/* 뱃지 */}
+                                        <DraggableElement
+                                            type="badge"
+                                            position={{ x: badgeStyle.x, y: badgeStyle.y }}
+                                            rotate={badgeStyle.rotate}
+                                            isSelected={selectedElement === 'badge'}
+                                            onSelect={() => setSelectedElement('badge')}
+                                            onUpdate={updateSelectedElement}
+                                            title="클릭해서 뱃지 변경 / 드래그해서 이동"
+                                        >
+                                            <div style={{ fontSize: `${badgeStyle.fontSize}px`, lineHeight: 1 }}>{selectedBadge}</div>
+                                        </DraggableElement>
+
+                                        {/* 닉네임 */}
+                                        <DraggableElement
+                                            type="nickname"
+                                            position={{ x: nicknameStyle.x, y: nicknameStyle.y }}
+                                            rotate={nicknameStyle.rotate}
+                                            isSelected={selectedElement === 'nickname'}
+                                            onSelect={() => setSelectedElement('nickname')}
+                                            onUpdate={updateSelectedElement}
+                                            title="클릭해서 닉네임 스타일 편집 / 드래그해서 이동"
+                                        >
+                                            <div
+                                                style={{
+                                                    color: nicknameStyle.color,
+                                                    fontWeight: nicknameStyle.bold ? 800 : 500,
+                                                    fontStyle: nicknameStyle.italic ? 'italic' : 'normal',
+                                                    textDecoration: nicknameStyle.underline ? 'underline' : 'none',
+                                                    textShadow: cardStyle !== 'white' && nicknameStyle.color === '#ffffff' ? '0 1px 3px rgba(0,0,0,0.5)' : 'none',
+                                                    fontSize: `${nicknameStyle.fontSize}px`,
+                                                    whiteSpace: 'nowrap',
+                                                    lineHeight: 1,
+                                                    paddingRight: nicknameStyle.italic ? '0.2em' : '0'
+                                                }}
+                                            >
+                                                {nickname}
+                                            </div>
+                                        </DraggableElement>
+
+                                        {/* 포인트 */}
+                                        <DraggableElement
+                                            type="point"
+                                            position={{ x: pointStyle.x, y: pointStyle.y }}
+                                            rotate={pointStyle.rotate}
+                                            isSelected={selectedElement === 'point'}
+                                            onSelect={() => setSelectedElement('point')}
+                                            onUpdate={updateSelectedElement}
+                                            parentScale={scale}
+                                            title="클릭해서 포인트 스타일 편집 / 드래그해서 이동"
+                                        >
+                                            <div className={styles.pointsBox} style={{
+                                                background: pointStyle.background,
+                                                color: pointStyle.color,
+                                                border: `${pointStyle.borderWidth}px solid ${pointStyle.borderColor}`,
+                                                margin: 0,
+                                                padding: '0.4rem 0.8rem'
+                                            }}>
+                                                <IconZap color={pointStyle.color} />
+                                                <span className={styles.points} style={{ color: pointStyle.color, fontSize: `${pointStyle.fontSize}px` }}>
+                                                    {pointInfo.toLocaleString()}P
+                                                </span>
+                                            </div>
+                                        </DraggableElement>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1187,9 +1237,9 @@ function CustomizeContent() {
                         </div>
                     </div>
                 </div>
-            </main>
+            </main >
             <Toast toast={toast} onHide={hideToast} />
-        </div>
+        </div >
     );
 }
 
