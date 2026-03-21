@@ -13,6 +13,19 @@
     padding: 2rem 1rem;
 }
 
+.chicorunBrand {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #a29bfe;
+    background: var(--gradient-primary, linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -1px;
+    margin-bottom: 2rem;
+    animation: slideDown 0.4s ease-out forwards;
+}
+
 .titleArea {
     display: flex;
     justify-content: space-between;
@@ -85,43 +98,62 @@
 
 .codeBox {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
     gap: 0.75rem;
     background: #eff6ff;
     border: 1px solid #dbeafe;
-    border-radius: 0.5rem;
-    padding: 0.75rem;
+    border-radius: 0.75rem;
+    padding: 1rem;
+}
+
+.codeRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .codeLabel {
     font-size: 0.8rem;
     font-weight: 600;
-    color: #2563eb;
+    color: #3b82f6;
 }
 
 .codeValue {
-    flex: 1;
     font-family: monospace;
     font-size: 1.25rem;
     font-weight: 800;
     letter-spacing: 0.1em;
-    color: #0f172a;
-    text-align: center;
+    color: #1e3a8a;
 }
 
-.btnCopy {
-    padding: 0.4rem;
-    background: none;
+.btnCopyLink {
+    width: 100%;
+    padding: 0.75rem;
+    background: #2563eb;
+    color: white;
     border: none;
-    color: #94a3b8;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
     cursor: pointer;
-    border-radius: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
 }
 
-.btnCopy:hover {
-    color: #2563eb;
-    background: #dbeafe;
+.btnCopyLink:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+}
+
+.btnCopyLink.copied {
+    background: #10b981;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
 }
 
 .cardFooter {

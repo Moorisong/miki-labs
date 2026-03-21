@@ -8,6 +8,7 @@ export const CHICORUN_API = {
     STUDENT_LOGIN: `${API_BASE}/api/chicorun/student/login`,
     STUDENT_ME: `${API_BASE}/api/chicorun/student/me`,
     STUDENT_CUSTOMIZE: `${API_BASE}/api/chicorun/student/customize`,
+    STUDENT_CHANGE_PASSWORD: `${API_BASE}/api/chicorun/student/password`,
     QUESTION: `${API_BASE}/api/chicorun/question`,
     ANSWER: `${API_BASE}/api/chicorun/answer`,
     RESET_PROGRESS: `${API_BASE}/api/chicorun/reset-progress`,
@@ -18,6 +19,8 @@ export const CHICORUN_API = {
         `${API_BASE}/api/chicorun/class/${classCode}/reset-password`,
     CLASS_UPDATE_NICKNAME: (classCode: string, studentId: string) =>
         `${API_BASE}/api/chicorun/class/${classCode}/students/${studentId}/nickname`,
+    CLASS_UPDATE_TITLE: (classCode: string) =>
+        `${API_BASE}/api/chicorun/class/${classCode}/title`,
     TEACHER_LOGIN: `${API_BASE}/api/chicorun/teacher/login`,
 } as const;
 
@@ -30,6 +33,7 @@ export const CHICORUN_ROUTES = {
     LEARN: '/chicorun/learn',
     RANKING: '/chicorun/ranking',
     CUSTOMIZE: '/chicorun/customize',
+    STORE: '/chicorun/store',
     TEACHER_DASHBOARD: '/chicorun/teacher/dashboard',
     TEACHER_STUDENT: (classId: string) => `/chicorun/teacher/student/${classId}`,
 } as const;

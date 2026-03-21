@@ -25,6 +25,14 @@ const IconPlus = () => (
     </svg>
 );
 
+const IconEdit = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+    </svg>
+);
+
 const IconCopy = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -80,6 +88,10 @@ export default function TeacherClassManagePage() {
     const [newClassName, setNewClassName] = useState('');
     const [isCreating, setIsCreating] = useState(false);
     const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+    const [editingClassCode, setEditingClassCode] = useState<string | null>(null);
+    const [editTitleInput, setEditTitleInput] = useState<string>('');
+    const [isSavingTitle, setIsSavingTitle] = useState(false);
 
     const isExchanging = useRef(false);
 
@@ -180,6 +192,35 @@ export default function TeacherClassManagePage() {
         }
     };
 
+    const handleUpdateTitle = async (classCode: string) => {
+        if (!editTitleInput.trim() || isSavingTitle) return;
+        const token = getTeacherTokenFromLocal();
+        if (!token) return;
+
+        setIsSavingTitle(true);
+        try {
+            const res = await fetch(CHICORUN_API.CLASS_UPDATE_TITLE(classCode), {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ title: editTitleInput.trim() }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setClasses(classes.map(c => c.classCode === classCode ? { ...c, title: editTitleInput.trim() } : c));
+                setEditingClassCode(null);
+            } else {
+                alert(data.error || '클래스 이름 변경에 실패했습니다.');
+            }
+        } catch (err) {
+            console.error('Failed to update class title:', err);
+        } finally {
+            setIsSavingTitle(false);
+        }
+    };
+
     const copyToClipboard = async (code: string) => {
         try {
             await navigator.clipboard.writeText(code);
@@ -193,6 +234,7 @@ export default function TeacherClassManagePage() {
     return (
         <div className={styles.container}>
             <main className={styles.main}>
+                <div className={styles.chicorunBrand}>Chicorun</div>
                 <div className={styles.titleArea}>
                     <div>
                         <h1 className={styles.title}>
@@ -224,38 +266,45 @@ export default function TeacherClassManagePage() {
                         {classes.map((cls, i) => (
                             <div key={cls.id} className={styles.card} style={{ animationDelay: `${i * 0.1}s` }}>
                                 <div>
-                                    <h2 className={styles.cardTitle}>{cls.title}</h2>
-                                    <div className={styles.codeBox}>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                <span className={styles.codeLabel}>클래스 코드</span>
-                                                <span className={styles.codeValue}>{cls.classCode}</span>
-                                                <button
-                                                    className={styles.btnCopy}
-                                                    onClick={() => copyToClipboard(cls.classCode)}
-                                                    title="코드 복사"
-                                                >
-                                                    {copiedCode === cls.classCode ? '✅' : <IconCopy />}
-                                                </button>
-                                            </div>
+                                    {editingClassCode === cls.classCode ? (
+                                        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', alignItems: 'center' }}>
+                                            <input
+                                                className={styles.inputField}
+                                                style={{ marginBottom: 0, padding: '0.5rem', flex: 1 }}
+                                                value={editTitleInput}
+                                                onChange={e => setEditTitleInput(e.target.value)}
+                                                autoFocus
+                                            />
+                                            <button className={styles.btnPrimary} style={{ padding: '0.5rem' }} onClick={() => handleUpdateTitle(cls.classCode)} disabled={isSavingTitle}>저장</button>
+                                            <button className={styles.btnSecondary} style={{ padding: '0.5rem' }} onClick={() => setEditingClassCode(null)}>취소</button>
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                                            <h2 className={styles.cardTitle} style={{ margin: 0, flex: 1, wordBreak: 'break-all' }}>{cls.title}</h2>
                                             <button
-                                                className={styles.btnCopyLink}
-                                                style={{
-                                                    fontSize: '0.75rem', padding: '0.4rem 0.6rem',
-                                                    background: '#ebf2ff', color: '#2563eb',
-                                                    border: 'none', borderRadius: '0.4rem',
-                                                    cursor: 'pointer', fontWeight: 600,
-                                                    display: 'flex', alignItems: 'center', gap: '4px',
-                                                    width: 'fit-content'
-                                                }}
-                                                onClick={() => {
-                                                    const link = `${window.location.origin}${CHICORUN_ROUTES.JOIN}?classCode=${cls.classCode}`;
-                                                    copyToClipboard(link);
-                                                }}
+                                                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', borderRadius: '4px' }}
+                                                onClick={() => { setEditingClassCode(cls.classCode); setEditTitleInput(cls.title); }}
+                                                title="클래스 이름 변경"
                                             >
-                                                {copiedCode?.startsWith('http') ? '링크 복사됨 ✅' : '🔗 참여 링크 복사'}
+                                                <IconEdit />
                                             </button>
                                         </div>
+                                    )}
+
+                                    <div className={styles.codeBox}>
+                                        <div className={styles.codeRow}>
+                                            <span className={styles.codeLabel}>클래스 코드</span>
+                                            <span className={styles.codeValue}>{cls.classCode}</span>
+                                        </div>
+                                        <button
+                                            className={`${styles.btnCopyLink} ${copiedCode?.includes(cls.classCode) ? styles.copied : ''}`}
+                                            onClick={() => {
+                                                const link = `${window.location.origin}${CHICORUN_ROUTES.JOIN}?classCode=${cls.classCode}`;
+                                                copyToClipboard(link);
+                                            }}
+                                        >
+                                            {copiedCode?.includes(cls.classCode) ? '✅ 참여 링크 복사됨' : '🔗 참여 링크 복사'}
+                                        </button>
                                     </div>
                                 </div>
 

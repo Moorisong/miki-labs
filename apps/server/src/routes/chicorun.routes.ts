@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { chicorunStudentAuth } from '../middlewares/chicorun-student-auth';
 import { chicorunTeacherAuth } from '../middlewares/chicorun-teacher-auth';
 import { getQuestion, submitAnswer, resetProgress } from '../controllers/chicorun-solve.controller';
-import { studentLogin, getStudentMe, updateCustomize } from '../controllers/chicorun-student.controller';
+import { studentLogin, getStudentMe, updateCustomize, changeStudentPassword } from '../controllers/chicorun-student.controller';
 import {
     createClass,
     getMyClasses,
@@ -11,6 +11,7 @@ import {
     updateStudentNickname,
     getClassRanking,
     loginTeacher,
+    updateClassTitle,
 } from '../controllers/chicorun-class.controller';
 
 const router = Router();
@@ -27,11 +28,13 @@ router.post('/reset-progress', chicorunStudentAuth, resetProgress);
 // ─── 학생 내 정보 API (studentAuth 필요) ─────────────────────────────────────────
 router.get('/student/me', chicorunStudentAuth, getStudentMe);
 router.patch('/student/customize', chicorunStudentAuth, updateCustomize);
+router.patch('/student/password', chicorunStudentAuth, changeStudentPassword);
 
 // ─── 교사 클래스 관리 API (teacherAuth 필요) ─────────────────────────────────────
 router.post('/class', chicorunTeacherAuth, createClass);
 router.get('/class', chicorunTeacherAuth, getMyClasses);
 router.get('/class/:classCode/students', chicorunTeacherAuth, getClassStudents);
+router.patch('/class/:classCode/title', chicorunTeacherAuth, updateClassTitle);
 router.post('/class/:classCode/reset-password', chicorunTeacherAuth, resetStudentPassword);
 router.patch('/class/:classCode/students/:studentId/nickname', chicorunTeacherAuth, updateStudentNickname);
 
