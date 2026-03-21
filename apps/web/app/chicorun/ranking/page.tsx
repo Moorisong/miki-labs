@@ -65,7 +65,6 @@ const IconZap = ({ color = '#ea580c' }: { color?: string }) => (
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
     </svg>
 );
-
 const IconClass = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb"
         strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -73,6 +72,20 @@ const IconClass = () => (
         <path d="M6 12v5c3 3 9 3 12 0v-5" />
     </svg>
 );
+
+const getCardBorderStyle = (borderStyle: any) => {
+    if (!borderStyle) return {};
+    const { color, width, style, radius } = borderStyle;
+    const baseStyle: React.CSSProperties = {
+        borderRadius: `${radius !== undefined ? radius : 24}px`,
+        borderWidth: `${width !== undefined ? width : 3}px`,
+        borderColor: color || '#facc15',
+        borderStyle: ['solid', 'dashed', 'dotted'].includes(style) ? (style as any) : 'none',
+        backgroundClip: 'padding-box',
+    };
+
+    return baseStyle;
+};
 
 function RankingContent() {
     const searchParams = useSearchParams();
@@ -182,21 +195,26 @@ function RankingContent() {
                                 className={styles.rankingItem}
                                 style={{
                                     animationDelay: `${index * 0.05}s`,
-                                    background: user.cardStyle || 'white',
+                                    ...((user.cardStyle || 'white').startsWith('linear-gradient')
+                                        ? { backgroundImage: user.cardStyle || 'white' }
+                                        : { backgroundColor: user.cardStyle || 'white' }),
                                     position: 'relative',
-                                    overflow: isFirst ? 'visible' : 'hidden',
+                                    overflow: isFirst || user.customize?.borderStyle?.style === 'ribbon' ? 'visible' : 'hidden',
                                     transform: isFirst ? 'scale(1.05)' : 'translateZ(0)',
                                     zIndex: isFirst ? 10 : 1,
                                     margin: isFirst ? '1rem 0' : '0',
-                                    border: user.customize?.borderStyle?.width
-                                        ? `${user.customize.borderStyle.width}px ${user.customize.borderStyle.style} ${user.customize.borderStyle.color}`
-                                        : (isFirst ? '3px solid #facc15' : 'none'),
-                                    boxShadow: isFirst ? '0 20px 25px -5px rgba(250, 204, 21, 0.4)' : undefined,
-                                    borderRadius: user.customize?.borderStyle?.radius !== undefined ? `${user.customize.borderStyle.radius}px` : '1.5rem',
+                                    ...getCardBorderStyle(user.customize?.borderStyle),
+                                    boxShadow: isFirst && user.customize?.borderStyle?.style !== 'neon' ? '0 20px 25px -5px rgba(250, 204, 21, 0.4)' : undefined,
                                     height: '80px',
                                     display: 'block',
                                 }}
                             >
+                                {user.customize?.borderStyle?.style === 'ribbon' && (
+                                    <>
+                                        <div style={{ position: 'absolute', top: -10, left: -10, fontSize: '1.5rem', transform: 'rotate(-45deg)', zIndex: 100 }}>🎀</div>
+                                        <div style={{ position: 'absolute', top: -10, right: -10, fontSize: '1.5rem', transform: 'rotate(45deg)', zIndex: 100 }}>🎀</div>
+                                    </>
+                                )}
                                 {isFirst && (
                                     <div style={{
                                         position: 'absolute',
