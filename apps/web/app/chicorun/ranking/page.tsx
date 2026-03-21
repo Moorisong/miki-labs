@@ -281,7 +281,8 @@ function RankingContent() {
                                             textDecoration: user.nicknameStyle?.underline ? 'underline' : 'none',
                                             fontSize: user.nicknameStyle?.fontSize ? `${user.nicknameStyle.fontSize}px` : '1.1rem',
                                             lineHeight: 1,
-                                            whiteSpace: 'nowrap'
+                                            whiteSpace: 'nowrap',
+                                            paddingRight: user.nicknameStyle?.italic ? '0.2em' : '0'
                                         }}
                                     >
                                         {user.nickname}
