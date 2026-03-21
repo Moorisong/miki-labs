@@ -188,6 +188,81 @@
   background: rgba(108, 92, 231, 0.05);
 }
 
+.dropdownInfoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  margin: 0 8px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.infoLabel {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.infoValue {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.dropdownProfileRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  margin: 0 8px;
+}
+
+.profileBadgeName {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profileBadge {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.profileName {
+  font-weight: 700;
+  color: var(--color-text);
+  font-size: 0.95rem;
+}
+
+.profilePoints {
+  color: #f59e0b;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.dropdownDivider {
+  height: 1px;
+  background: rgba(162, 155, 254, 0.2);
+  margin: 8px 12px;
+}
+
+.dropdownActionBtn {
+  width: calc(100% - 16px);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.studentProfileBtn {
+  display: flex !important;
+  align-items: center;
+  gap: 4px;
+}
+
 .mobileOnly {
   display: none;
 }
@@ -518,4 +593,131 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+/* Modal Styles for NavBar */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  padding: 1rem;
+}
+
+.modal {
+  background: white;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: modalPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.modal p {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.modalInput {
+  width: 100%;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  transition: border-color 0.2s;
+  outline: none;
+  background-color: white;
+  color: #0f172a;
+}
+
+.modalInput:focus {
+  border-color: #3b82f6;
+}
+
+.modalError {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.btnCancel {
+  flex: 1;
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btnCancel:hover {
+  background: #e2e8f0;
+}
+
+.btnConfirm {
+  flex: 1;
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btnConfirm:hover {
+  background: #1d4ed8;
+}
+
+.btnConfirm:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Chicorun Teacher Header Specific Styles */
+
+.chicorunTeacherAuth {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
 }
