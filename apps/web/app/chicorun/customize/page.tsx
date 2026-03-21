@@ -341,72 +341,119 @@ function DraggableElement({
     );
 }
 
-// Reusable Color Picker Component
-const SpectrumBar = ({ value, onChange, onClose }: any) => {
-    const barRef = useRef<HTMLDivElement>(null);
+// Reusable Color Picker Component (Hue Slider + Saturation/Lightness 2D Area)
+const ColorPicker = ({ value, onChange }: { value: string; onChange: (color: string) => void }) => {
+    const boxRef = useRef<HTMLDivElement>(null);
+    const hueRef = useRef<HTMLDivElement>(null);
 
-    let initialHue = 0;
-    const hueMatch = value && typeof value === 'string' ? value.match(/hsl\((\d+)/) : null;
-    if (hueMatch) initialHue = parseInt(hueMatch[1]);
+    // Parse current color to HSL
+    const parseHSL = (val: string) => {
+        if (!val) return { h: 0, s: 75, l: 50 };
+        const hslMatch = val.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+        if (hslMatch) return { h: parseInt(hslMatch[1]), s: parseInt(hslMatch[2]), l: parseInt(hslMatch[3]) };
 
-    const updateColor = (clientX: number) => {
-        if (!barRef.current) return;
-        const rect = barRef.current.getBoundingClientRect();
-        const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
-        const percent = x / rect.width;
-        const hue = Math.floor(percent * 360);
-        onChange(`hsl(${hue}, 75%, 50%)`);
+        // Fallback for hex values (could implement a better parser if needed)
+        if (val === '#000000') return { h: 0, s: 0, l: 0 };
+        if (val === '#ffffff') return { h: 0, s: 0, l: 100 };
+        return { h: 0, s: 75, l: 50 };
     };
 
-    const onPointerDown = (e: React.PointerEvent) => {
+    const { h, s, l } = parseHSL(value);
+
+    const updateSL = (clientX: number, clientY: number) => {
+        if (!boxRef.current) return;
+        const rect = boxRef.current.getBoundingClientRect();
+        const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+        const y = Math.max(0, Math.min(clientY - rect.top, rect.height));
+        const newS = Math.floor((x / rect.width) * 100);
+        const newL = Math.floor(100 - (y / rect.height) * 100);
+        onChange(`hsl(${h}, ${newS}%, ${newL}%)`);
+    };
+
+    const updateHue = (clientX: number) => {
+        if (!hueRef.current) return;
+        const rect = hueRef.current.getBoundingClientRect();
+        const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+        const newH = Math.floor((x / rect.width) * 360);
+        onChange(`hsl(${newH}, ${s}%, ${l}%)`);
+    };
+
+    const handleSLPointer = (e: React.PointerEvent) => {
         e.stopPropagation();
         (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-        updateColor(e.clientX);
+        updateSL(e.clientX, e.clientY);
     };
 
-    const onPointerMove = (e: React.PointerEvent) => {
-        if (e.buttons > 0) {
-            e.stopPropagation();
-            updateColor(e.clientX);
-        }
-    };
-
-    const onPointerUp = (e: React.PointerEvent) => {
+    const handleHuePointer = (e: React.PointerEvent) => {
         e.stopPropagation();
-        updateColor(e.clientX);
-        onClose();
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+        updateHue(e.clientX);
     };
 
     return (
-        <div
-            ref={barRef}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp}
-            style={{
-                background: 'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)',
-                height: '2.5rem',
-                width: '100%',
-                borderRadius: '0.8rem',
-                cursor: 'crosshair',
-                position: 'relative',
-                marginTop: '0.5rem',
-                touchAction: 'none',
-                boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
-            }}
-        >
-            <div style={{
-                position: 'absolute',
-                top: '-2px',
-                bottom: '-2px',
-                width: '6px',
-                background: 'white',
-                boxShadow: '0 0 4px rgba(0,0,0,0.4)',
-                borderRadius: '3px',
-                left: `${(initialHue / 360) * 100}%`,
-                pointerEvents: 'none',
-                transform: 'translateX(-50%)'
-            }} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+            {/* 2D SL Area */}
+            <div
+                ref={boxRef}
+                onPointerDown={handleSLPointer}
+                onPointerMove={(e) => e.buttons > 0 && updateSL(e.clientX, e.clientY)}
+                style={{
+                    width: '100%',
+                    height: '160px',
+                    borderRadius: '1rem',
+                    position: 'relative',
+                    background: `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, hsl(${h}, 100%, 50%))`,
+                    cursor: 'crosshair',
+                    touchAction: 'none',
+                    boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.1)',
+                    overflow: 'hidden'
+                }}
+            >
+                {/* Pointer */}
+                <div style={{
+                    position: 'absolute',
+                    left: `${s}%`,
+                    top: `${100 - l}%`,
+                    width: '14px',
+                    height: '14px',
+                    borderRadius: '50%',
+                    border: '2.5px solid white',
+                    boxShadow: '0 0 5px rgba(0,0,0,0.4)',
+                    transform: 'translate(-50%, -50%)',
+                    pointerEvents: 'none',
+                    zIndex: 2
+                }} />
+            </div>
+
+            {/* Hue Bar */}
+            <div
+                ref={hueRef}
+                onPointerDown={handleHuePointer}
+                onPointerMove={(e) => e.buttons > 0 && updateHue(e.clientX)}
+                style={{
+                    height: '24px',
+                    width: '100%',
+                    borderRadius: '0.6rem',
+                    position: 'relative',
+                    background: 'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)',
+                    cursor: 'crosshair',
+                    touchAction: 'none'
+                }}
+            >
+                {/* Hue Pointer */}
+                <div style={{
+                    position: 'absolute',
+                    left: `${(h / 360) * 100}%`,
+                    top: '-2px',
+                    bottom: '-2px',
+                    width: '6px',
+                    background: 'white',
+                    boxShadow: '0 0 3px rgba(0,0,0,0.5)',
+                    borderRadius: '3px',
+                    transform: 'translateX(-50%)',
+                    pointerEvents: 'none'
+                }} />
+            </div>
         </div>
     );
 };
@@ -429,12 +476,22 @@ const ColorControl = ({ id, value, onChange, activePickerId, setActivePickerId, 
                     onClick={(e) => e.stopPropagation()}
                     onPointerDown={(e) => e.stopPropagation()}
                 >
-                    <div style={{ fontWeight: 700, fontSize: '0.8rem', color: '#64748b', marginBottom: '0.4rem' }}>드래그 도중에 떼면 저장됩니다!</div>
-                    <SpectrumBar
+                    <div style={{ fontWeight: 700, fontSize: '0.8rem', color: '#64748b', marginBottom: '0.6rem' }}>색상 선택</div>
+                    <ColorPicker
                         value={value}
                         onChange={onChange}
-                        onClose={() => setActivePickerId(null)}
                     />
+
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                        <input
+                            type="text"
+                            className={styles.pickerHexInputNative}
+                            value={value}
+                            onChange={(e) => onChange(e.target.value)}
+                            placeholder="#HEX or hsl"
+                        />
+                    </div>
+
                     {showGradientOption && (
                         <button className={styles.btnResetGradient} style={{ width: '100%', marginTop: '1rem' }} onClick={() => { onChange('linear-gradient(90deg, #ffedd5, #fef3c7)'); setActivePickerId(null); }}>기본 그라데이션 복구</button>
                     )}
@@ -770,7 +827,7 @@ function CustomizeContent() {
                                     }}
                                     className={styles.rankingItemPreview}
                                     style={{
-                                        ...(cardStyle.startsWith('linear-gradient') ? { backgroundImage: cardStyle } : { backgroundColor: cardStyle }),
+                                        background: cardStyle,
                                         ...getCardBorderStyle(borderStyle),
                                         overflow: isFirst || borderStyle.style === 'ribbon' ? 'visible' : 'hidden',
                                         transform: isFirst ? 'scale(1.05)' : 'translateZ(0)',
@@ -926,7 +983,7 @@ function CustomizeContent() {
                                         onUpdate={updateSelectedElement}
                                     >
                                         <div className={styles.pointsBox} style={{
-                                            ...(pointStyle.background.startsWith('linear-gradient') ? { backgroundImage: pointStyle.background } : { backgroundColor: pointStyle.background }),
+                                            background: pointStyle.background,
                                             color: pointStyle.color,
                                             border: `${pointStyle.borderWidth}px solid ${pointStyle.borderColor}`,
                                             margin: 0,
