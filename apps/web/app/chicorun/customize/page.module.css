@@ -28,6 +28,12 @@
     gap: 0.5rem;
 }
 
+@media (max-width: 640px) {
+    .title {
+        font-size: 1.75rem;
+    }
+}
+
 .subtitle {
     color: #64748b;
     font-size: 1rem;
@@ -79,8 +85,6 @@
 }
 
 .previewContainer {
-    display: flex;
-    justify-content: center;
     overflow-x: auto;
     width: 100%;
     /* In case screen is small */
@@ -617,22 +621,51 @@
 
 
 .btnStickerFAB {
-    position: absolute;
-    bottom: -15px;
-    right: 5px;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
-    border: 3px solid white;
-    box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.3), 0 4px 6px -2px rgba(124, 58, 237, 0.1);
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    border: 2px solid white;
+    color: white;
+    font-weight: 800;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 6px -1px rgba(124, 58, 237, 0.2);
     cursor: pointer;
-    z-index: 1000;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btnStickerText {
+    display: inline;
+}
+
+@media (max-width: 640px) {
+    .btnStickerFAB {
+        padding: 0.5rem 0.9rem;
+        font-size: 0.8rem;
+    }
+
+    .btnStickerText {
+        display: none;
+        /* Hide text on small screens, keep only emoji */
+    }
+
+    .subtitle {
+        font-size: 0.85rem;
+    }
+
+    .hintText {
+        font-size: 0.8rem;
+    }
+
+    .previewHeaderDescription {
+        font-size: 0.75rem !important;
+    }
+
+    .panelTitle {
+        font-size: 1.1rem;
+    }
 }
 
 .btnStickerFAB:hover {

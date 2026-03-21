@@ -577,8 +577,8 @@ function CustomizeContent() {
         const winWidth = window.innerWidth;
         const docWidth = document.documentElement.clientWidth;
 
-        const availableWidth = Math.min(rectWidth > 0 ? rectWidth : winWidth, winWidth, docWidth) - 48;
-        const baseWidth = 800;
+        const availableWidth = Math.min(rectWidth > 0 ? rectWidth : winWidth, winWidth, docWidth) - 80;
+        const baseWidth = 840; // 800 * 1.05 (for Rank 1)
 
         if (availableWidth < baseWidth) {
             const newScale = availableWidth / baseWidth;
@@ -839,23 +839,26 @@ function CustomizeContent() {
 
                 <div className={styles.layoutGrid}>
                     <div className={styles.previewPanel}>
-                        <div className={styles.previewHeader}>
-                            <h2 className={styles.panelTitle} style={{ marginBottom: '0.5rem' }}>현재 내 랭킹 영역 미리보기</h2>
+                        <div className={styles.previewHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <div style={{ textAlign: 'left' }}>
+                                <h2 className={styles.panelTitle} style={{ margin: 0 }}>현재 내 랭킹 영역 미리보기</h2>
+                                <p className={styles.previewHeaderDescription} style={{ color: '#64748b', fontSize: '0.85rem', margin: '4px 0 0 0' }}>드래그하거나 스티커를 추가해 보세요!</p>
+                            </div>
+                            <button
+                                className={styles.btnStickerFAB}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedElement('sticker-picker');
+                                }}
+                                title="스티커 추가하기"
+                            >
+                                ✨ <span className={styles.btnStickerText}>스티커 추가</span>
+                            </button>
                         </div>
 
                         {/* 미리보기영역 - 픽스 상태일때는 이 부분만 고정됨 */}
                         <div className={styles.stickyPreviewWrapper} ref={containerRef}>
                             <div className={styles.previewContainer} style={{ paddingBottom: 0 }}>
-                                <button
-                                    className={styles.btnStickerFAB}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setSelectedElement('sticker-picker');
-                                    }}
-                                    title="스티커 추가하기"
-                                >
-                                    ✨
-                                </button>
 
                                 <div style={{
                                     width: `${800 * scale * (isFirst ? 1.05 : 1)}px`,
