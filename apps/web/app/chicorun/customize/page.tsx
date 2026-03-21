@@ -269,7 +269,7 @@ function DraggableElement({
                 position: 'absolute',
                 left: position.x + (isDragging && offset ? offset.x : 0),
                 top: position.y + (isDragging && offset ? offset.y : 0),
-                cursor: (isResizing || isRotating) ? 'crosshair' : 'move',
+                cursor: (isResizing || isRotating) ? 'crosshair' : 'pointer',
                 opacity: isDragging ? 0.3 : 1,
                 userSelect: 'none',
                 zIndex: isSelected ? 100 : (isResizing || isRotating ? 101 : 20),
@@ -282,7 +282,9 @@ function DraggableElement({
                 ...extraStyles,
             }}
         >
-            {children}
+            <div className={styles.hoverContent}>
+                {children}
+            </div>
 
             {/* Transform Handles */}
             {isSelected && (
@@ -495,7 +497,6 @@ const ColorControl = ({ id, value, onChange, activePickerId, setActivePickerId, 
                     {showGradientOption && (
                         <button className={styles.btnResetGradient} style={{ width: '100%', marginTop: '1rem' }} onClick={() => { onChange('linear-gradient(90deg, #ffedd5, #fef3c7)'); setActivePickerId(null); }}>기본 그라데이션 복구</button>
                     )}
-                    <button className={styles.btnPickerDone} style={{ marginTop: '0.75rem', background: '#f8fafc', color: '#94a3b8', border: '1px solid #f1f5f9' }} onClick={() => setActivePickerId(null)}>닫기</button>
                 </div>
             )}
         </div>
@@ -563,7 +564,6 @@ function CustomizeContent() {
 
     const [selectedElement, setSelectedElement] = useState<string | null>(null);
     const [activePickerId, setActivePickerId] = useState<string | null>(null);
-
 
     // Reset picker when element changes
     useEffect(() => {
@@ -794,7 +794,7 @@ function CustomizeContent() {
 
     return (
         <div className={styles.container} onClick={() => { setSelectedElement(null); setActivePickerId(null); }}>
-            <main className={styles.main} onClick={(e) => e.stopPropagation()}>
+            <main className={styles.main} onClick={(e) => { e.stopPropagation(); setActivePickerId(null); }}>
                 <div className={styles.titleArea}>
                     <h1 className={styles.title}><IconSparkles /> 랭킹 꾸미기</h1>
                     <p className={styles.subtitle}>랭킹 리스트에 나타나는 나의 랭킹 영역을 자유롭게 꾸며보세요!</p>
@@ -827,7 +827,8 @@ function CustomizeContent() {
                                     }}
                                     className={styles.rankingItemPreview}
                                     style={{
-                                        background: cardStyle,
+                                        backgroundColor: cardStyle.includes('gradient') ? undefined : cardStyle,
+                                        backgroundImage: cardStyle.includes('gradient') ? cardStyle : undefined,
                                         ...getCardBorderStyle(borderStyle),
                                         overflow: isFirst || borderStyle.style === 'ribbon' ? 'visible' : 'hidden',
                                         transform: isFirst ? 'scale(1.05)' : 'translateZ(0)',
@@ -845,12 +846,12 @@ function CustomizeContent() {
                                             e.stopPropagation();
                                             setSelectedElement('base-card-bg');
                                         }}
+                                        className={styles.backgroundClickArea}
                                         style={{
                                             position: 'absolute',
-                                            inset: '10px',
+                                            inset: '15px',
                                             borderRadius: `${borderStyle.radius}px`,
                                             zIndex: 2,
-                                            cursor: 'pointer'
                                         }}
                                         title="배경 바꾸기"
                                     />
@@ -860,12 +861,12 @@ function CustomizeContent() {
                                             e.stopPropagation();
                                             setSelectedElement('base-card-border');
                                         }}
+                                        className={styles.borderClickArea}
                                         style={{
                                             position: 'absolute',
                                             inset: 0,
                                             borderRadius: `${borderStyle.radius}px`,
                                             zIndex: 1,
-                                            cursor: 'pointer'
                                         }}
                                         title="테두리 꾸미기"
                                     />
@@ -925,6 +926,7 @@ function CustomizeContent() {
                                         isSelected={selectedElement === 'rank'}
                                         onSelect={() => setSelectedElement('rank')}
                                         onUpdate={updateSelectedElement}
+                                        title="클릭해서 등수 스타일 편집 / 드래그해서 이동"
                                     >
                                         <span className={styles.rankNumber} style={{
                                             color: rankStyle.color,
@@ -944,6 +946,7 @@ function CustomizeContent() {
                                         isSelected={selectedElement === 'badge'}
                                         onSelect={() => setSelectedElement('badge')}
                                         onUpdate={updateSelectedElement}
+                                        title="클릭해서 뱃지 변경 / 드래그해서 이동"
                                     >
                                         <div style={{ fontSize: `${badgeStyle.fontSize}px`, lineHeight: 1 }}>{selectedBadge}</div>
                                     </DraggableElement>
@@ -956,6 +959,7 @@ function CustomizeContent() {
                                         isSelected={selectedElement === 'nickname'}
                                         onSelect={() => setSelectedElement('nickname')}
                                         onUpdate={updateSelectedElement}
+                                        title="클릭해서 닉네임 스타일 편집 / 드래그해서 이동"
                                     >
                                         <div
                                             style={{
@@ -966,7 +970,8 @@ function CustomizeContent() {
                                                 textShadow: cardStyle !== 'white' && nicknameStyle.color === '#ffffff' ? '0 1px 3px rgba(0,0,0,0.5)' : 'none',
                                                 fontSize: `${nicknameStyle.fontSize}px`,
                                                 whiteSpace: 'nowrap',
-                                                lineHeight: 1
+                                                lineHeight: 1,
+                                                paddingRight: nicknameStyle.italic ? '0.2em' : '0'
                                             }}
                                         >
                                             {nickname}
@@ -981,6 +986,7 @@ function CustomizeContent() {
                                         isSelected={selectedElement === 'point'}
                                         onSelect={() => setSelectedElement('point')}
                                         onUpdate={updateSelectedElement}
+                                        title="클릭해서 포인트 스타일 편집 / 드래그해서 이동"
                                     >
                                         <div className={styles.pointsBox} style={{
                                             background: pointStyle.background,
@@ -1000,7 +1006,7 @@ function CustomizeContent() {
                         </div>
 
                         {/* 옵션 컨트롤 - 이제 선택된 요소에 따라 다르게 보임 */}
-                        <div className={styles.optionsContainer} style={{ marginTop: '2rem' }} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.optionsContainer} style={{ marginTop: '2rem' }} onClick={(e) => { e.stopPropagation(); setActivePickerId(null); }}>
                             {/* 아무것도 선택되지 않았을 때 */}
                             {(!selectedElement) && (
                                 <div style={{ textAlign: 'center', padding: '3rem 1.5rem', background: '#f8fafc', borderRadius: '1.5rem', border: '2px dashed #cbd5e1' }}>
