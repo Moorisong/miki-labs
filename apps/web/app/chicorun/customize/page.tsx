@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 import { CHICORUN_API, CHICORUN_ROUTES, CHICORUN_STORAGE_KEY } from '@/constants/chicorun';
 
 // ─── Constants ─────────────────────────────────────────────────────────────
@@ -12,6 +12,7 @@ const AVAILABLE_STICKERS = ['⭐', '🔥', '💎', '🎯', '🚀', '💪', '🎨
 const AVAILABLE_BADGES = ['👑', '🔥', '⚡', '📚', '💪', '⭐', '🎯', '🥊', '🦄', '🎮', '🥇', '🦸', '🚀', '💎', '🌈'];
 
 const AVAILABLE_BACKGROUNDS = [
+    { name: '투명 (기본)', value: 'transparent' },
     { name: '기본 화이트', value: 'white' },
     { name: '다크 나이트', value: 'linear-gradient(135deg, #1e293b, #0f172a)' },
     { name: '선셋 오렌지', value: 'linear-gradient(135deg, #f97316, #f59e0b)' },
@@ -30,6 +31,7 @@ const AVAILABLE_NICKNAME_COLORS = [
     '#1e293b', // Default
     '#ffffff', // White
     '#ef4444', // Red
+    '#ea580c', // Orange
     '#f59e0b', // Gold
     '#10b981', // Green
     '#3b82f6', // Blue
@@ -51,6 +53,35 @@ interface NicknameStyleType {
     bold: boolean;
     italic: boolean;
     underline: boolean;
+    fontSize: number;
+    x: number;
+    y: number;
+}
+interface BorderStyleType {
+    color: string;
+    width: number;
+    style: string;
+    radius: number;
+}
+interface PointStyleType {
+    color: string;
+    background: string;
+    borderWidth: number;
+    borderColor: string;
+    fontSize: number;
+    x: number;
+    y: number;
+}
+interface RankStyleType {
+    x: number;
+    y: number;
+    color: string;
+    fontSize: number;
+}
+interface BadgeStyleType {
+    x: number;
+    y: number;
+    fontSize: number;
 }
 
 // ─── Icons ─────────────────────────────────────────────────────────────────
@@ -68,51 +99,53 @@ const IconSave = () => (
     </svg>
 );
 
-const IconZap = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="#f97316" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const IconZap = ({ color = '#ea580c' }: { color?: string }) => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill={color} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
     </svg>
 );
 
-const IconTrophy = () => (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="#eab308" stroke="#ca8a04" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
-        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
-        <path d="M4 22h16"></path>
-        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
-        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
-        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
-    </svg>
-);
-
 // ─── Components ────────────────────────────────────────────────────────────
-function DraggableSticker({ sticker, onRemove }: { sticker: StickerItem; onRemove: (id: string) => void }) {
+function DraggableElement({
+    type,
+    id,
+    position,
+    children,
+    style: extraStyles = {},
+    title = "드래그해서 이동"
+}: {
+    type: string;
+    id?: string;
+    position: { x: number; y: number };
+    children: React.ReactNode;
+    style?: React.CSSProperties;
+    title?: string;
+}) {
     const [{ isDragging }, drag] = useDrag(() => ({
-        type: 'sticker',
-        item: { id: sticker.id, x: sticker.x, y: sticker.y },
+        type,
+        item: { id, x: position.x, y: position.y },
         collect: (monitor) => ({
             isDragging: !!monitor.isDragging(),
         }),
-    }));
+    }), [type, id, position.x, position.y]);
 
     return (
         <div
             ref={drag as any}
-            onDoubleClick={() => onRemove(sticker.id)}
+            title={title}
             style={{
                 position: 'absolute',
-                left: sticker.x,
-                top: sticker.y,
+                left: position.x,
+                top: position.y,
                 cursor: 'move',
                 opacity: isDragging ? 0.3 : 1,
-                fontSize: '2rem',
                 userSelect: 'none',
-                zIndex: 10,
-                transform: `scale(${sticker.scale || 1}) rotate(${sticker.rotate || 0}deg)`
+                zIndex: 20,
+                touchAction: 'none', // Mobile dragging fix
+                ...extraStyles,
             }}
-            title="더블클릭해서 삭제"
         >
-            {sticker.emoji}
+            {children}
         </div>
     );
 }
@@ -122,15 +155,51 @@ function CustomizeContent() {
 
     const [nickname, setNickname] = useState('치코런');
     const [selectedBadge, setSelectedBadge] = useState(AVAILABLE_BADGES[0]);
-    const [cardStyle, setCardStyle] = useState(AVAILABLE_BACKGROUNDS[0].value);
+    const [cardStyle, setCardStyle] = useState(AVAILABLE_BACKGROUNDS[1].value);
     const [stickers, setStickers] = useState<StickerItem[]>([]);
+
     const [nicknameStyle, setNicknameStyle] = useState<NicknameStyleType>({
         color: '#1e293b',
         bold: true,
         italic: false,
         underline: false,
+        fontSize: 20,
+        x: 120,
+        y: 25,
     });
-    const [pointInfo] = useState(9999);
+
+    const [borderStyle, setBorderStyle] = useState<BorderStyleType>({
+        color: '#facc15',
+        width: 3,
+        style: 'solid',
+        radius: 24,
+    });
+
+    const [pointStyle, setPointStyle] = useState<PointStyleType>({
+        color: '#ea580c',
+        background: 'linear-gradient(90deg, #ffedd5, #fef3c7)',
+        borderWidth: 0,
+        borderColor: '#ffffff',
+        fontSize: 18,
+        x: 580,
+        y: 20,
+    });
+
+    const [rankStyle, setRankStyle] = useState<RankStyleType>({
+        color: '#ca8a04',
+        fontSize: 24,
+        x: 24,
+        y: 20,
+    });
+
+    const [badgeStyle, setBadgeStyle] = useState<BadgeStyleType>({
+        fontSize: 32,
+        x: 80,
+        y: 20,
+    });
+
+    const [pointInfo, setPointInfo] = useState(0);
+    const [myRank, setMyRank] = useState(0);
 
     const [isSaving, setIsSaving] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -147,19 +216,66 @@ function CustomizeContent() {
             const data = await res.json();
             if (data.success) {
                 setNickname(data.data.nickname);
-                const custom = data.data.customization;
+                setPointInfo(data.data.point || 0);
+
+                const custom = data.data.customize;
+                if (data.data.badge) setSelectedBadge(data.data.badge);
+                if (data.data.cardStyle) setCardStyle(data.data.cardStyle);
+
                 if (custom) {
-                    if (custom.badge) setSelectedBadge(custom.badge);
-                    if (custom.cardStyle) setCardStyle(custom.cardStyle);
                     if (Array.isArray(custom.stickers)) setStickers(custom.stickers);
+                    if (custom.borderStyle) setBorderStyle(prev => ({ ...prev, ...custom.borderStyle }));
+
+                    if (custom.pointStyle) {
+                        setPointStyle(prev => ({
+                            ...prev,
+                            ...custom.pointStyle,
+                            x: custom.pointStyle.x || prev.x,
+                            y: custom.pointStyle.y || prev.y
+                        }));
+                    }
+                    if (custom.rankStyle) {
+                        setRankStyle(prev => ({
+                            ...prev,
+                            ...custom.rankStyle,
+                            x: custom.rankStyle.x || prev.x,
+                            y: custom.rankStyle.y || prev.y
+                        }));
+                    }
+                    if (custom.badgeStyle) {
+                        setBadgeStyle(prev => ({
+                            ...prev,
+                            ...custom.badgeStyle,
+                            x: custom.badgeStyle.x || prev.x,
+                            y: custom.badgeStyle.y || prev.y
+                        }));
+                    }
                 }
+
                 if (data.data.nicknameStyle) {
-                    setNicknameStyle({
-                        color: data.data.nicknameStyle.color || '#1e293b',
-                        bold: data.data.nicknameStyle.bold || false,
-                        italic: data.data.nicknameStyle.italic || false,
-                        underline: data.data.nicknameStyle.underline || false,
-                    });
+                    setNicknameStyle(prev => ({
+                        ...prev,
+                        ...data.data.nicknameStyle,
+                        x: data.data.nicknameStyle.x || prev.x,
+                        y: data.data.nicknameStyle.y || prev.y
+                    }));
+                }
+
+                // Fetch real rank
+                try {
+                    const rankRes = await fetch(CHICORUN_API.CLASS_RANKING(data.data.classCode), { headers: { Authorization: `Bearer ${token}` } });
+                    const rankData = await rankRes.json();
+                    if (rankData.success && rankData.data) {
+                        const rankingArray = Array.isArray(rankData.data) ? rankData.data : rankData.data.ranking;
+                        if (Array.isArray(rankingArray)) {
+                            const myRankEntry = rankingArray.find((r: any) => r.id === data.data.id || r.nickname === data.data.nickname);
+                            if (myRankEntry) {
+                                setMyRank(myRankEntry.rank);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error('Failed to fetch rank for preview', e);
                 }
             }
         } catch (err) {
@@ -175,38 +291,54 @@ function CustomizeContent() {
 
     const previewContainerRef = useRef<HTMLDivElement>(null);
 
+    const moveSticker = useCallback((id: string, x: number, y: number) => {
+        setStickers(prev => prev.map(s => (s.id === id ? { ...s, x, y } : s)));
+    }, []);
+
     const [, drop] = useDrop(() => ({
-        accept: 'sticker',
-        drop: (item: { id: string; x: number; y: number }, monitor) => {
+        accept: ['sticker', 'rank', 'badge', 'nickname', 'point'],
+        drop: (item: any, monitor) => {
             const delta = monitor.getDifferenceFromInitialOffset();
-            if (delta) {
-                moveSticker(item.id, Math.round(item.x + delta.x), Math.round(item.y + delta.y));
-            }
+            if (!delta) return;
+            const newX = Math.round(item.x + delta.x);
+            const newY = Math.round(item.y + delta.y);
+            const type = monitor.getItemType();
+
+            if (type === 'sticker') moveSticker(item.id, newX, newY);
+            else if (type === 'rank') setRankStyle(p => ({ ...p, x: newX, y: newY }));
+            else if (type === 'badge') setBadgeStyle(p => ({ ...p, x: newX, y: newY }));
+            else if (type === 'nickname') setNicknameStyle(p => ({ ...p, x: newX, y: newY }));
+            else if (type === 'point') setPointStyle(p => ({ ...p, x: newX, y: newY }));
         },
-    }));
+    }), [moveSticker]);
 
     const addSticker = (emoji: string) => {
         const newSticker: StickerItem = {
             id: Date.now().toString(),
             emoji,
-            x: 150 + Math.random() * 50,
-            y: 20 + Math.random() * 30,
-            scale: 1 + Math.random() * 0.5,
-            rotate: Math.random() * 60 - 30, // -30 to 30 deg
+            x: 100 + Math.random() * 200,
+            y: 20 + Math.random() * 20,
+            scale: 0.8 + Math.random() * 0.7,
+            rotate: Math.random() * 60 - 30,
         };
         setStickers(prev => [...prev, newSticker]);
-    };
-
-    const moveSticker = (id: string, x: number, y: number) => {
-        setStickers(prev => prev.map(s => (s.id === id ? { ...s, x, y } : s)));
     };
 
     const removeSticker = (id: string) => {
         setStickers(prev => prev.filter(s => s.id !== id));
     };
 
+    // Mobile double tap logic helper
+    const [lastTap, setLastTap] = useState(0);
+    const handleTouchSticker = (id: string) => {
+        const now = Date.now();
+        if (now - lastTap < 300) {
+            removeSticker(id);
+        }
+        setLastTap(now);
+    };
+
     const handleSave = async () => {
-        if (!nickname.trim()) return;
         const token = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
         if (!token) return;
 
@@ -216,27 +348,24 @@ function CustomizeContent() {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({
-                    nickname: nickname.trim(),
                     badge: selectedBadge,
                     cardStyle: cardStyle,
-                    stickers,
                     nicknameStyle,
+                    customize: {
+                        stickers,
+                        borderStyle,
+                        pointStyle,
+                        rankStyle,
+                        badgeStyle
+                    }
                 }),
             });
 
             const data = await res.json();
             if (data.success) {
                 alert('랭킹 꾸미기가 저장되었습니다! 화려해진 랭킹 리스트를 확인해 보세요.');
-                const stored = localStorage.getItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
-                if (stored) {
-                    try {
-                        const parsed = JSON.parse(stored);
-                        parsed.nickname = nickname.trim();
-                        localStorage.setItem(CHICORUN_STORAGE_KEY.STUDENT_INFO, JSON.stringify(parsed));
-                    } catch { }
-                }
             } else {
-                alert(data.error?.includes('DUPLICATE') ? '이미 사용 중인 닉네임입니다.' : '저장 실패');
+                alert('저장 실패');
             }
         } catch (err) {
             console.error('Failed to save customization:', err);
@@ -260,6 +389,8 @@ function CustomizeContent() {
         );
     }
 
+    const isFirst = myRank === 1;
+
     return (
         <div className={styles.container}>
             <main className={styles.main}>
@@ -269,73 +400,130 @@ function CustomizeContent() {
                 </div>
 
                 <div className={styles.layoutGrid}>
-                    {/* 미리보기 (랭킹 아이템과 동일한 레이아웃) */}
-                    <div className={styles.previewPanel}>
-                        <h2 className={styles.panelTitle}>미리보기</h2>
-                        <div className={styles.previewContainer}>
+                    <div className={styles.optionSection}>
+                        <h2 className={styles.panelTitle} style={{ marginBottom: '0.5rem' }}>현재 내 랭킹 영역 미리보기</h2>
+                        <div className={styles.hintText} style={{ marginTop: 0 }}>
+                            💡 <b>직접 드래그</b>하여 위치를 옮겨보세요. 모바일에선 <b>한번 터치해 드래그</b>할 수 있으며, 스티커는 <b>두 번 톡톡 터치</b>하면 삭제됩니다.
+                        </div>
+                    </div>
+
+                    {/* 미리보기 영역 */}
+                    <div className={styles.previewPanel} style={{ paddingTop: '1rem', paddingBottom: '1rem' }}>
+                        <div className={styles.previewContainer} style={{ paddingBottom: 0 }}>
                             <div
                                 ref={(node) => {
                                     drop(node);
                                     (previewContainerRef as any).current = node;
                                 }}
                                 className={styles.rankingItemPreview}
-                                style={{ background: cardStyle }}
+                                style={{
+                                    background: cardStyle,
+                                    border: `${borderStyle.width}px ${borderStyle.style} ${borderStyle.color}`,
+                                    borderRadius: `${borderStyle.radius}px`,
+                                    overflow: isFirst ? 'visible' : 'hidden',
+                                    transform: isFirst ? 'scale(1.05)' : 'translateZ(0)',
+                                    zIndex: isFirst ? 10 : 1,
+                                    margin: isFirst ? '1rem 0' : '0',
+                                    boxShadow: isFirst ? '0 20px 25px -5px rgba(250, 204, 21, 0.4)' : undefined,
+                                    height: '80px',
+                                    display: 'block',
+                                }}
                             >
-                                {/* 추가된 스티커들 */}
+                                {/* 탑강조 뱃지 */}
+                                {isFirst && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '-15px',
+                                        left: '-15px',
+                                        background: 'linear-gradient(135deg, #fef08a, #ca8a04)',
+                                        color: '#fff',
+                                        padding: '0.25rem 0.75rem',
+                                        borderRadius: '1rem',
+                                        fontWeight: 900,
+                                        fontSize: '1rem',
+                                        boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
+                                        transform: 'rotate(-10deg)',
+                                        zIndex: 40,
+                                        border: '2px solid white',
+                                        pointerEvents: 'none',
+                                    }}>
+                                        👑 TOP 1
+                                    </div>
+                                )}
+
+                                {/* 스티커들 */}
                                 {stickers.map(sticker => (
-                                    <DraggableSticker key={sticker.id} sticker={sticker} onRemove={removeSticker} />
+                                    <DraggableElement
+                                        key={sticker.id}
+                                        type="sticker"
+                                        id={sticker.id}
+                                        position={{ x: sticker.x, y: sticker.y }}
+                                        style={{ fontSize: '2rem', zIndex: 10, transform: `scale(${sticker.scale || 1}) rotate(${sticker.rotate || 0}deg)` }}
+                                        title="더블클릭/더블탭해서 삭제"
+                                    >
+                                        <div onDoubleClick={() => removeSticker(sticker.id)} onClick={() => handleTouchSticker(sticker.id)}>{sticker.emoji}</div>
+                                    </DraggableElement>
                                 ))}
 
-                                {/* 가상의 1등 랭크 */}
-                                <div className={styles.rankBadgeBox} style={{ position: 'relative', zIndex: 1 }}>
-                                    <IconTrophy />
-                                </div>
+                                {/* 랭크 번호 */}
+                                <DraggableElement type="rank" position={{ x: rankStyle.x, y: rankStyle.y }}>
+                                    <span className={styles.rankNumber} style={{
+                                        color: rankStyle.color,
+                                        fontSize: `${rankStyle.fontSize}px`,
+                                        margin: 0,
+                                        lineHeight: 1
+                                    }}>
+                                        #{myRank > 0 ? myRank : '-'}
+                                    </span>
+                                </DraggableElement>
 
-                                {/* 뱃지와 닉네임 */}
-                                <div className={styles.rankInfo} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'relative', zIndex: 1 }}>
-                                    <div className={styles.rankBadgeEmoji}>{selectedBadge}</div>
+                                {/* 뱃지 */}
+                                <DraggableElement type="badge" position={{ x: badgeStyle.x, y: badgeStyle.y }}>
+                                    <div style={{ fontSize: `${badgeStyle.fontSize}px`, lineHeight: 1 }}>{selectedBadge}</div>
+                                </DraggableElement>
+
+                                {/* 닉네임 */}
+                                <DraggableElement type="nickname" position={{ x: nicknameStyle.x, y: nicknameStyle.y }}>
                                     <div
-                                        className={styles.rankNickname}
                                         style={{
                                             color: nicknameStyle.color,
                                             fontWeight: nicknameStyle.bold ? 800 : 500,
                                             fontStyle: nicknameStyle.italic ? 'italic' : 'normal',
                                             textDecoration: nicknameStyle.underline ? 'underline' : 'none',
                                             textShadow: cardStyle !== 'white' && nicknameStyle.color === '#ffffff' ? '0 1px 3px rgba(0,0,0,0.5)' : 'none',
+                                            fontSize: `${nicknameStyle.fontSize}px`,
+                                            whiteSpace: 'nowrap',
+                                            lineHeight: 1
                                         }}
                                     >
                                         {nickname}
                                     </div>
-                                </div>
+                                </DraggableElement>
 
-                                {/* 가상의 점수 상자 */}
-                                <div className={styles.pointsBox} style={{ position: 'relative', zIndex: 1 }}>
-                                    <IconZap />
-                                    <span className={styles.points}>{pointInfo.toLocaleString()}P</span>
-                                </div>
+                                {/* 포인트 */}
+                                <DraggableElement type="point" position={{ x: pointStyle.x, y: pointStyle.y }}>
+                                    <div className={styles.pointsBox} style={{
+                                        background: pointStyle.background,
+                                        color: pointStyle.color,
+                                        border: `${pointStyle.borderWidth}px solid ${pointStyle.borderColor}`,
+                                        margin: 0,
+                                        padding: '0.4rem 0.8rem'
+                                    }}>
+                                        <IconZap color={pointStyle.color} />
+                                        <span className={styles.points} style={{ color: pointStyle.color, fontSize: `${pointStyle.fontSize}px` }}>
+                                            {pointInfo.toLocaleString()}P
+                                        </span>
+                                    </div>
+                                </DraggableElement>
                             </div>
-                        </div>
-                        <div className={styles.hintText}>
-                            💡 <b>스티커를 추가</b>하고 자유롭게 패널 안에서 <b>드래그</b>해 나만의 화려한 랭킹 줄을 만들어보세요. 더블클릭하면 스티커가 삭제됩니다.
                         </div>
                     </div>
 
                     {/* 옵션 컨트롤 */}
                     <div className={styles.optionsContainer}>
-
                         {/* 닉네임 설정 */}
                         <div className={styles.optionSection}>
                             <div className={styles.sectionTitle}>📝 닉네임 스타일</div>
-                            <input
-                                type="text"
-                                value={nickname}
-                                onChange={e => setNickname(e.target.value)}
-                                maxLength={10}
-                                className={styles.inputNickname}
-                                placeholder="새 닉네임 입력 (최대 10자)"
-                            />
-
-                            {/* 색상 픽커 */}
                             <div className={styles.gridColor}>
                                 {AVAILABLE_NICKNAME_COLORS.map(color => (
                                     <div
@@ -346,19 +534,21 @@ function CustomizeContent() {
                                     />
                                 ))}
                             </div>
-
-                            {/* 효과 픽커 */}
                             <div className={styles.textStyleControls}>
                                 <button className={`${styles.btnTextStyle} ${nicknameStyle.bold ? styles.active : ''}`} onClick={() => toggleStyle('bold')}>Bold</button>
                                 <button className={`${styles.btnTextStyle} ${nicknameStyle.italic ? styles.active : ''}`} onClick={() => toggleStyle('italic')}>Italic</button>
                                 <button className={`${styles.btnTextStyle} ${nicknameStyle.underline ? styles.active : ''}`} onClick={() => toggleStyle('underline')}>Underline</button>
                             </div>
+                            <div className={styles.sliderGroup}>
+                                <div className={styles.sliderLabel}><span>크기 (Size)</span> <span>{nicknameStyle.fontSize}px</span></div>
+                                <input type="range" min="10" max="60" value={nicknameStyle.fontSize} onChange={e => setNicknameStyle(p => ({ ...p, fontSize: Number(e.target.value) }))} className={styles.sliderInput} />
+                            </div>
                         </div>
 
-                        {/* 뱃지 설정 */}
+                        {/* 등수 및 뱃지 설정 */}
                         <div className={styles.optionSection}>
-                            <div className={styles.sectionTitle}>🎖️ 대표 뱃지</div>
-                            <div className={styles.gridEmojis}>
+                            <div className={styles.sectionTitle}>🎖️ 대표 뱃지 및 크기</div>
+                            <div className={styles.gridEmojis} style={{ marginBottom: '1rem' }}>
                                 {AVAILABLE_BADGES.map(badge => (
                                     <button
                                         key={badge}
@@ -369,28 +559,59 @@ function CustomizeContent() {
                                     </button>
                                 ))}
                             </div>
+                            <div className={styles.sliderGroup}>
+                                <div className={styles.sliderLabel}><span>뱃지 크기</span> <span>{badgeStyle.fontSize}px</span></div>
+                                <input type="range" min="10" max="80" value={badgeStyle.fontSize} onChange={e => setBadgeStyle(p => ({ ...p, fontSize: Number(e.target.value) }))} className={styles.sliderInput} />
+                                <div className={styles.sliderLabel} style={{ marginTop: '0.5rem' }}><span>등수 글자 크기</span> <span>{rankStyle.fontSize}px</span></div>
+                                <input type="range" min="10" max="60" value={rankStyle.fontSize} onChange={e => setRankStyle(p => ({ ...p, fontSize: Number(e.target.value) }))} className={styles.sliderInput} />
+                            </div>
                         </div>
 
-                        {/* 테두리(배경) 설정 */}
+                        {/* 테두리(배경) 및 테두리 설정 */}
                         <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
-                            <div className={styles.sectionTitle}>🎨 랭킹 배경 스타일</div>
+                            <div className={styles.sectionTitle}>🎨 랭킹 배경 및 테두리</div>
                             <div className={styles.gridBackgrounds}>
                                 {AVAILABLE_BACKGROUNDS.map(bg => (
                                     <div
                                         key={bg.name}
                                         onClick={() => setCardStyle(bg.value)}
                                         className={`${styles.btnBackground} ${cardStyle === bg.value ? styles.selected : ''}`}
-                                        style={{ background: bg.value, border: cardStyle === bg.value ? '3px solid #3b82f6' : '3px solid #e2e8f0' }}
+                                        style={{ background: bg.value, border: cardStyle === bg.value ? '4px solid #3b82f6' : '3px solid #e2e8f0', color: bg.value === 'white' || bg.value === 'transparent' ? '#1e293b' : 'white' }}
                                     >
                                         {bg.name}
                                     </div>
                                 ))}
                             </div>
+                            <div className={styles.sliderGroup} style={{ marginTop: '1.5rem' }}>
+                                <div className={styles.sliderLabel}><span>테두리 두께</span> <span>{borderStyle.width}px</span></div>
+                                <input type="range" min="0" max="15" value={borderStyle.width} onChange={e => setBorderStyle(p => ({ ...p, width: Number(e.target.value) }))} className={styles.sliderInput} />
+                                <div className={styles.sliderLabel}><span>둥글기</span> <span>{borderStyle.radius}px</span></div>
+                                <input type="range" min="0" max="100" value={borderStyle.radius} onChange={e => setBorderStyle(p => ({ ...p, radius: Number(e.target.value) }))} className={styles.sliderInput} />
+                            </div>
+                        </div>
+
+                        {/* 포인트 영역 설정 */}
+                        <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
+                            <div className={styles.sectionTitle}>💎 포인트 영역 스타일</div>
+                            <div className={styles.gridColor}>
+                                {AVAILABLE_NICKNAME_COLORS.map(color => (
+                                    <div
+                                        key={color}
+                                        className={`${styles.colorCircle} ${pointStyle.color === color ? styles.selected : ''}`}
+                                        style={{ background: color, border: pointStyle.color === color ? '3px solid #6366f1' : '3px solid #cbd5e1' }}
+                                        onClick={() => setPointStyle(prev => ({ ...prev, color }))}
+                                    />
+                                ))}
+                            </div>
+                            <div className={styles.sliderGroup} style={{ marginTop: '1rem' }}>
+                                <div className={styles.sliderLabel}><span>점수 크기</span> <span>{pointStyle.fontSize}px</span></div>
+                                <input type="range" min="10" max="40" value={pointStyle.fontSize} onChange={e => setPointStyle(p => ({ ...p, fontSize: Number(e.target.value) }))} className={styles.sliderInput} />
+                            </div>
                         </div>
 
                         {/* 스티커 설정 */}
                         <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
-                            <div className={styles.sectionTitle}>✨ 장식 스티커 추가 (무제한 배치 가능)</div>
+                            <div className={styles.sectionTitle}>✨ 장식 스티커 추가</div>
                             <div className={styles.gridEmojis}>
                                 {AVAILABLE_STICKERS.map(sticker => (
                                     <button
@@ -409,9 +630,9 @@ function CustomizeContent() {
                             <button
                                 className={styles.btnSave}
                                 onClick={handleSave}
-                                disabled={isSaving || !nickname.trim()}
+                                disabled={isSaving}
                             >
-                                {isSaving ? '저장 중...' : <><IconSave /> 화려하게 변신한 랭킹 영역 저장하기</>}
+                                {isSaving ? '저장 중...' : <><IconSave /> 변화된 랭킹 영역 저장하기</>}
                             </button>
                         </div>
                     </div>
@@ -423,7 +644,7 @@ function CustomizeContent() {
 
 export default function CustomizePage() {
     return (
-        <DndProvider backend={HTML5Backend}>
+        <DndProvider backend={TouchBackend} options={{ enableMouseEvents: true }}>
             <CustomizeContent />
         </DndProvider>
     );
