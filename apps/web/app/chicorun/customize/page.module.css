@@ -44,11 +44,25 @@
     background: white;
     border-radius: 1.5rem;
     box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    padding: 1.5rem;
+    padding: 2rem;
     animation: slideRight 0.5s ease-out forwards;
+    margin-top: 1.5rem;
+}
+
+.previewHeader {
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.stickyPreviewWrapper {
     position: sticky;
-    top: 0;
-    z-index: 50;
+    top: 80px;
+    z-index: 100;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }
 
 .panelTitle {
@@ -62,6 +76,7 @@
     display: flex;
     justify-content: center;
     overflow-x: auto;
+    width: 100%;
     /* In case screen is small */
     padding-bottom: 1rem;
 }
