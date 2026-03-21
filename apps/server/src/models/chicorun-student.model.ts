@@ -13,6 +13,10 @@ export interface ICustomizeData {
     stickers: IStickerPlacement[];
     frameId: string;
     badgeId: string;
+    borderStyle: any;
+    pointStyle: any;
+    rankStyle: any;
+    badgeStyle: any;
 }
 
 export interface INicknameStyle {
@@ -20,6 +24,9 @@ export interface INicknameStyle {
     bold: boolean;
     italic: boolean;
     underline: boolean;
+    fontSize?: number;
+    x?: number;
+    y?: number;
 }
 
 export interface IChicorunStudent extends Document {
@@ -54,6 +61,9 @@ const nicknameStyleSchema = new Schema<INicknameStyle>(
         bold: { type: Boolean, default: false },
         italic: { type: Boolean, default: false },
         underline: { type: Boolean, default: false },
+        fontSize: { type: Number, default: 16 },
+        x: { type: Number, default: 120 },
+        y: { type: Number, default: 25 },
     },
     { _id: false }
 );
@@ -102,6 +112,10 @@ const chicorunStudentSchema = new Schema<IChicorunStudent>(
             stickers: { type: [stickerPlacementSchema], default: [] },
             frameId: { type: String, default: 'default' },
             badgeId: { type: String, default: 'default' },
+            borderStyle: { type: Schema.Types.Mixed, default: () => ({ color: '#ffffff', width: 0, style: 'solid', radius: 16 }) },
+            pointStyle: { type: Schema.Types.Mixed, default: () => ({ color: '#f97316', background: 'transparent', borderWidth: 0, borderColor: '#ffffff', fontSize: 16, x: 580, y: 20 }) },
+            rankStyle: { type: Schema.Types.Mixed, default: () => ({ color: '#94a3b8', fontSize: 20, x: 24, y: 20 }) },
+            badgeStyle: { type: Schema.Types.Mixed, default: () => ({ fontSize: 24, x: 80, y: 20 }) },
         },
     },
     {
