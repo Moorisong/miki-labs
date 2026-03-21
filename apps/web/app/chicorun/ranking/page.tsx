@@ -67,6 +67,14 @@ const IconZap = () => (
     </svg>
 );
 
+const IconClass = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb"
+        strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+        <path d="M6 12v5c3 3 9 3 12 0v-5" />
+    </svg>
+);
+
 function getRankIcon(rank: number) {
     switch (rank) {
         case 1: return <IconTrophy />;
@@ -173,7 +181,15 @@ function RankingContent() {
 
             <main className={styles.main}>
                 <div className={styles.titleArea}>
-                    <h1 className={styles.title}>🏆 랭킹 {className && <span style={{ fontSize: '1rem', color: '#64748b', fontWeight: 500 }}>({className})</span>}</h1>
+                    {className && (
+                        <div className={styles.classInfoContainer}>
+                            <div className={styles.classInfoBadge}>
+                                <IconClass />
+                                {className}
+                            </div>
+                        </div>
+                    )}
+                    <h1 className={styles.title}>🏆 랭킹</h1>
                     <p className={styles.subtitle}>최고 점수를 향해 달려보세요!</p>
                 </div>
 
