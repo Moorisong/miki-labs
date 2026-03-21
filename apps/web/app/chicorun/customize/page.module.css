@@ -7,9 +7,9 @@
 }
 
 .main {
-    max-width: 1024px;
+    max-width: 900px;
     margin: 0 auto;
-    padding: 3rem 1rem;
+    padding: 3rem 1.5rem;
     width: 100%;
 }
 
@@ -51,15 +51,13 @@
 
 .previewHeader {
     margin-bottom: 2rem;
-    text-align: left;
+    text-align: center;
 }
 
 .stickyPreviewWrapper {
-    position: sticky;
-    top: 80px;
-    z-index: 100;
+    position: relative;
     margin-top: 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
     display: flex;
     justify-content: center;
     width: 100%;
@@ -151,12 +149,16 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 1.5rem;
-    margin-top: 2rem;
+    margin-top: 3rem;
+    width: 100%;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 @media (min-width: 1024px) {
     .optionsContainer {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
     }
 }
 
@@ -503,4 +505,271 @@
     .editControls {
         grid-template-columns: 1fr;
     }
+}
+
+.gridBorderTypes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+    gap: 0.5rem;
+}
+
+.btnBorderType {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 0.5rem;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #475569;
+    font-weight: 700;
+}
+
+.btnBorderType:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.btnBorderType.selected {
+    background: #eff6ff;
+    border-color: #3b82f6;
+    color: #1e40af;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+}
+
+.btnSubMenu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem 1rem;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #334155;
+    font-weight: 700;
+    font-size: 0.95rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btnSubMenu:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.sectionTitleWithBack {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 1.25rem;
+}
+
+.btnBack {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1.2rem;
+}
+
+.btnBack:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+    border-color: #cbd5e1;
+}
+
+.stickyPreviewWrapper {
+    position: relative;
+    z-index: 50;
+}
+
+.btnStickerFAB {
+    position: absolute;
+    bottom: -15px;
+    right: 5px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    border: 3px solid white;
+    box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.3), 0 4px 6px -2px rgba(124, 58, 237, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btnStickerFAB:hover {
+    transform: scale(1.15) rotate(15deg);
+    box-shadow: 0 20px 25px -5px rgba(124, 58, 237, 0.4);
+    background: linear-gradient(135deg, #c084fc 0%, #9333ea 100%);
+}
+
+.btnStickerFAB:active {
+    transform: scale(0.95);
+}
+
+.colorPickerSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+}
+
+.colorSwatchWrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 1rem;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.colorSwatchWrapper:hover {
+    border-color: #cbd5e1;
+    background: #f1f5f9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.colorSwatch {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 0 1px #e2e8f0;
+}
+
+.colorHexCode {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #64748b;
+    font-family: 'Monaco', 'Consolas', monospace;
+    text-transform: uppercase;
+}
+
+.customPickerPopover {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    z-index: 1000;
+    background: white;
+    padding: 1rem;
+    border-radius: 1.25rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    width: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pickerPalette {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.paletteCircle {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 0.6rem;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.1s;
+}
+
+.paletteCircle:hover {
+    transform: scale(1.1);
+}
+
+.paletteCircle:active {
+    transform: scale(0.9);
+}
+
+.pickerHexInputNative {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 2px solid #f1f5f9;
+    border-radius: 0.75rem;
+    font-size: 0.85rem;
+    font-family: monospace;
+    color: #475569;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.pickerHexInputNative:focus {
+    border-color: #6366f1;
+}
+
+.btnPickerDone {
+    padding: 0.5rem 1rem;
+    background: #6366f1;
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btnPickerDone:hover {
+    opacity: 0.9;
+}
+
+.btnResetGradient {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    color: #64748b;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btnResetGradient:hover {
+    background: #f1f5f9;
+    color: #475569;
 }
