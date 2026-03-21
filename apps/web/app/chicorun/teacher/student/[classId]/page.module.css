@@ -57,6 +57,12 @@
     margin: 0 0 0.25rem 0;
 }
 
+@media (max-width: 640px) {
+    .panelTitle {
+        font-size: 1.25rem;
+    }
+}
+
 .panelSubtitle {
     color: #64748b;
     font-size: 0.875rem;

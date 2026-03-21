@@ -44,6 +44,12 @@
     margin: 0;
 }
 
+@media (max-width: 640px) {
+    .title {
+        font-size: 1.5rem;
+    }
+}
+
 .subtitle {
     color: #64748b;
     margin-top: 0.5rem;
