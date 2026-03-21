@@ -62,6 +62,14 @@ const IconZap = () => (
     </svg>
 );
 
+const IconClass = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb"
+        strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+        <path d="M6 12v5c3 3 9 3 12 0v-5" />
+    </svg>
+);
+
 // ─── 유틸 함수 ─────────────────────────────────────────────────────────────────
 function getAuthHeader(): Record<string, string> {
     const token = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
@@ -332,8 +340,11 @@ export default function StudentLearnPage() {
         <div className={styles.container}>
             <main className={styles.main}>
                 {className && (
-                    <div className={styles.classInfoBadge}>
-                        🏫 {className}
+                    <div className={styles.classInfoContainer}>
+                        <div className={styles.classInfoBadge}>
+                            <IconClass />
+                            {className}
+                        </div>
                     </div>
                 )}
                 {/* 상단 정보 패널 */}
