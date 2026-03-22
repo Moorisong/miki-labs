@@ -7,8 +7,8 @@ LOCAL_HOST="192.168.0.6"     # 집 (LAN)
 REMOTE_HOST="125.190.25.48"  # 외부 (WAN)
 SSH_PORT_LOCAL="22"
 SSH_PORT_WAN="2222"
-REMOTE_DIR="~/haroo-box/apps/server"
-LOCAL_SERVER_ROOT="."
+REMOTE_DIR="~/srv/box"
+LOCAL_CLIENT_ROOT="."
 
 # --- 네트워크 자동 감지 ---
 # 집 LAN IP의 SSH 포트(22)가 2초 내 응답 시 → 집 환경, 아니면 → 외부 환경
@@ -26,17 +26,26 @@ else
   echo "🌐 외부 네트워크 감지됨 → WAN($REMOTE_HOST:$SSH_PORT) 배포"
 fi
 
-# 0. 서버에 디렉토리가 없으면 생성
+# 0. TOBY 앱 빌드 및 복사 (정적 서빙 대비)
+echo "📦 TOBY 앱 빌드 중..."
+cd ../toby
+npm install && npm run build
+cd ../web
+mkdir -p public/toby
+rm -rf public/toby/*
+cp -r ../toby/dist/* public/toby/
+echo "✅ TOBY 빌드 및 복사 완료"
+
+# 1. 서버에 디렉토리가 없으면 생성
 ssh $SSH_OPT $REMOTE_USER@$REMOTE_HOST "mkdir -p $REMOTE_DIR"
 
-# 1. 로컬 백엔드 파일 서버로 동기화 (삭제된 파일도 서버에서 제거)
+# 1. 로컬 클라이언트 파일 서버로 동기화 (삭제된 파일도 서버에서 제거)
 echo "📤 파일 동기화 중 (rsync)..."
 rsync -avz --delete --progress -e "$RSYNC_SSH" \
   --exclude 'node_modules' \
-  --exclude 'dist' \
+  --exclude '.next' \
   --exclude '.git' \
-  --exclude '.env' \
-  $LOCAL_SERVER_ROOT/ $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR
+  $LOCAL_CLIENT_ROOT/ $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR
 
 # 2. 서버에서 빌드 및 실행 명령 전달
 echo "🛠️ 서버에서 빌드 및 PM2 실행 중..."
@@ -45,17 +54,17 @@ ssh $SSH_OPT $REMOTE_USER@$REMOTE_HOST "
   [ -s \"\$NVM_DIR/nvm.sh\" ] && . \"\$NVM_DIR/nvm.sh\"
   
   if command -v nvm > /dev/null 2>&1; then
-    nvm use 20
+    nvm use 22 || nvm use 20
   fi
   
   echo \"사용중인 Node 버전: \$(node -v)\"
   
   cd $REMOTE_DIR && \
-  npm install && \
+  npm install --legacy-peer-deps --ignore-engines && \
+  export NEXT_PUBLIC_API_URL=https://claw-addict-server.haroo.site && \
+  export NODE_OPTIONS=\"--max-old-space-size=4096\" && \
   npm run build && \
-  # PM2 설정이 변경되었을 가능성(경로 등)이 있으므로 기존 프로세스를 삭제하고 재시작하여 CWD 및 환경설정을 갱신함
-  pm2 delete box-be || true && \
-  pm2 start ecosystem.config.js
+  pm2 reload box-fe --update-env || pm2 start ecosystem.config.js
 "
 
-echo "✅ 배포 완료!"
+echo "✅ 배포 완료! https://box.haroo.site 주소를 확인하세요."
