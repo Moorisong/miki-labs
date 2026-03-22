@@ -1,0 +1,5 @@
+<svg width="80" height="60" viewBox="0 0 80 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M10 30L5 10L25 15L40 5L55 15L75 10L70 30L75 50L55 45L40 55L25 45L5 50L10 30Z" fill="white" stroke="white" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M10 30L5 10L25 15L40 5L55 15L75 10L70 30L75 50L55 45L40 55L25 45L5 50L10 30Z" fill="#EF4444"/>
+  <text x="40" y="38" font-family="Impact, Charcoal, sans-serif" font-weight="900" font-size="24" fill="white" text-anchor="middle" font-style="italic">WOW!</text>
+</svg>
