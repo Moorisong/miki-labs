@@ -27,6 +27,7 @@ export interface INicknameStyle {
     fontSize?: number;
     x?: number;
     y?: number;
+    rotate?: number;
 }
 
 export interface IChicorunStudent extends Document {
@@ -65,6 +66,7 @@ const nicknameStyleSchema = new Schema<INicknameStyle>(
         fontSize: { type: Number, default: 16 },
         x: { type: Number, default: 120 },
         y: { type: Number, default: 25 },
+        rotate: { type: Number, default: 0 },
     },
     { _id: false }
 );
@@ -103,7 +105,7 @@ const chicorunStudentSchema = new Schema<IChicorunStudent>(
         },
         nicknameStyle: {
             type: nicknameStyleSchema,
-            default: () => ({ color: '#ffffff', bold: false, italic: false, underline: false }),
+            default: () => ({ color: '#ffffff', bold: false, italic: false, underline: false, rotate: 0 }),
         },
         cardStyle: {
             type: String,
