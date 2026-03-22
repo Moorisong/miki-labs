@@ -14,7 +14,7 @@ export const ALL_CHICORUN_ITEMS: ShopItem[] = [
         id: 'bg-white',
         name: '기본 화이트',
         description: '깔끔한 화이트 배경',
-        price: 1,
+        price: 0,
         category: 'background',
         value: 'white',
         previewStyle: { background: 'white' }
@@ -47,57 +47,50 @@ export const ALL_CHICORUN_ITEMS: ShopItem[] = [
         previewStyle: { background: 'linear-gradient(135deg, #ec4899, #8b5cf6)' }
     },
 
-    // Badges
+    // Badges (Italian Brainrot Characters)
     {
-        id: 'badge-crown',
-        name: '황금 왕관',
-        description: '최고의 실력자 배지',
+        id: 'badge-tralallero',
+        name: '트랄랄레로 트랄랄라',
+        description: '세 개의 근육질 다리를 가진 귀여운 상어',
         price: 1,
         category: 'badge',
-        value: '👑'
+        value: '/chicorun/badges/tralallero.png'
     },
     {
-        id: 'badge-fire',
-        name: '불타는 열정',
-        description: '멈추지 않는 도전 정신',
+        id: 'badge-tungtung',
+        name: '퉁퉁퉁 사후르',
+        description: '야구 배트를 든 귀여운 나무 유령',
         price: 1,
         category: 'badge',
-        value: '🔥'
+        value: '/chicorun/badges/tungtung.png'
     },
     {
-        id: 'badge-zap',
-        name: '번개 속도',
-        description: '누구보다 빠른 문제 해결',
+        id: 'badge-ballerina',
+        name: '발레리나 카푸치나',
+        description: '카푸치노 머리를 한 우아한 발레리나',
         price: 1,
         category: 'badge',
-        value: '⚡'
+        value: '/chicorun/badges/ballerina.png'
+    },
+    {
+        id: 'badge-bombardiro',
+        name: '봄바르디로 크로코딜로',
+        description: '비행기 몸을 가진 용감한 악어',
+        price: 1,
+        category: 'badge',
+        value: '/chicorun/badges/bombardiro.png'
+    },
+    {
+        id: 'badge-assassino',
+        name: '카푸치노 아사시노',
+        description: '가면을 쓴 귀여운 커피 암살자',
+        price: 1,
+        category: 'badge',
+        value: '/chicorun/badges/assassino.png'
     },
 
     // Stickers
-    {
-        id: 'sticker-star',
-        name: '반짝이는 별',
-        description: '카드를 빛내줄 별 스티커',
-        price: 1,
-        category: 'sticker',
-        value: '⭐'
-    },
-    {
-        id: 'sticker-rocket',
-        name: '우주선 로켓',
-        description: '목표를 향해 나아가는 로켓',
-        price: 1,
-        category: 'sticker',
-        value: '🚀'
-    },
-    {
-        id: 'sticker-heart',
-        name: '사랑의 하트',
-        description: '귀여운 하트 스티커',
-        price: 1,
-        category: 'sticker',
-        value: '💖'
-    },
+    // (Stickers removed as per user request to delete previous emoji data)
 
     // Borders
     {
@@ -119,4 +112,5 @@ export const ALL_CHICORUN_ITEMS: ShopItem[] = [
         previewStyle: { borderStyle: 'dashed', borderWidth: '4px', borderColor: '#3b82f6' }
     }
 ];
+
 

@@ -120,7 +120,7 @@ const chicorunStudentSchema = new Schema<IChicorunStudent>(
         },
         ownedItems: {
             type: [String],
-            default: ['bg-white', 'badge-crown', 'border-solid'],
+            default: ['bg-white', 'border-solid'],
         },
     },
     {
