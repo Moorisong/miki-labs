@@ -125,54 +125,7 @@ function RankingContent() {
             if (data.success) {
                 const list = data.data.ranking || (Array.isArray(data.data) ? data.data : []);
 
-                // 송현 닉네임 제외 나머지 학생들 랜덤 스타일 적용
-                const gradients = [
-                    'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%)',
-                    'linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%)',
-                    'linear-gradient(120deg, #f6d365 0%, #fda085 100%)',
-                    'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)',
-                    'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)',
-                    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    'linear-gradient(to right, #fa709a 0%, #fee140 100%)',
-                    'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
-                    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                    'linear-gradient(135deg, #5ee7df 0%, #b490ca 100%)',
-                ];
-                const borderColors = ['#facc15', '#f87171', '#60a5fa', '#4ade80', '#c084fc', '#fb923c'];
-                const borderStyles = ['solid', 'dashed', 'dotted'];
-
-                const styledList = list.map((user: RankingEntry) => {
-                    if (user.nickname === 'sh') return user;
-
-                    // 이미 스타일이 있는 경우는 유지 (필요 시 주석 처리하여 무조건 랜덤 적용 가능)
-                    if (user.cardStyle && user.cardStyle !== 'white') return user;
-
-                    const seed = user.id || user.nickname;
-                    const hash = seed.split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0);
-                    const absHash = Math.abs(hash);
-
-                    return {
-                        ...user,
-                        cardStyle: gradients[absHash % gradients.length],
-                        nicknameStyle: {
-                            ...user.nicknameStyle,
-                            color: '#ffffff',
-                            bold: true,
-                            fontSize: user.nicknameStyle?.fontSize || 24,
-                        },
-                        customize: {
-                            ...user.customize,
-                            borderStyle: user.customize?.borderStyle || {
-                                color: borderColors[absHash % borderColors.length],
-                                width: 3,
-                                style: borderStyles[absHash % borderStyles.length],
-                                radius: 24
-                            }
-                        }
-                    };
-                });
-
-                setRankings(styledList);
+                setRankings(list);
                 if (data.data.className) setClassName(data.data.className);
             }
         } catch (err) {
