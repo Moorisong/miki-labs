@@ -586,6 +586,22 @@
     padding: var(--space-md);
     flex-direction: column;
     gap: var(--space-md);
+    width: 100%;
+  }
+
+  .logoutButton {
+    width: 100%;
+    padding: 14px !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: #ef4444 !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+  }
+
+  .logoutButton:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-color: #ef4444 !important;
   }
 
   .userMenu {
@@ -628,6 +644,65 @@
     display: flex;
     width: 100%;
     justify-content: center;
+  }
+
+  .mobileProfileHeader {
+    flex-direction: column;
+    padding: var(--space-md);
+    background: rgba(162, 155, 254, 0.1);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-sm);
+    gap: var(--space-sm);
+  }
+
+  .mobileProfileInfo {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-lg);
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .mobilePoints {
+    color: #fbbf24;
+    font-weight: 800;
+    font-size: 1rem;
+  }
+
+  .mobileClassCode {
+    color: var(--color-primary);
+    font-weight: 700;
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+
+  .mobileProfileActions {
+    display: flex !important;
+    gap: 12px;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .mobileActionBtn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(162, 155, 254, 0.2);
+    border-radius: 8px;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .mobileActionBtn:hover {
+    background: rgba(162, 155, 254, 0.15);
+    color: var(--color-text);
   }
 }
 

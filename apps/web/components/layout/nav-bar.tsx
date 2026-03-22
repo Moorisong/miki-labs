@@ -211,40 +211,42 @@ export default function NavBar() {
 
           <ul className={`${styles.navLinks} ${isMenuOpen ? styles.open : ''}`}>
             {/* PC: Dropdown Menu */}
-            <li
-              className={`${styles.dropdownContainer} ${styles.desktopOnly}`}
-              onMouseEnter={() => setIsDropdownOpen(true)}
-              onMouseLeave={() => setIsDropdownOpen(false)}
-            >
-              <button
-                className={`${styles.navLink} ${styles.dropdownToggle} ${isContentsActive ? styles.active : ''}`}
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                aria-haspopup="true"
-                aria-expanded={isDropdownOpen}
+            {!isChicorun && (
+              <li
+                className={`${styles.dropdownContainer} ${styles.desktopOnly}`}
+                onMouseEnter={() => window.innerWidth > 768 && setIsDropdownOpen(true)}
+                onMouseLeave={() => window.innerWidth > 768 && setIsDropdownOpen(false)}
               >
-                콘텐츠 <span className={`${styles.arrow} ${isDropdownOpen ? styles.arrowRotate : ''}`}>▾</span>
-              </button>
-              <ul className={`${styles.dropdownMenu} ${isDropdownOpen ? styles.show : ''}`}>
-                {NAV_LINKS.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className={`${styles.dropdownItem} ${pathname === link.href ? styles.dropdownItemActive : ''}`}
-                      onClick={() => {
-                        closeMenu();
-                        setIsDropdownOpen(false);
-                      }}
-                      {...((link as any).newTab || link.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </li>
+                <button
+                  className={`${styles.navLink} ${styles.dropdownToggle} ${isContentsActive ? styles.active : ''}`}
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  aria-haspopup="true"
+                  aria-expanded={isDropdownOpen}
+                >
+                  콘텐츠 <span className={`${styles.arrow} ${isDropdownOpen ? styles.arrowRotate : ''}`}>▾</span>
+                </button>
+                <ul className={`${styles.dropdownMenu} ${isDropdownOpen ? styles.show : ''}`}>
+                  {NAV_LINKS.map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className={`${styles.dropdownItem} ${pathname === link.href ? styles.dropdownItemActive : ''}`}
+                        onClick={() => {
+                          closeMenu();
+                          setIsDropdownOpen(false);
+                        }}
+                        {...((link as any).newTab || link.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            )}
 
             {/* Mobile: Linear List */}
-            {NAV_LINKS.map((link) => (
+            {!isChicorun && NAV_LINKS.map((link) => (
               <li key={link.href} className={styles.mobileOnly}>
                 <Link
                   href={link.href}
@@ -260,7 +262,6 @@ export default function NavBar() {
             {/* Chicorun Specific Links (Visible only on /chicorun paths) - Positioned to the right */}
             {isChicorun && (
               <>
-                <li className={styles.divider} />
                 {CHICORUN_LINKS.map((link) => (
                   <li key={link.href} className={styles.chicorunLinkItem}>
                     <Link
@@ -273,12 +274,12 @@ export default function NavBar() {
                   </li>
                 ))}
 
-                {/* 학생 프로필 드롭다운 (학생 로그인 시에만 보임) */}
+                {/* 학생 프로필 (PC: 드롭다운) */}
                 {studentNickname && !teacherName && (
                   <li
-                    className={`${styles.dropdownContainer}`}
-                    onMouseEnter={() => setIsStudentDropdownOpen(true)}
-                    onMouseLeave={() => setIsStudentDropdownOpen(false)}
+                    className={`${styles.dropdownContainer} ${styles.desktopOnly}`}
+                    onMouseEnter={() => window.innerWidth > 768 && setIsStudentDropdownOpen(true)}
+                    onMouseLeave={() => window.innerWidth > 768 && setIsStudentDropdownOpen(false)}
                   >
                     <button
                       className={`${styles.navLink} ${styles.chicorunLink} ${styles.studentProfileBtn}`}
@@ -370,6 +371,60 @@ export default function NavBar() {
                       </li>
                     </ul>
                   </li>
+                )}
+
+                {/* 학생 프로필 (모바일: 모두 펼침) */}
+                {studentNickname && !teacherName && (
+                  <>
+                    <li className={`${styles.mobileOnly} ${styles.mobileProfileHeader}`}>
+                      <div className={styles.profileBadgeName}>
+                        <span className={styles.profileBadge}>
+                          {studentBadge.startsWith('/') ? (
+                            <div style={{
+                              background: getBadgeStyles(studentBadge).bg,
+                              border: `2px solid ${getBadgeStyles(studentBadge).border}`,
+                              borderRadius: '22%',
+                              width: '1.5em',
+                              height: '1.5em',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              overflow: 'hidden'
+                            }}>
+                              <img
+                                src={studentBadge}
+                                alt="badge"
+                                style={{ width: '100%', height: '100%', objectFit: 'contain', mixBlendMode: 'multiply' }}
+                              />
+                            </div>
+                          ) : studentBadge}
+                        </span>
+                        <span className={styles.profileName}>{studentNickname}</span>
+                      </div>
+                      <div className={styles.mobileProfileInfo}>
+                        <span className={styles.mobilePoints}>{studentPoints} P</span>
+                        <span className={styles.mobileClassCode}>{studentClassCode}</span>
+                      </div>
+                    </li>
+                    <li className={`${styles.mobileOnly} ${styles.mobileProfileActions}`}>
+                      <Link
+                        href="/chicorun/customize"
+                        className={styles.mobileActionBtn}
+                        onClick={closeMenu}
+                      >
+                        꾸미기
+                      </Link>
+                      <button
+                        className={styles.mobileActionBtn}
+                        onClick={() => {
+                          closeMenu();
+                          setIsPasswordModalOpen(true);
+                        }}
+                      >
+                        비밀번호 변경
+                      </button>
+                    </li>
+                  </>
                 )}
               </>
             )}
