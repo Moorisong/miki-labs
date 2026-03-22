@@ -682,9 +682,6 @@ function CustomizeContent() {
                 const merged = Array.from(new Set([...DEFAULT_OWNED_ITEMS, ...serverOwned]));
                 setOwnedItems(merged);
 
-                // Keep localStorage as a secondary cache
-                localStorage.setItem('chicorun_owned_items', JSON.stringify(merged));
-
 
                 if (custom) {
                     if (Array.isArray(custom.stickers)) setStickers(custom.stickers);
@@ -752,18 +749,9 @@ function CustomizeContent() {
     useEffect(() => {
         fetchMyInfo();
 
-        const handleStorageChange = () => {
-            const storedOwned = localStorage.getItem('chicorun_owned_items');
-            if (storedOwned) {
-                try {
-                    const parsed = JSON.parse(storedOwned);
-                    const merged = Array.from(new Set([...DEFAULT_OWNED_ITEMS, ...parsed]));
-                    setOwnedItems(merged);
-                } catch (e) { }
-            }
-        };
-        window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
+        const handleReFetch = () => fetchMyInfo();
+        window.addEventListener('chicorun_user_update', handleReFetch);
+        return () => window.removeEventListener('chicorun_user_update', handleReFetch);
     }, [fetchMyInfo]);
 
     const previewContainerRef = useRef<HTMLDivElement>(null);
@@ -841,6 +829,9 @@ function CustomizeContent() {
 
             const data = await res.json();
             if (data.success) {
+                // Notify other components (like NavBar) to re-fetch latest data from DB
+                window.dispatchEvent(new Event('chicorun_user_update'));
+
                 showToast('랭킹 꾸미기가 저장되었습니다! 화려해진 랭킹 리스트를 확인해 보세요.', 'success');
                 // Reset interactions
                 setSelectedElement(null);

@@ -68,11 +68,6 @@ export default function StorePage() {
                     const serverOwned = data.data.ownedItems || [];
                     const merged = Array.from(new Set([...DEFAULT_OWNED_ITEMS, ...serverOwned]));
                     setOwnedItems(merged);
-
-                    // Keep localStorage as a secondary cache
-                    localStorage.setItem('chicorun_owned_items', JSON.stringify(merged));
-
-
                 }
             } catch (err) {
                 console.error('Failed to load user data', err);
@@ -81,22 +76,7 @@ export default function StorePage() {
             }
         };
 
-        const handleStorageChange = () => {
-            const storedOwned = localStorage.getItem('chicorun_owned_items');
-            if (storedOwned) {
-                try {
-                    const parsed = JSON.parse(storedOwned);
-                    const merged = Array.from(new Set([...DEFAULT_OWNED_ITEMS, ...parsed]));
-                    setOwnedItems(merged);
-                } catch (e) { }
-            } else {
-                setOwnedItems(DEFAULT_OWNED_ITEMS);
-            }
-        };
-        window.addEventListener('storage', handleStorageChange);
-
         fetchUserData();
-        return () => window.removeEventListener('storage', handleStorageChange);
     }, [router]);
 
 
@@ -137,20 +117,9 @@ export default function StorePage() {
 
                 setPoints(newPointTotal);
                 setOwnedItems(merged);
-                localStorage.setItem('chicorun_owned_items', JSON.stringify(merged));
 
-                // Update global info in localStorage so Header can pick it up
-                const infoStr = localStorage.getItem('chicorun_student_info');
-                if (infoStr) {
-                    try {
-                        const info = JSON.parse(infoStr);
-                        info.point = newPointTotal;
-                        localStorage.setItem('chicorun_student_info', JSON.stringify(info));
-                        window.dispatchEvent(new Event('storage'));
-                    } catch (e) {
-                        console.error('Failed to update localStorage student info', e);
-                    }
-                }
+                // Notify Header to re-fetch latest data from DB
+                window.dispatchEvent(new Event('chicorun_user_update'));
 
                 showToast(`${item.name}을(를) 구매했습니다!`, 'success');
             } else {

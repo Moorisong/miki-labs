@@ -148,25 +148,6 @@ function RankingContent() {
                 }
             }
         }
-
-        // --- Sync latest points from server ---
-        const token = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
-        if (token) {
-            fetch(CHICORUN_API.STUDENT_ME, { headers: { Authorization: `Bearer ${token}` } })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success && data.data.point !== undefined) {
-                        const infoStr = localStorage.getItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
-                        if (infoStr) {
-                            const info = JSON.parse(infoStr);
-                            info.point = data.data.point;
-                            localStorage.setItem(CHICORUN_STORAGE_KEY.STUDENT_INFO, JSON.stringify(info));
-                            window.dispatchEvent(new Event('storage'));
-                        }
-                    }
-                })
-                .catch(err => console.error('Failed to sync student point on ranking mount', err));
-        }
     }, [searchParams]);
 
 
@@ -185,28 +166,10 @@ function RankingContent() {
             const res = await fetch(CHICORUN_API.CLASS_RANKING(code));
             const data = await res.json();
             if (data.success) {
-                let list = data.data.ranking || (Array.isArray(data.data) ? data.data : []);
-
-                // Sync with local points if current user is in the list
-                const studentInfoStr = localStorage.getItem('chicorun_student_info');
-                if (studentInfoStr) {
-                    try {
-                        const info = JSON.parse(studentInfoStr);
-                        list = list.map((user: RankingEntry) => {
-                            if (user.nickname === info.nickname) {
-                                return { ...user, point: info.point };
-                            }
-                            return user;
-                        });
-                    } catch (err) {
-                        console.error('Failed to sync local points in ranking', err);
-                    }
-                }
-
+                const list = data.data.ranking || (Array.isArray(data.data) ? data.data : []);
                 setRankings(list);
                 if (data.data.className) setClassName(data.data.className);
             }
-
         } catch (err) {
             console.error('Failed to fetch rankings:', err);
         } finally {
