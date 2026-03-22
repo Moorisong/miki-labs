@@ -52,7 +52,9 @@ ssh $SSH_OPT $REMOTE_USER@$REMOTE_HOST "
   cd $REMOTE_DIR && \
   npm install && \
   npm run build && \
-  pm2 reload box-be --update-env || pm2 start ecosystem.config.js
+  # PM2 설정이 변경되었을 가능성(경로 등)이 있으므로 기존 프로세스를 삭제하고 재시작하여 CWD 및 환경설정을 갱신함
+  pm2 delete box-be || true && \
+  pm2 start ecosystem.config.js
 "
 
 echo "✅ 배포 완료!"
