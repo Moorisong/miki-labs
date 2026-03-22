@@ -33,36 +33,38 @@ export default function NavBar() {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   useEffect(() => {
-    const loadStudentInfo = () => {
-      if (typeof window !== 'undefined') {
-        const studentToken = localStorage.getItem('chicorun_student_token');
-        const teacherToken = localStorage.getItem('chicorun_teacher_token');
-        const studentInfo = localStorage.getItem('chicorun_student_info');
+    const fetchLatestInfo = async () => {
+      const studentToken = localStorage.getItem('chicorun_student_token');
+      const teacherToken = localStorage.getItem('chicorun_teacher_token');
+      setHasChicoToken(!!(studentToken || teacherToken));
 
-        setHasChicoToken(!!(studentToken || teacherToken));
-
-        if (studentToken && studentInfo) {
-          try {
-            const info = JSON.parse(studentInfo);
+      if (studentToken) {
+        try {
+          const res = await fetch(CHICORUN_API.STUDENT_ME, {
+            headers: { Authorization: `Bearer ${studentToken}` }
+          });
+          const data = await res.json();
+          if (data.success && data.data) {
+            const info = data.data;
             setStudentNickname(info.nickname || null);
             setStudentClassCode(info.classCode || '알 수 없음');
             setStudentPoints(info.point || 0);
             setStudentBadge(info.badge || '🌱');
-          } catch {
-            setStudentNickname(null);
-            setStudentClassCode(null);
-            setStudentPoints(0);
-            setStudentBadge('🌱');
           }
-        } else {
-          setStudentNickname(null);
+        } catch (err) {
+          console.error('Failed to fetch latest student info in NavBar', err);
         }
+      } else {
+        setStudentNickname(null);
       }
     };
 
-    loadStudentInfo();
-    window.addEventListener('storage', loadStudentInfo);
-    return () => window.removeEventListener('storage', loadStudentInfo);
+    fetchLatestInfo();
+
+    // Listen for custom event to re-fetch on save/purchase
+    const handleReFetch = () => fetchLatestInfo();
+    window.addEventListener('chicorun_user_update', handleReFetch);
+    return () => window.removeEventListener('chicorun_user_update', handleReFetch);
   }, [pathname]);
 
 
@@ -289,7 +291,27 @@ export default function NavBar() {
                     <ul className={`${styles.dropdownMenu} ${isStudentDropdownOpen ? styles.show : ''}`}>
                       <li className={styles.dropdownProfileRow}>
                         <div className={styles.profileBadgeName}>
-                          <span className={styles.profileBadge}>{studentBadge}</span>
+                          <span className={styles.profileBadge}>
+                            {studentBadge.startsWith('/') ? (
+                              <div style={{
+                                background: getBadgeStyles(studentBadge).bg,
+                                border: `2px solid ${getBadgeStyles(studentBadge).border}`,
+                                borderRadius: '22%',
+                                width: '1.4em',
+                                height: '1.4em',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                overflow: 'hidden'
+                              }}>
+                                <img
+                                  src={studentBadge}
+                                  alt="badge"
+                                  style={{ width: '100%', height: '100%', objectFit: 'contain', mixBlendMode: 'multiply' }}
+                                />
+                              </div>
+                            ) : studentBadge}
+                          </span>
                           <span className={styles.profileName}>{studentNickname}</span>
                         </div>
                         <Link
@@ -427,3 +449,16 @@ export default function NavBar() {
     </>
   );
 }
+
+/**
+ * 뱃지 스타일 헬퍼 (배경색 및 테두리 색상)
+ */
+const getBadgeStyles = (path: string) => {
+  if (path.includes('tralallero')) return { bg: '#FFD700', border: '#1D4ED8' }; // Yellow
+  if (path.includes('tungtung')) return { bg: '#D1FAE5', border: '#7C2D12' }; // Mint green
+  if (path.includes('ballerina')) return { bg: '#DDD6FE', border: '#DB2777' }; // Lavender
+  if (path.includes('bombardiro')) return { bg: '#FFEDD5', border: '#374151' }; // Orange
+  if (path.includes('assassino')) return { bg: '#E0F2FE', border: '#000000' }; // SkyBlue
+  return { bg: '#f1f5f9', border: '#e2e8f0' };
+};
+
