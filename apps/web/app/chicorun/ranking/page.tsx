@@ -34,6 +34,7 @@ function RankingContent() {
 
     const [rankings, setRankings] = useState<RankingEntry[]>([]);
     const [className, setClassName] = useState('');
+    const [myNickname, setMyNickname] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [hasSearched, setHasSearched] = useState(false);
 
@@ -48,11 +49,12 @@ function RankingContent() {
         const docWidth = document.documentElement.clientWidth;
 
         const availableWidth = Math.min(rectWidth > 0 ? rectWidth : winWidth, winWidth, docWidth);
-        const baseWidth = CARD_WIDTH + 32;
+        // 1등 카드는 1.2배 스케일이므로 이를 고려한 기준 너비 설정
+        const baseWidth = (CARD_WIDTH * 1.2) + 40;
 
         if (availableWidth < baseWidth) {
-            const newScale = (availableWidth - 32) / baseWidth;
-            setScale(Math.max(0.5, newScale));
+            const newScale = (availableWidth - 40) / baseWidth;
+            setScale(Math.max(0.4, newScale));
         } else {
             setScale(1);
         }
@@ -72,31 +74,45 @@ function RankingContent() {
         };
     }, [updateScale, isLoading, rankings]);
 
-    // Initial class code detection & sync points
+    // 1. URL이나 DB(서버)에서 최신 정보를 가져와서 설정
     useEffect(() => {
-        const urlCode = searchParams.get('classCode');
-        if (urlCode) {
-            setClassCode(urlCode);
-        } else {
-            // Try localStorage if URL is missing code
-            const studentInfo = localStorage.getItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
-            if (studentInfo) {
-                try {
-                    const info = JSON.parse(studentInfo);
-                    if (info.classCode) setClassCode(info.classCode);
-                } catch (e) {
-                    console.error('Failed to parse student info', e);
-                }
+        const fetchMeAndInitialize = async () => {
+            // URL 파라미터 확인이 최우선
+            const urlCode = searchParams.get('classCode');
+            if (urlCode) setClassCode(urlCode);
+
+            const token = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
+            if (!token) {
+                if (!urlCode) setIsLoading(false);
+                return;
             }
-        }
+
+            try {
+                // 로컬 스토리지가 아닌 서버(DB) 정보를 확인
+                const res = await fetch(CHICORUN_API.STUDENT_ME, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success && data.data) {
+                    const info = data.data;
+                    setMyNickname(info.nickname || null);
+                    // URL 코드가 없을 때만 DB의 클래스 코드를 보조적으로 사용
+                    if (!urlCode && info.classCode) setClassCode(info.classCode);
+                }
+            } catch (err) {
+                console.error('Failed to fetch latest info from server:', err);
+            }
+        };
+
+        fetchMeAndInitialize();
     }, [searchParams]);
 
-
+    // 2. 클래스 코드가 확정되면 랭킹 데이터를 가져옴
     useEffect(() => {
         if (classCode) {
             fetchRankings(classCode);
-        } else {
-            setIsLoading(false); // Stop loading if no code is found
+        } else if (!isLoading) {
+            // 초기 로딩 후에도 코드가 없으면 중단
         }
     }, [classCode]);
 
@@ -108,13 +124,79 @@ function RankingContent() {
             const data = await res.json();
             if (data.success) {
                 const list = data.data.ranking || (Array.isArray(data.data) ? data.data : []);
-                setRankings(list);
+
+                // 송현 닉네임 제외 나머지 학생들 랜덤 스타일 적용
+                const gradients = [
+                    'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%)',
+                    'linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%)',
+                    'linear-gradient(120deg, #f6d365 0%, #fda085 100%)',
+                    'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)',
+                    'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)',
+                    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    'linear-gradient(to right, #fa709a 0%, #fee140 100%)',
+                    'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
+                    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                    'linear-gradient(135deg, #5ee7df 0%, #b490ca 100%)',
+                ];
+                const borderColors = ['#facc15', '#f87171', '#60a5fa', '#4ade80', '#c084fc', '#fb923c'];
+                const borderStyles = ['solid', 'dashed', 'dotted'];
+
+                const styledList = list.map((user: RankingEntry) => {
+                    if (user.nickname === 'sh') return user;
+
+                    // 이미 스타일이 있는 경우는 유지 (필요 시 주석 처리하여 무조건 랜덤 적용 가능)
+                    if (user.cardStyle && user.cardStyle !== 'white') return user;
+
+                    const seed = user.id || user.nickname;
+                    const hash = seed.split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0);
+                    const absHash = Math.abs(hash);
+
+                    return {
+                        ...user,
+                        cardStyle: gradients[absHash % gradients.length],
+                        nicknameStyle: {
+                            ...user.nicknameStyle,
+                            color: '#ffffff',
+                            bold: true,
+                            fontSize: user.nicknameStyle?.fontSize || 24,
+                        },
+                        customize: {
+                            ...user.customize,
+                            borderStyle: user.customize?.borderStyle || {
+                                color: borderColors[absHash % borderColors.length],
+                                width: 3,
+                                style: borderStyles[absHash % borderStyles.length],
+                                radius: 24
+                            }
+                        }
+                    };
+                });
+
+                setRankings(styledList);
                 if (data.data.className) setClassName(data.data.className);
             }
         } catch (err) {
             console.error('Failed to fetch rankings:', err);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const myRankEntry = rankings.find(r => r.nickname === myNickname);
+
+    const scrollToMyCard = () => {
+        if (!myRankEntry) return;
+        const id = `student-card-${myRankEntry.id || myRankEntry.nickname}`;
+        const element = document.getElementById(id);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Add a brief highlight effect
+            const originalTransform = element.style.transform;
+            element.style.transition = 'transform 0.3s ease';
+            element.style.transform = `${originalTransform} scale(1.05)`;
+            setTimeout(() => {
+                element.style.transform = originalTransform;
+            }, 600);
         }
     };
 
@@ -149,11 +231,14 @@ function RankingContent() {
                 <div className={styles.rankingGrid} ref={containerRef}>
                     {/* 1등 랭커 강조 영역 */}
                     {rankings.find(u => u.rank === 1) && (
-                        <div className={styles.firstRankerRow} style={{ scale: scale > 1 ? 1 : scale }}>
+                        <div
+                            id={`student-card-${rankings.find(u => u.rank === 1)!.id || rankings.find(u => u.rank === 1)!.nickname}`}
+                            className={styles.firstRankerRow}
+                        >
                             <RankingCard
                                 user={rankings.find(u => u.rank === 1)!}
                                 isFirst={true}
-                                scale={1.2}
+                                scale={1.2 * (scale < 1 ? scale : 1)}
                             />
                         </div>
                     )}
@@ -163,11 +248,13 @@ function RankingContent() {
                         {rankings.filter(u => u.rank !== 1).map((user, index) => (
                             <div
                                 key={user.id || index.toString()}
+                                id={`student-card-${user.id || user.nickname}`}
                                 style={{
                                     animation: `${styles.slideUp} 0.5s ease-out forwards`,
                                     animationDelay: `${index * 0.05}s`,
                                     display: 'flex',
-                                    justifyContent: 'center'
+                                    justifyContent: 'center',
+                                    transition: 'transform 0.3s ease'
                                 }}
                             >
                                 <RankingCard
@@ -193,6 +280,25 @@ function RankingContent() {
             <div className={styles.hintText}>
                 💡 더 많은 문제를 풀고 랭킹을 올려보세요!
             </div>
+
+            {/* 내 랭킹 스티키 바 */}
+            {!isLoading && myRankEntry && (
+                <div className={styles.myRankBar} onClick={scrollToMyCard}>
+                    <div className={styles.myRankInfo}>
+                        <div className={styles.myRankBadge}>#{myRankEntry.rank}</div>
+                        <div className={styles.myRankText}>
+                            <strong>{myRankEntry.nickname}</strong>님의 현재 랭킹
+                        </div>
+                    </div>
+                    <div className={styles.myRankPoints}>
+                        <IconZap />
+                        {myRankEntry.point.toLocaleString()}P
+                    </div>
+                    <div className={styles.jumpHint}>
+                        내 카드로 이동 ➔
+                    </div>
+                </div>
+            )}
         </main>
     );
 }
