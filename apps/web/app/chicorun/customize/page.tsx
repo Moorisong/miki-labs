@@ -9,43 +9,16 @@ import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import { CHICORUN_API, CHICORUN_ROUTES, CHICORUN_STORAGE_KEY } from '@/constants/chicorun';
 
-// ─── Constants ─────────────────────────────────────────────────────────────
-const AVAILABLE_STICKERS = ['⭐', '🔥', '💎', '🎯', '🚀', '💪', '🎨', '🎵', '🌈', '✨', '🍀', '🍎', '🧩', '🎸', '🕹️', '🏆', '💯', '🍕', '😎', '👻'];
-const AVAILABLE_BADGES = ['👑', '🔥', '⚡', '📚', '💪', '⭐', '🎯', '🥊', '🦄', '🎮', '🥇', '🦸', '🚀', '💎', '🌈'];
+import { ALL_CHICORUN_ITEMS } from '@/constants/chicorun-items';
 
-const AVAILABLE_BACKGROUNDS = [
-    { name: '투명 (기본)', value: 'transparent' },
-    { name: '기본 화이트', value: 'white' },
-    { name: '다크 나이트', value: 'linear-gradient(135deg, #1e293b, #0f172a)' },
-    { name: '선셋 오렌지', value: 'linear-gradient(135deg, #f97316, #f59e0b)' },
-    { name: '오션 블루', value: 'linear-gradient(135deg, #0ea5e9, #3b82f6)' },
-    { name: '네온 핑크', value: 'linear-gradient(135deg, #ec4899, #8b5cf6)' },
-    { name: '갤럭시', value: 'radial-gradient(circle at center, #2e1065, #000000)' },
-    { name: '스위트 코랄', value: 'linear-gradient(135deg, #fda4af, #f9a8d4)' },
-    { name: '에메랄드 포레스트', value: 'linear-gradient(135deg, #10b981, #059669)' },
-    { name: '골든 글로우', value: 'linear-gradient(135deg, #fde047, #eab308)' },
-    { name: '레인보우 파티', value: 'linear-gradient(90deg, #f87171, #fbbf24, #34d399, #60a5fa, #a78bfa)' },
-    { name: '사이버펑크', value: 'linear-gradient(135deg, #0f172a, #14b8a6, #ec4899)' },
-    { name: '매직 페어리', value: 'linear-gradient(135deg, #fce7f3, #e879f9, #c084fc)' },
+// ─── Constants (Defaults - will be filtered by ownedItems) ─────────────────
+const DEFAULT_OWNED_ITEMS = [
+    'bg-white',
+    'badge-crown',
+    'border-solid'
 ];
 
-const AVAILABLE_NICKNAME_COLORS = [
-    '#1e293b', // Default
-    '#ffffff', // White
-    '#ef4444', // Red
-    '#ea580c', // Orange
-    '#f59e0b', // Gold
-    '#10b981', // Green
-    '#3b82f6', // Blue
-    '#8b5cf6', // Violet
-    '#ec4899', // Pink
-];
-
-const AVAILABLE_BORDER_TYPES = [
-    { name: '실선', value: 'solid', icon: '➖' },
-    { name: '대시', value: 'dashed', icon: '---' },
-    { name: '리본', value: 'ribbon', icon: '🎀' },
-];
+// These will be derived from ALL_CHICORUN_ITEMS and ownedItems in the component
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 interface StickerItem {
@@ -143,6 +116,22 @@ const IconTrash = () => (
         <path d="M3 6h18"></path>
         <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
         <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+    </svg>
+);
+
+const IconTrashSmall = () => (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 6h18"></path>
+        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+    </svg>
+);
+
+const IconStore = () => (
+
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
     </svg>
 );
 
@@ -516,11 +505,34 @@ const ColorControl = ({ id, value, onChange, activePickerId, setActivePickerId, 
 function CustomizeContent() {
     const router = useRouter();
     const { toast, showToast, hideToast } = useToast();
-
+    const [ownedItems, setOwnedItems] = useState<string[]>(DEFAULT_OWNED_ITEMS);
     const [nickname, setNickname] = useState('치코런');
-    const [selectedBadge, setSelectedBadge] = useState(AVAILABLE_BADGES[0]);
-    const [cardStyle, setCardStyle] = useState(AVAILABLE_BACKGROUNDS[1].value);
+    const [selectedBadge, setSelectedBadge] = useState('👑');
+    const [cardStyle, setCardStyle] = useState('white');
     const [stickers, setStickers] = useState<StickerItem[]>([]);
+
+    // Filtered lists based on ownedItems
+    const AVAILABLE_BACKGROUNDS = ALL_CHICORUN_ITEMS
+        .filter(i => i.category === 'background' && ownedItems.includes(i.id))
+        .map(i => ({ id: i.id, name: i.name, value: i.value }));
+
+    const AVAILABLE_BADGES = ALL_CHICORUN_ITEMS
+        .filter(i => i.category === 'badge' && ownedItems.includes(i.id))
+        .map(i => ({ id: i.id, value: i.value }));
+
+    const AVAILABLE_STICKERS = ALL_CHICORUN_ITEMS
+        .filter(i => i.category === 'sticker' && ownedItems.includes(i.id))
+        .map(i => ({ id: i.id, value: i.value }));
+
+    const AVAILABLE_BORDER_TYPES = ALL_CHICORUN_ITEMS
+        .filter(i => i.category === 'border' && ownedItems.includes(i.id))
+        .map(i => ({ id: i.id, name: i.name, value: i.value, icon: i.value === 'solid' ? '➖' : '---' }));
+
+    const AVAILABLE_NICKNAME_COLORS = [
+        '#1e293b', '#ffffff', '#ef4444', '#ea580c', '#f59e0b',
+        '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#fce7f3'
+    ];
+
 
     const [nicknameStyle, setNicknameStyle] = useState<NicknameStyleType>({
         color: '#1e293b',
@@ -665,6 +677,14 @@ function CustomizeContent() {
                 if (data.data.badge) setSelectedBadge(data.data.badge);
                 if (data.data.cardStyle) setCardStyle(data.data.cardStyle);
 
+                // Sync owned items with DB data
+                const serverOwned = data.data.ownedItems || DEFAULT_OWNED_ITEMS;
+                setOwnedItems(serverOwned);
+
+                // Keep localStorage as a secondary cache if needed
+                localStorage.setItem('chicorun_owned_items', JSON.stringify(serverOwned));
+
+
                 if (custom) {
                     if (Array.isArray(custom.stickers)) setStickers(custom.stickers);
                     if (custom.borderStyle) setBorderStyle(prev => ({ ...prev, ...custom.borderStyle }));
@@ -730,6 +750,19 @@ function CustomizeContent() {
 
     useEffect(() => {
         fetchMyInfo();
+
+        const handleStorageChange = () => {
+            const storedOwned = localStorage.getItem('chicorun_owned_items');
+            if (storedOwned) {
+                try {
+                    const parsed = JSON.parse(storedOwned);
+                    const merged = Array.from(new Set([...DEFAULT_OWNED_ITEMS, ...parsed]));
+                    setOwnedItems(merged);
+                } catch (e) { }
+            }
+        };
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
     }, [fetchMyInfo]);
 
     const previewContainerRef = useRef<HTMLDivElement>(null);
@@ -818,6 +851,38 @@ function CustomizeContent() {
         }
     };
 
+    const discardItem = (itemId: string) => {
+        if (DEFAULT_OWNED_ITEMS.includes(itemId)) {
+            showToast('기본 아이템은 삭제할 수 없습니다.', 'error');
+            return;
+        }
+        if (window.confirm('이 아이템을 소지품에서 영구적으로 삭제하시겠습니까?\n다시 사용하려면 상점에서 구매해야 합니다.')) {
+            // Update DB
+            const token = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
+            fetch(CHICORUN_API.STUDENT_REMOVE_ITEM(itemId), {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        const newOwned = data.data.ownedItems || [];
+                        setOwnedItems(newOwned);
+                        localStorage.setItem('chicorun_owned_items', JSON.stringify(newOwned));
+                        window.dispatchEvent(new Event('storage'));
+                        showToast('아이템이 삭제되었습니다.', 'success');
+                    } else {
+                        showToast('삭제 실패', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to delete item from DB', err);
+                    showToast('서버 오류로 삭제하지 못했습니다.', 'error');
+                });
+        }
+
+    };
+
     const toggleStyle = (style: 'bold' | 'italic' | 'underline') => {
         setNicknameStyle(prev => ({ ...prev, [style]: !prev[style] }));
     };
@@ -840,10 +905,13 @@ function CustomizeContent() {
     return (
         <div className={styles.container} onClick={() => { setSelectedElement(null); setActivePickerId(null); }}>
             <main className={styles.main} onClick={(e) => { e.stopPropagation(); setActivePickerId(null); }}>
-                <div className={styles.titleArea}>
-                    <h1 className={styles.title}><IconSparkles /> 랭킹 꾸미기</h1>
-                    <p className={styles.subtitle}>랭킹 리스트에 나타나는 나의 랭킹 영역을 자유롭게 꾸며보세요!</p>
+                <div className={styles.headerRow}>
+                    <div className={styles.titleArea}>
+                        <h1 className={styles.title}><IconSparkles /> 랭킹 꾸미기</h1>
+                        <p className={styles.subtitle}>랭킹 리스트에 나타나는 나의 랭킹 영역을 자유롭게 꾸며보세요!</p>
+                    </div>
                 </div>
+
 
                 <div className={styles.layoutGrid}>
                     <div className={styles.previewPanel}>
@@ -1089,12 +1157,21 @@ function CustomizeContent() {
                                     <div className={styles.gridBackgrounds}>
                                         {AVAILABLE_BACKGROUNDS.map(bg => (
                                             <div
-                                                key={bg.name}
-                                                onClick={() => setCardStyle(bg.value)}
+                                                key={bg.id}
                                                 className={`${styles.btnBackground} ${cardStyle === bg.value ? styles.selected : ''}`}
-                                                style={{ background: bg.value, border: cardStyle === bg.value ? '4px solid #3b82f6' : '3px solid #e2e8f0', color: bg.value === 'white' || bg.value === 'transparent' ? '#1e293b' : 'white' }}
+                                                style={{ background: bg.value, border: cardStyle === bg.value ? '4px solid #3b82f6' : '3px solid #e2e8f0', color: bg.value === 'white' || bg.value === 'transparent' ? '#1e293b' : 'white', position: 'relative' }}
+                                                onClick={() => setCardStyle(bg.value)}
                                             >
                                                 {bg.name}
+                                                {!DEFAULT_OWNED_ITEMS.includes(bg.id) && (
+                                                    <button
+                                                        className={styles.btnDiscardSmall}
+                                                        onClick={(e) => { e.stopPropagation(); discardItem(bg.id); }}
+                                                        title="보유 목록에서 삭제"
+                                                    >
+                                                        <IconTrashSmall />
+                                                    </button>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
@@ -1111,12 +1188,22 @@ function CustomizeContent() {
                                     <div className={styles.gridBorderTypes}>
                                         {AVAILABLE_BORDER_TYPES.map(type => (
                                             <button
-                                                key={type.value}
+                                                key={type.id}
                                                 onClick={() => setBorderStyle(p => ({ ...p, style: type.value }))}
                                                 className={`${styles.btnBorderType} ${borderStyle.style === type.value ? styles.selected : ''}`}
+                                                style={{ position: 'relative' }}
                                             >
                                                 <span style={{ fontSize: '1.2rem', marginBottom: '4px' }}>{type.icon}</span>
                                                 <span style={{ fontSize: '0.8rem' }}>{type.name}</span>
+                                                {!DEFAULT_OWNED_ITEMS.includes(type.id) && (
+                                                    <button
+                                                        className={styles.btnDiscardSmall}
+                                                        onClick={(e) => { e.stopPropagation(); discardItem(type.id); }}
+                                                        title="보유 목록에서 삭제"
+                                                    >
+                                                        <IconTrashSmall />
+                                                    </button>
+                                                )}
                                             </button>
                                         ))}
                                     </div>
@@ -1140,13 +1227,27 @@ function CustomizeContent() {
                                     </div>
                                     <div className={styles.gridEmojis}>
                                         {AVAILABLE_STICKERS.map(sticker => (
-                                            <button
-                                                key={sticker}
-                                                onClick={() => addSticker(sticker)}
-                                                className={styles.btnEmoji}
+                                            <div
+                                                key={sticker.id}
+                                                className={styles.btnEmojiWrapper}
+                                                style={{ position: 'relative' }}
                                             >
-                                                {sticker}
-                                            </button>
+                                                <button
+                                                    onClick={() => addSticker(sticker.value)}
+                                                    className={styles.btnEmoji}
+                                                >
+                                                    {sticker.value}
+                                                </button>
+                                                {!DEFAULT_OWNED_ITEMS.includes(sticker.id) && (
+                                                    <button
+                                                        className={styles.btnDiscardSmall}
+                                                        onClick={(e) => { e.stopPropagation(); discardItem(sticker.id); }}
+                                                        title="보유 목록에서 삭제"
+                                                    >
+                                                        <IconTrashSmall />
+                                                    </button>
+                                                )}
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
@@ -1156,7 +1257,18 @@ function CustomizeContent() {
                             {selectedElement === 'nickname' && (
                                 <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
                                     <div className={styles.sectionTitle}>📝 닉네임 스타일</div>
+                                    <div className={styles.gridColor} style={{ marginBottom: '1rem' }}>
+                                        {AVAILABLE_NICKNAME_COLORS.map(color => (
+                                            <div
+                                                key={color}
+                                                onClick={() => setNicknameStyle(p => ({ ...p, color }))}
+                                                className={`${styles.colorCircle} ${nicknameStyle.color === color ? styles.selected : ''}`}
+                                                style={{ background: color }}
+                                            />
+                                        ))}
+                                    </div>
                                     <ColorControl id="nick-color" value={nicknameStyle.color} onChange={(val: string) => setNicknameStyle(p => ({ ...p, color: val }))} activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
+
 
                                     <div className={styles.textStyleControls}>
                                         <button className={`${styles.btnTextStyle} ${nicknameStyle.bold ? styles.active : ''}`} onClick={() => toggleStyle('bold')}>Bold</button>
@@ -1172,13 +1284,27 @@ function CustomizeContent() {
                                     <div className={styles.sectionTitle}>🎖️ 대표 뱃지 설정</div>
                                     <div className={styles.gridEmojis}>
                                         {AVAILABLE_BADGES.map(badge => (
-                                            <button
-                                                key={badge}
-                                                onClick={() => setSelectedBadge(badge)}
-                                                className={`${styles.btnEmoji} ${selectedBadge === badge ? styles.selected : ''}`}
+                                            <div
+                                                key={badge.id}
+                                                className={styles.btnEmojiWrapper}
+                                                style={{ position: 'relative' }}
                                             >
-                                                {badge}
-                                            </button>
+                                                <button
+                                                    onClick={() => setSelectedBadge(badge.value)}
+                                                    className={`${styles.btnEmoji} ${selectedBadge === badge.value ? styles.selected : ''}`}
+                                                >
+                                                    {badge.value}
+                                                </button>
+                                                {!DEFAULT_OWNED_ITEMS.includes(badge.id) && (
+                                                    <button
+                                                        className={styles.btnDiscardSmall}
+                                                        onClick={(e) => { e.stopPropagation(); discardItem(badge.id); }}
+                                                        title="보유 목록에서 삭제"
+                                                    >
+                                                        <IconTrashSmall />
+                                                    </button>
+                                                )}
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
