@@ -292,16 +292,18 @@ function RankingContent() {
                                                 position: 'absolute',
                                                 left: sticker.x,
                                                 top: sticker.y,
-                                                fontSize: '2rem',
+                                                fontSize: '2.5rem',
                                                 zIndex: 5,
                                                 transform: `scale(${sticker.scale || 1}) rotate(${sticker.rotate || 0}deg)`,
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                justifyContent: 'center'
+                                                justifyContent: 'center',
+                                                width: '1.2em',
+                                                height: '1.2em'
                                             }}
                                         >
                                             {sticker.emoji.startsWith('/') ? (
-                                                <img src={sticker.emoji} style={{ width: '1em', height: '1em', objectFit: 'contain' }} alt="sticker" />
+                                                <img src={sticker.emoji} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="sticker" />
                                             ) : sticker.emoji}
                                         </div>
                                     ))}

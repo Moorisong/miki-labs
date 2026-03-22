@@ -1037,10 +1037,25 @@ function CustomizeContent() {
                                                 onSelect={() => setSelectedElement(`sticker-${sticker.id}`)}
                                                 onUpdate={updateSelectedElement}
                                                 parentScale={scale}
-                                                style={{ fontSize: '2rem', zIndex: 10 }}
+                                                style={{ fontSize: '2.5rem', zIndex: 10 }}
                                                 title="클릭해서 편집 / 더블탭해서 삭제"
                                             >
-                                                <div onDoubleClick={() => removeSticker(sticker.id)} onClick={() => handleTouchSticker(sticker.id)}>{sticker.emoji}</div>
+                                                <div
+                                                    onDoubleClick={() => removeSticker(sticker.id)}
+                                                    onClick={() => handleTouchSticker(sticker.id)}
+                                                    style={{ width: '1.2em', height: '1.2em', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                >
+                                                    {sticker.emoji.startsWith('/') ? (
+                                                        <img
+                                                            src={sticker.emoji}
+                                                            alt="sticker"
+                                                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                                            draggable={false}
+                                                        />
+                                                    ) : (
+                                                        sticker.emoji
+                                                    )}
+                                                </div>
                                             </DraggableElement>
                                         ))}
 
@@ -1270,8 +1285,17 @@ function CustomizeContent() {
                                                 <button
                                                     onClick={() => addSticker(sticker.value)}
                                                     className={styles.btnEmoji}
+                                                    style={{ padding: sticker.value.startsWith('/') ? '8px' : '0.5rem' }}
                                                 >
-                                                    {sticker.value}
+                                                    {sticker.value.startsWith('/') ? (
+                                                        <img
+                                                            src={sticker.value}
+                                                            alt={sticker.id}
+                                                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                                        />
+                                                    ) : (
+                                                        sticker.value
+                                                    )}
                                                 </button>
                                                 {!DEFAULT_OWNED_ITEMS.includes(sticker.id) && (
                                                     <button
