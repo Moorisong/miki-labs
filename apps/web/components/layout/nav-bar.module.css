@@ -208,6 +208,24 @@
   color: var(--color-primary);
 }
 
+.infoValueLink {
+  font-weight: 700;
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  padding: 2px 6px;
+  margin-right: -6px;
+  border-radius: 4px;
+}
+
+.infoValueLink:hover {
+  background: rgba(108, 92, 231, 0.15);
+  color: var(--color-text);
+  text-decoration-color: var(--color-primary);
+}
+
 .dropdownProfileRow {
   display: flex;
   align-items: center;
@@ -237,6 +255,24 @@
   color: #f59e0b;
   font-weight: 800;
   font-size: 0.95rem;
+}
+
+.profilePointsLink {
+  color: #f59e0b;
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 2px 6px;
+  margin-right: -6px;
+  border-radius: 4px;
+}
+
+.profilePointsLink:hover {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
 }
 
 .dropdownDivider {

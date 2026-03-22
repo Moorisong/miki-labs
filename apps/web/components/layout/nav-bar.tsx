@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 
 import { NAV_LINKS, API, MESSAGES, CONFIG } from '@/constants';
-import { CHICORUN_API } from '@/constants/chicorun';
+import { CHICORUN_API, CHICORUN_ROUTES } from '@/constants/chicorun';
 
 
 import styles from './nav-bar.module.css';
@@ -285,12 +285,30 @@ export default function NavBar() {
                           <span className={styles.profileBadge}>{studentBadge}</span>
                           <span className={styles.profileName}>{studentNickname}</span>
                         </div>
-                        <span className={styles.profilePoints}>{studentPoints} P</span>
+                        <Link
+                          href={CHICORUN_ROUTES.RANKING}
+                          className={styles.profilePointsLink}
+                          onClick={() => {
+                            closeMenu();
+                            setIsStudentDropdownOpen(false);
+                          }}
+                        >
+                          {studentPoints} P
+                        </Link>
                       </li>
                       <li className={styles.dropdownDivider}></li>
                       <li className={styles.dropdownInfoItem}>
                         <span className={styles.infoLabel}>클래스</span>
-                        <span className={styles.infoValue}>{studentClassCode}</span>
+                        <Link
+                          href={CHICORUN_ROUTES.LEARN}
+                          className={styles.infoValueLink}
+                          onClick={() => {
+                            closeMenu();
+                            setIsStudentDropdownOpen(false);
+                          }}
+                        >
+                          {studentClassCode}
+                        </Link>
                       </li>
                       <li className={styles.dropdownDivider}></li>
                       <li>
