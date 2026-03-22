@@ -14,7 +14,7 @@ import { ALL_CHICORUN_ITEMS } from '@/constants/chicorun-items';
 // ─── Constants (Defaults - will be filtered by ownedItems) ─────────────────
 const DEFAULT_OWNED_ITEMS = [
     'bg-white',
-    'badge-crown',
+    // 'badge-crown' 삭제됨
     'border-solid'
 ];
 
@@ -507,7 +507,7 @@ function CustomizeContent() {
     const { toast, showToast, hideToast } = useToast();
     const [ownedItems, setOwnedItems] = useState<string[]>(DEFAULT_OWNED_ITEMS);
     const [nickname, setNickname] = useState('치코런');
-    const [selectedBadge, setSelectedBadge] = useState('👑');
+    const [selectedBadge, setSelectedBadge] = useState('');
     const [cardStyle, setCardStyle] = useState('white');
     const [stickers, setStickers] = useState<StickerItem[]>([]);
 
@@ -678,11 +678,12 @@ function CustomizeContent() {
                 if (data.data.cardStyle) setCardStyle(data.data.cardStyle);
 
                 // Sync owned items with DB data
-                const serverOwned = data.data.ownedItems || DEFAULT_OWNED_ITEMS;
-                setOwnedItems(serverOwned);
+                const serverOwned = data.data.ownedItems || [];
+                const merged = Array.from(new Set([...DEFAULT_OWNED_ITEMS, ...serverOwned]));
+                setOwnedItems(merged);
 
-                // Keep localStorage as a secondary cache if needed
-                localStorage.setItem('chicorun_owned_items', JSON.stringify(serverOwned));
+                // Keep localStorage as a secondary cache
+                localStorage.setItem('chicorun_owned_items', JSON.stringify(merged));
 
 
                 if (custom) {
@@ -841,6 +842,9 @@ function CustomizeContent() {
             const data = await res.json();
             if (data.success) {
                 showToast('랭킹 꾸미기가 저장되었습니다! 화려해진 랭킹 리스트를 확인해 보세요.', 'success');
+                // Reset interactions
+                setSelectedElement(null);
+                setActivePickerId(null);
             } else {
                 showToast('저장 실패', 'error');
             }
@@ -850,6 +854,7 @@ function CustomizeContent() {
             setIsSaving(false);
         }
     };
+
 
     const discardItem = (itemId: string) => {
         if (DEFAULT_OWNED_ITEMS.includes(itemId)) {
@@ -1040,6 +1045,7 @@ function CustomizeContent() {
                                                 isSelected={selectedElement === `sticker-${sticker.id}`}
                                                 onSelect={() => setSelectedElement(`sticker-${sticker.id}`)}
                                                 onUpdate={updateSelectedElement}
+                                                parentScale={scale}
                                                 style={{ fontSize: '2rem', zIndex: 10 }}
                                                 title="클릭해서 편집 / 더블탭해서 삭제"
                                             >
@@ -1055,6 +1061,7 @@ function CustomizeContent() {
                                             isSelected={selectedElement === 'rank'}
                                             onSelect={() => setSelectedElement('rank')}
                                             onUpdate={updateSelectedElement}
+                                            parentScale={scale}
                                             title="클릭해서 등수 스타일 편집 / 드래그해서 이동"
                                         >
                                             <span className={styles.rankNumber} style={{
@@ -1075,9 +1082,37 @@ function CustomizeContent() {
                                             isSelected={selectedElement === 'badge'}
                                             onSelect={() => setSelectedElement('badge')}
                                             onUpdate={updateSelectedElement}
+                                            parentScale={scale}
                                             title="클릭해서 뱃지 변경 / 드래그해서 이동"
                                         >
-                                            <div style={{ fontSize: `${badgeStyle.fontSize}px`, lineHeight: 1 }}>{selectedBadge}</div>
+                                            <div style={{
+                                                fontSize: `${badgeStyle.fontSize}px`,
+                                                lineHeight: 1,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                            }}>
+                                                {selectedBadge.startsWith('/') ? (
+                                                    <div style={{
+                                                        background: getBadgeStyles(selectedBadge).bg,
+                                                        border: `calc(${badgeStyle.fontSize}px * 0.1) solid ${getBadgeStyles(selectedBadge).border}`,
+                                                        borderRadius: '22%',
+                                                        width: '1em',
+                                                        height: '1em',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        overflow: 'hidden'
+                                                    }}>
+                                                        <img
+                                                            src={selectedBadge}
+                                                            style={{ width: '100%', height: '100%', objectFit: 'contain', mixBlendMode: 'multiply' }}
+                                                            alt="badge"
+                                                            draggable={false}
+                                                        />
+                                                    </div>
+                                                ) : selectedBadge}
+                                            </div>
                                         </DraggableElement>
 
                                         {/* 닉네임 */}
@@ -1088,6 +1123,7 @@ function CustomizeContent() {
                                             isSelected={selectedElement === 'nickname'}
                                             onSelect={() => setSelectedElement('nickname')}
                                             onUpdate={updateSelectedElement}
+                                            parentScale={scale}
                                             title="클릭해서 닉네임 스타일 편집 / 드래그해서 이동"
                                         >
                                             <div
@@ -1187,11 +1223,18 @@ function CustomizeContent() {
                                     </div>
                                     <div className={styles.gridBorderTypes}>
                                         {AVAILABLE_BORDER_TYPES.map(type => (
-                                            <button
+                                            <div
                                                 key={type.id}
                                                 onClick={() => setBorderStyle(p => ({ ...p, style: type.value }))}
                                                 className={`${styles.btnBorderType} ${borderStyle.style === type.value ? styles.selected : ''}`}
-                                                style={{ position: 'relative' }}
+                                                style={{ position: 'relative', cursor: 'pointer' }}
+                                                role="button"
+                                                tabIndex={0}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' || e.key === ' ') {
+                                                        setBorderStyle(p => ({ ...p, style: type.value }));
+                                                    }
+                                                }}
                                             >
                                                 <span style={{ fontSize: '1.2rem', marginBottom: '4px' }}>{type.icon}</span>
                                                 <span style={{ fontSize: '0.8rem' }}>{type.name}</span>
@@ -1204,7 +1247,8 @@ function CustomizeContent() {
                                                         <IconTrashSmall />
                                                     </button>
                                                 )}
-                                            </button>
+                                            </div>
+
                                         ))}
                                     </div>
                                     <ColorControl id="border-color" value={borderStyle.color} onChange={(val: string) => setBorderStyle(p => ({ ...p, color: val }))} activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
@@ -1292,8 +1336,27 @@ function CustomizeContent() {
                                                 <button
                                                     onClick={() => setSelectedBadge(badge.value)}
                                                     className={`${styles.btnEmoji} ${selectedBadge === badge.value ? styles.selected : ''}`}
+                                                    style={{ padding: badge.value.startsWith('/') ? '4px' : '0.5rem' }}
                                                 >
-                                                    {badge.value}
+                                                    {badge.value.startsWith('/') ? (
+                                                        <div style={{
+                                                            width: '100%',
+                                                            height: '100%',
+                                                            background: getBadgeStyles(badge.value).bg,
+                                                            border: `3px solid ${getBadgeStyles(badge.value).border}`,
+                                                            borderRadius: '20%',
+                                                            overflow: 'hidden',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center'
+                                                        }}>
+                                                            <img
+                                                                src={badge.value}
+                                                                style={{ width: '100%', height: '100%', objectFit: 'contain', mixBlendMode: 'multiply' }}
+                                                                alt="badge"
+                                                            />
+                                                        </div>
+                                                    ) : badge.value}
                                                 </button>
                                                 {!DEFAULT_OWNED_ITEMS.includes(badge.id) && (
                                                     <button
@@ -1401,3 +1464,15 @@ export default function CustomizePage() {
         </DndProvider>
     );
 }
+
+/**
+ * 뱃지 스타일 헬퍼 (배경색 및 테두리 색상)
+ */
+const getBadgeStyles = (path: string) => {
+    if (path.includes('tralallero')) return { bg: '#FFD700', border: '#1D4ED8' }; // Yellow
+    if (path.includes('tungtung')) return { bg: '#D1FAE5', border: '#7C2D12' }; // Mint green
+    if (path.includes('ballerina')) return { bg: '#DDD6FE', border: '#DB2777' }; // Lavender
+    if (path.includes('bombardiro')) return { bg: '#FFEDD5', border: '#374151' }; // Orange
+    if (path.includes('assassino')) return { bg: '#E0F2FE', border: '#000000' }; // SkyBlue
+    return { bg: '#f1f5f9', border: '#e2e8f0' };
+};

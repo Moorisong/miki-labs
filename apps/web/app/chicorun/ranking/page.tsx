@@ -332,9 +332,14 @@ function RankingContent() {
                                                 fontSize: '2rem',
                                                 zIndex: 5,
                                                 transform: `scale(${sticker.scale || 1}) rotate(${sticker.rotate || 0}deg)`,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
                                             }}
                                         >
-                                            {sticker.emoji}
+                                            {sticker.emoji.startsWith('/') ? (
+                                                <img src={sticker.emoji} style={{ width: '1em', height: '1em', objectFit: 'contain' }} alt="sticker" />
+                                            ) : sticker.emoji}
                                         </div>
                                     ))}
 
@@ -351,8 +356,32 @@ function RankingContent() {
 
                                     {/* Badge */}
                                     <div style={{ position: 'absolute', left: bX, top: bY, zIndex: 10 }}>
-                                        <div style={{ fontSize: user.customize?.badgeStyle?.fontSize ? `${user.customize.badgeStyle.fontSize}px` : '1.5rem', lineHeight: 1 }}>
-                                            {user.badge || '⭐'}
+                                        <div style={{
+                                            fontSize: user.customize?.badgeStyle?.fontSize ? `${user.customize.badgeStyle.fontSize}px` : '1.5rem',
+                                            lineHeight: 1,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}>
+                                            {user.badge?.startsWith('/') ? (
+                                                <div style={{
+                                                    background: getBadgeStyles(user.badge).bg,
+                                                    border: `3px solid ${getBadgeStyles(user.badge).border}`,
+                                                    borderRadius: '22%',
+                                                    width: '1em',
+                                                    height: '1em',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    overflow: 'hidden'
+                                                }}>
+                                                    <img
+                                                        src={user.badge}
+                                                        style={{ width: '100%', height: '100%', objectFit: 'contain', mixBlendMode: 'multiply' }}
+                                                        alt="badge"
+                                                    />
+                                                </div>
+                                            ) : (user.badge || '')}
                                         </div>
                                     </div>
 
@@ -427,3 +456,15 @@ export default function RankingPage() {
         </div>
     );
 }
+
+/**
+ * 뱃지 스타일 헬퍼 (배경색 및 테두리 색상)
+ */
+const getBadgeStyles = (path: string) => {
+    if (path.includes('tralallero')) return { bg: '#FFD700', border: '#1D4ED8' }; // Yellow
+    if (path.includes('tungtung')) return { bg: '#D1FAE5', border: '#7C2D12' }; // Mint green
+    if (path.includes('ballerina')) return { bg: '#DDD6FE', border: '#DB2777' }; // Lavender
+    if (path.includes('bombardiro')) return { bg: '#FFEDD5', border: '#374151' }; // Orange
+    if (path.includes('assassino')) return { bg: '#E0F2FE', border: '#000000' }; // SkyBlue
+    return { bg: '#f1f5f9', border: '#e2e8f0' };
+};

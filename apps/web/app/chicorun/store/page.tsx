@@ -11,7 +11,7 @@ import { ALL_CHICORUN_ITEMS, ShopItem } from '@/constants/chicorun-items';
 
 const DEFAULT_OWNED_ITEMS = [
     'bg-white',
-    'badge-crown',
+    // 이전 기본 배지였던 badge-crown 삭제
     'border-solid'
 ];
 
@@ -65,11 +65,12 @@ export default function StorePage() {
                     }
 
                     // Sync owned items with DB data
-                    const serverOwned = data.data.ownedItems || DEFAULT_OWNED_ITEMS;
-                    setOwnedItems(serverOwned);
+                    const serverOwned = data.data.ownedItems || [];
+                    const merged = Array.from(new Set([...DEFAULT_OWNED_ITEMS, ...serverOwned]));
+                    setOwnedItems(merged);
 
-                    // Keep localStorage as a secondary cache if needed for other components (optional)
-                    localStorage.setItem('chicorun_owned_items', JSON.stringify(serverOwned));
+                    // Keep localStorage as a secondary cache
+                    localStorage.setItem('chicorun_owned_items', JSON.stringify(merged));
 
 
                 }
@@ -132,10 +133,11 @@ export default function StorePage() {
             if (deductData.success) {
                 const newPointTotal = deductData.data.point;
                 const newOwned = deductData.data.ownedItems || [];
+                const merged = Array.from(new Set([...DEFAULT_OWNED_ITEMS, ...newOwned]));
 
                 setPoints(newPointTotal);
-                setOwnedItems(newOwned);
-                localStorage.setItem('chicorun_owned_items', JSON.stringify(newOwned));
+                setOwnedItems(merged);
+                localStorage.setItem('chicorun_owned_items', JSON.stringify(merged));
 
                 // Update global info in localStorage so Header can pick it up
                 const infoStr = localStorage.getItem('chicorun_student_info');
@@ -163,9 +165,10 @@ export default function StorePage() {
 
 
 
-    const filteredItems = activeTab === 'all'
+    const filteredItems = (activeTab === 'all'
         ? ALL_CHICORUN_ITEMS
-        : ALL_CHICORUN_ITEMS.filter(item => item.category === activeTab);
+        : ALL_CHICORUN_ITEMS.filter(item => item.category === activeTab)
+    ).filter(item => !DEFAULT_OWNED_ITEMS.includes(item.id));
 
     if (isLoading) {
         return <div className={styles.container}>로딩 중...</div>;
@@ -234,14 +237,53 @@ export default function StorePage() {
 }
 
 // ─── Render Helpers ────────────────────────────────────────────────────────
+const getBadgeStyles = (path: string) => {
+    if (path.includes('tralallero')) return { bg: '#FFD700', border: '#1D4ED8' }; // Yellow
+    if (path.includes('tungtung')) return { bg: '#D1FAE5', border: '#7C2D12' }; // Mint green
+    if (path.includes('ballerina')) return { bg: '#DDD6FE', border: '#DB2777' }; // Lavender
+    if (path.includes('bombardiro')) return { bg: '#FFEDD5', border: '#374151' }; // Orange
+    if (path.includes('assassino')) return { bg: '#E0F2FE', border: '#000000' }; // SkyBlue
+    return { bg: '#f1f5f9', border: '#e2e8f0' };
+};
+
 function renderPreview(item: ShopItem) {
     switch (item.category) {
         case 'background':
             return <div className={styles.backgroundPreview} style={item.previewStyle} />;
         case 'badge':
+            if (item.value.startsWith('/')) {
+                const badgeStyle = getBadgeStyles(item.value);
+                return (
+                    <div style={{
+                        background: badgeStyle.bg,
+                        border: `4px solid ${badgeStyle.border}`,
+                        borderRadius: '22%',
+                        overflow: 'hidden',
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <img
+                            src={item.value}
+                            alt={item.name}
+                            className={styles.badgeImage}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                mixBlendMode: 'multiply' // Makes white background of PNG transparent
+                            }}
+                        />
+                    </div>
+                );
+            }
             return <span>{item.value}</span>;
         case 'sticker':
-            return <span>{item.value}</span>;
+            return item.value.startsWith('/')
+                ? <img src={item.value} alt={item.name} className={styles.stickerImage} />
+                : <span>{item.value}</span>;
         case 'border':
             return <div className={styles.borderPreview} style={item.previewStyle} />;
         case 'nickname':
