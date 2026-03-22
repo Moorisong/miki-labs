@@ -1,0 +1,96 @@
+.rankingCard {
+    background: white;
+    border-radius: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
+    overflow: hidden;
+    position: relative;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+}
+
+.rankingCard:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    z-index: 50;
+}
+
+/* Rank Number Style */
+.rankNumber {
+    font-weight: 950;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Nickname Style */
+.nickname {
+    white-space: nowrap;
+    line-height: 1.2;
+    padding: 4px 8px;
+    border-radius: 8px;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Points Box Style */
+.pointsBox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(90deg, #ffedd5, #fef3c7);
+    padding: 0.6rem 1rem;
+    border-radius: 1rem;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.pointsText {
+    font-weight: 900;
+    color: #ea580c;
+    letter-spacing: -0.01em;
+}
+
+/* TOP 1 Badge */
+.topBadge {
+    position: absolute;
+    top: -16px;
+    left: -16px;
+    background: linear-gradient(135deg, #fef08a, #ca8a04);
+    color: #fff;
+    padding: 0.4rem 1rem;
+    border-radius: 1rem;
+    font-weight: 900;
+    font-size: 1.1rem;
+    box-shadow: 0 8px 16px rgba(234, 179, 8, 0.3);
+    transform: rotate(-10deg);
+    z-index: 30;
+    border: 2px solid white;
+    pointer-events: none;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: rotate(-10deg) scale(1);
+    }
+
+    50% {
+        transform: rotate(-10deg) scale(1.05);
+    }
+
+    100% {
+        transform: rotate(-10deg) scale(1);
+    }
+}
+
+/* Sticker Hover */
+.sticker {
+    transition: transform 0.2s;
+}
+
+.sticker:hover {
+    transform: scale(1.1) rotate(5deg);
+}
