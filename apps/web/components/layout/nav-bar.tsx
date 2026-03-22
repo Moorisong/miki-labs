@@ -33,31 +33,38 @@ export default function NavBar() {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const studentToken = localStorage.getItem('chicorun_student_token');
-      const teacherToken = localStorage.getItem('chicorun_teacher_token');
-      const studentInfo = localStorage.getItem('chicorun_student_info');
+    const loadStudentInfo = () => {
+      if (typeof window !== 'undefined') {
+        const studentToken = localStorage.getItem('chicorun_student_token');
+        const teacherToken = localStorage.getItem('chicorun_teacher_token');
+        const studentInfo = localStorage.getItem('chicorun_student_info');
 
-      setHasChicoToken(!!(studentToken || teacherToken));
+        setHasChicoToken(!!(studentToken || teacherToken));
 
-      if (studentToken && studentInfo) {
-        try {
-          const info = JSON.parse(studentInfo);
-          setStudentNickname(info.nickname || null);
-          setStudentClassCode(info.classCode || '알 수 없음');
-          setStudentPoints(info.point || 0);
-          setStudentBadge(info.badge || '🌱');
-        } catch {
+        if (studentToken && studentInfo) {
+          try {
+            const info = JSON.parse(studentInfo);
+            setStudentNickname(info.nickname || null);
+            setStudentClassCode(info.classCode || '알 수 없음');
+            setStudentPoints(info.point || 0);
+            setStudentBadge(info.badge || '🌱');
+          } catch {
+            setStudentNickname(null);
+            setStudentClassCode(null);
+            setStudentPoints(0);
+            setStudentBadge('🌱');
+          }
+        } else {
           setStudentNickname(null);
-          setStudentClassCode(null);
-          setStudentPoints(0);
-          setStudentBadge('🌱');
         }
-      } else {
-        setStudentNickname(null);
       }
-    }
+    };
+
+    loadStudentInfo();
+    window.addEventListener('storage', loadStudentInfo);
+    return () => window.removeEventListener('storage', loadStudentInfo);
   }, [pathname]);
+
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);

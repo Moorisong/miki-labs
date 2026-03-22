@@ -9,6 +9,8 @@ export const CHICORUN_API = {
     STUDENT_ME: `${API_BASE}/api/chicorun/student/me`,
     STUDENT_CUSTOMIZE: `${API_BASE}/api/chicorun/student/customize`,
     STUDENT_CHANGE_PASSWORD: `${API_BASE}/api/chicorun/student/password`,
+    STUDENT_DEDUCT_POINT: `${API_BASE}/api/chicorun/student/point`,
+    STUDENT_REMOVE_ITEM: (itemId: string) => `${API_BASE}/api/chicorun/student/item/${itemId}`,
     QUESTION: `${API_BASE}/api/chicorun/question`,
     ANSWER: `${API_BASE}/api/chicorun/answer`,
     RESET_PROGRESS: `${API_BASE}/api/chicorun/reset-progress`,
