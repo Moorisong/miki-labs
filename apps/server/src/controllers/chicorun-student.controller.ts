@@ -129,6 +129,7 @@ export const studentLogin = async (
                     progressIndex: student.progressIndex,
                     point: student.point,
                     badge: student.badge,
+                    ownedItems: student.ownedItems,
                     level: Math.floor(student.progressIndex / 10) + 1,
                 },
             },
@@ -177,6 +178,7 @@ export const getStudentMe = async (
                 nicknameStyle: studentDoc.nicknameStyle,
                 cardStyle: studentDoc.cardStyle,
                 customize: studentDoc.customize,
+                ownedItems: studentDoc.ownedItems,
                 level: Math.floor(studentDoc.progressIndex / 10) + 1,
             },
         });
@@ -270,3 +272,83 @@ export const changeStudentPassword = async (
         next(error);
     }
 };
+// PATCH /api/chicorun/student/point
+export const deductPoints = async (
+    req: Request,
+    res: Response<ApiResponse>,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const student = req.chicoStudent;
+        if (!student) {
+            throw new AppError(401, 'ERROR_UNAUTHORIZED: 학생 인증이 필요합니다.');
+        }
+
+        const { amount, itemId } = req.body;
+        if (amount === undefined || typeof amount !== 'number' || amount < 0) {
+            throw new AppError(400, 'ERROR_INVALID_INPUT: 차감할 포인트 금액이 올바르지 않습니다.');
+        }
+
+        const studentDoc = await ChicorunStudentModel.findById(student.studentId);
+        if (!studentDoc) {
+            throw new AppError(404, 'ERROR_STUDENT_NOT_FOUND: 학생 정보를 찾을 수 없습니다.');
+        }
+
+        if (studentDoc.point < amount) {
+            throw new AppError(400, 'ERROR_INSUFFICIENT_POINTS: 포인트가 부족합니다.');
+        }
+
+        studentDoc.point -= amount;
+
+        // If itemId is provided, add it to ownedItems (if not already there)
+        if (itemId && !studentDoc.ownedItems.includes(itemId)) {
+            studentDoc.ownedItems.push(itemId);
+        }
+
+        await studentDoc.save();
+
+        res.json({
+            success: true,
+            data: {
+                point: studentDoc.point,
+                ownedItems: studentDoc.ownedItems
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// DELETE /api/chicorun/student/item/:itemId
+export const removeOwnedItem = async (
+    req: Request,
+    res: Response<ApiResponse>,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const student = req.chicoStudent;
+        const itemId = req.params.itemId;
+
+        if (!student) {
+            throw new AppError(401, 'ERROR_UNAUTHORIZED: 학생 인증이 필요합니다.');
+        }
+
+        const studentDoc = await ChicorunStudentModel.findById(student.studentId);
+        if (!studentDoc) {
+            throw new AppError(404, 'ERROR_STUDENT_NOT_FOUND: 학생 정보를 찾을 수 없습니다.');
+        }
+
+        studentDoc.ownedItems = studentDoc.ownedItems.filter(id => id !== itemId);
+        await studentDoc.save();
+
+        res.json({
+            success: true,
+            data: {
+                ownedItems: studentDoc.ownedItems
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+

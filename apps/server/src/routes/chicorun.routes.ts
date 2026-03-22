@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { chicorunStudentAuth } from '../middlewares/chicorun-student-auth';
 import { chicorunTeacherAuth } from '../middlewares/chicorun-teacher-auth';
 import { getQuestion, submitAnswer, resetProgress } from '../controllers/chicorun-solve.controller';
-import { studentLogin, getStudentMe, updateCustomize, changeStudentPassword } from '../controllers/chicorun-student.controller';
+import { studentLogin, getStudentMe, updateCustomize, changeStudentPassword, deductPoints, removeOwnedItem } from '../controllers/chicorun-student.controller';
 import {
     createClass,
     getMyClasses,
@@ -29,6 +29,8 @@ router.post('/reset-progress', chicorunStudentAuth, resetProgress);
 router.get('/student/me', chicorunStudentAuth, getStudentMe);
 router.patch('/student/customize', chicorunStudentAuth, updateCustomize);
 router.patch('/student/password', chicorunStudentAuth, changeStudentPassword);
+router.patch('/student/point', chicorunStudentAuth, deductPoints);
+router.delete('/student/item/:itemId', chicorunStudentAuth, removeOwnedItem);
 
 // ─── 교사 클래스 관리 API (teacherAuth 필요) ─────────────────────────────────────
 router.post('/class', chicorunTeacherAuth, createClass);

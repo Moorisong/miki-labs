@@ -39,6 +39,7 @@ export interface IChicorunStudent extends Document {
     nicknameStyle: INicknameStyle;
     cardStyle: string;
     customize: ICustomizeData;
+    ownedItems: string[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -116,6 +117,10 @@ const chicorunStudentSchema = new Schema<IChicorunStudent>(
             pointStyle: { type: Schema.Types.Mixed, default: () => ({ color: '#f97316', background: 'transparent', borderWidth: 0, borderColor: '#ffffff', fontSize: 16, x: 580, y: 20 }) },
             rankStyle: { type: Schema.Types.Mixed, default: () => ({ color: '#94a3b8', fontSize: 20, x: 24, y: 20 }) },
             badgeStyle: { type: Schema.Types.Mixed, default: () => ({ fontSize: 24, x: 80, y: 20 }) },
+        },
+        ownedItems: {
+            type: [String],
+            default: ['bg-white', 'badge-crown', 'border-solid'],
         },
     },
     {
