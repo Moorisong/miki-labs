@@ -588,14 +588,19 @@ function CustomizeContent() {
         const winWidth = window.innerWidth;
         const docWidth = document.documentElement.clientWidth;
 
-        const availableWidth = Math.min(rectWidth > 0 ? rectWidth : winWidth, winWidth, docWidth) - 80;
-        const baseWidth = 840; // 800 * 1.05 (for Rank 1)
+        const availableWidth = Math.min(rectWidth > 0 ? rectWidth : winWidth, winWidth, docWidth);
+        const padding = availableWidth < 500 ? 32 : 100; // Smaller padding on mobile
+        const targetWidth = availableWidth - padding;
 
-        if (availableWidth < baseWidth) {
-            const newScale = availableWidth / baseWidth;
-            setScale(newScale);
+        const newScale = targetWidth / CARD_WIDTH;
+
+        // On mobile, we want the card to be prominent. 
+        // We'll scale it to fit the width but cap it so it doesn't get ridiculously large.
+        if (availableWidth < 600) {
+            setScale(Math.min(1.4, Math.max(0.6, newScale)));
         } else {
-            setScale(1);
+            // On desktop, scale 1 is usually enough or even slightly smaller if needed.
+            setScale(Math.min(1, newScale));
         }
     }, [containerRef]);
 
@@ -675,41 +680,52 @@ function CustomizeContent() {
 
 
                 if (custom) {
-                    if (Array.isArray(custom.stickers)) setStickers(custom.stickers);
+                    const clampX = (x: number) => Math.max(0, Math.min(x, 230));
+                    const clampY = (y: number) => Math.max(0, Math.min(y, 310));
+
+                    if (Array.isArray(custom.stickers)) {
+                        setStickers(custom.stickers.map((s: any) => ({
+                            ...s,
+                            x: clampX(s.x),
+                            y: clampY(s.y)
+                        })));
+                    }
                     if (custom.borderStyle) setBorderStyle(prev => ({ ...prev, ...custom.borderStyle }));
 
                     if (custom.pointStyle) {
                         setPointStyle(prev => ({
                             ...prev,
                             ...custom.pointStyle,
-                            x: custom.pointStyle.x || prev.x,
-                            y: custom.pointStyle.y || prev.y
+                            x: clampX(custom.pointStyle.x || prev.x),
+                            y: clampY(custom.pointStyle.y || prev.y)
                         }));
                     }
                     if (custom.rankStyle) {
                         setRankStyle(prev => ({
                             ...prev,
                             ...custom.rankStyle,
-                            x: custom.rankStyle.x || prev.x,
-                            y: custom.rankStyle.y || prev.y
+                            x: clampX(custom.rankStyle.x || prev.x),
+                            y: clampY(custom.rankStyle.y || prev.y)
                         }));
                     }
                     if (custom.badgeStyle) {
                         setBadgeStyle(prev => ({
                             ...prev,
                             ...custom.badgeStyle,
-                            x: custom.badgeStyle.x || prev.x,
-                            y: custom.badgeStyle.y || prev.y
+                            x: clampX(custom.badgeStyle.x || prev.x),
+                            y: clampY(custom.badgeStyle.y || prev.y)
                         }));
                     }
                 }
 
                 if (data.data.nicknameStyle) {
+                    const clampX = (x: number) => Math.max(0, Math.min(x, 230));
+                    const clampY = (y: number) => Math.max(0, Math.min(y, 310));
                     setNicknameStyle(prev => ({
                         ...prev,
                         ...data.data.nicknameStyle,
-                        x: data.data.nicknameStyle.x || prev.x,
-                        y: data.data.nicknameStyle.y || prev.y
+                        x: clampX(data.data.nicknameStyle.x || prev.x),
+                        y: clampY(data.data.nicknameStyle.y || prev.y)
                     }));
                 }
 

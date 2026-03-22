@@ -194,23 +194,24 @@ export const RankingCard: React.FC<RankingCardProps> = ({
             width: `${CARD_WIDTH * scale}px`,
             height: `${CARD_HEIGHT * scale}px`,
             position: 'relative',
+            margin: '0 auto',
         }}>
             <div
                 ref={dropRef}
                 className={styles.rankingCard}
                 style={cardStyles}
             >
-                {/* Background Click Area for Edit Mode */}
+                {/* Background Click Area for Edit Mode - Moved to negative z-index to stay below content */}
                 {isEdit && [
                     <div
                         key="bg-click-inner"
                         onClick={(e) => { e.stopPropagation(); onSelectElement?.('base-card-bg'); }}
-                        style={{ position: 'absolute', inset: '20px', borderRadius: `${user.customize?.borderStyle?.radius || 24}px`, zIndex: 2, cursor: 'pointer' }}
+                        style={{ position: 'absolute', inset: '20px', borderRadius: `${user.customize?.borderStyle?.radius || 24}px`, zIndex: -1, cursor: 'pointer' }}
                     />,
                     <div
                         key="bg-click-outer"
                         onClick={(e) => { e.stopPropagation(); onSelectElement?.('base-card-border'); }}
-                        style={{ position: 'absolute', inset: 0, borderRadius: `${user.customize?.borderStyle?.radius || 24}px`, zIndex: 1, cursor: 'pointer' }}
+                        style={{ position: 'absolute', inset: 0, borderRadius: `${user.customize?.borderStyle?.radius || 24}px`, zIndex: -2, cursor: 'pointer' }}
                     />
                 ]}
 
