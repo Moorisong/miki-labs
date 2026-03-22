@@ -13,38 +13,38 @@ export const ALL_CHICORUN_ITEMS: ShopItem[] = [
     {
         id: 'bg-white',
         name: '기본 화이트',
-        description: '깔끔한 화이트 배경',
+        description: '깔끔한 화이트 배경 (기본)',
         price: 0,
         category: 'background',
         value: 'white',
         previewStyle: { background: 'white' }
     },
     {
-        id: 'bg-sunset',
-        name: '선셋 오렌지',
-        description: '따뜻한 노을빛 그라데이션',
+        id: 'bg-premium-cloud',
+        name: '실키 클라우드',
+        description: '연하고 부드러운 화이트-블루 파스텔 그라데이션',
         price: 1,
         category: 'background',
-        value: 'linear-gradient(135deg, #f97316, #f59e0b)',
-        previewStyle: { background: 'linear-gradient(135deg, #f97316, #f59e0b)' }
+        value: 'linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)',
+        previewStyle: { background: 'linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)' }
     },
     {
-        id: 'bg-ocean',
-        name: '오션 블루',
-        description: '시원한 바다색 그라데이션',
-        price: 1,
+        id: 'bg-premium-vivid',
+        name: '트로피컬 프리즘',
+        description: '강렬하고 화려한 비비드 혼합색 그라데이션',
+        price: 2,
         category: 'background',
-        value: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
-        previewStyle: { background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)' }
+        value: 'linear-gradient(135deg, #FF0844 0%, #FFB199 50%, #FFD700 100%)',
+        previewStyle: { background: 'linear-gradient(135deg, #FF0844 0%, #FFB199 50%, #FFD700 100%)' }
     },
     {
-        id: 'bg-neon',
-        name: '네온 핑크',
-        description: '화려한 네온 핑크',
-        price: 1,
+        id: 'bg-premium-neon',
+        name: '네온 시티나이트',
+        description: '진한 바탕에 세련된 네온 블루가 감도는 사이버 무드',
+        price: 3,
         category: 'background',
-        value: 'linear-gradient(135deg, #ec4899, #8b5cf6)',
-        previewStyle: { background: 'linear-gradient(135deg, #ec4899, #8b5cf6)' }
+        value: 'linear-gradient(135deg, #0f172a 0%, #312e81 100%)',
+        previewStyle: { background: 'linear-gradient(135deg, #0f172a 0%, #312e81 100%)' }
     },
 
     // Badges (Italian Brainrot Characters)
