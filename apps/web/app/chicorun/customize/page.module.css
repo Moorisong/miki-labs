@@ -276,13 +276,13 @@
 
 .btnEmoji:hover {
     background: #f1f5f9;
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 .btnEmoji.selected {
     background: #fae8ff;
     border-color: #e879f9;
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 .gridBackgrounds {
@@ -669,8 +669,8 @@
 }
 
 .btnStickerFAB:hover {
-    transform: scale(1.15) rotate(15deg);
-    box-shadow: 0 20px 25px -5px rgba(124, 58, 237, 0.4);
+    transform: scale(1.05) rotate(3deg);
+    box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.3);
     background: linear-gradient(135deg, #c084fc 0%, #9333ea 100%);
 }
 
@@ -898,4 +898,32 @@
     100% {
         box-shadow: inset 0 0 10px rgba(59, 130, 246, 0.3), inset 0 0 0 0px rgba(59, 130, 246, 0.5);
     }
+}
+
+.btnRemoveAllStickers {
+    width: 100%;
+    padding: 0.75rem;
+    background: #fef2f2;
+    border: 2px solid #fee2e2;
+    border-radius: 0.75rem;
+    color: #dc2626;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.btnRemoveAllStickers:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    transform: translateY(-1px);
+}
+
+.btnRemoveAllStickers:active {
+    transform: translateY(0);
 }
