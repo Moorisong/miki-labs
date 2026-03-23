@@ -7,29 +7,25 @@ import { ChicorunStudentModel } from '../src/models/chicorun-student.model';
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const ALL_CHICORUN_ITEMS = [
+    // Backgrounds
     { id: 'bg-white', category: 'background', value: 'white' },
-    { id: 'bg-grad-1', category: 'background', value: 'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%)' },
-    { id: 'bg-grad-2', category: 'background', value: 'linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%)' },
-    { id: 'bg-grad-3', category: 'background', value: 'linear-gradient(120deg, #f6d365 0%, #fda085 100%)' },
-    { id: 'bg-grad-4', category: 'background', value: 'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)' },
-    { id: 'bg-grad-5', category: 'background', value: 'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)' },
-    { id: 'bg-grad-6', category: 'background', value: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
-    { id: 'bg-grad-7', category: 'background', value: 'linear-gradient(to right, #fa709a 0%, #fee140 100%)' },
-    { id: 'bg-grad-8', category: 'background', value: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)' },
-    { id: 'bg-grad-9', category: 'background', value: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
-    { id: 'bg-grad-10', category: 'background', value: 'linear-gradient(135deg, #5ee7df 0%, #b490ca 100%)' },
-    { id: 'bg-grad-11', category: 'background', value: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' },
-    { id: 'bg-grad-12', category: 'background', value: 'linear-gradient(135deg, #ff0844 0%, #ffb199 100%)' },
-    { id: 'bg-grad-13', category: 'background', value: 'linear-gradient(135deg, #fddb92 0%, #d1f2ff 100%)' },
-    { id: 'bg-grad-14', category: 'background', value: 'linear-gradient(135deg, #ebbba7 0%, #cfc7f8 100%)' },
-    { id: 'bg-grad-15', category: 'background', value: 'linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%)' },
-    { id: 'bg-grad-16', category: 'background', value: 'linear-gradient(135deg, #c31432 0%, #240b36 100%)' },
-    { id: 'bg-grad-17', category: 'background', value: 'linear-gradient(135deg, #0f0c29 0%, #302b63 10%, #24243e 100%)' },
-    { id: 'badge-tralallero', category: 'badge', value: '/chicorun/badges/tralallero.png' },
-    { id: 'badge-tungtung', category: 'badge', value: '/chicorun/badges/tungtung.png' },
-    { id: 'badge-ballerina', category: 'badge', value: '/chicorun/badges/ballerina.png' },
-    { id: 'badge-bombardiro', category: 'badge', value: '/chicorun/badges/bombardiro.png' },
-    { id: 'badge-assassino', category: 'badge', value: '/chicorun/badges/assassino.png' },
+    { id: 'bg-premium-cloud', category: 'background', value: 'linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)' },
+    { id: 'bg-premium-vivid', category: 'background', value: 'linear-gradient(135deg, #FF0844 0%, #FFB199 50%, #FFD700 100%)' },
+    { id: 'bg-premium-neon', category: 'background', value: 'linear-gradient(135deg, #0f172a 0%, #312e81 100%)' },
+    { id: 'bg-sunset-mirage', category: 'background', value: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
+    { id: 'bg-emerald-aurora', category: 'background', value: 'linear-gradient(to right, #43e97b 0%, #38f9d7 100%)' },
+    { id: 'bg-midnight-velvet', category: 'background', value: 'linear-gradient(135deg, #2b5876 0%, #4e4376 100%)' },
+    { id: 'bg-cyber-neon', category: 'background', value: 'linear-gradient(to right, #00dbde 0%, #fc00ff 100%)' },
+    { id: 'bg-lemon-chiffon', category: 'background', value: '#fff9c4' },
+
+    // Badges
+    { id: 'badge-pasta-rex', category: 'badge', value: '/chicorun/badges/pasta-rex.png' },
+    { id: 'badge-pizzadino', category: 'badge', value: '/chicorun/badges/pizzadino.png' },
+    { id: 'badge-gelato-bear', category: 'badge', value: '/chicorun/badges/gelato-bear.png' },
+    { id: 'badge-vespa-cat', category: 'badge', value: '/chicorun/badges/vespa-cat.png' },
+    { id: 'badge-leaning-giraffe', category: 'badge', value: '/chicorun/badges/leaning-giraffe.png' },
+
+    // Stickers
     { id: 'sticker-star', category: 'sticker', value: '/chicorun/stickers/simple-star.svg' },
     { id: 'sticker-heart', category: 'sticker', value: '/chicorun/stickers/bling-heart.svg' },
     { id: 'sticker-zap', category: 'sticker', value: '/chicorun/stickers/funky-zap.svg' },
@@ -40,7 +36,13 @@ const ALL_CHICORUN_ITEMS = [
     { id: 'sticker-paw', category: 'sticker', value: '/chicorun/stickers/cute-paw.svg' },
     { id: 'sticker-music', category: 'sticker', value: '/chicorun/stickers/music-note.svg' },
     { id: 'sticker-wow', category: 'sticker', value: '/chicorun/stickers/wow-bubble.svg' },
-    { id: 'border-solid', category: 'border', value: 'solid' },
+    { id: 'sticker-sun-sparkle', category: 'sticker', value: '/chicorun/stickers/sun-sparkle.svg' },
+    { id: 'sticker-cool-shades', category: 'sticker', value: '/chicorun/stickers/cool-shades.svg' },
+    { id: 'sticker-go-text', category: 'sticker', value: '/chicorun/stickers/go-text.svg' },
+    { id: 'sticker-pastel-moon', category: 'sticker', value: '/chicorun/stickers/pastel-moon.svg' },
+    { id: 'sticker-vivid-fire', category: 'sticker', value: '/chicorun/stickers/vivid-fire.svg' },
+
+    // Borders
     { id: 'border-dashed', category: 'border', value: 'dashed' },
 ];
 
