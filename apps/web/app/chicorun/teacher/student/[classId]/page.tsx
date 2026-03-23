@@ -274,11 +274,25 @@ export default function TeacherStudentManagePage() {
                                         <td>
                                             <div style={{
                                                 width: '40px', height: '40px', borderRadius: '0.5rem',
-                                                background: student.cardStyle, display: 'flex',
+                                                background: student.cardStyle || '#f1f5f9', display: 'flex',
                                                 alignItems: 'center', justifyContent: 'center',
                                                 fontSize: '1.5rem',
+                                                overflow: 'hidden'
                                             }}>
-                                                {student.badge}
+                                                {student.badge?.startsWith('/') ? (
+                                                    <img
+                                                        src={student.badge}
+                                                        alt="badge"
+                                                        style={{
+                                                            width: '85%',
+                                                            height: '85%',
+                                                            objectFit: 'contain',
+                                                            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    student.badge
+                                                )}
                                             </div>
                                         </td>
                                         <td>
