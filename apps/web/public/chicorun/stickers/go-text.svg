@@ -1,0 +1,5 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <path d="M10 20 H90 L80 85 L0 80 Z" fill="#FF4500" stroke="#CC3700" stroke-width="2" />
+  <text x="45" y="62" font-family="Arial Black, Impact, sans-serif" font-size="32" fill="white" text-anchor="middle" font-weight="bold">GO!</text>
+  <path d="M20 30 L10 35 M25 40 L15 45 M30 50 L20 55" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.6" />
+</svg>

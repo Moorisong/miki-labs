@@ -46,47 +46,92 @@ export const ALL_CHICORUN_ITEMS: ShopItem[] = [
         value: 'linear-gradient(135deg, #0f172a 0%, #312e81 100%)',
         previewStyle: { background: 'linear-gradient(135deg, #0f172a 0%, #312e81 100%)' }
     },
+    {
+        id: 'bg-sunset-mirage',
+        name: '선셋 미라지',
+        description: '황홀한 태양빛을 닮은 보라-핑크 그라데이션 (Vivid)',
+        price: 2,
+        category: 'background',
+        value: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        previewStyle: { background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }
+    },
+    {
+        id: 'bg-emerald-aurora',
+        name: '에메랄드 오로라',
+        description: '청량한 숲의 기운을 담은 그린-민트 그라데이션 (Pastel)',
+        price: 2,
+        category: 'background',
+        value: 'linear-gradient(to right, #43e97b 0%, #38f9d7 100%)',
+        previewStyle: { background: 'linear-gradient(to right, #43e97b 0%, #38f9d7 100%)' }
+    },
+    {
+        id: 'bg-midnight-velvet',
+        name: '미드나잇 벨벳',
+        description: '깊고 중후한 멋의 다크 네이비 그라데이션 (Dark)',
+        price: 3,
+        category: 'background',
+        value: 'linear-gradient(135deg, #2b5876 0%, #4e4376 100%)',
+        previewStyle: { background: 'linear-gradient(135deg, #2b5876 0%, #4e4376 100%)' }
+    },
+    {
+        id: 'bg-cyber-neon',
+        name: '사이버 네온 핑크',
+        description: '강렬한 대비를 이루는 네온 시안-핑크 (Neon)',
+        price: 3,
+        category: 'background',
+        value: 'linear-gradient(to right, #00dbde 0%, #fc00ff 100%)',
+        previewStyle: { background: 'linear-gradient(to right, #00dbde 0%, #fc00ff 100%)' }
+    },
+    {
+        id: 'bg-lemon-chiffon',
+        name: '레몬 쉬폰',
+        description: '부드럽고 밝은 느낌의 단색 파스텔 옐로우 (Simple)',
+        price: 1,
+        category: 'background',
+        value: '#fff9c4',
+        previewStyle: { background: '#fff9c4' }
+    },
 
-    // Badges (Italian Brainrot Characters)
+    // Badges (Italian Brainrot Style Characters)
     {
-        id: 'badge-tralallero',
-        name: '트랄랄레로 트랄랄라',
-        description: '세 개의 근육질 다리를 가진 귀여운 상어',
+        id: 'badge-pasta-rex',
+        name: '파스타 렉스',
+        description: '스파게티 몸에 미트볼 눈을 가진 개구쟁이 파스타 공룡',
         price: 1,
         category: 'badge',
-        value: '/chicorun/badges/tralallero.png'
+        value: '/chicorun/badges/pasta-rex.png'
     },
     {
-        id: 'badge-tungtung',
-        name: '퉁퉁퉁 사후르',
-        description: '야구 배트를 든 귀여운 나무 유령',
+        id: 'badge-pizzadino',
+        name: '피자 다이노',
+        description: '머리에 맛있는 페퍼로니 피자를 얹은 초식 공룡',
         price: 1,
         category: 'badge',
-        value: '/chicorun/badges/tungtung.png'
+        value: '/chicorun/badges/pizzadino.png'
     },
     {
-        id: 'badge-ballerina',
-        name: '발레리나 카푸치나',
-        description: '카푸치노 머리를 한 우아한 발레리나',
+        id: 'badge-gelato-bear',
+        name: '젤라또 베어',
+        description: '입에서 살살 녹는 젤라또 콘을 입은 분홍 곰돌이',
         price: 1,
         category: 'badge',
-        value: '/chicorun/badges/ballerina.png'
+        value: '/chicorun/badges/gelato-bear.png'
     },
     {
-        id: 'badge-bombardiro',
-        name: '봄바르디로 크로코딜로',
-        description: '비행기 몸을 가진 용감한 악어',
+        id: 'badge-vespa-cat',
+        name: '베스파 냥이',
+        description: '이탈리아 빈티지 스쿠터를 타는 쿨한 검은 고양이',
         price: 1,
         category: 'badge',
-        value: '/chicorun/badges/bombardiro.png'
+        value: '/chicorun/badges/vespa-cat.png'
     },
     {
-        id: 'badge-assassino',
-        name: '카푸치노 아사시노',
-        description: '가면을 쓴 귀여운 커피 암살자',
+        id: 'badge-leaning-giraffe',
+        name: '피사의 기린',
+        description: '피사의 사탑처럼 살짝 기울어진 요리사 모자 기린',
         price: 1,
         category: 'badge',
-        value: '/chicorun/badges/assassino.png'
+        value: '/chicorun/badges/leaning-giraffe.png'
     },
 
     // Stickers
@@ -170,17 +215,48 @@ export const ALL_CHICORUN_ITEMS: ShopItem[] = [
         category: 'sticker',
         value: '/chicorun/stickers/wow-bubble.svg'
     },
+    {
+        id: 'sticker-sun-sparkle',
+        name: '눈부신 태양',
+        description: '반짝반짝 빛나는 블링블링 태양 (Bling)',
+        price: 1,
+        category: 'sticker',
+        value: '/chicorun/stickers/sun-sparkle.svg'
+    },
+    {
+        id: 'sticker-cool-shades',
+        name: '선글라스 표정',
+        description: '자신감 넘치는 쿨한 선글라스 페이스 (Emoji)',
+        price: 1,
+        category: 'sticker',
+        value: '/chicorun/stickers/cool-shades.svg'
+    },
+    {
+        id: 'sticker-go-text',
+        name: '고! 전진',
+        description: '속도감이 느껴지는 펑키한 GO! 텍스트 (Text)',
+        price: 2,
+        category: 'sticker',
+        value: '/chicorun/stickers/go-text.svg'
+    },
+    {
+        id: 'sticker-pastel-moon',
+        name: '파스텔 달님',
+        description: '포근하고 은은한 느낌의 파스텔 달 (Pastel)',
+        price: 1,
+        category: 'sticker',
+        value: '/chicorun/stickers/pastel-moon.svg'
+    },
+    {
+        id: 'sticker-vivid-fire',
+        name: '활활 불꽃',
+        description: '열정적인 에너지를 뿜는 비비드 불꽃 (Vivid)',
+        price: 2,
+        category: 'sticker',
+        value: '/chicorun/stickers/vivid-fire.svg'
+    },
 
     // Borders
-    {
-        id: 'border-solid',
-        name: '기본 실선',
-        description: '깔끔한 실선 테두리',
-        price: 1,
-        category: 'border',
-        value: 'solid',
-        previewStyle: { borderStyle: 'solid', borderWidth: '4px', borderColor: '#3b82f6' }
-    },
     {
         id: 'border-dashed',
         name: '대시 라인',
