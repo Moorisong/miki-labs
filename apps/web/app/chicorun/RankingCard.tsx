@@ -70,11 +70,11 @@ const IconZap = ({ color = '#ea580c' }: { color?: string }) => (
 
 export const getBadgeStyles = (path: string) => {
     if (!path) return { bg: '#f1f5f9', border: '#e2e8f0' };
-    if (path.includes('tralallero')) return { bg: '#FFD700', border: '#1D4ED8' }; // Yellow
-    if (path.includes('tungtung')) return { bg: '#D1FAE5', border: '#7C2D12' }; // Mint green
-    if (path.includes('ballerina')) return { bg: '#DDD6FE', border: '#DB2777' }; // Lavender
-    if (path.includes('bombardiro')) return { bg: '#FFEDD5', border: '#374151' }; // Orange
-    if (path.includes('assassino')) return { bg: '#E0F2FE', border: '#000000' }; // SkyBlue
+    if (path.includes('pasta-rex')) return { bg: '#FEF3C7', border: '#D97706' }; // Amber
+    if (path.includes('pizzadino')) return { bg: '#FEE2E2', border: '#DC2626' }; // Red
+    if (path.includes('gelato-bear')) return { bg: '#DBEAFE', border: '#2563EB' }; // Blue
+    if (path.includes('vespa-cat')) return { bg: '#D1FAE5', border: '#059669' }; // Green
+    if (path.includes('leaning-giraffe')) return { bg: '#FEF9C3', border: '#CA8A04' }; // Yellow
     return { bg: '#f1f5f9', border: '#e2e8f0' };
 };
 
@@ -215,11 +215,7 @@ export const RankingCard: React.FC<RankingCardProps> = ({
                     />
                 ]}
 
-                {/* Ribbon decoration */}
-                {user.customize?.borderStyle?.style === 'ribbon' && [
-                    <div key="ribbon-l" style={{ position: 'absolute', top: -12, left: -12, fontSize: '1.8rem', transform: 'rotate(-45deg)', zIndex: 100 }}>🎀</div>,
-                    <div key="ribbon-r" style={{ position: 'absolute', top: -12, right: -12, fontSize: '1.8rem', transform: 'rotate(45deg)', zIndex: 100 }}>🎀</div>
-                ]}
+                {/* No special decorations for standard borders */}
 
                 {/* Top 1 Badge */}
                 {isFirst && (

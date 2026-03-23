@@ -17,7 +17,7 @@ import { RankingCard, CARD_WIDTH, CARD_HEIGHT, CHICORUN_CARD_DEFAULTS, RankingEn
 const DEFAULT_OWNED_ITEMS = [
     'bg-white',
     // 'badge-crown' 삭제됨
-    'border-solid'
+    'border-dashed'
 ];
 
 // These will be derived from ALL_CHICORUN_ITEMS and ownedItems in the component
