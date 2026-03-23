@@ -207,11 +207,11 @@ export default function StorePage() {
 
 // ─── Render Helpers ────────────────────────────────────────────────────────
 const getBadgeStyles = (path: string) => {
-    if (path.includes('tralallero')) return { bg: '#FFD700', border: '#1D4ED8' }; // Yellow
-    if (path.includes('tungtung')) return { bg: '#D1FAE5', border: '#7C2D12' }; // Mint green
-    if (path.includes('ballerina')) return { bg: '#DDD6FE', border: '#DB2777' }; // Lavender
-    if (path.includes('bombardiro')) return { bg: '#FFEDD5', border: '#374151' }; // Orange
-    if (path.includes('assassino')) return { bg: '#E0F2FE', border: '#000000' }; // SkyBlue
+    if (path.includes('pasta-rex')) return { bg: '#FEF3C7', border: '#D97706' }; // Amber
+    if (path.includes('pizzadino')) return { bg: '#FEE2E2', border: '#DC2626' }; // Red
+    if (path.includes('gelato-bear')) return { bg: '#DBEAFE', border: '#2563EB' }; // Blue
+    if (path.includes('vespa-cat')) return { bg: '#D1FAE5', border: '#059669' }; // Green
+    if (path.includes('leaning-giraffe')) return { bg: '#FEF9C3', border: '#CA8A04' }; // Yellow
     return { bg: '#f1f5f9', border: '#e2e8f0' };
 };
 
