@@ -89,14 +89,65 @@ const WORDS = {
         object: ['the broken window', 'his old car', 'a beautiful song', 'this lesson'],
     },
     advanced: {
-        subjects: ['The environmental impact', 'Technological advancement', 'Success in life', 'Continuous effort'],
-        verbs: ['requires', 'influence', 'demonstrates', 'concluded', 'have emphasized', 'has transformed'],
+        subjects: ['Environmental impact', 'Technological advancement', 'Success in life', 'Continuous effort'],
+        verbs: ['requires', 'influence', 'demonstrates', 'concluded', 'emphasized', 'transformed'],
         places: ['global markets', 'modern society', 'educational institutions', 'diverse cultures'],
         food: ['nutritional value', 'processed products', 'organic ingredients'],
         time: ['in the long run', 'for centuries', 'simultaneously'],
         person: ['philosophers', 'scientists', 'researchers', 'professionals'],
         adjective: ['inevitable', 'significant', 'sustainable', 'complicated', 'efficient'],
         object: ['the complexity of the issue', 'a new perspective', 'substantial evidence'],
+    },
+};
+
+interface VerbRule {
+    type: 'transitive' | 'intransitive';
+    structure: string;
+    validObjects: string[];
+    preposition?: string;
+}
+
+const VERB_RULES: Record<string, VerbRule> = {
+    make: {
+        type: 'transitive',
+        structure: '{subject} {verb} {object}',
+        validObjects: ['a cake', 'food', 'a plan', 'a decision', 'homework'],
+    },
+    eat: {
+        type: 'transitive',
+        structure: '{subject} {verb} {object}',
+        validObjects: ['an apple', 'pizza', 'rice', 'bread'],
+    },
+    play: {
+        type: 'transitive',
+        structure: '{subject} {verb} {object}',
+        validObjects: ['soccer', 'basketball', 'the game', 'the piano'],
+    },
+    see: {
+        type: 'transitive',
+        structure: '{subject} {verb} {object}',
+        validObjects: ['a movie', 'a dog', 'a friend', 'a teacher'],
+    },
+    go: {
+        type: 'intransitive',
+        structure: '{subject} {verb} {object}',
+        preposition: 'to',
+        validObjects: ['school', 'home', 'the park', 'the store'],
+    },
+    study: {
+        type: 'transitive',
+        structure: '{subject} {verb} {object}',
+        validObjects: ['English', 'math', 'science', 'history'],
+    },
+    visit: {
+        type: 'transitive',
+        structure: '{subject} {verb} {object}',
+        validObjects: ['the museum', 'London', 'a restaurant', 'the beach'],
+    },
+    finish: {
+        type: 'transitive',
+        structure: '{subject} {verb} {object}',
+        validObjects: ['the work', 'the lesson', 'dinner', 'homework'],
     },
 };
 
@@ -130,6 +181,9 @@ class DeterministicPRNG {
         return result;
     }
 }
+
+const UNCOUNTABLE_NOUNS = ['history', 'water', 'information', 'advice', 'homework', 'bread', 'rice', 'milk', 'music', 'science', 'math'];
+const SAFE_NOUNS = ['apple', 'book', 'dog', 'cake', 'pizza', 'sandwich', 'ball', 'piano', 'movie'];
 
 export class ChicorunProblemService {
     static getLevelByProgressIndex(progressIndex: number): 'beginner' | 'intermediate' | 'advanced' {
@@ -166,7 +220,7 @@ export class ChicorunProblemService {
         return crypto.createHash('sha256').update(data).digest('hex').substring(0, 16);
     }
 
-    static generateQuestion(studentId: string, classCode: string, progressIndex: number) {
+    static generateQuestion(studentId: string, classCode: string, progressIndex: number): any {
         const seed = this.generateSeed(studentId, classCode, progressIndex);
         const type = this.getTypeByIndex(progressIndex);
         const level = this.getLevelByProgressIndex(progressIndex);
@@ -200,6 +254,8 @@ export class ChicorunProblemService {
                 if (v === 'make') return 'made';
                 if (v === 'buy') return 'bought';
                 if (v === 'think') return 'thought';
+                if (v === 'visit') return 'visited';
+                if (v === 'finish') return 'finished';
                 if (v.endsWith('y') && !['a', 'e', 'i', 'o', 'u'].includes(v[v.length - 2])) return v.slice(0, -1) + 'ied';
                 if (v.endsWith('e')) return v + 'd';
                 return v + 'ed';
@@ -208,17 +264,24 @@ export class ChicorunProblemService {
                 if (v === 'go') return 'goes';
                 if (v === 'do') return 'does';
                 if (v === 'study') return 'studies';
+                if (v === 'finish') return 'finishes';
                 if (v.endsWith('sh') || v.endsWith('ch')) return v + 'es';
                 return v + 's';
             }
             return v;
         };
 
-        const getPrep = (v: string, p: string) => {
-            if (v === 'go' || v === 'went' || v === 'goes') return 'to';
-            if (v === 'visit' || v === 'visited') return '';
-            if (p === 'home' && (v === 'go' || v === 'went' || v === 'goes')) return '';
-            return 'at';
+        const fillTemplate = (template: string, s: string, v: string, o: string, prep?: string) => {
+            let space = prep ? ' ' : '';
+            if (o === 'home' && v.match(/^go|went|goes$/)) {
+                prep = '';
+                space = '';
+            }
+            const processedVerb = prep ? `${v}${space}${prep}` : v;
+            return template
+                .replace('{subject}', s)
+                .replace('{verb}', processedVerb)
+                .replace('{object}', o) + '.';
         };
 
         let question = '';
@@ -226,99 +289,152 @@ export class ChicorunProblemService {
         let choices: string[] = [];
         let explanation = '';
 
-        const subj = prng.pickOne(wordPool.subjects);
-        const verb = prng.pickOne(wordPool.verbs);
-        const place = prng.pickOne(wordPool.places);
-        const food = prng.pickOne(wordPool.food);
-        const adj = prng.pickOne(wordPool.adjective);
-        const obj = prng.pickOne(wordPool.object);
+        // 1. Verb 선택 (동적 풀 사용)
+        const availableVerbs = Object.keys(VERB_RULES).filter(v => wordPool.verbs.map(wv => wv.replace(/ed$|s$|es$/, '')).includes(v));
+        const verbKey = prng.pickOne(availableVerbs.length > 0 ? availableVerbs : ['make', 'eat', 'go']);
+        const rule = VERB_RULES[verbKey];
 
-        const prep = getPrep(verb, place);
-        const conjVerb = conjugate(verb, subj);
+        // 2. Subject & Object 선택
+        const subj = prng.pickOne(wordPool.subjects);
+        const obj = prng.pickOne(rule.validObjects);
+
+        // 3. 정답 생성
+        const conjVerb = conjugate(verbKey, subj);
+        correctAnswer = fillTemplate(rule.structure, subj, conjVerb, obj, rule.preposition);
+
+        const createDistractor = (type: 'sv_error' | 'tense_error' | 'structure_error' | 'article_error') => {
+            switch (type) {
+                case 'sv_error':
+                    const wrongV = isThirdPersonSingular(subj) ? verbKey : conjugate(verbKey, 'He');
+                    return fillTemplate(rule.structure, subj, wrongV, obj, rule.preposition);
+                case 'tense_error':
+                    const wrongTense = level === 'beginner' ? conjugate(verbKey, subj, 'past') : verbKey;
+                    if (wrongTense === conjVerb) return fillTemplate(rule.structure, subj, `will ${verbKey}`, obj, rule.preposition);
+                    return fillTemplate(rule.structure, subj, wrongTense, obj, rule.preposition);
+                case 'structure_error':
+                    return fillTemplate(rule.structure, subj, `is ${conjVerb}`, obj, rule.preposition);
+                case 'article_error':
+                    const baseObj = obj.replace(/^(a|an|the) /, '');
+                    if (UNCOUNTABLE_NOUNS.some(un => baseObj.includes(un))) {
+                        // Uncountable nouns should NOT have article distractors to avoid ambiguity
+                        return fillTemplate(rule.structure, subj, conjugate(verbKey, subj, 'past'), obj, rule.preposition);
+                    }
+                    if (baseObj === obj) return fillTemplate(rule.structure, subj, conjVerb, `the ${obj}`, rule.preposition);
+                    return fillTemplate(rule.structure, subj, conjVerb, baseObj, rule.preposition);
+            }
+        };
+
+        const hasAmbiguity = (ans: string, otherChoices: string[]) => {
+            // Check for present simple vs present continuous
+            const isContinuous = (s: string) => s.includes(' is ') || s.includes(' am ') || s.includes(' are ');
+            const hasContinuous = isContinuous(ans) || otherChoices.some(isContinuous);
+            const hasSimple = !isContinuous(ans) || otherChoices.some(c => !isContinuous(c));
+
+            // If we have both types for the SAME verb/subject/object, it's risky
+            // For now, let's keep it simple: if the sentences are grammatically valid but too similar, reject.
+            return false; // Placeholder for more complex checks
+        };
 
         switch (type) {
             case 'sentence_choice':
-                question = `다음 정보를 사용하여 올바른 영어 문장을 고르세요:\n[${subj}, ${verb}, ${place}]`;
-                correctAnswer = prep ? `${subj} ${conjVerb} ${prep} ${place}.` : `${subj} ${conjVerb} ${place}.`;
+                question = `주어진 정보를 바탕으로 올바른 문장을 고르세요:\n[${subj}, ${verbKey}, ${obj.replace(/^(a|an|the) /, '')}]`;
                 choices = [
                     correctAnswer,
-                    `${subj} ${verb === conjVerb ? (isThirdPersonSingular(subj) ? verb : verb + 's') : verb} ${prep} ${place}.`,
-                    `${subj} is ${conjVerb} ${prep} ${place}.`,
-                    `${subj} ${conjVerb} with ${place}.`,
+                    createDistractor('sv_error'),
+                    createDistractor('structure_error'),
+                    createDistractor('article_error'),
                 ];
                 explanation = isThirdPersonSingular(subj)
-                    ? `주어가 '${subj}'면 동사에 s 붙이는 거 국룰 R지?\n'${conjVerb}'로 가보자고!`
-                    : `주어가 '${subj}'면 동사는 그냥 원형 '${verb}' 가야지.\n억지로 s 붙이면 킹받음 주의!`;
+                    ? `주어가 '${subj}'면 동사가 어떻게 변해야 자연스러울까? s/es 붙는지 확인해봐! 🚀`
+                    : `주어가 '${subj}'면 동사는 원래 어떤 형태여야 할까? 불필요하게 s가 붙어있진 않은지 정독해봐!`;
                 break;
+
             case 'word_order':
-                const wordList = prep ? [subj, conjVerb, prep, place] : [subj, conjVerb, place];
-                question = `주어진 단어를 올바른 순서로 배열하세요:\n(${wordList.join(', ')})`;
-                correctAnswer = wordList.join(' ');
+                const prep = (obj === 'home' && verbKey === 'go') ? '' : rule.preposition;
+                const correctWordList = [subj, conjVerb, prep, obj].filter(Boolean).map(w => w?.split(' ')).flat();
+                const shuffledWordList = prng.shuffle([...correctWordList]);
+                question = `단어를 올바른 순서로 배열하세요:\n(${shuffledWordList.join(', ')})`;
+                correctAnswer = correctWordList.join(' ');
                 choices = [
                     correctAnswer,
-                    `${subj} ${prep} ${conjVerb} ${place}`.trim().replace('  ', ' '),
-                    `${conjVerb} ${subj} ${prep} ${place}`.trim().replace('  ', ' '),
-                    `${place} ${conjVerb} ${prep} ${subj}`.trim().replace('  ', ' '),
+                    prng.shuffle([...correctWordList]).join(' '),
+                    prng.shuffle([...correctWordList]).join(' '),
+                    prng.shuffle([...correctWordList]).join(' '),
                 ];
-                explanation = '영어는 [주어 + 동사] 순서가 근본인 거 고전임.\n순서 꼬이면 가독성 탈락이야!';
+                // Ensure unique choices
+                choices = Array.from(new Set(choices));
+                while (choices.length < 4) {
+                    choices.push(prng.shuffle([...correctWordList]).join(' '));
+                    choices = Array.from(new Set(choices));
+                }
+                explanation = '영어 문장은 [주어 + 동사 + 목적어] 순서가 근본임!\n순서가 꼬이면 의미 전달이 어려울 수 있어. 다시 한 번 배열해볼까?';
                 break;
+
             case 'fill_blank':
-                question = `빈칸에 들어갈 알맞은 단어를 고르세요:\n"${subj} ___ ${prep} ${place}."`.replace('  ', ' ');
+                const displayObj = (obj === 'home' && verbKey === 'go') ? 'home' : (rule.preposition ? `${rule.preposition} ${obj}` : obj);
+                question = `빈칸에 들어갈 알맞은 단어를 고르세요:\n"${subj} ___ ${displayObj}."`;
                 correctAnswer = conjVerb;
                 choices = [
                     correctAnswer,
-                    isThirdPersonSingular(subj) ? verb : verb + 's',
-                    verb + 'ing',
-                    'to ' + verb,
+                    isThirdPersonSingular(subj) ? verbKey : conjugate(verbKey, 'He'),
+                    verbKey + 'ing',
+                    'to ' + verbKey,
                 ];
-                explanation = `주어가 '${subj}'는데 '${conjVerb}' 안 쓰고 뭐함?\n수일치 맞추는 게 진짜 실력임 ㄹㅇ.`;
+                explanation = `주어 '${subj}'에 어울리는 동사 모양을 찾아보자! 힌트는 수일치야. 🧐`;
                 break;
+
             case 'translation':
-                const koreanVerb = verb === 'go' ? '간다' : verb === 'eat' ? '먹는다' : verb === 'study' ? '공부한다' : '한다';
-                question = `다음 문장을 영어로 번역하세요:\n"${subj}${subj === 'I' || subj === 'You' ? '는' : '은'} ${place}에서 ${koreanVerb}."`;
-                correctAnswer = prep ? `${subj} ${conjVerb} ${prep} ${place}.` : `${subj} ${conjVerb} ${place}.`;
+                const koreanVerb = verbKey === 'go' ? '간다' : verbKey === 'eat' ? '먹는다' : verbKey === 'play' ? '한다' : '본다';
+                const koreanObj = obj.includes('apple') ? '사과를' : obj.includes('pizza') ? '피자를' : obj.includes('school') ? '학교에' : '그것을';
+                question = `다음 문장을 영어로 번역하세요:\n"${subj}${subj === 'I' || subj === 'You' ? '는' : '은'} ${koreanObj} ${koreanVerb}."`;
                 choices = [
                     correctAnswer,
-                    `${subj} ${verb === conjVerb ? (isThirdPersonSingular(subj) ? verb : verb + 's') : verb} ${prep} ${place}.`,
-                    `${subj} is ${conjVerb} ${prep} ${place}.`,
-                    `${subj} are ${verb} ${prep} ${place}.`,
+                    createDistractor('sv_error'),
+                    createDistractor('tense_error'),
+                    createDistractor('structure_error'),
                 ];
-                explanation = "번역할 때 주어랑 동사 '깔맞춤' 안 하면 촌스러움.\n수일치 신경 써서 폼 올려보자!";
+                explanation = "번역할 땐 주어와 동사 '깔맞춤'이 생명이야! 주어의 인칭에 맞춰 동사가 변해야 하는지 잘 생각해봐.";
                 break;
-            case 'transformation':
-                question = `다음 문장을 과거형으로 바꾸세요:\n"${subj} ${conjVerb} ${prep} ${place}."`.replace('  ', ' ');
-                const pastVerb = conjugate(verb, subj, 'past');
-                correctAnswer = prep ? `${subj} ${pastVerb} ${prep} ${place}.` : `${subj} ${pastVerb} ${place}.`;
-                choices = [
-                    correctAnswer,
-                    `${subj} ${conjVerb} ${prep} ${place}.`,
-                    `${subj} will ${verb} ${prep} ${place}.`,
-                    `${subj} is ${verb} ${prep} ${place}.`,
-                ];
-                explanation = `'${verb}'가 과거로 가면 '${pastVerb}'로 폼 바뀜.\n시제 틀리면 시공간 오그라듦 ㄷㄷ.`;
-                break;
-            case 'error_detection':
-                const wrongVerb = isThirdPersonSingular(subj) ? verb : verb + 's';
-                const wrongSentence = prep ? `${subj} ${wrongVerb} ${prep} ${place}.` : `${subj} ${wrongVerb} ${place}.`;
-                question = `다음 문장에서 틀린 부분을 고르세요:\n"${wrongSentence}"`;
-                correctAnswer = `'${wrongVerb}'를 '${conjVerb}'로 바꿔야 함`;
-                choices = [
-                    correctAnswer,
-                    `'${subj}'를 'They'로 바꿔야 함`,
-                    `'${prep || place}'를 'there'로 바꿔야 함`,
-                    '이 문장 폼 미쳤음(이상 없음)',
-                ];
-                explanation = "실력을 보여줘! 주어랑 동사가 안 맞는 게 딱 걸림.\n수일치 오류는 진짜 참을 수 없지.";
-                break;
+
             default:
-                question = `단어의 알맞은 뜻을 고르세요:\n'${verb}'`;
-                correctAnswer = verb === 'go' ? '가다' : verb === 'eat' ? '먹다' : verb === 'study' ? '공부하다' : '활동하다';
-                choices = [correctAnswer, '잠자다', '행복하다', '어렵다'];
-                explanation = "이거 모르면 진짜 에바임.\n기본 단어니까 머릿속에 박제해두자!";
+                // Fallback to sentence choice for other types for now
+                question = `다음 정보를 사용하여 올바른 영어 문장을 고르세요:\n[${subj}, ${verbKey}, ${obj}]`;
+                choices = [correctAnswer, createDistractor('sv_error'), createDistractor('structure_error'), createDistractor('article_error')];
+                explanation = '항상 주어와 동사의 관계(수일치)를 생각하며 문장을 완성해봐! 정답엔 이유가 있어 🌱';
         }
 
-        const finalChoices = prng.shuffle(choices);
+        // 최종 검증
+        const uniqueChoices = Array.from(new Set(choices));
+
+        // 복수 정답 위험성 정밀 체크
+        const hasConflict = (ch: string[]) => {
+            // "She is runs" vs "She runs" 등 시제 혼동 방지 (이미 distractor에서 처리 중이지만 한 번 더 확인)
+            // 불가산 명사의 관사 유무가 섞여있는지 확인
+            const uncountablePatterns = UNCOUNTABLE_NOUNS.some(un => {
+                const withThe = `the ${un}`;
+                return ch.some(c => c.includes(withThe)) && ch.some(c => c.includes(un) && !c.includes(withThe));
+            });
+            if (uncountablePatterns) return true;
+
+            // 시제 혼용 (is running vs runs)
+            const continuousCount = ch.filter(c => c.includes(' is ') || c.includes(' am ') || c.includes(' are ')).length;
+            if (continuousCount > 0 && continuousCount < ch.length && type === 'sentence_choice') {
+                // 한 문제에 진행형과 일반형이 섞여있는데 시제 전환 문제가 아니면 위험
+                return true;
+            }
+            return false;
+        };
+
+        if (uniqueChoices.length < 4 || uniqueChoices.includes(undefined as any) || hasConflict(uniqueChoices)) {
+            return this.generateQuestion(studentId, classCode, progressIndex + 7); // Skip and try again
+        }
+
+        const finalChoices = prng.shuffle(uniqueChoices.slice(0, 4));
         const correctIndex = finalChoices.indexOf(correctAnswer);
+
+        if (correctIndex === -1) {
+            return this.generateQuestion(studentId, classCode, progressIndex + 1);
+        }
 
         return {
             id: crypto.createHmac('sha256', process.env.CHICORUN_HMAC_SECRET || 'secret').update(`${progressIndex}:${seed}`).digest('hex'),
