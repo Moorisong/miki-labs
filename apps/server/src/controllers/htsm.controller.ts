@@ -381,7 +381,7 @@ export async function getResult(req: Request, res: Response): Promise<void> {
         let displayName = test.name;
         if (test.userId) {
             const user = await getUserModel().findOne({ providerId: test.userId });
-            if (user) {
+            if (user && user.nickname) {
                 displayName = user.nickname;
             }
         }
@@ -433,7 +433,7 @@ export async function getTestInfo(req: Request, res: Response): Promise<void> {
         let displayName = test.name;
         if (test.userId) {
             const user = await getUserModel().findOne({ providerId: test.userId });
-            if (user) {
+            if (user && user.nickname) {
                 displayName = user.nickname;
             }
         }
