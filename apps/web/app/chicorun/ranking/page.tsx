@@ -188,11 +188,14 @@ function RankingContent() {
                             id={`student-card-${rankings.find(u => u.rank === 1)!.id || rankings.find(u => u.rank === 1)!.nickname}`}
                             className={styles.firstRankerRow}
                         >
-                            <RankingCard
-                                user={rankings.find(u => u.rank === 1)!}
-                                isFirst={true}
-                                scale={1.2 * (scale < 1 ? scale : 1)}
-                            />
+                            <div className={styles.cardRankWrapper}>
+                                <div className={styles.cardRankLabel}>1등</div>
+                                <RankingCard
+                                    user={rankings.find(u => u.rank === 1)!}
+                                    isFirst={true}
+                                    scale={1.2 * (scale < 1 ? scale : 1)}
+                                />
+                            </div>
                         </div>
                     )}
 
@@ -210,11 +213,14 @@ function RankingContent() {
                                     transition: 'transform 0.3s ease'
                                 }}
                             >
-                                <RankingCard
-                                    user={user}
-                                    isFirst={false}
-                                    scale={scale < 1 ? scale : 1}
-                                />
+                                <div className={styles.cardRankWrapper}>
+                                    <div className={styles.cardRankLabel}>{user.rank}등</div>
+                                    <RankingCard
+                                        user={user}
+                                        isFirst={false}
+                                        scale={scale < 1 ? scale : 1}
+                                    />
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -238,7 +244,7 @@ function RankingContent() {
             {!isLoading && myRankEntry && (
                 <div className={styles.myRankBar} onClick={scrollToMyCard}>
                     <div className={styles.myRankInfo}>
-                        <div className={styles.myRankBadge}>#{myRankEntry.rank}</div>
+                        <div className={styles.myRankBadge}>{myRankEntry.rank}등</div>
                         <div className={styles.myRankText}>
                             <strong>{myRankEntry.nickname}</strong>님의 현재 랭킹
                         </div>

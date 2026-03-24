@@ -164,8 +164,6 @@ export const RankingCard: React.FC<RankingCardProps> = ({
         );
     };
 
-    const rX = user.customize?.rankStyle?.x ?? CHICORUN_CARD_DEFAULTS.rank.x;
-    const rY = user.customize?.rankStyle?.y ?? CHICORUN_CARD_DEFAULTS.rank.y;
     const bX = user.customize?.badgeStyle?.x ?? CHICORUN_CARD_DEFAULTS.badge.x;
     const bY = user.customize?.badgeStyle?.y ?? CHICORUN_CARD_DEFAULTS.badge.y;
     const nX = user.nicknameStyle?.x ?? CHICORUN_CARD_DEFAULTS.nickname.x;
@@ -215,8 +213,6 @@ export const RankingCard: React.FC<RankingCardProps> = ({
                     />
                 ]}
 
-                {/* No special decorations for standard borders */}
-
                 {/* Top 1 Badge */}
                 {isFirst && (
                     <div key="top-badge" className={styles.topBadge}>
@@ -245,23 +241,6 @@ export const RankingCard: React.FC<RankingCardProps> = ({
                         </div>
                     )
                 ))}
-
-                {/* Rank */}
-                {renderContent(
-                    'rank',
-                    undefined,
-                    { x: rX, y: rY },
-                    user.customize?.rankStyle?.rotate || 0,
-                    1,
-                    selectedElement === 'rank',
-                    () => onSelectElement?.('rank'),
-                    <span className={styles.rankNumber} style={{
-                        color: user.customize?.rankStyle?.color || (user.rank <= 3 ? '#ca8a04' : '#94a3b8'),
-                        fontSize: user.customize?.rankStyle?.fontSize ? `${user.customize.rankStyle.fontSize}px` : (isFirst ? '1.75rem' : '1.25rem'),
-                    }}>
-                        #{user.rank || '-'}
-                    </span>
-                )}
 
                 {/* Badge Icon */}
                 {renderContent(

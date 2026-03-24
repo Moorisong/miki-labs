@@ -85,8 +85,37 @@
 .rankingGrid {
     display: flex;
     flex-direction: column;
-    gap: 3rem;
+    gap: 4rem;
     width: 100%;
+}
+
+.cardRankWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7rem;
+    width: fit-content;
+}
+
+.cardRankLabel {
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: #475569;
+    background: white;
+    padding: 0.3rem 1.1rem;
+    border-radius: 0.8rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+    border: 1.5px solid #f1f5f9;
+    line-height: 1;
+}
+
+.firstRankerRow .cardRankLabel {
+    font-size: 1.5rem;
+    padding: 0.5rem 1.6rem;
+    color: #ca8a04;
+    border-color: #fef08a;
+    background: linear-gradient(to bottom, #ffffff, #fffbeb);
+    box-shadow: 0 8px 16px rgba(234, 179, 8, 0.12);
 }
 
 .firstRankerRow {
@@ -107,7 +136,7 @@
 @media (max-width: 640px) {
     .otherRankersGrid {
         grid-template-columns: 1fr;
-        gap: 1.5rem;
+        gap: 3.5rem;
     }
 }
 

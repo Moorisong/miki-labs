@@ -57,13 +57,6 @@ interface PointStyleType {
     y: number;
     rotate: number;
 }
-interface RankStyleType {
-    x: number;
-    y: number;
-    color: string;
-    fontSize: number;
-    rotate: number;
-}
 interface BadgeStyleType {
     x: number;
     y: number;
@@ -554,14 +547,6 @@ function CustomizeContent() {
         rotate: 0,
     });
 
-    const [rankStyle, setRankStyle] = useState<RankStyleType>({
-        color: '#ca8a04',
-        fontSize: 24,
-        x: CHICORUN_CARD_DEFAULTS.rank.x,
-        y: CHICORUN_CARD_DEFAULTS.rank.y,
-        rotate: 0,
-    });
-
     const [badgeStyle, setBadgeStyle] = useState<BadgeStyleType>({
         fontSize: 100,
         x: CHICORUN_CARD_DEFAULTS.badge.x,
@@ -632,8 +617,6 @@ function CustomizeContent() {
             setStickers(prev => prev.map(s => s.id === id ? { ...s, scale: updates.scale ?? s.scale, rotate: updates.rotate ?? s.rotate } : s));
         } else if (selectedElement === 'nickname') {
             setNicknameStyle(prev => ({ ...prev, fontSize: updates.fontSize ?? prev.fontSize, rotate: updates.rotate ?? prev.rotate }));
-        } else if (selectedElement === 'rank') {
-            setRankStyle(prev => ({ ...prev, fontSize: updates.fontSize ?? prev.fontSize, rotate: updates.rotate ?? prev.rotate }));
         } else if (selectedElement === 'badge') {
             setBadgeStyle(prev => ({ ...prev, fontSize: updates.fontSize ?? prev.fontSize, rotate: updates.rotate ?? prev.rotate }));
         } else if (selectedElement === 'point') {
@@ -649,7 +632,6 @@ function CustomizeContent() {
             return { size: s?.scale || 1, rotate: s?.rotate || 0, isSticker: true };
         }
         if (selectedElement === 'nickname') return { size: nicknameStyle.fontSize, rotate: nicknameStyle.rotate, isSticker: false };
-        if (selectedElement === 'rank') return { size: rankStyle.fontSize, rotate: rankStyle.rotate, isSticker: false };
         if (selectedElement === 'badge') return { size: badgeStyle.fontSize, rotate: badgeStyle.rotate, isSticker: false };
         if (selectedElement === 'point') return { size: pointStyle.fontSize, rotate: pointStyle.rotate, isSticker: false };
         return null;
@@ -698,14 +680,6 @@ function CustomizeContent() {
                             ...custom.pointStyle,
                             x: clampX(custom.pointStyle.x || prev.x),
                             y: clampY(custom.pointStyle.y || prev.y)
-                        }));
-                    }
-                    if (custom.rankStyle) {
-                        setRankStyle(prev => ({
-                            ...prev,
-                            ...custom.rankStyle,
-                            x: clampX(custom.rankStyle.x || prev.x),
-                            y: clampY(custom.rankStyle.y || prev.y)
                         }));
                     }
                     if (custom.badgeStyle) {
@@ -777,7 +751,6 @@ function CustomizeContent() {
             const type = monitor.getItemType();
 
             if (type === 'sticker') moveSticker(item.id, newX, newY);
-            else if (type === 'rank') setRankStyle(p => ({ ...p, x: newX, y: newY }));
             else if (type === 'badge') setBadgeStyle(p => ({ ...p, x: newX, y: newY }));
             else if (type === 'nickname') setNicknameStyle(p => ({ ...p, x: newX, y: newY }));
             else if (type === 'point') setPointStyle(p => ({ ...p, x: newX, y: newY }));
@@ -828,7 +801,6 @@ function CustomizeContent() {
                         stickers,
                         borderStyle,
                         pointStyle,
-                        rankStyle,
                         badgeStyle
                     }
                 }),
@@ -955,7 +927,7 @@ function CustomizeContent() {
                                                 stickers,
                                                 borderStyle,
                                                 pointStyle,
-                                                rankStyle,
+
                                                 badgeStyle
                                             }
                                         }}
@@ -1229,14 +1201,6 @@ function CustomizeContent() {
                                 </div>
                             )}
 
-                            {/* 등수 선택 시 */}
-                            {selectedElement === 'rank' && (
-                                <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
-                                    <div className={styles.sectionTitle}>#{myRank} 등수 표시 스타일</div>
-                                    <ColorControl id="rank-color" value={rankStyle.color} onChange={(val: string) => setRankStyle(p => ({ ...p, color: val }))} activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
-
-                                </div>
-                            )}
 
                             {/* 스티커 선택 시 - 삭제 팁 및 전체 제거 */}
                             {selectedElement?.toString().startsWith('sticker-') && (
