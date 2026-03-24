@@ -5,23 +5,40 @@
 
 ## 📝 작업 내용
 
-### 1. DB 모델(Schema) 구현
-- `Teacher`: kakaoId, name, createdAt.
-- `Class`: classCode, teacherId, title.
-- `Student`: studentId, classCode, nickname, passwordHash, progressIndex, point, badge, nicknameStyle, cardStyle, customize. **학생은 시스템 내 하나의 클래스에만 소속될 수 있으며, classCode + nickname 조합으로 식별.** 커스터마이징 데이터는 `students` 다큐먼트에 임베디드로 작성.
+### 1. DB 모델(Schema) 및 레벨 시스템
+* `Student` 모델에 `selectedLevel` (enum: beginner, intermediate, advanced) 필드 추가 (기본값: beginner).
+* 레벨 선택 시 `progressIndex` 재매핑 및 `level offset` 적용 로직 구현.
+  * beginner: 0 ~ 2999
+  * intermediate: 3000 ~ 6999
+  * advanced: 7000 ~ 9999
 
-### 2. 인증 미들웨어
-- 학생 인증(`studentAuth`) 및 교사 인증(`teacherAuth`) 분리. 
-- Stateless 기반의 JWT 로그인 및 Payload 검증.
+### 2. 🧠 문제 생성 엔진 (`generateQuestion`)
+* **핵심 원칙**: DB 저장 없음, 서버 사이드 생성, deterministic.
+* **Seed 생성**: `hash(studentId + classCode + progressIndex)`.
+* **문제 유형**: `sentence_choice`, `word_order`, `fill_blank`, `translation`, `transformation`, `error_detection`, `word_meaning`.
+* **레벨별 비율 적용**: `getTypeByIndex(progressIndex)` 로직 (동일 유형 3회 연속 금지).
+* **템플릿 시스템**: `TEMPLATES` 및 `WORDS` 풀 구축 (레벨별 단어/문법 제약 적용).
+* **오답 생성**: 최소 2가지 오류 혼합 (시제, 수일치, 어순 등).
 
-### 3. 학습 및 문제 채점 핵심 로직 (`solveController.js`)
-- `GET /api/question`: `progressIndex` 기반 템플릿 문제 **계산 및 생성** (DB 랜덤 탐색 금지, seed 및 templateId 조합).
-- `POST /api/answer`: 전달받은 `questionId`와 `seed`의 무결성 검증 후, 정답 시 `$inc`를 사용해 `progressIndex`와 `point` 1회 원자적(Atomic) 업데이트.
+### 3. API 엔드포인트 구현
+* `GET /api/chicorun/question`: 현재 `progressIndex`와 `seed`에 기반한 문제 생성 및 반환.
+* `POST /api/chicorun/answer`: `questionId`와 `seed` 무결성 검증, 정답 시 `$inc`를 사용한 원자적 업데이트.
+* `POST /api/chicorun/level`: 레벨 선택 API (progressIndex 범위 이동).
 
-### 4. 기타 API
-- 학생 로그인/가입 API 생성, 비밀번호는 초기 1회 bcrypt 비교 후 폐기.
-- 클래스 생성, 학생 비번 초기화, 랭킹 리스트 조회 등 (progress 미포함).
+---
 
-## ⚠️ 주의사항 (토큰 및 리소스 절약)
-- 프론트엔드 상태에 구애받지 않고 Postman이나 curl로 동작 검증 가능한 격리된 API를 목표로 설계합니다.
-- 동시성 처리 충돌 방지를 위해 `$inc: { progressIndex: 1 }` 조건식에 주의합니다.
+## AI 작업 지침
+
+### 목적
+서버 부하를 최소화하면서 10,000개의 고품질 영어 학습 문제를 동적으로 생성하고 검증하는 시스템 구축.
+
+### 작업 단계
+1. `ChicorunStudent` 모델 업데이트 (selectedLevel 추가).
+2. `ProblemEngine` 유틸리티 서비시 생성 (타입 결정, 템플릿 선택, 단어 조합).
+3. `solveController.ts` 내 기존 placeholder 로직을 신규 엔진으로 교체.
+4. 레벨 변경 API 구현.
+
+### 주의사항
+* **보안**: `questionId`는 반드시 서버의 시크릿과 `seed`, `progressIndex`를 조합하여 생성/검증해야 함.
+* **일관성**: 동일한 `progressIndex`와 `studentId`에 대해 항상 동일한 문제가 생성되어야 함.
+* **난이도**: 고급(Advanced) 레벨은 수능형 문장(7-12단어) 및 복합 구조를 반영해야 함.

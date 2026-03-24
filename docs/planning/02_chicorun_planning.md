@@ -200,46 +200,63 @@ req.user = {
 
 ---
 
-## 7. 학습 구조 (레벨 시스템)
+## 7. 🎯 레벨 선택 시스템
 
-- 총 레벨: **1 ~ 100**
-- 레벨당 문제 수: **100문제**
-- 총 문제 수: **10,000문제**
+### 요구사항
+* 학생은 언제든지 레벨 선택 가능 (학습 전 / 학습 중 모두)
+* 레벨은 3단계로 구성: 초급, 중급, 고급
 
-### 구간 설계
+### 레벨 정의 및 범위
+| 레벨 | 라벨 | 설명 | 문제 범위 (progressIndex) |
+|---|---|---|---|
+| beginner | 초급 | 기초 단어와 간단한 문장 (3~5단어, 현재형 중심) | 0 ~ 2999 |
+| intermediate | 중급 | 시제 활용 및 문장 확장 (5~8단어, 과거 포함) | 3000 ~ 6999 |
+| advanced | 고급 | 수능형 문장 및 복합 구조 (7~12단어, 응용/해석 중심) | 7000 ~ 9999 |
 
-- 🟢 초등: Level 1 ~ 30
-- 🟡 중등: Level 31 ~ 70
-- 🔴 고등: Level 71 ~ 100
-
----
-
-## 8. 진행 데이터 구조
-
-- progressIndex = 완료한 총 문제 수
-- 정답 시에만 증가
-
-### 계산식
-
-- level = floor(progressIndex / 100) + 1
-- question = (progressIndex % 100) + 1
+### 레벨 선택 동작 방식
+* 학생이 레벨 선택 시: 해당 레벨의 **문제 범위로 progressIndex 재매핑**
+* 기존 progressIndex는 유지하되, **문제 생성 시 level offset 적용**
+* 총 문제 수: 10,000
 
 ---
 
-### 🔐 서버 기준 진행 처리 (보안)
+## 8. 🧠 문제 생성 시스템
 
-- progressIndex는 클라이언트 값을 신뢰하지 않음
-- 서버 DB 기준으로만 진행 처리
+### 핵심 원칙
+* 문제는 DB에 저장하지 않음 (서버 코드에서 생성)
+* 항상 동일 입력 → 동일 문제 (Deterministic)
+* `seed = hash(studentId + classCode + progressIndex)`
+* `generateQuestion(progressIndex, seed)`
 
-### 처리 방식
+### 🧩 문제 유형 분배
+| 유형 | 설명 |
+|---|---|
+| sentence_choice | 문장 선택형 |
+| word_order | 단어 배열 |
+| fill_blank | 빈칸 채우기 |
+| translation | 번역 |
+| transformation | 문장 변환 |
+| error_detection | 틀린 문장 찾기 |
+| word_meaning | 단어 의미 |
 
-1. 서버에서 현재 progressIndex 조회
-2. 해당 값으로 문제 생성
-3. 정답일 경우에만 +1 증가
+### 레벨별 유형 비율 (%)
+| 유형 | 초급 (0-2999) | 중급 (3000-6999) | 고급 (7000-9999) |
+|---|:---:|:---:|:---:|
+| sentence_choice | 40 | 15 | 5 |
+| word_order | 35 | 25 | 15 |
+| fill_blank | 20 | 25 | 20 |
+| translation | - | 20 | 35 |
+| transformation | - | 10 | 15 |
+| error_detection | 5 | 5 | 10 |
+| word_meaning | - | - | - |
 
-### 금지 사항
+* **타입 결정 로직**: `type = getTypeByIndex(progressIndex)`
+* 동일 유형 3회 연속 금지
 
-- 클라이언트에서 전달된 progressIndex 사용 ❌
+### 🧱 템플릿 및 단어 풀 시스템
+* 레벨별 단어 제한: beginner(기본), intermediate(과거형 포함), advanced(확장/구문)
+* 오답 생성 규칙: 최소 2가지 오류 혼합 (시제, 수일치, 어순, 문법 누락, 유사 단어 등)
+
 
 ---
 

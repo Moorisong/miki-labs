@@ -41,6 +41,7 @@ export interface IChicorunStudent extends Document {
     cardStyle: string;
     customize: ICustomizeData;
     ownedItems: string[];
+    selectedLevel: 'beginner' | 'intermediate' | 'advanced';
     createdAt: Date;
     updatedAt: Date;
 }
@@ -123,6 +124,11 @@ const chicorunStudentSchema = new Schema<IChicorunStudent>(
         ownedItems: {
             type: [String],
             default: ['bg-white', 'border-solid'],
+        },
+        selectedLevel: {
+            type: String,
+            enum: ['beginner', 'intermediate', 'advanced'],
+            default: 'beginner',
         },
     },
     {
