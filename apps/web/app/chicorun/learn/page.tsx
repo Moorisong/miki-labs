@@ -258,12 +258,12 @@ export default function StudentLearnPage() {
                 const newCombo = comboCount + 1;
                 setComboCount(newCombo);
 
-                // 콤보 연출
-                if (newCombo >= 10 && newCombo % 10 === 0) {
+                // 콤보 연출: 특정 마일스톤에서만 노출
+                if (newCombo > 0 && newCombo % 10 === 0) {
                     setActiveCombo('combo10');
-                } else if (newCombo >= 5 && newCombo % 5 === 0) {
+                } else if (newCombo === 5) {
                     setActiveCombo('combo5');
-                } else if (newCombo >= 3 && newCombo % 3 === 0) {
+                } else if (newCombo === 3) {
                     setActiveCombo('combo3');
                 }
 
