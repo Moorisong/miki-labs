@@ -109,34 +109,38 @@ req.user = {
 ### students
 
 - studentId
-- classCode
-- nickname
-- passwordHash
-- progressIndex
-- point
+- classCode (클래스 고유 코드)
+- nickname (닉네임)
+- passwordHash (비밀번호 해시)
+- progressIndex (완료한 총 문제 수)
+- point (보유 포인트)
+- badge (대표 아이콘/이모지)
+- nicknameStyle (닉네임 스타일: 색상, 굵기 등)
+- cardStyle (카드 배경 스타일)
+- customize (상세 커스터마이징 좌표 및 스타일)
+- ownedItems (보유 중인 스킨/스티커 아이템 목록)
 
 👉 인증은 JWT 기반으로 처리되며
 👉 password는 로그인 시 1회만 사용됨
 
 ---
 
-### 🧩 뱃지 & 커스터마이징 정보 (students 내부 포함)
+### 🧩 커스터마이징 정보 (students.customize)
 
-### badge
-
-- badgeId (기본 뱃지)
-- frameId (테두리)
-- stickers (스티커 배열)
-
-```
+```json
 {
-  "badgeId":"gold_01",
-  "frameId":"frame_gold",
   "stickers": [
-    { "id":"star", "x":10, "y":20, "scale":1, "rotate":0 }
-  ]
+    { "id": "star", "emoji": "⭐", "x": 10, "y": 20, "scale": 1, "rotate": 0 }
+  ],
+  "frameId": "default",
+  "badgeId": "default",
+  "borderStyle": { "color": "#ffffff", "width": 2, "style": "solid", "radius": 16 },
+  "pointStyle": { "color": "#f97316", "background": "transparent", "borderWidth": 0, "borderColor": "#ffffff", "fontSize": 16, "x": 580, "y": 20 },
+  "badgeStyle": { "fontSize": 24, "x": 80, "y": 20 }
 }
 ```
+
+👉 **주의**: 등수(#n)는 카드 외부 요소로 변경되어 `customize` 정보에서 제외됨
 
 ---
 
@@ -174,17 +178,10 @@ req.user = {
 
 ---
 
-### customize (커스터마이징 횟수 관리)
+### customizeHistory (커스터마이징 횟수 관리 - 별도 필드 또는 내부)
 
 - count (당일 횟수)
 - lastDate (마지막 수정 날짜)
-
-```
-{
-  "count":2,
-  "lastDate":"2026-03-18"
-}
-```
 
 ---
 
@@ -370,8 +367,10 @@ Authorization: Bearer {token}
 
 ### UI 요소
 
-- 닉네임 + 뱃지 표시
-- 뱃지 없는 경우 → 기본 이미지 표시
+- 닉네임 + 뱃지 표시 (커스터마이징 카드 형태)
+- **등수(#n)는 카드 외부 상단에 별도 레이블로 표시**
+- **모바일 환경에서는 카드 사이 간격을 넓게(3.5rem) 배치하여 가독성 확보**
+- 뱃지 없는 경우 → 기본 이모지 표시
 - **랭킹 검색 필드 없음**
 
 ---
@@ -1587,14 +1586,9 @@ go → visit / head to / move to
 ### 기능
 
 - 뱃지 + 닉네임을 포함한 영역을 하나의 카드로 정의
-- 카드 테두리 커스터마이징 가능
-
----
-
-### 구성 요소
-
-- 카드 테두리 스타일 선택 (테두리 옵션 중 선택해서 구매)
-- 그림자, glow 효과 적용도 구매 가능
+- 카드 테두리 및 배경 커스터마이징 가능
+- **카드 내부 등수 표시 제거 (외부 레이블로 고정)**
+- **모바일 간격 최적화 (3.5rem)**
 
 ---
 
@@ -1940,9 +1934,10 @@ go → visit / head to / move to
 
 ## 프로필 카드
 
-- 뱃지
+- 뱃지 (아이콘)
 - 닉네임
-- 카드 테두리
+- 카드 테두리 및 배경
+- **외부 등수 레이블 (1등은 더 크고 화려하게 표시)**
 
 ---
 
