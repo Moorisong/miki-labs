@@ -307,6 +307,28 @@ export default function StudentLearnPage() {
         }
     };
 
+    const handleLevelChange = async (level: 'beginner' | 'intermediate' | 'advanced') => {
+        if (isLoading) return;
+        setIsLoading(true);
+        try {
+            const res = await fetch(CHICORUN_API.LEVEL, {
+                method: 'POST',
+                headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+                body: JSON.stringify({ level }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                fetchQuestion();
+            } else {
+                alert(data.error || '레벨 변경에 실패했습니다.');
+            }
+        } catch (err) {
+            console.error('Failed to change level:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleNextLevel = () => {
         setShowLevelClear(false);
         fetchQuestion();
@@ -383,6 +405,27 @@ export default function StudentLearnPage() {
                     </div>
                 </div>
 
+                {/* 레벨 스위처 */}
+                <div className={styles.levelSwitcher}>
+                    {[
+                        { id: 'beginner', label: '초급', range: [0, 2999] },
+                        { id: 'intermediate', label: '중급', range: [3000, 6999] },
+                        { id: 'advanced', label: '고급', range: [7000, 9999] }
+                    ].map((lvl) => {
+                        const isActive = progressIndex >= lvl.range[0] && progressIndex <= lvl.range[1];
+                        return (
+                            <button
+                                key={lvl.id}
+                                className={`${styles.btnLevelTab} ${isActive ? styles.active : ''}`}
+                                onClick={() => handleLevelChange(lvl.id as any)}
+                                disabled={isLoading || isActive}
+                            >
+                                {lvl.label}
+                            </button>
+                        );
+                    })}
+                </div>
+
                 {/* 문제 카드 */}
                 {isLoading ? (
                     <div className={styles.questionCard} style={{ textAlign: 'center', padding: '4rem' }}>
@@ -404,7 +447,7 @@ export default function StudentLearnPage() {
                                 <div className={styles.feedbackTitle}>
                                     {feedback === 'correct' ? '🎉 정답!' : '😅 오답!'}
                                 </div>
-                                {answerResult?.explanation && (
+                                {feedback === 'wrong' && answerResult?.explanation && (
                                     <div className={styles.feedbackDesc}>{answerResult.explanation}</div>
                                 )}
                                 {showZeroPointMsg && (

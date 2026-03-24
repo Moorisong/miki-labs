@@ -13,6 +13,7 @@ export const CHICORUN_API = {
     STUDENT_REMOVE_ITEM: (itemId: string) => `${API_BASE}/api/chicorun/student/item/${itemId}`,
     QUESTION: `${API_BASE}/api/chicorun/question`,
     ANSWER: `${API_BASE}/api/chicorun/answer`,
+    LEVEL: `${API_BASE}/api/chicorun/level`,
     RESET_PROGRESS: `${API_BASE}/api/chicorun/reset-progress`,
     CLASS: `${API_BASE}/api/chicorun/class`,
     CLASS_STUDENTS: (classCode: string) => `${API_BASE}/api/chicorun/class/${classCode}/students`,
