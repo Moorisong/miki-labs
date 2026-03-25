@@ -26,7 +26,7 @@ export const getQuestion = async (
 
         const { progressIndex, classCode } = studentDoc;
         const difficulty = req.query.difficulty as 'easy' | 'medium' | 'hard';
-        const problem = await ChicorunProblemService.getQuestion(student.studentId, classCode, progressIndex, difficulty);
+        const problem = await ChicorunProblemService.getQuestion(student.studentId, classCode, progressIndex, difficulty, studentDoc.maxLevel);
 
         res.json({
             success: true,
@@ -91,7 +91,8 @@ export const submitAnswer = async (
             student.studentId,
             studentDoc.classCode,
             studentDoc.progressIndex,
-            difficulty as 'easy' | 'medium' | 'hard'
+            difficulty as 'easy' | 'medium' | 'hard',
+            studentDoc.maxLevel
         );
 
         // questionId 및 seed 검증 (무결성)
@@ -102,19 +103,34 @@ export const submitAnswer = async (
         const isCorrect = selectedIndex === problem.answer;
 
         if (isCorrect) {
-            // 시도 횟수별 포인트 계산 (1회: 5P, 2회: 3P, 3회 이상: 1P)
+            // 시도 횟수별 기본 포인트 (1회: 5P, 2회: 3P, 3회 이상: 1P)
             const attempts = studentDoc.currentQuestionAttempts || 1;
-            let rewardPoints = 1;
-            if (attempts === 1) rewardPoints = 5;
-            else if (attempts === 2) rewardPoints = 3;
-            else rewardPoints = 1;
+            let baseReward = 1;
+            if (attempts === 1) baseReward = 5;
+            else if (attempts === 2) baseReward = 3;
+            else baseReward = 1;
 
-            // 정답 처리: progressIndex 및 point 증가, currentQuestionAttempts 초기화
+            // 난이도 페널티 적용
+            const { level: problemLevel } = ChicorunProblemService.getLevelAndOrderIndex(studentDoc.progressIndex);
+
+            // difficulty가 없으면 기본 추천 난이도로 간주 (사실상 factor 1.0)
+            const targetDifficulty = (difficulty as 'easy' | 'medium' | 'hard') || ChicorunProblemService.getRecommendedDifficulty(problemLevel);
+            const { factor } = ChicorunProblemService.getDifficultyPenalty(targetDifficulty, problemLevel, studentDoc.maxLevel);
+
+            // 최종 보상 (최소 1P 보장)
+            const rewardPoints = Math.max(1, Math.floor(baseReward * factor));
+
+            // 새로운 레벨 계산
+            const tempProgressIndex = studentDoc.progressIndex + 1;
+            const { level: nextLevel } = ChicorunProblemService.getLevelAndOrderIndex(tempProgressIndex);
+
+            // 정답 처리: progressIndex 및 point 증가, currentQuestionAttempts 초기화, maxLevel 갱신
             const updatedStudent = await ChicorunStudentModel.findByIdAndUpdate(
                 student.studentId,
                 {
                     $inc: { progressIndex: 1, point: rewardPoints },
-                    $set: { currentQuestionAttempts: 1 }
+                    $set: { currentQuestionAttempts: 1, currentLevel: nextLevel },
+                    $max: { maxLevel: nextLevel }
                 },
                 { new: true }
             );

@@ -493,9 +493,11 @@ export default function StudentLearnPage() {
                             <div className={styles.questionCounter}>
                                 문제 {question.questionNumber} / {question.totalProblemsInLevel}
                                 (획득 가능: {(() => {
-                                    const attempts = question.currentQuestionAttempts + wrongIndices.length;
-                                    if (attempts === 1) return 5;
-                                    if (attempts === 2) return 3;
+                                    const attempts = (question.currentQuestionAttempts || 1) + wrongIndices.length;
+                                    const baseReward = question.questionPoint ?? 5; // 난이도 페널티가 이미 적용된 1회차 보상
+
+                                    if (attempts === 1) return baseReward;
+                                    if (attempts === 2) return Math.max(1, Math.floor(baseReward * (3 / 5)));
                                     return 1;
                                 })()}P)
                             </div>
