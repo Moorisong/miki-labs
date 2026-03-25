@@ -1,13 +1,16 @@
 import crypto from 'crypto';
 
 export type QuestionType =
-    | 'sentence_choice'
-    | 'word_order'
-    | 'fill_blank'
-    | 'translation'
-    | 'transformation'
-    | 'error_detection'
-    | 'word_meaning';
+    | 'vocab'
+    | 'grammar'
+    | 'fact'
+    | 'inference'
+    | 'mainIdea'
+    | 'purpose'
+    | 'attitude'
+    | 'blank'
+    | 'order'
+    | 'comparison';
 
 export interface QuestionLevel {
     level: string;
@@ -37,119 +40,23 @@ export const LEVELS: QuestionLevel[] = [
     },
 ];
 
-const RATIOS = {
-    beginner: {
-        sentence_choice: 40,
-        word_order: 35,
-        fill_blank: 20,
-        error_detection: 5,
-        translation: 0,
-        transformation: 0,
-        word_meaning: 0,
-    },
-    intermediate: {
-        sentence_choice: 15,
-        word_order: 25,
-        fill_blank: 25,
-        translation: 20,
-        transformation: 10,
-        error_detection: 5,
-        word_meaning: 0,
-    },
-    advanced: {
-        sentence_choice: 5,
-        word_order: 15,
-        fill_blank: 20,
-        translation: 35,
-        transformation: 15,
-        error_detection: 10,
-        word_meaning: 0,
-    },
-};
-
-const WORDS = {
-    beginner: {
-        subjects: ['I', 'You', 'He', 'She', 'They', 'A boy', 'A girl', 'The cat', 'My mom', 'My dad'],
-        verbs: ['go', 'eat', 'play', 'study', 'make', 'run', 'sleep', 'like', 'see', 'want'],
-        places: ['school', 'home', 'park', 'the zoo', 'the library', 'the room'],
-        food: ['apples', 'pizza', 'rice', 'bread', 'milk', 'an egg'],
-        time: ['morning', 'night', 'every day', 'now'],
-        person: ['friends', 'teacher', 'a doctor', 'sister', 'brother'],
-        adjective: ['happy', 'tired', 'fast', 'small', 'big', 'hungry'],
-        object: ['homework', 'soccer', 'dinner', 'a book', 'a ball'],
-    },
-    intermediate: {
-        subjects: ['My best friend', 'The students', 'Our teacher', 'Everyone', 'Nobody'],
-        verbs: ['visited', 'finished', 'thought', 'bought', 'walked', 'learned', 'decided', 'started', 'stopped'],
-        places: ['the grocery store', 'the museum', 'London', 'a restaurant', 'the beach'],
-        food: ['delicious pasta', 'a sandwich', 'some fruit', 'spicy chicken', 'a cake'],
-        time: ['yesterday', 'last week', 'two days ago', 'at that time'],
-        person: ['the principal', 'my cousins', 'an actor', 'a chef'],
-        adjective: ['expensive', 'difficult', 'important', 'surprised', 'excited'],
-        object: ['the broken window', 'his old car', 'a beautiful song', 'this lesson'],
-    },
-    advanced: {
-        subjects: ['Environmental impact', 'Technological advancement', 'Success in life', 'Continuous effort'],
-        verbs: ['requires', 'influence', 'demonstrates', 'concluded', 'emphasized', 'transformed'],
-        places: ['global markets', 'modern society', 'educational institutions', 'diverse cultures'],
-        food: ['nutritional value', 'processed products', 'organic ingredients'],
-        time: ['in the long run', 'for centuries', 'simultaneously'],
-        person: ['philosophers', 'scientists', 'researchers', 'professionals'],
-        adjective: ['inevitable', 'significant', 'sustainable', 'complicated', 'efficient'],
-        object: ['the complexity of the issue', 'a new perspective', 'substantial evidence'],
-    },
-};
-
-interface VerbRule {
-    type: 'transitive' | 'intransitive';
-    structure: string;
-    validObjects: string[];
-    preposition?: string;
+export interface Problem {
+    id: string;
+    level: number;
+    difficulty: 'easy' | 'medium' | 'hard';
+    passage: string;
+    question: string;
+    choices: string[];
+    answer: number;
+    explanation: string;
+    questionType: QuestionType;
+    wordCount: number;
+    seed?: string;
+    progressIndex?: number;
+    questionNumber?: number;
+    point?: number;
+    penaltyMessage?: string;
 }
-
-const VERB_RULES: Record<string, VerbRule> = {
-    make: {
-        type: 'transitive',
-        structure: '{subject} {verb} {object}',
-        validObjects: ['a cake', 'food', 'a plan', 'a decision', 'homework'],
-    },
-    eat: {
-        type: 'transitive',
-        structure: '{subject} {verb} {object}',
-        validObjects: ['an apple', 'pizza', 'rice', 'bread'],
-    },
-    play: {
-        type: 'transitive',
-        structure: '{subject} {verb} {object}',
-        validObjects: ['soccer', 'basketball', 'the game', 'the piano'],
-    },
-    see: {
-        type: 'transitive',
-        structure: '{subject} {verb} {object}',
-        validObjects: ['a movie', 'a dog', 'a friend', 'a teacher'],
-    },
-    go: {
-        type: 'intransitive',
-        structure: '{subject} {verb} {object}',
-        preposition: 'to',
-        validObjects: ['school', 'home', 'the park', 'the store'],
-    },
-    study: {
-        type: 'transitive',
-        structure: '{subject} {verb} {object}',
-        validObjects: ['English', 'math', 'science', 'history'],
-    },
-    visit: {
-        type: 'transitive',
-        structure: '{subject} {verb} {object}',
-        validObjects: ['the museum', 'London', 'a restaurant', 'the beach'],
-    },
-    finish: {
-        type: 'transitive',
-        structure: '{subject} {verb} {object}',
-        validObjects: ['the work', 'the lesson', 'dinner', 'homework'],
-    },
-};
 
 class DeterministicPRNG {
     private seed: number;
@@ -182,9 +89,6 @@ class DeterministicPRNG {
     }
 }
 
-const UNCOUNTABLE_NOUNS = ['history', 'water', 'information', 'advice', 'homework', 'bread', 'rice', 'milk', 'music', 'science', 'math'];
-const SAFE_NOUNS = ['apple', 'book', 'dog', 'cake', 'pizza', 'sandwich', 'ball', 'piano', 'movie'];
-
 export class ChicorunProblemService {
     static getLevelByProgressIndex(progressIndex: number): number {
         return Math.floor(progressIndex / 100) + 1;
@@ -197,260 +101,113 @@ export class ChicorunProblemService {
         return 'advanced';
     }
 
-    static getTypeByIndex(progressIndex: number): QuestionType {
-        const label = this.getLevelLabel(progressIndex);
-        const levelRatios = RATIOS[label] as Record<string, number>;
-        const typePool: QuestionType[] = [];
-        Object.entries(levelRatios).forEach(([type, ratio]) => {
-            for (let i = 0; i < ratio; i++) {
-                typePool.push(type as QuestionType);
-            }
-        });
-        const blockIndex = Math.floor(progressIndex / 100);
-        const offsetInBlock = progressIndex % 100;
-        const prng = new DeterministicPRNG(`type-sequence-${label}-${blockIndex}`);
-        let sequence = prng.shuffle(typePool);
-        for (let i = 2; i < sequence.length; i++) {
-            if (sequence[i] === sequence[i - 1] && sequence[i] === sequence[i - 2]) {
-                if (i + 1 < sequence.length) {
-                    [sequence[i], sequence[i + 1]] = [sequence[i + 1], sequence[i]];
-                }
-            }
-        }
-        return sequence[offsetInBlock] || 'sentence_choice';
-    }
-
     static generateSeed(studentId: string, classCode: string, progressIndex: number): string {
         const data = `${studentId}-${classCode}-${progressIndex}`;
         return crypto.createHash('sha256').update(data).digest('hex').substring(0, 16);
     }
 
-    static generateQuestion(studentId: string, classCode: string, progressIndex: number): any {
-        const seed = this.generateSeed(studentId, classCode, progressIndex);
-        const type = this.getTypeByIndex(progressIndex);
-        const level = this.getLevelByProgressIndex(progressIndex);
-        const label = this.getLevelLabel(progressIndex);
-        const prng = new DeterministicPRNG(seed);
+    static generateMockProblem(currentLevel: number, difficulty: string): Problem {
+        const prng = new DeterministicPRNG(`mock-${currentLevel}-${difficulty}`);
 
-        const wordPool = { ...WORDS.beginner };
-        if (label === 'intermediate' || label === 'advanced') {
-            if (label === 'intermediate') {
-                Object.keys(wordPool).forEach((key) => {
-                    (wordPool as any)[key] = [...(wordPool as any)[key], ...((WORDS.intermediate as any)[key] || [])];
-                });
-            } else if (label === 'advanced') {
-                Object.keys(wordPool).forEach((key) => {
-                    (wordPool as any)[key] = [
-                        ...(wordPool as any)[key],
-                        ...((WORDS.intermediate as any)[key] || []),
-                        ...((WORDS.advanced as any)[key] || [])
-                    ];
-                });
-            }
+        // 난이도별 출제 범위 결정
+        let targetLevel = currentLevel;
+        if (difficulty === 'easy') {
+            targetLevel = prng.nextInt(Math.max(1, currentLevel - 10), Math.min(100, currentLevel + 5));
+        } else if (difficulty === 'medium') {
+            targetLevel = prng.nextInt(Math.max(1, currentLevel - 5), Math.min(100, currentLevel + 10));
+        } else if (difficulty === 'hard') {
+            targetLevel = prng.nextInt(currentLevel, Math.min(100, currentLevel + 20));
         }
 
-        const isThirdPersonSingular = (s: string) =>
-            ['He', 'She', 'A boy', 'A girl', 'The cat', 'My mom', 'My dad', 'Our teacher', 'Everyone', 'Nobody', 'Technological advancement', 'Success in life', 'Continuous effort'].includes(s);
+        // 포인트 페널티 계산
+        let basePoint = 10;
+        let penaltyMessage = undefined;
+        const levelDiff = currentLevel - targetLevel;
 
-        const conjugate = (v: string, s: string, tense: 'present' | 'past' = 'present') => {
-            if (tense === 'past') {
-                if (v === 'go') return 'went';
-                if (v === 'eat') return 'ate';
-                if (v === 'see') return 'saw';
-                if (v === 'make') return 'made';
-                if (v === 'buy') return 'bought';
-                if (v === 'think') return 'thought';
-                if (v === 'visit') return 'visited';
-                if (v === 'finish') return 'finished';
-                if (v.endsWith('y') && !['a', 'e', 'i', 'o', 'u'].includes(v[v.length - 2])) return v.slice(0, -1) + 'ied';
-                if (v.endsWith('e')) return v + 'd';
-                return v + 'ed';
-            }
-            if (isThirdPersonSingular(s)) {
-                if (v === 'go') return 'goes';
-                if (v === 'do') return 'does';
-                if (v === 'study') return 'studies';
-                if (v === 'finish') return 'finishes';
-                if (v.endsWith('sh') || v.endsWith('ch')) return v + 'es';
-                return v + 's';
-            }
-            return v;
-        };
+        if (levelDiff >= 6) {
+            basePoint = 2; // 0P~3P 중 2P
+            penaltyMessage = "이 난이도는 포인트가 적게 나와요. 더 도전적인 문제를 풀어보세요!";
+        } else if (levelDiff >= 3) {
+            basePoint = 5; // 50%
+            penaltyMessage = "이 난이도는 포인트가 절반만 지급됩니다.";
+        }
 
-        const fillTemplate = (template: string, s: string, v: string, o: string, prep?: string) => {
-            let space = prep ? ' ' : '';
-            if (o === 'home' && v.match(/^go|went|goes$/)) {
-                prep = '';
-                space = '';
-            }
-            const processedVerb = prep ? `${v}${space}${prep}` : v;
-            return template
-                .replace('{subject}', s)
-                .replace('{verb}', processedVerb)
-                .replace('{object}', o) + '.';
-        };
+        const actualDifficulty: 'easy' | 'medium' | 'hard' =
+            targetLevel > 70 ? 'hard' : targetLevel > 30 ? 'medium' : 'easy';
 
+        let passage = '';
+        let wordCount = 0;
+        let questionType: QuestionType = 'fact';
         let question = '';
-        let correctAnswer = '';
         let choices: string[] = [];
+        let answer = 0;
         let explanation = '';
 
-        // 1. Verb 선택 (동적 풀 사용)
-        const availableVerbs = Object.keys(VERB_RULES).filter(v => wordPool.verbs.map(wv => wv.replace(/ed$|s$|es$/, '')).includes(v));
-        const verbKey = prng.pickOne(availableVerbs.length > 0 ? availableVerbs : ['make', 'eat', 'go']);
-        const rule = VERB_RULES[verbKey];
-
-        // 2. Subject & Object 선택
-        const subj = prng.pickOne(wordPool.subjects);
-        const obj = prng.pickOne(rule.validObjects);
-
-        // 3. 정답 생성
-        const conjVerb = conjugate(verbKey, subj);
-        correctAnswer = fillTemplate(rule.structure, subj, conjVerb, obj, rule.preposition);
-
-        const createDistractor = (type: 'sv_error' | 'tense_error' | 'structure_error' | 'article_error') => {
-            switch (type) {
-                case 'sv_error':
-                    const wrongV = isThirdPersonSingular(subj) ? verbKey : conjugate(verbKey, 'He');
-                    return fillTemplate(rule.structure, subj, wrongV, obj, rule.preposition);
-                case 'tense_error':
-                    const wrongTense = label === 'beginner' ? conjugate(verbKey, subj, 'past') : verbKey;
-                    if (wrongTense === conjVerb) return fillTemplate(rule.structure, subj, `will ${verbKey}`, obj, rule.preposition);
-                    return fillTemplate(rule.structure, subj, wrongTense, obj, rule.preposition);
-                case 'structure_error':
-                    return fillTemplate(rule.structure, subj, `is ${conjVerb}`, obj, rule.preposition);
-                case 'article_error':
-                    const baseObj = obj.replace(/^(a|an|the) /, '');
-                    if (UNCOUNTABLE_NOUNS.some(un => baseObj.includes(un))) {
-                        // Uncountable nouns should NOT have article distractors to avoid ambiguity
-                        return fillTemplate(rule.structure, subj, conjugate(verbKey, subj, 'past'), obj, rule.preposition);
-                    }
-                    if (baseObj === obj) return fillTemplate(rule.structure, subj, conjVerb, `the ${obj}`, rule.preposition);
-                    return fillTemplate(rule.structure, subj, conjVerb, baseObj, rule.preposition);
-            }
-        };
-
-        const hasAmbiguity = (ans: string, otherChoices: string[]) => {
-            // Check for present simple vs present continuous
-            const isContinuous = (s: string) => s.includes(' is ') || s.includes(' am ') || s.includes(' are ');
-            const hasContinuous = isContinuous(ans) || otherChoices.some(isContinuous);
-            const hasSimple = !isContinuous(ans) || otherChoices.some(c => !isContinuous(c));
-
-            // If we have both types for the SAME verb/subject/object, it's risky
-            // For now, let's keep it simple: if the sentences are grammatically valid but too similar, reject.
-            return false; // Placeholder for more complex checks
-        };
-
-        switch (type) {
-            case 'sentence_choice':
-                question = `주어진 정보를 바탕으로 올바른 문장을 고르세요:\n[${subj}, ${verbKey}, ${obj.replace(/^(a|an|the) /, '')}]`;
-                choices = [
-                    correctAnswer,
-                    createDistractor('sv_error'),
-                    createDistractor('structure_error'),
-                    createDistractor('article_error'),
-                ];
-                explanation = isThirdPersonSingular(subj)
-                    ? `주어가 '${subj}'면 동사가 어떻게 변해야 자연스러울까? s/es 붙는지 확인해봐! 🚀`
-                    : `주어가 '${subj}'면 동사는 원래 어떤 형태여야 할까? 불필요하게 s가 붙어있진 않은지 정독해봐!`;
-                break;
-
-            case 'word_order':
-                const prep = (obj === 'home' && verbKey === 'go') ? '' : rule.preposition;
-                const correctWordList = [subj, conjVerb, prep, obj].filter(Boolean).map(w => w?.split(' ')).flat();
-                const shuffledWordList = prng.shuffle([...correctWordList]);
-                question = `단어를 올바른 순서로 배열하세요:\n(${shuffledWordList.join(', ')})`;
-                correctAnswer = correctWordList.join(' ');
-                choices = [
-                    correctAnswer,
-                    prng.shuffle([...correctWordList]).join(' '),
-                    prng.shuffle([...correctWordList]).join(' '),
-                    prng.shuffle([...correctWordList]).join(' '),
-                ];
-                // Ensure unique choices
-                choices = Array.from(new Set(choices));
-                while (choices.length < 4) {
-                    choices.push(prng.shuffle([...correctWordList]).join(' '));
-                    choices = Array.from(new Set(choices));
-                }
-                explanation = '영어 문장은 [주어 + 동사 + 목적어] 순서가 근본임!\n순서가 꼬이면 의미 전달이 어려울 수 있어. 다시 한 번 배열해볼까?';
-                break;
-
-            case 'fill_blank':
-                const displayObj = (obj === 'home' && verbKey === 'go') ? 'home' : (rule.preposition ? `${rule.preposition} ${obj}` : obj);
-                question = `빈칸에 들어갈 알맞은 단어를 고르세요:\n"${subj} ___ ${displayObj}."`;
-                correctAnswer = conjVerb;
-                choices = [
-                    correctAnswer,
-                    isThirdPersonSingular(subj) ? verbKey : conjugate(verbKey, 'He'),
-                    verbKey + 'ing',
-                    'to ' + verbKey,
-                ];
-                explanation = `주어 '${subj}'에 어울리는 동사 모양을 찾아보자! 힌트는 수일치야. 🧐`;
-                break;
-
-            case 'translation':
-                const koreanVerb = verbKey === 'go' ? '간다' : verbKey === 'eat' ? '먹는다' : verbKey === 'play' ? '한다' : '본다';
-                const koreanObj = obj.includes('apple') ? '사과를' : obj.includes('pizza') ? '피자를' : obj.includes('school') ? '학교에' : '그것을';
-                question = `다음 문장을 영어로 번역하세요:\n"${subj}${subj === 'I' || subj === 'You' ? '는' : '은'} ${koreanObj} ${koreanVerb}."`;
-                choices = [
-                    correctAnswer,
-                    createDistractor('sv_error'),
-                    createDistractor('tense_error'),
-                    createDistractor('structure_error'),
-                ];
-                explanation = "번역할 땐 주어와 동사 '깔맞춤'이 생명이야! 주어의 인칭에 맞춰 동사가 변해야 하는지 잘 생각해봐.";
-                break;
-
-            default:
-                // Fallback to sentence choice for other types for now
-                question = `다음 정보를 사용하여 올바른 영어 문장을 고르세요:\n[${subj}, ${verbKey}, ${obj}]`;
-                choices = [correctAnswer, createDistractor('sv_error'), createDistractor('structure_error'), createDistractor('article_error')];
-                explanation = '항상 주어와 동사의 관계(수일치)를 생각하며 문장을 완성해봐! 정답엔 이유가 있어 🌱';
-        }
-
-        // 최종 검증
-        const uniqueChoices = Array.from(new Set(choices));
-
-        // 복수 정답 위험성 정밀 체크
-        const hasConflict = (ch: string[]) => {
-            // "She is runs" vs "She runs" 등 시제 혼동 방지 (이미 distractor에서 처리 중이지만 한 번 더 확인)
-            // 불가산 명사의 관사 유무가 섞여있는지 확인
-            const uncountablePatterns = UNCOUNTABLE_NOUNS.some(un => {
-                const withThe = `the ${un}`;
-                return ch.some(c => c.includes(withThe)) && ch.some(c => c.includes(un) && !c.includes(withThe));
-            });
-            if (uncountablePatterns) return true;
-
-            // 시제 혼용 (is running vs runs)
-            const continuousCount = ch.filter(c => c.includes(' is ') || c.includes(' am ') || c.includes(' are ')).length;
-            if (continuousCount > 0 && continuousCount < ch.length && type === 'sentence_choice') {
-                // 한 문제에 진행형과 일반형이 섞여있는데 시제 전환 문제가 아니면 위험
-                return true;
-            }
-            return false;
-        };
-
-        if (uniqueChoices.length < 4 || uniqueChoices.includes(undefined as any) || hasConflict(uniqueChoices)) {
-            return this.generateQuestion(studentId, classCode, progressIndex + 7); // Skip and try again
-        }
-
-        const finalChoices = prng.shuffle(uniqueChoices.slice(0, 4));
-        const correctIndex = finalChoices.indexOf(correctAnswer);
-
-        if (correctIndex === -1) {
-            return this.generateQuestion(studentId, classCode, progressIndex + 1);
+        if (actualDifficulty === 'easy') {
+            const subjects = ['The cat', 'A small bird', 'My teacher', 'Yesterday', 'Summer vacation'];
+            const verbs = ['is sleeping', 'was singing', 'explained the rules', 'started well', 'is very hot'];
+            passage = `${prng.pickOne(subjects)} ${prng.pickOne(verbs)}.`;
+            wordCount = passage.split(' ').length;
+            questionType = prng.pickOne(['vocab', 'grammar', 'fact']);
+            question = '지문의 주인공은 누구인가요?';
+            choices = ['The cat', 'A dog', 'The teacher', 'A bird'];
+            answer = 0;
+            explanation = '지문에서 첫 번째 단어를 잘 찾아봐! 아주 쉬운 문제야 🚀';
+        } else if (actualDifficulty === 'medium') {
+            passage = `Modern technology has changed our lives in many ways. People can communicate with each other easily through social media. However, some scientists are worried about the negative effects of using smartphones too much. They say that it can hurt our eyes and make us feel lonely. We need to find a balance between using technology and spending time with our family.`;
+            wordCount = passage.split(' ').length;
+            questionType = prng.pickOne(['inference', 'mainIdea', 'purpose', 'vocab']);
+            question = '이 지문의 핵심 주제로 가장 적절한 것은?';
+            choices = [
+                'The history of social media',
+                'Negative effects of excessive smartphone use',
+                'Benefits of modern communication',
+                'How to repair smartphones',
+            ];
+            answer = 1;
+            explanation = '지문 후반부에 "worried about negative effects" 부분을 잘 읽어봐! 🤔';
+        } else {
+            passage = `Quantum entanglement is a phenomenon in quantum mechanics where particles become interconnected such that the state of one particle cannot be described independently of the other. This complex relationship remains even if they are separated by vast distances. Einstein famously referred to this as "spooky action at a distance." Recent experiments have confirmed that this occurs instantaneously, challenging our classic understanding of space and time. Furthermore, the development of quantum computers relies heavily on this principle to perform calculations at speeds impossible for classical machines. While the theoretical implications are still being debated among physicists, the practical applications in encryption and communication technology are beginning to emerge, promising a revolution in the digital era.`;
+            wordCount = passage.split(' ').length;
+            questionType = prng.pickOne(['blank', 'order', 'comparison', 'attitude']);
+            question = 'Which of the following is NOT mentioned about quantum entanglement?';
+            choices = [
+                'It involves particles being interconnected regardless of distance.',
+                'Einstein was skeptical of this phenomenon initially.',
+                'It is used to speed up classical computer repairs.',
+                'It has potential applications in digital encryption.',
+            ];
+            answer = 2;
+            explanation = '수능에서 자주 나오는 함축/불일치 유형입니다. 지문 속 "classical machines"와 "quantum computers"의 관계를 명확히 구분하세요! 👑';
         }
 
         return {
-            id: crypto.createHmac('sha256', process.env.CHICORUN_HMAC_SECRET || 'secret').update(`${progressIndex}:${seed}`).digest('hex'),
-            seed,
-            type,
-            level,
+            id: crypto.createHash('sha256').update(`${targetLevel}-${difficulty}-${passage}`).digest('hex').substring(0, 16),
+            level: targetLevel,
+            difficulty: difficulty as any,
+            passage,
             question,
-            choices: finalChoices,
-            correctIndex,
+            choices,
+            answer,
             explanation,
+            questionType,
+            wordCount,
+            point: basePoint,
+            penaltyMessage
+        };
+    }
+
+    static generateQuestion(studentId: string, classCode: string, progressIndex: number, selectedDifficulty?: string): Problem {
+        const currentLevel = this.getLevelByProgressIndex(progressIndex);
+        const difficulty = selectedDifficulty || (currentLevel <= 30 ? 'easy' : currentLevel <= 70 ? 'medium' : 'hard');
+
+        const problem = this.generateMockProblem(currentLevel, difficulty);
+
+        return {
+            ...problem,
+            seed: this.generateSeed(studentId, classCode, progressIndex),
+            progressIndex,
+            questionNumber: (progressIndex % 100) + 1,
         };
     }
 }

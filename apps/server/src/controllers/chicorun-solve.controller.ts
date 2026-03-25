@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { ApiResponse } from '../types/api.types';
 import { AppError } from '../middlewares/error-handler';
 import { ChicorunStudentModel } from '../models/chicorun-student.model';
-import { ChicorunProblemService, LEVELS } from '../services/chicorun-problem.service';
+import { ChicorunProblemService } from '../services/chicorun-problem.service';
 
 /**
  * GET /api/chicorun/question
@@ -25,19 +25,26 @@ export const getQuestion = async (
         }
 
         const { progressIndex, classCode } = studentDoc;
-        const problem = ChicorunProblemService.generateQuestion(student.studentId, classCode, progressIndex);
+        const difficulty = (req.query.difficulty as string) || 'easy';
+        const problem = ChicorunProblemService.generateQuestion(student.studentId, classCode, progressIndex, difficulty);
 
         res.json({
             success: true,
             data: {
                 questionId: problem.id,
                 seed: problem.seed,
-                type: problem.type,
-                level: studentDoc.currentLevel,
+                level: problem.level,
+                difficulty: problem.difficulty,
+                passage: problem.passage,
                 question: problem.question,
                 options: problem.choices,
+                explanation: problem.explanation,
+                questionType: problem.questionType,
+                wordCount: problem.wordCount,
                 progressIndex,
                 point: studentDoc.point,
+                questionPoint: problem.point,
+                penaltyMessage: problem.penaltyMessage,
                 questionNumber: (progressIndex % 100) + 1,
             },
         });
@@ -61,10 +68,11 @@ export const submitAnswer = async (
             throw new AppError(401, 'ERROR_UNAUTHORIZED: 학생 인증이 필요합니다.');
         }
 
-        const { questionId, seed, selectedIndex } = req.body as {
+        const { questionId, seed, selectedIndex, difficulty } = req.body as {
             questionId: string;
             seed: string;
             selectedIndex: number;
+            difficulty?: string;
         };
 
         if (!questionId || !seed || selectedIndex === undefined) {
@@ -80,7 +88,8 @@ export const submitAnswer = async (
         const problem = ChicorunProblemService.generateQuestion(
             student.studentId,
             studentDoc.classCode,
-            studentDoc.progressIndex
+            studentDoc.progressIndex,
+            difficulty || 'easy'
         );
 
         // questionId 및 seed 검증 (무결성)
@@ -88,13 +97,13 @@ export const submitAnswer = async (
             throw new AppError(400, 'ERROR_INVALID_QUESTION: 유효하지 않은 문제 정보입니다.');
         }
 
-        const isCorrect = selectedIndex === problem.correctIndex;
+        const isCorrect = selectedIndex === problem.answer;
 
         if (isCorrect) {
             // 정답 처리: progressIndex 및 point 증가
             const updatedStudent = await ChicorunStudentModel.findByIdAndUpdate(
                 student.studentId,
-                { $inc: { progressIndex: 1, point: 10 } },
+                { $inc: { progressIndex: 1, point: problem.point || 10 } },
                 { new: true }
             ).lean();
 
@@ -127,7 +136,7 @@ export const submitAnswer = async (
                 data: {
                     isCorrect: false,
                     explanation: problem.explanation,
-                    correctIndex: problem.correctIndex,
+                    correctIndex: problem.answer,
                     newProgressIndex: studentDoc.progressIndex,
                     newPoint: studentDoc.point,
                     level: Math.floor(studentDoc.progressIndex / 100) + 1,
@@ -217,7 +226,7 @@ export const resetProgress = async (
         }
 
         await ChicorunStudentModel.findByIdAndUpdate(student.studentId, {
-            $set: { progressIndex: 0, selectedLevel: 'beginner' },
+            $set: { progressIndex: 0, currentLevel: 1 },
         });
 
         res.json({
