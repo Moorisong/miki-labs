@@ -133,6 +133,14 @@ export const ALL_CHICORUN_ITEMS: ShopItem[] = [
         category: 'badge',
         value: '/chicorun/badges/leaning-giraffe.png'
     },
+    {
+        id: 'badge-starter-star',
+        name: '스타터 스타',
+        description: '처음 시작하는 당신을 위한 반짝이는 별 배지 (기본)',
+        price: 0,
+        category: 'badge',
+        value: '/chicorun/badges/badge-starter-star.png'
+    },
 
     // Stickers
     {
@@ -257,6 +265,15 @@ export const ALL_CHICORUN_ITEMS: ShopItem[] = [
     },
 
     // Borders
+    {
+        id: 'border-solid',
+        name: '솔리드 라인',
+        description: '깔끔한 직선 테두리 (기본)',
+        price: 0,
+        category: 'border',
+        value: 'solid',
+        previewStyle: { borderStyle: 'solid', borderWidth: '4px', borderColor: '#cbd5e1' }
+    },
     {
         id: 'border-dashed',
         name: '대시 라인',
