@@ -163,8 +163,8 @@ function RankingContent() {
             </div>
 
             <div className={styles.titleArea}>
-                <h1 className={styles.title}>실시간 랭킹 보드</h1>
-                <p className={styles.subtitle}>최고 점수를 향해 달려보세요!</p>
+                <h1 className={styles.title}>실시간 포인트 랭킹 보드</h1>
+                <p className={styles.subtitle}>포인트 1등을 향해 달려보세요!</p>
             </div>
 
             {isLoading && (
