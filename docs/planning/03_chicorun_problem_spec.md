@@ -73,7 +73,7 @@ interface Problem {
 
 ### 구현 방법
 - 백엔드에 `problemSeeder.ts` (또는 Python 스크립트)를 작성하여 한 번에 모든 문제 생성.
-- MySQL/PostgreSQL 또는 JSON 파일로 저장. (현재 프로젝트는 MySQL/Prisma 사용 중으로 보임)
+- MongoDB/Mongoose를 사용하여 저장. (현재 프로젝트는 MongoDB/Mongoose 사용 중)
 - 프론트엔드는 API `GET /problems/level/{level}/index/{progressIndex}` 로 순서대로 받아옴.
 
 ## 6. 문제 생성 검증 규칙 (구멍 방지)
