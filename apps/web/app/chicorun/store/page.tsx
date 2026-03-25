@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/lib/hooks/use-toast';
+import Toast from '@/components/ui/toast';
 import styles from './page.module.css';
 import { CHICORUN_API, CHICORUN_ROUTES, CHICORUN_STORAGE_KEY } from '@/constants/chicorun';
 
@@ -27,7 +28,7 @@ const CATEGORIES = [
 
 export default function StorePage() {
     const router = useRouter();
-    const { showToast } = useToast();
+    const { toast, showToast, hideToast } = useToast();
     const [activeTab, setActiveTab] = useState('all');
     const [points, setPoints] = useState(0);
     const [ownedItems, setOwnedItems] = useState<string[]>(DEFAULT_OWNED_ITEMS);
@@ -85,12 +86,12 @@ export default function StorePage() {
         if (ownedItems.includes(item.id)) return;
 
         if (points < item.price) {
-            showToast('포인트가 부족합니다.', 'error');
+            showToast(`포인트가 부족합니다. (${item.price} CP 필요)`, 'error');
             return;
         }
 
         // Show confirmation dialog
-        const isConfirmed = window.confirm(`[${item.name}]을(를) 구매하시겠습니까? 1 CP가 차감됩니다.`);
+        const isConfirmed = window.confirm(`[${item.name}]을(를) 구매하시겠습니까? ${item.price} CP가 차감됩니다.`);
         if (!isConfirmed) return;
 
         // Update DB (Point deduction & Item purchase)
@@ -201,6 +202,7 @@ export default function StorePage() {
                     );
                 })}
             </main>
+            <Toast toast={toast} onHide={hideToast} />
         </div>
     );
 }
