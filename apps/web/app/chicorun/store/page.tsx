@@ -11,7 +11,7 @@ import { ALL_CHICORUN_ITEMS, ShopItem } from '@/constants/chicorun-items';
 
 const DEFAULT_OWNED_ITEMS = [
     'bg-white',
-    // 이전 기본 배지였던 badge-crown 삭제
+    'badge-starter-star',
     'border-solid'
 ];
 
@@ -212,6 +212,7 @@ const getBadgeStyles = (path: string) => {
     if (path.includes('gelato-bear')) return { bg: '#DBEAFE', border: '#2563EB' }; // Blue
     if (path.includes('vespa-cat')) return { bg: '#D1FAE5', border: '#059669' }; // Green
     if (path.includes('leaning-giraffe')) return { bg: '#FEF9C3', border: '#CA8A04' }; // Yellow
+    if (path.includes('badge-starter-star')) return { bg: '#FFFFFF', border: '#60A5FA' }; // Blue
     return { bg: '#f1f5f9', border: '#e2e8f0' };
 };
 
@@ -225,7 +226,7 @@ function renderPreview(item: ShopItem) {
                 return (
                     <div style={{
                         background: badgeStyle.bg,
-                        border: `4px solid ${badgeStyle.border}`,
+                        border: item.value.includes('badge-starter-star') ? 'none' : `4px solid ${badgeStyle.border}`,
                         borderRadius: '22%',
                         overflow: 'hidden',
                         width: '100%',

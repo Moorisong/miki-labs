@@ -16,7 +16,8 @@ import { RankingCard, CARD_WIDTH, CARD_HEIGHT, CHICORUN_CARD_DEFAULTS, RankingEn
 // ─── Constants (Defaults - will be filtered by ownedItems) ─────────────────
 const DEFAULT_OWNED_ITEMS = [
     'bg-white',
-    // 'badge-crown' 삭제됨
+    'badge-starter-star',
+    'border-solid',
     'border-dashed'
 ];
 

@@ -28,9 +28,10 @@
 .nickname {
     white-space: nowrap;
     line-height: 1.2;
-    padding: 4px 8px;
+    padding: 4px;
     border-radius: 8px;
-    max-width: 220px;
+    width: 220px;
+    text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -39,10 +40,12 @@
 .pointsBox {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
     background: linear-gradient(90deg, #ffedd5, #fef3c7);
     padding: 0.6rem 1rem;
     border-radius: 1rem;
+    width: 220px;
     white-space: nowrap;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }

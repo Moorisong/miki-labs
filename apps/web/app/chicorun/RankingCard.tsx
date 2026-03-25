@@ -56,9 +56,9 @@ export interface RankingEntry {
 }
 
 export const CHICORUN_CARD_DEFAULTS = {
-    rank: { x: 20, y: 20 },
-    badge: { x: 70, y: 60 },
-    nickname: { x: 20, y: 210 },
+    rank: { x: 110, y: 20 },
+    badge: { x: 90, y: 60 },
+    nickname: { x: 20, y: 200 },
     point: { x: 20, y: 270 }
 };
 
@@ -75,6 +75,7 @@ export const getBadgeStyles = (path: string) => {
     if (path.includes('gelato-bear')) return { bg: '#DBEAFE', border: '#2563EB' }; // Blue
     if (path.includes('vespa-cat')) return { bg: '#D1FAE5', border: '#059669' }; // Green
     if (path.includes('leaning-giraffe')) return { bg: '#FEF9C3', border: '#CA8A04' }; // Yellow
+    if (path.includes('badge-starter-star')) return { bg: '#FFFFFF', border: '#60A5FA' }; // Blue
     return { bg: '#f1f5f9', border: '#e2e8f0' };
 };
 
@@ -261,7 +262,9 @@ export const RankingCard: React.FC<RankingCardProps> = ({
                         {user.badge?.startsWith('/') ? (
                             <div style={{
                                 background: getBadgeStyles(user.badge).bg,
-                                border: `calc(${user.customize?.badgeStyle?.fontSize || 100}px * 0.1) solid ${getBadgeStyles(user.badge).border}`,
+                                border: user.badge?.includes('badge-starter-star')
+                                    ? 'none'
+                                    : `calc(${user.customize?.badgeStyle?.fontSize || 100}px * 0.1) solid ${getBadgeStyles(user.badge).border}`,
                                 borderRadius: '22%',
                                 width: '1em',
                                 height: '1em',
