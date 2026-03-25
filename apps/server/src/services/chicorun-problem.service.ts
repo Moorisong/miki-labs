@@ -186,15 +186,20 @@ const UNCOUNTABLE_NOUNS = ['history', 'water', 'information', 'advice', 'homewor
 const SAFE_NOUNS = ['apple', 'book', 'dog', 'cake', 'pizza', 'sandwich', 'ball', 'piano', 'movie'];
 
 export class ChicorunProblemService {
-    static getLevelByProgressIndex(progressIndex: number): 'beginner' | 'intermediate' | 'advanced' {
-        if (progressIndex < 3000) return 'beginner';
-        if (progressIndex < 7000) return 'intermediate';
+    static getLevelByProgressIndex(progressIndex: number): number {
+        return Math.floor(progressIndex / 100) + 1;
+    }
+
+    static getLevelLabel(progressIndex: number): 'beginner' | 'intermediate' | 'advanced' {
+        const level = this.getLevelByProgressIndex(progressIndex);
+        if (level <= 30) return 'beginner';
+        if (level <= 70) return 'intermediate';
         return 'advanced';
     }
 
     static getTypeByIndex(progressIndex: number): QuestionType {
-        const level = this.getLevelByProgressIndex(progressIndex);
-        const levelRatios = RATIOS[level];
+        const label = this.getLevelLabel(progressIndex);
+        const levelRatios = RATIOS[label] as Record<string, number>;
         const typePool: QuestionType[] = [];
         Object.entries(levelRatios).forEach(([type, ratio]) => {
             for (let i = 0; i < ratio; i++) {
@@ -203,7 +208,7 @@ export class ChicorunProblemService {
         });
         const blockIndex = Math.floor(progressIndex / 100);
         const offsetInBlock = progressIndex % 100;
-        const prng = new DeterministicPRNG(`type-sequence-${level}-${blockIndex}`);
+        const prng = new DeterministicPRNG(`type-sequence-${label}-${blockIndex}`);
         let sequence = prng.shuffle(typePool);
         for (let i = 2; i < sequence.length; i++) {
             if (sequence[i] === sequence[i - 1] && sequence[i] === sequence[i - 2]) {
@@ -224,15 +229,16 @@ export class ChicorunProblemService {
         const seed = this.generateSeed(studentId, classCode, progressIndex);
         const type = this.getTypeByIndex(progressIndex);
         const level = this.getLevelByProgressIndex(progressIndex);
+        const label = this.getLevelLabel(progressIndex);
         const prng = new DeterministicPRNG(seed);
 
         const wordPool = { ...WORDS.beginner };
-        if (level === 'intermediate' || level === 'advanced') {
-            if (level === 'intermediate') {
+        if (label === 'intermediate' || label === 'advanced') {
+            if (label === 'intermediate') {
                 Object.keys(wordPool).forEach((key) => {
                     (wordPool as any)[key] = [...(wordPool as any)[key], ...((WORDS.intermediate as any)[key] || [])];
                 });
-            } else if (level === 'advanced') {
+            } else if (label === 'advanced') {
                 Object.keys(wordPool).forEach((key) => {
                     (wordPool as any)[key] = [
                         ...(wordPool as any)[key],
@@ -308,7 +314,7 @@ export class ChicorunProblemService {
                     const wrongV = isThirdPersonSingular(subj) ? verbKey : conjugate(verbKey, 'He');
                     return fillTemplate(rule.structure, subj, wrongV, obj, rule.preposition);
                 case 'tense_error':
-                    const wrongTense = level === 'beginner' ? conjugate(verbKey, subj, 'past') : verbKey;
+                    const wrongTense = label === 'beginner' ? conjugate(verbKey, subj, 'past') : verbKey;
                     if (wrongTense === conjVerb) return fillTemplate(rule.structure, subj, `will ${verbKey}`, obj, rule.preposition);
                     return fillTemplate(rule.structure, subj, wrongTense, obj, rule.preposition);
                 case 'structure_error':
