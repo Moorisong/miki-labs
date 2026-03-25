@@ -44,6 +44,7 @@ export interface IChicorunStudent extends Document {
     currentLevel: number;
     startLevel: number;
     adjustmentCount: number;
+    currentQuestionAttempts: number; // 현재 문제 시도 횟수 (1부터 시작, 정답 시 1로 리셋)
     createdAt: Date;
     updatedAt: Date;
 }
@@ -138,6 +139,11 @@ const chicorunStudentSchema = new Schema<IChicorunStudent>(
         adjustmentCount: {
             type: Number,
             default: 0,
+        },
+        currentQuestionAttempts: {
+            type: Number,
+            default: 1,
+            min: 1,
         },
     },
     {
