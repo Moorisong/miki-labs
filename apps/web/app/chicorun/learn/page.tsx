@@ -39,6 +39,23 @@ type FeedbackType = 'correct' | 'wrong' | null;
 // 콤보 연출 타입
 type ComboType = 'combo3' | 'combo5' | 'combo10' | null;
 
+// 레벨 선택 옵션 타입
+interface LevelOption {
+    id: string;
+    label: string;
+    description: string;
+    startLevel: number;
+    range: [number, number];
+}
+
+const START_LEVEL_OPTIONS: LevelOption[] = [
+    { id: 'beginner1', label: '완전 초보예요', description: '기본 단어부터 차근차근!', startLevel: 8, range: [1, 15] },
+    { id: 'beginner2', label: '기초는 좀 알아요', description: '간단한 문장은 만들 수 있어요.', startLevel: 23, range: [11, 35] },
+    { id: 'intermediate', label: '중급 정도예요', description: '일상 표현이 가능해요.', startLevel: 45, range: [31, 60] },
+    { id: 'advanced1', label: '꽤 자신 있어요', description: '다양한 문장을 구사해요.', startLevel: 70, range: [56, 85] },
+    { id: 'advanced2', label: '고급 수준이에요', description: '심화 문법도 익숙해요.', startLevel: 90, range: [81, 100] },
+];
+
 // ─── 아이콘 ──────────────────────────────────────────────────────────────────────
 const IconBook = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -108,6 +125,99 @@ function ComboOverlay({ combo, onDone }: { combo: ComboType; onDone: () => void 
     );
 }
 
+// ─── 레벨 선택 모달 ───────────────────────────────────────────────────────────
+function LevelSelectModal({
+    onSelect, onSkip, currentSelected,
+}: {
+    onSelect: (level: number, isInitial: boolean) => void;
+    onSkip?: () => void;
+    currentSelected?: number;
+}) {
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [dontShowAgain, setDontShowAgain] = useState(false);
+
+    const handleConfirm = () => {
+        const option = START_LEVEL_OPTIONS.find(o => o.id === selectedId);
+        if (option) {
+            onSelect(option.startLevel, !currentSelected);
+        }
+    };
+
+    const handleSkip = () => {
+        if (onSkip) {
+            onSkip();
+        }
+    };
+
+    return (
+        <div className={styles.comboOverlay}>
+            <div className={styles.levelSelectCard}>
+                <h2 className={styles.levelSelectTitle}>시작 레벨을 선택해주세요</h2>
+                <p className={styles.levelSelectDesc}>
+                    현재 영어 실력에 맞는 레벨에서 시작하면<br />더 재미있게 공부할 수 있어요!
+                </p>
+
+                <div className={styles.levelOptionsGrid}>
+                    {START_LEVEL_OPTIONS.map((opt) => (
+                        <div
+                            key={opt.id}
+                            className={`${styles.levelOptionCard} ${selectedId === opt.id ? styles.selected : ''}`}
+                            onClick={() => setSelectedId(opt.id)}
+                        >
+                            <div className={styles.levelOptionInfo}>
+                                <div className={styles.levelOptionLabel}>{opt.label}</div>
+                                <div className={styles.levelOptionLevel}>추천 레벨: {opt.range[0]} ~ {opt.range[1]}</div>
+                            </div>
+                            <div className={styles.levelOptionRadio}>
+                                <div className={styles.levelOptionRadioInner} />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className={styles.levelSelectActions}>
+                    <button
+                        className={styles.btnStartLearning}
+                        disabled={!selectedId}
+                        onClick={handleConfirm}
+                    >
+                        학습 시작하기
+                    </button>
+                    {onSkip && (
+                        <div className={styles.skipActionsContainer}>
+                            <button className={styles.btnSkipLevel} onClick={handleSkip}>
+                                나중에 선택할게요 (1레벨 시작)
+                            </button>
+                            <label className={styles.checkDontShowLabel}>
+                                <input
+                                    type="checkbox"
+                                    checked={dontShowAgain}
+                                    onChange={(e) => setDontShowAgain(e.target.checked)}
+                                />
+                                다시 보지 않기
+                            </label>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ─── 자동 레벨 조정 토스트 ────────────────────────────────────────────────────
+function LevelAdjustToast({ message, onDone }: { message: string; onDone: () => void }) {
+    useEffect(() => {
+        const timer = setTimeout(onDone, 2500);
+        return () => clearTimeout(timer);
+    }, [onDone]);
+
+    return (
+        <div className={styles.levelAdjustToast}>
+            <span>⚙️</span> {message}
+        </div>
+    );
+}
+
 // ─── 레벨 클리어 오버레이 ──────────────────────────────────────────────────────
 function LevelClearOverlay({
     level, isFinal, onNext, onRestart,
@@ -166,12 +276,21 @@ export default function StudentLearnPage() {
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
     const [answerResult, setAnswerResult] = useState<AnswerResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [comboCount, setComboCount] = useState(0);
-    const [activeCombo, setActiveCombo] = useState<ComboType>(null);
-    const [showLevelClear, setShowLevelClear] = useState(false);
     const [failCount, setFailCount] = useState(0);
     const [showZeroPointMsg, setShowZeroPointMsg] = useState(false);
     const [className, setClassName] = useState<string>('');
+
+    // 레벨 시스템 상태
+    const [currentLevel, setCurrentLevel] = useState<number>(1);
+    const [startLevel, setStartLevel] = useState<number | null>(null);
+    const [adjustmentCount, setAdjustmentCount] = useState<number>(0);
+    const [correctCombo, setCorrectCombo] = useState<number>(0);
+    const [incorrectTotal, setIncorrectTotal] = useState<number>(0);
+    const [showLevelModal, setShowLevelModal] = useState(false);
+    const [adjustMessage, setAdjustMessage] = useState<string | null>(null);
+    const [activeCombo, setActiveCombo] = useState<ComboType>(null);
+    const [showLevelClear, setShowLevelClear] = useState(false);
+
     const answerLockRef = useRef(false);
 
     useEffect(() => {
@@ -180,6 +299,17 @@ export default function StudentLearnPage() {
             try {
                 const info = JSON.parse(studentInfoStr);
                 setClassName(info.className || info.classCode || '');
+                const hasStarted = (info.startLevel && info.startLevel !== 0) || (info.progressIndex && info.progressIndex > 0);
+
+                if (hasStarted) {
+                    const fallbackLevel = Math.floor((info.progressIndex || 0) / 100) + 1;
+                    setCurrentLevel(info.currentLevel || fallbackLevel);
+                    setStartLevel(info.startLevel || 0);
+                    setAdjustmentCount(info.adjustmentCount || 0);
+                } else {
+                    // 선택 이력이 없고, 1번 문제도 풀지 않은 완전 초기 상태인 경우에만 표시
+                    setShowLevelModal(true);
+                }
             } catch (e) {
                 console.error(e);
             }
@@ -218,6 +348,9 @@ export default function StudentLearnPage() {
             setAnswerResult(null);
             setFailCount(0);
             setShowZeroPointMsg(false);
+            if (data.data.level) {
+                setCurrentLevel(data.data.level);
+            }
             answerLockRef.current = false;
         } catch (err) {
             console.error('Failed to fetch question:', err);
@@ -255,10 +388,11 @@ export default function StudentLearnPage() {
 
             if (result.isCorrect) {
                 setFeedback('correct');
-                const newCombo = comboCount + 1;
-                setComboCount(newCombo);
+                const newCombo = correctCombo + 1;
+                setCorrectCombo(newCombo);
+                setIncorrectTotal(0); // 연속 정답시 오답 카운트 초기화 (연속 정답 규칙)
 
-                // 콤보 연출: 특정 마일스톤에서만 노출
+                // 콤보 연출
                 if (newCombo > 0 && newCombo % 10 === 0) {
                     setActiveCombo('combo10');
                 } else if (newCombo === 5) {
@@ -267,12 +401,31 @@ export default function StudentLearnPage() {
                     setActiveCombo('combo3');
                 }
 
-                // 0점 상황 위로 메시지
+                // 자동 레벨 조정 (첫 10문제)
+                if (adjustmentCount < 10 && startLevel !== null && startLevel !== 0) {
+                    let levelOffset = 0;
+                    if (newCombo >= 8) levelOffset = 3;
+                    else if (newCombo >= 5) levelOffset = 2;
+                    else if (newCombo >= 3) levelOffset = 1;
+
+                    if (levelOffset > 0) {
+                        const nextLevel = Math.min(startLevel + 5, Math.min(100, Math.max(1, startLevel + levelOffset)));
+                        if (nextLevel > currentLevel) {
+                            await handleAutoAdjust(nextLevel);
+                        }
+                    }
+                }
+
                 if (question.point === 0 && result.newPoint === 0) {
                     setShowZeroPointMsg(true);
                 }
 
-                // 레벨 클리어 또는 다음 문제
+                // 로컬 스토리지 진도 업데이트
+                updateLocalStudentInfo({
+                    progressIndex: result.newProgressIndex,
+                    currentLevel: result.level,
+                });
+
                 if (result.isLevelComplete || result.isFinalComplete) {
                     setTimeout(() => {
                         setShowLevelClear(true);
@@ -284,13 +437,94 @@ export default function StudentLearnPage() {
                 }
             } else {
                 setFeedback('wrong');
-                setComboCount(0);
+                setCorrectCombo(0);
+                const newIncorrectTotal = incorrectTotal + 1;
+                setIncorrectTotal(newIncorrectTotal);
                 setFailCount(prev => prev + 1);
+
+                // 자동 레벨 조정 (오답 규칙)
+                if (adjustmentCount < 10 && startLevel !== null && startLevel !== 0) {
+                    let levelOffset = 0;
+                    if (newIncorrectTotal >= 4) levelOffset = -2;
+                    else if (newIncorrectTotal >= 2) levelOffset = -1;
+
+                    if (levelOffset < 0) {
+                        const nextLevel = Math.max(startLevel - 5, Math.max(1, startLevel + levelOffset));
+                        if (nextLevel < currentLevel) {
+                            await handleAutoAdjust(nextLevel);
+                        }
+                    }
+                }
                 answerLockRef.current = false;
+            }
+
+            // 조정 카운트 증가
+            if (adjustmentCount < 10) {
+                setAdjustmentCount(prev => prev + 1);
             }
         } catch (err) {
             console.error('Failed to submit answer:', err);
             answerLockRef.current = false;
+        }
+    };
+
+    const handleAutoAdjust = async (nextLevel: number) => {
+        try {
+            const res = await fetch(CHICORUN_API.LEVEL, {
+                method: 'POST',
+                headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    level: nextLevel,
+                    adjustmentCount: adjustmentCount + 1
+                }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setCurrentLevel(nextLevel);
+                setAdjustMessage(`실력에 맞춰 레벨이 ${nextLevel}로 조정되었습니다!`);
+                updateLocalStudentInfo({ currentLevel: nextLevel, adjustmentCount: adjustmentCount + 1 });
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const updateLocalStudentInfo = (updates: any) => {
+        const infoStr = localStorage.getItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
+        if (infoStr) {
+            const info = JSON.parse(infoStr);
+            const newInfo = { ...info, ...updates };
+            localStorage.setItem(CHICORUN_STORAGE_KEY.STUDENT_INFO, JSON.stringify(newInfo));
+        }
+    };
+
+    const handleSelectLevel = async (level: number, isInitial: boolean) => {
+        setIsLoading(true);
+        try {
+            const res = await fetch(CHICORUN_API.LEVEL, {
+                method: 'POST',
+                headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+                body: JSON.stringify({ level, isInitial }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setCurrentLevel(level);
+                if (isInitial) {
+                    setStartLevel(level);
+                    setAdjustmentCount(0);
+                    updateLocalStudentInfo({ currentLevel: level, startLevel: level, adjustmentCount: 0 });
+                } else {
+                    updateLocalStudentInfo({ currentLevel: level });
+                }
+                setShowLevelModal(false);
+                fetchQuestion();
+            } else {
+                alert(data.error || '레벨 변경에 실패했습니다.');
+            }
+        } catch (err) {
+            console.error('Failed to select level:', err);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -304,28 +538,6 @@ export default function StudentLearnPage() {
             fetchQuestion();
         } catch (err) {
             console.error('Failed to reset progress:', err);
-        }
-    };
-
-    const handleLevelChange = async (level: 'beginner' | 'intermediate' | 'advanced') => {
-        if (isLoading) return;
-        setIsLoading(true);
-        try {
-            const res = await fetch(CHICORUN_API.LEVEL, {
-                method: 'POST',
-                headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
-                body: JSON.stringify({ level }),
-            });
-            const data = await res.json();
-            if (data.success) {
-                fetchQuestion();
-            } else {
-                alert(data.error || '레벨 변경에 실패했습니다.');
-            }
-        } catch (err) {
-            console.error('Failed to change level:', err);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -352,11 +564,10 @@ export default function StudentLearnPage() {
         router.replace(CHICORUN_ROUTES.JOIN);
     };
 
-    const currentLevel = answerResult?.level ?? question?.level ?? 1;
     const currentPoint = answerResult?.newPoint ?? question?.point ?? 0;
     const progressIndex = answerResult?.newProgressIndex ?? question?.progressIndex ?? 0;
     const progressInLevel = progressIndex % CHICORUN_CONFIG.QUESTIONS_PER_LEVEL;
-    const progressPercent = (progressIndex / CHICORUN_CONFIG.MAX_LEVEL) * 100;
+    const progressPercent = (progressIndex / (CHICORUN_CONFIG.MAX_LEVEL * CHICORUN_CONFIG.QUESTIONS_PER_LEVEL)) * 100;
 
     return (
         <div className={styles.container}>
@@ -372,17 +583,25 @@ export default function StudentLearnPage() {
                 {/* 상단 정보 패널 */}
                 <div className={styles.topInfoPanel}>
                     <div className={styles.infoRow}>
-                        <div className={styles.levelBadge}>
-                            <IconStar />
-                            <span>Lv.{currentLevel}</span>
+                        <div className={styles.levelBadgeContainer}>
+                            <div className={styles.levelBadge}>
+                                <IconStar />
+                                <span>Lv.{currentLevel}</span>
+                            </div>
+                            <button
+                                className={styles.btnLevelChange}
+                                onClick={() => setShowLevelModal(true)}
+                            >
+                                레벨 변경
+                            </button>
                         </div>
-                        {comboCount >= 3 && (
+                        {correctCombo >= 3 && (
                             <div style={{
                                 display: 'flex', alignItems: 'center', gap: '0.25rem',
                                 color: '#f97316', fontWeight: 800, fontSize: '0.95rem',
                                 animation: 'pulse 1s ease-in-out infinite',
                             }}>
-                                🔥 {comboCount}연속
+                                🔥 {correctCombo}연속
                             </div>
                         )}
                         <div className={styles.pointBadge}>
@@ -405,26 +624,6 @@ export default function StudentLearnPage() {
                     </div>
                 </div>
 
-                {/* 레벨 스위처 */}
-                <div className={styles.levelSwitcher}>
-                    {[
-                        { id: 'beginner', label: '초급', range: [0, 2999] },
-                        { id: 'intermediate', label: '중급', range: [3000, 6999] },
-                        { id: 'advanced', label: '고급', range: [7000, 9999] }
-                    ].map((lvl) => {
-                        const isActive = progressIndex >= lvl.range[0] && progressIndex <= lvl.range[1];
-                        return (
-                            <button
-                                key={lvl.id}
-                                className={`${styles.btnLevelTab} ${isActive ? styles.active : ''}`}
-                                onClick={() => handleLevelChange(lvl.id as any)}
-                                disabled={isLoading || isActive}
-                            >
-                                {lvl.label}
-                            </button>
-                        );
-                    })}
-                </div>
 
                 {/* 문제 카드 */}
                 {isLoading ? (
@@ -502,6 +701,23 @@ export default function StudentLearnPage() {
                     isFinal={answerResult.isFinalComplete}
                     onNext={handleNextLevel}
                     onRestart={handleResetProgress}
+                />
+            )}
+
+            {/* 레벨 선택 모달 */}
+            {showLevelModal && (
+                <LevelSelectModal
+                    onSelect={handleSelectLevel}
+                    onSkip={startLevel === null ? () => handleSelectLevel(1, true) : undefined}
+                    currentSelected={currentLevel}
+                />
+            )}
+
+            {/* 자동 레벨 조정 토스트 */}
+            {adjustMessage && (
+                <LevelAdjustToast
+                    message={adjustMessage}
+                    onDone={() => setAdjustMessage(null)}
                 />
             )}
         </div>

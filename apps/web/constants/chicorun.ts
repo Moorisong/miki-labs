@@ -70,7 +70,7 @@ export const CHICORUN_ERROR = {
  */
 export const CHICORUN_CONFIG = {
     MAX_LEVEL: 100,
-    QUESTIONS_PER_LEVEL: 10,
+    QUESTIONS_PER_LEVEL: 100,
     POINT_PER_CORRECT: 10,
     COMBO_THRESHOLDS: [3, 5, 10] as const,
     COMBO_BONUS_POINT: 20, // 10연속 퍼펙트 시 추가 포인트
