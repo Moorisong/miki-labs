@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { chicorunStudentAuth } from '../middlewares/chicorun-student-auth';
 import { chicorunTeacherAuth } from '../middlewares/chicorun-teacher-auth';
-import { getQuestion, submitAnswer, resetProgress, selectLevel } from '../controllers/chicorun-solve.controller';
+import { getQuestion, submitAnswer, resetProgress, selectLevel, resetAchievedLevel } from '../controllers/chicorun-solve.controller';
 import { studentLogin, getStudentMe, updateCustomize, changeStudentPassword, deductPoints, removeOwnedItem } from '../controllers/chicorun-student.controller';
 import {
     createClass,
@@ -25,6 +25,7 @@ router.get('/question', chicorunStudentAuth, getQuestion);
 router.post('/answer', chicorunStudentAuth, submitAnswer);
 router.post('/level', chicorunStudentAuth, selectLevel);
 router.post('/reset-progress', chicorunStudentAuth, resetProgress);
+router.post('/reset-achieved-level', chicorunStudentAuth, resetAchievedLevel);
 
 // ─── 학생 내 정보 API (studentAuth 필요) ─────────────────────────────────────────
 router.get('/student/me', chicorunStudentAuth, getStudentMe);

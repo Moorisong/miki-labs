@@ -42,7 +42,11 @@ export interface IChicorunStudent extends Document {
     customize: ICustomizeData;
     ownedItems: string[];
     currentLevel: number;
-    maxLevel: number; // 학생이 도달한 최고 레벨 (페널티 계산 기준)
+    achievedMaxLevel: number; // 학생이 도달한 최고 레벨 (페널티 계산 기준)
+    currentLevelSolvedCount: number; // 현재 레벨에서 맞힌 문제 수
+    currentLevelTotalCount: number;  // 현재 레벨에서 푼 전체 문제 수
+    currentLevelMaxStreak: number;   // 현재 레벨에서의 최대 연속 정답 수
+    currentLevelCurrentStreak: number; // 현재 연속 정답 수
     startLevel: number;
     adjustmentCount: number;
     currentQuestionAttempts: number; // 현재 문제 시도 횟수 (1부터 시작, 정답 시 1로 리셋)
@@ -133,9 +137,25 @@ const chicorunStudentSchema = new Schema<IChicorunStudent>(
             type: Number,
             default: 1,
         },
-        maxLevel: {
+        achievedMaxLevel: {
             type: Number,
             default: 1,
+        },
+        currentLevelSolvedCount: {
+            type: Number,
+            default: 0,
+        },
+        currentLevelTotalCount: {
+            type: Number,
+            default: 0,
+        },
+        currentLevelMaxStreak: {
+            type: Number,
+            default: 0,
+        },
+        currentLevelCurrentStreak: {
+            type: Number,
+            default: 0,
         },
         startLevel: {
             type: Number,

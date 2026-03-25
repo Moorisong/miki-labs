@@ -15,6 +15,7 @@ export const CHICORUN_API = {
     ANSWER: `${API_BASE}/api/chicorun/answer`,
     LEVEL: `${API_BASE}/api/chicorun/level`,
     RESET_PROGRESS: `${API_BASE}/api/chicorun/reset-progress`,
+    RESET_ACHIEVED_LEVEL: `${API_BASE}/api/chicorun/reset-achieved-level`,
     CLASS: `${API_BASE}/api/chicorun/class`,
     CLASS_STUDENTS: (classCode: string) => `${API_BASE}/api/chicorun/class/${classCode}/students`,
     CLASS_RANKING: (classCode: string) => `${API_BASE}/api/chicorun/class/${classCode}/ranking`,

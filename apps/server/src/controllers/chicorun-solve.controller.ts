@@ -26,7 +26,7 @@ export const getQuestion = async (
 
         const { progressIndex, classCode } = studentDoc;
         const difficulty = req.query.difficulty as 'easy' | 'medium' | 'hard';
-        const problem = await ChicorunProblemService.getQuestion(student.studentId, classCode, progressIndex, difficulty, studentDoc.maxLevel);
+        const problem = await ChicorunProblemService.getQuestion(student.studentId, classCode, progressIndex, difficulty, studentDoc.achievedMaxLevel);
 
         res.json({
             success: true,
@@ -34,6 +34,7 @@ export const getQuestion = async (
                 questionId: problem.id,
                 seed: problem.seed,
                 level: problem.level,
+                achievedMaxLevel: studentDoc.achievedMaxLevel,
                 difficulty: problem.difficulty,
                 passage: problem.passage,
                 question: problem.question,
@@ -92,7 +93,7 @@ export const submitAnswer = async (
             studentDoc.classCode,
             studentDoc.progressIndex,
             difficulty as 'easy' | 'medium' | 'hard',
-            studentDoc.maxLevel
+            studentDoc.achievedMaxLevel
         );
 
         // questionId 및 seed 검증 (무결성)
@@ -102,70 +103,97 @@ export const submitAnswer = async (
 
         const isCorrect = selectedIndex === problem.answer;
 
+        // 1. 시도 횟수 및 난이도 기반 포인트 계산 (정답일 때만 사용)
+        const attempts = studentDoc.currentQuestionAttempts || 1;
+        let baseReward = 1;
+        if (attempts === 1) baseReward = 5;
+        else if (attempts === 2) baseReward = 3;
+        else baseReward = 1;
+
+        const { level: currentProblemLevel } = ChicorunProblemService.getLevelAndOrderIndex(studentDoc.progressIndex);
+        const targetDifficulty = (difficulty as 'easy' | 'medium' | 'hard') || ChicorunProblemService.getRecommendedDifficulty(currentProblemLevel);
+        const { factor } = ChicorunProblemService.getDifficultyPenalty(targetDifficulty, currentProblemLevel, studentDoc.achievedMaxLevel);
+        const rewardPoints = Math.max(1, Math.floor(baseReward * factor));
+
+        // 2. 새로운 통계 계산 (무조건 1회 시도로 간주)
+        const newTotalCount = (studentDoc.currentLevelTotalCount || 0) + 1;
+
         if (isCorrect) {
-            // 시도 횟수별 기본 포인트 (1회: 5P, 2회: 3P, 3회 이상: 1P)
-            const attempts = studentDoc.currentQuestionAttempts || 1;
-            let baseReward = 1;
-            if (attempts === 1) baseReward = 5;
-            else if (attempts === 2) baseReward = 3;
-            else baseReward = 1;
+            const newSolvedCount = (studentDoc.currentLevelSolvedCount || 0) + 1;
+            const newCurrentStreak = (studentDoc.currentLevelCurrentStreak || 0) + 1;
+            const newMaxStreak = Math.max(studentDoc.currentLevelMaxStreak || 0, newCurrentStreak);
 
-            // 난이도 페널티 적용
-            const { level: problemLevel } = ChicorunProblemService.getLevelAndOrderIndex(studentDoc.progressIndex);
-
-            // difficulty가 없으면 기본 추천 난이도로 간주 (사실상 factor 1.0)
-            const targetDifficulty = (difficulty as 'easy' | 'medium' | 'hard') || ChicorunProblemService.getRecommendedDifficulty(problemLevel);
-            const { factor } = ChicorunProblemService.getDifficultyPenalty(targetDifficulty, problemLevel, studentDoc.maxLevel);
-
-            // 최종 보상 (최소 1P 보장)
-            const rewardPoints = Math.max(1, Math.floor(baseReward * factor));
-
-            // 새로운 레벨 계산
-            const tempProgressIndex = studentDoc.progressIndex + 1;
-            const { level: nextLevel } = ChicorunProblemService.getLevelAndOrderIndex(tempProgressIndex);
-
-            // 정답 처리: progressIndex 및 point 증가, currentQuestionAttempts 초기화, maxLevel 갱신
-            const updatedStudent = await ChicorunStudentModel.findByIdAndUpdate(
-                student.studentId,
-                {
-                    $inc: { progressIndex: 1, point: rewardPoints },
-                    $set: { currentQuestionAttempts: 1, currentLevel: nextLevel },
-                    $max: { maxLevel: nextLevel }
-                },
-                { new: true }
-            );
-
-            if (!updatedStudent) throw new AppError(500, 'ERROR_DB: 업데이트 실패');
-
-            const newProgressIndex = updatedStudent.progressIndex;
-            const { level: newLevel, orderIndex } = ChicorunProblemService.getLevelAndOrderIndex(newProgressIndex);
+            // 새로운 레벨 및 익덱스 계산
+            const newProgressIndex = studentDoc.progressIndex + 1;
+            const { level: nextLevel, orderIndex } = ChicorunProblemService.getLevelAndOrderIndex(newProgressIndex);
 
             const isLevelComplete = orderIndex === 1 && newProgressIndex > 0;
             const isFinalComplete = newProgressIndex >= 1500;
 
+            let achievedMaxLevel = studentDoc.achievedMaxLevel;
+            let finalUpdate: any = {
+                $inc: { point: rewardPoints, progressIndex: 1 },
+                $set: { currentQuestionAttempts: 1 }
+            };
+
+            // 레벨 클리어 시 조건 검증 및 achievedMaxLevel 업데이트
             if (isLevelComplete) {
-                await ChicorunStudentModel.findByIdAndUpdate(student.studentId, {
-                    $set: { currentLevel: newLevel }
-                });
+                // 조건: 정확도 70%(고급 60%) 이상 + 연속 정답 5회 이상
+                const accuracyThreshold = currentProblemLevel > 70 ? 0.6 : 0.7;
+                const accuracy = newSolvedCount / newTotalCount;
+                const streakCondition = newMaxStreak >= 5;
+
+                if (accuracy >= accuracyThreshold && streakCondition) {
+                    achievedMaxLevel = Math.max(achievedMaxLevel, currentProblemLevel);
+                }
+
+                // 레벨 클리어 시 통계 초기화 및 achievedMaxLevel 반영
+                finalUpdate.$set = {
+                    ...finalUpdate.$set,
+                    currentLevelTotalCount: 0,
+                    currentLevelSolvedCount: 0,
+                    currentLevelMaxStreak: 0,
+                    currentLevelCurrentStreak: 0,
+                    currentLevel: nextLevel,
+                    achievedMaxLevel
+                };
+            } else {
+                // 레벨 진행 중이면 통계 업데이트 (모두 $set으로 통일하여 충돌 방지)
+                finalUpdate.$set = {
+                    ...finalUpdate.$set,
+                    currentLevelTotalCount: newTotalCount,
+                    currentLevelSolvedCount: newSolvedCount,
+                    currentLevelCurrentStreak: newCurrentStreak,
+                    currentLevelMaxStreak: newMaxStreak
+                };
             }
+
+            const updatedStudent = await ChicorunStudentModel.findByIdAndUpdate(
+                student.studentId,
+                finalUpdate,
+                { new: true }
+            );
+
+            if (!updatedStudent) throw new AppError(500, 'ERROR_DB: 업데이트 실패');
 
             res.json({
                 success: true,
                 data: {
                     isCorrect: true,
                     explanation: problem.explanation,
-                    newProgressIndex,
+                    newProgressIndex: updatedStudent.progressIndex,
                     newPoint: updatedStudent.point,
                     earnedPoints: rewardPoints,
-                    level: newLevel,
+                    level: nextLevel,
                     isLevelComplete,
                     isFinalComplete,
                 },
             });
         } else {
-            // 오답 처리: 시도 횟수 증가
+            // 오답 처리: 시도 횟수 증가, 스트릭 초기화, 토탈 카운트 증가
             await ChicorunStudentModel.findByIdAndUpdate(student.studentId, {
-                $inc: { currentQuestionAttempts: 1 }
+                $inc: { currentQuestionAttempts: 1, currentLevelTotalCount: 1 },
+                $set: { currentLevelCurrentStreak: 0 }
             });
 
             const { level } = ChicorunProblemService.getLevelAndOrderIndex(studentDoc.progressIndex);
@@ -233,7 +261,13 @@ export const selectLevel = async (
         }
 
         await ChicorunStudentModel.findByIdAndUpdate(student.studentId, {
-            $set: updateData,
+            $set: {
+                ...updateData,
+                currentLevelTotalCount: 0,
+                currentLevelSolvedCount: 0,
+                currentLevelMaxStreak: 0,
+                currentLevelCurrentStreak: 0,
+            },
         });
 
         res.json({
@@ -251,7 +285,7 @@ export const selectLevel = async (
 
 /**
  * POST /api/chicorun/reset-progress
- * 10,000번 문제 도달 혹은 전체 초기화 시 사용
+ * 10,000번 문제 도달 혹은 전체 초기화 시 사용 (progressIndex 0, currentLevel 1)
  */
 export const resetProgress = async (
     req: Request,
@@ -265,12 +299,60 @@ export const resetProgress = async (
         }
 
         await ChicorunStudentModel.findByIdAndUpdate(student.studentId, {
-            $set: { progressIndex: 0, currentLevel: 1, currentQuestionAttempts: 1 },
+            $set: {
+                progressIndex: 0,
+                currentLevel: 1,
+                currentQuestionAttempts: 1,
+                currentLevelTotalCount: 0,
+                currentLevelSolvedCount: 0,
+                currentLevelMaxStreak: 0,
+                currentLevelCurrentStreak: 0,
+            },
         });
 
         res.json({
             success: true,
             data: { message: '진도가 초기화되었습니다. 포인트는 유지됩니다.' },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * POST /api/chicorun/reset-achieved-level
+ * 학생 본인이 기준 레벨(achievedMaxLevel)을 현재 레벨로 맞추고 통계 초기화
+ */
+export const resetAchievedLevel = async (
+    req: Request,
+    res: Response<ApiResponse>,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const student = req.chicoStudent;
+        if (!student) {
+            throw new AppError(401, 'ERROR_UNAUTHORIZED: 학생 인증이 필요합니다.');
+        }
+
+        const studentDoc = await ChicorunStudentModel.findById(student.studentId);
+        if (!studentDoc) {
+            throw new AppError(404, 'ERROR_STUDENT_NOT_FOUND: 학생 정보를 찾을 수 없습니다.');
+        }
+
+        await ChicorunStudentModel.findByIdAndUpdate(student.studentId, {
+            $set: {
+                achievedMaxLevel: studentDoc.currentLevel,
+                currentLevelTotalCount: 0,
+                currentLevelSolvedCount: 0,
+                currentLevelMaxStreak: 0,
+                currentLevelCurrentStreak: 0,
+                progressIndex: ChicorunProblemService.getStartProgressIndexForLevel(studentDoc.currentLevel),
+            },
+        });
+
+        res.json({
+            success: true,
+            data: { message: '기준 레벨이 현재 레벨로 초기화되었습니다.' },
         });
     } catch (error) {
         next(error);

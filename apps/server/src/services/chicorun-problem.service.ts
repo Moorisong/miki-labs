@@ -93,11 +93,11 @@ export class ChicorunProblemService {
         return 'hard';
     }
 
-    static getDifficultyPenalty(targetDifficulty: 'easy' | 'medium' | 'hard', level: number, maxLevel: number = 1): { factor: number; message?: string } {
+    static getDifficultyPenalty(targetDifficulty: 'easy' | 'medium' | 'hard', level: number, achievedMaxLevel: number = 1): { factor: number; message?: string } {
         // 1. 레벨 차이에 따른 페널티 (기획안: -3레벨 이하: 50%, -6레벨 이하: 30% 수준)
         let levelFactor = 1.0;
-        if (level < maxLevel - 6) levelFactor = 0.3;
-        else if (level < maxLevel - 3) levelFactor = 0.5;
+        if (level < achievedMaxLevel - 6) levelFactor = 0.3;
+        else if (level < achievedMaxLevel - 3) levelFactor = 0.5;
 
         // 2. 난이도 설정에 따른 페널티 (현재 구간보다 낮은 난이도 선택 시)
         const recommended = this.getRecommendedDifficulty(level);
@@ -126,7 +126,7 @@ export class ChicorunProblemService {
         classCode: string,
         progressIndex: number,
         difficulty?: 'easy' | 'medium' | 'hard',
-        maxLevel: number = 1
+        achievedMaxLevel: number = 1
     ): Promise<Problem> {
         const { level, orderIndex } = this.getLevelAndOrderIndex(progressIndex);
         const totalProblemsInLevel = level <= 30 ? 12 : level <= 70 ? 15 : 18;
@@ -134,7 +134,7 @@ export class ChicorunProblemService {
         // 난이도가 없으면 레벨에 맞는 기본값 설정
         const targetDifficulty = difficulty || this.getRecommendedDifficulty(level);
 
-        const { factor, message: penaltyMessage } = this.getDifficultyPenalty(targetDifficulty, level, maxLevel);
+        const { factor, message: penaltyMessage } = this.getDifficultyPenalty(targetDifficulty, level, achievedMaxLevel);
 
         const basePoint = 5;
         const adjustedPoint = Math.max(1, Math.floor(basePoint * factor));
