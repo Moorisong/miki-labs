@@ -127,10 +127,11 @@ function ComboOverlay({ combo, onDone }: { combo: ComboType; onDone: () => void 
 
 // ─── 레벨 선택 모달 ───────────────────────────────────────────────────────────
 function LevelSelectModal({
-    onSelect, onSkip, currentSelected,
+    onSelect, onSkip, onClose, currentSelected,
 }: {
     onSelect: (level: number, isInitial: boolean) => void;
     onSkip?: () => void;
+    onClose?: () => void;
     currentSelected?: number;
 }) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -152,6 +153,15 @@ function LevelSelectModal({
     return (
         <div className={styles.comboOverlay}>
             <div className={styles.levelSelectCard}>
+                {onClose && (
+                    <button className={styles.btnCloseModal} onClick={onClose}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                )}
                 <h2 className={styles.levelSelectTitle}>시작 레벨을 선택해주세요</h2>
                 <p className={styles.levelSelectDesc}>
                     현재 영어 실력에 맞는 레벨에서 시작하면<br />더 재미있게 공부할 수 있어요!
@@ -709,6 +719,7 @@ export default function StudentLearnPage() {
                 <LevelSelectModal
                     onSelect={handleSelectLevel}
                     onSkip={startLevel === null ? () => handleSelectLevel(1, true) : undefined}
+                    onClose={() => setShowLevelModal(false)}
                     currentSelected={currentLevel}
                 />
             )}

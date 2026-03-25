@@ -498,6 +498,7 @@
 
 /* ─── 레벨 선택 모달 ───────────────────────────────────────────────────────── */
 .levelSelectCard {
+    position: relative;
     background: white;
     border-radius: 2.5rem;
     padding: 2.5rem;
@@ -507,6 +508,25 @@
     margin: auto;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
     animation: comboPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.btnCloseModal {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btnCloseModal:hover {
+    color: #475569;
+    transform: scale(1.1);
 }
 
 .levelSelectTitle {
