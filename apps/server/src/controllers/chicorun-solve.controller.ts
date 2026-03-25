@@ -33,7 +33,7 @@ export const getQuestion = async (
                 questionId: problem.id,
                 seed: problem.seed,
                 type: problem.type,
-                level: Math.floor(progressIndex / 100) + 1,
+                level: studentDoc.currentLevel,
                 question: problem.question,
                 options: problem.choices,
                 progressIndex,
@@ -102,6 +102,13 @@ export const submitAnswer = async (
             const isLevelComplete = newProgressIndex % 100 === 0 && newProgressIndex > 0;
             const isFinalComplete = newProgressIndex >= 10000;
 
+            if (isLevelComplete && updatedStudent) {
+                // 레벨 업그레이드
+                await ChicorunStudentModel.findByIdAndUpdate(student.studentId, {
+                    $set: { currentLevel: Math.floor(newProgressIndex / 100) + 1 }
+                });
+            }
+
             res.json({
                 success: true,
                 data: {
@@ -150,31 +157,43 @@ export const selectLevel = async (
             throw new AppError(401, 'ERROR_UNAUTHORIZED: 학생 인증이 필요합니다.');
         }
 
-        const { level } = req.body as { level: 'beginner' | 'intermediate' | 'advanced' };
-        if (!level || !['beginner', 'intermediate', 'advanced'].includes(level)) {
-            throw new AppError(400, 'ERROR_INVALID_INPUT: 올바른 레벨을 선택해 주세요.');
-        }
+        const { level, isInitial, adjustmentCount } = req.body as {
+            level: number;
+            isInitial?: boolean;
+            adjustmentCount?: number;
+        };
 
-        const levelInfo = LEVELS.find((l) => l.level === level);
-        if (!levelInfo) {
-            throw new AppError(400, 'ERROR_INVALID_LEVEL: 레벨 정보를 찾을 수 없습니다.');
+        if (level === undefined || level < 1 || level > 100) {
+            throw new AppError(400, 'ERROR_INVALID_INPUT: 1에서 100 사이의 올바른 레벨을 선택해 주세요.');
         }
 
         // 해당 레벨의 시작 인덱스로 재매핑
-        const newProgressIndex = levelInfo.range[0];
+        const newProgressIndex = (level - 1) * 100;
+
+        const updateData: any = {
+            currentLevel: level,
+            progressIndex: newProgressIndex,
+        };
+
+        if (isInitial) {
+            updateData.startLevel = level;
+            updateData.adjustmentCount = 0;
+        }
+
+        if (adjustmentCount !== undefined) {
+            updateData.adjustmentCount = adjustmentCount;
+        }
 
         await ChicorunStudentModel.findByIdAndUpdate(student.studentId, {
-            $set: {
-                selectedLevel: level,
-                progressIndex: newProgressIndex
-            },
+            $set: updateData,
         });
 
         res.json({
             success: true,
             data: {
-                message: `${levelInfo.label} 레벨로 변경되었습니다.`,
+                message: `${level} 레벨로 변경되었습니다.`,
                 newProgressIndex,
+                currentLevel: level,
             },
         });
     } catch (error) {

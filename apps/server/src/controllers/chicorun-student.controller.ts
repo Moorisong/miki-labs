@@ -130,7 +130,9 @@ export const studentLogin = async (
                     point: student.point,
                     badge: student.badge,
                     ownedItems: student.ownedItems,
-                    level: Math.floor(student.progressIndex / 10) + 1,
+                    currentLevel: student.currentLevel,
+                    startLevel: student.startLevel,
+                    adjustmentCount: student.adjustmentCount,
                 },
             },
         });
@@ -179,7 +181,9 @@ export const getStudentMe = async (
                 cardStyle: studentDoc.cardStyle,
                 customize: studentDoc.customize,
                 ownedItems: studentDoc.ownedItems,
-                level: Math.floor(studentDoc.progressIndex / 10) + 1,
+                currentLevel: studentDoc.currentLevel,
+                startLevel: studentDoc.startLevel,
+                adjustmentCount: studentDoc.adjustmentCount,
             },
         });
     } catch (error) {
