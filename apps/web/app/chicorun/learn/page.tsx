@@ -27,6 +27,8 @@ interface QuestionData {
     point: number;
     questionPoint: number;
     penaltyMessage?: string;
+    totalProblemsInLevel: number;
+    currentQuestionAttempts: number;
 }
 
 interface AnswerResult {
@@ -38,6 +40,7 @@ interface AnswerResult {
     isLevelComplete: boolean;
     isFinalComplete: boolean;
     level: number;
+    earnedPoints: number;
 }
 
 type FeedbackType = 'correct' | 'wrong' | null;
@@ -454,10 +457,10 @@ export default function StudentLearnPage() {
                     </div>
                     <div className={styles.progressContainer}>
                         <div className={styles.progressLabels}>
-                            <span>레벨 {currentLevel} 진행 ({(answerResult?.newProgressIndex ?? question?.progressIndex ?? 0) % 100}/100)</span>
+                            <span>레벨 {currentLevel} 진행 ({question?.questionNumber ?? 1}/{question?.totalProblemsInLevel ?? 12})</span>
                         </div>
                         <div className={styles.progressBarTrack}>
-                            <div className={styles.progressBarFill} style={{ width: `${((answerResult?.newProgressIndex ?? question?.progressIndex ?? 0) % 100)}%` }} />
+                            <div className={styles.progressBarFill} style={{ width: `${((question?.questionNumber ?? 1) / (question?.totalProblemsInLevel ?? 12)) * 100}%` }} />
                         </div>
                     </div>
                 </div>
@@ -487,7 +490,15 @@ export default function StudentLearnPage() {
                 ) : question ? (
                     <div key={question.questionId} className={styles.questionCard}>
                         <div className={styles.questionHeader}>
-                            <div className={styles.questionCounter}>문제 {question.questionNumber} / 100 (획득 가능: {question.questionPoint}P)</div>
+                            <div className={styles.questionCounter}>
+                                문제 {question.questionNumber} / {question.totalProblemsInLevel}
+                                (획득 가능: {(() => {
+                                    const attempts = question.currentQuestionAttempts + wrongIndices.length;
+                                    if (attempts === 1) return 5;
+                                    if (attempts === 2) return 3;
+                                    return 1;
+                                })()}P)
+                            </div>
                             <h2 className={styles.questionText}>{question.question}</h2>
                         </div>
 
@@ -515,7 +526,7 @@ export default function StudentLearnPage() {
                                 <button
                                     key={idx}
                                     className={`${styles.btnOption} ${(feedback === 'correct' && selectedIndex === idx) ? styles.correct :
-                                            wrongIndices.includes(idx) ? styles.wrong : ''
+                                        wrongIndices.includes(idx) ? styles.wrong : ''
                                         }`}
                                     onClick={() => handleAnswer(idx)}
                                     disabled={feedback === 'correct' || wrongIndices.includes(idx)}
@@ -527,25 +538,30 @@ export default function StudentLearnPage() {
                             ))}
                         </div>
                     </div>
-                ) : null}
-            </main>
+                ) : null
+                }
+            </main >
 
             <ComboOverlay combo={activeCombo} onDone={handleComboAnimationDone} />
-            {showLevelClear && (
-                <LevelClearOverlay
-                    level={currentLevel}
-                    isFinal={currentLevel === 100}
-                    onNext={() => { setShowLevelClear(false); fetchQuestion(); }}
-                    onRestart={handleRestart}
-                />
-            )}
-            {showLevelModal && (
-                <LevelSelectModal
-                    onSelect={handleSelectLevel}
-                    onSkip={() => handleSelectLevel(1, true)}
-                    onClose={() => setShowLevelModal(false)}
-                />
-            )}
-        </div>
+            {
+                showLevelClear && (
+                    <LevelClearOverlay
+                        level={currentLevel}
+                        isFinal={currentLevel === 100}
+                        onNext={() => { setShowLevelClear(false); fetchQuestion(); }}
+                        onRestart={handleRestart}
+                    />
+                )
+            }
+            {
+                showLevelModal && (
+                    <LevelSelectModal
+                        onSelect={handleSelectLevel}
+                        onSkip={() => handleSelectLevel(1, true)}
+                        onClose={() => setShowLevelModal(false)}
+                    />
+                )
+            }
+        </div >
     );
 }

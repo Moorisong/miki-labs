@@ -25,8 +25,8 @@ export const getQuestion = async (
         }
 
         const { progressIndex, classCode } = studentDoc;
-        const difficulty = (req.query.difficulty as string) || 'easy';
-        const problem = ChicorunProblemService.generateQuestion(student.studentId, classCode, progressIndex, difficulty);
+        const difficulty = req.query.difficulty as 'easy' | 'medium' | 'hard';
+        const problem = await ChicorunProblemService.getQuestion(student.studentId, classCode, progressIndex, difficulty);
 
         res.json({
             success: true,
@@ -45,7 +45,9 @@ export const getQuestion = async (
                 point: studentDoc.point,
                 questionPoint: problem.point,
                 penaltyMessage: problem.penaltyMessage,
-                questionNumber: (progressIndex % 100) + 1,
+                questionNumber: problem.questionNumber,
+                totalProblemsInLevel: problem.totalProblemsInLevel,
+                currentQuestionAttempts: studentDoc.currentQuestionAttempts || 1,
             },
         });
     } catch (error) {
@@ -84,12 +86,12 @@ export const submitAnswer = async (
             throw new AppError(404, 'ERROR_STUDENT_NOT_FOUND: 학생 정보를 찾을 수 없습니다.');
         }
 
-        // 서버에서 해당 progressIndex의 문제를 다시 생성하여 검증
-        const problem = ChicorunProblemService.generateQuestion(
+        // 서버에서 해당 progressIndex의 문제를 다시 조회하여 검증
+        const problem = await ChicorunProblemService.getQuestion(
             student.studentId,
             studentDoc.classCode,
             studentDoc.progressIndex,
-            difficulty || 'easy'
+            difficulty as 'easy' | 'medium' | 'hard'
         );
 
         // questionId 및 seed 검증 (무결성)
@@ -100,21 +102,34 @@ export const submitAnswer = async (
         const isCorrect = selectedIndex === problem.answer;
 
         if (isCorrect) {
-            // 정답 처리: progressIndex 및 point 증가
+            // 시도 횟수별 포인트 계산 (1회: 5P, 2회: 3P, 3회 이상: 1P)
+            const attempts = studentDoc.currentQuestionAttempts || 1;
+            let rewardPoints = 1;
+            if (attempts === 1) rewardPoints = 5;
+            else if (attempts === 2) rewardPoints = 3;
+            else rewardPoints = 1;
+
+            // 정답 처리: progressIndex 및 point 증가, currentQuestionAttempts 초기화
             const updatedStudent = await ChicorunStudentModel.findByIdAndUpdate(
                 student.studentId,
-                { $inc: { progressIndex: 1, point: problem.point || 10 } },
+                {
+                    $inc: { progressIndex: 1, point: rewardPoints },
+                    $set: { currentQuestionAttempts: 1 }
+                },
                 { new: true }
-            ).lean();
+            );
 
-            const newProgressIndex = updatedStudent?.progressIndex ?? 0;
-            const isLevelComplete = newProgressIndex % 100 === 0 && newProgressIndex > 0;
-            const isFinalComplete = newProgressIndex >= 10000;
+            if (!updatedStudent) throw new AppError(500, 'ERROR_DB: 업데이트 실패');
 
-            if (isLevelComplete && updatedStudent) {
-                // 레벨 업그레이드
+            const newProgressIndex = updatedStudent.progressIndex;
+            const { level: newLevel, orderIndex } = ChicorunProblemService.getLevelAndOrderIndex(newProgressIndex);
+
+            const isLevelComplete = orderIndex === 1 && newProgressIndex > 0;
+            const isFinalComplete = newProgressIndex >= 1500;
+
+            if (isLevelComplete) {
                 await ChicorunStudentModel.findByIdAndUpdate(student.studentId, {
-                    $set: { currentLevel: Math.floor(newProgressIndex / 100) + 1 }
+                    $set: { currentLevel: newLevel }
                 });
             }
 
@@ -124,13 +139,20 @@ export const submitAnswer = async (
                     isCorrect: true,
                     explanation: problem.explanation,
                     newProgressIndex,
-                    newPoint: updatedStudent?.point,
-                    level: Math.floor(newProgressIndex / 100) + 1,
+                    newPoint: updatedStudent.point,
+                    earnedPoints: rewardPoints,
+                    level: newLevel,
                     isLevelComplete,
                     isFinalComplete,
                 },
             });
         } else {
+            // 오답 처리: 시도 횟수 증가
+            await ChicorunStudentModel.findByIdAndUpdate(student.studentId, {
+                $inc: { currentQuestionAttempts: 1 }
+            });
+
+            const { level } = ChicorunProblemService.getLevelAndOrderIndex(studentDoc.progressIndex);
             res.json({
                 success: true,
                 data: {
@@ -139,7 +161,7 @@ export const submitAnswer = async (
                     correctIndex: problem.answer,
                     newProgressIndex: studentDoc.progressIndex,
                     newPoint: studentDoc.point,
-                    level: Math.floor(studentDoc.progressIndex / 100) + 1,
+                    level: level,
                     isLevelComplete: false,
                     isFinalComplete: false,
                 },
@@ -177,11 +199,12 @@ export const selectLevel = async (
         }
 
         // 해당 레벨의 시작 인덱스로 재매핑
-        const newProgressIndex = (level - 1) * 100;
+        const newProgressIndex = ChicorunProblemService.getStartProgressIndexForLevel(level);
 
         const updateData: any = {
             currentLevel: level,
             progressIndex: newProgressIndex,
+            currentQuestionAttempts: 1,
         };
 
         if (isInitial) {
@@ -226,7 +249,7 @@ export const resetProgress = async (
         }
 
         await ChicorunStudentModel.findByIdAndUpdate(student.studentId, {
-            $set: { progressIndex: 0, currentLevel: 1 },
+            $set: { progressIndex: 0, currentLevel: 1, currentQuestionAttempts: 1 },
         });
 
         res.json({
