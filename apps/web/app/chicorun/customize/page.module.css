@@ -41,47 +41,75 @@
 }
 
 .layoutGrid {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+    .layoutGrid {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 2rem;
+        align-items: flex-start;
+    }
 }
 
 .previewPanel {
     background: white;
     border-radius: 1.5rem;
     box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    padding: 2rem;
-    margin-top: 1.5rem;
+    padding: 1.5rem;
     opacity: 1;
     animation: slideRight 0.5s ease-out;
 }
 
+@media (min-width: 1024px) {
+    .previewPanel {
+        position: sticky;
+        top: calc(var(--header-height, 64px) + 1.25rem);
+        padding: 1rem;
+    }
+}
+
 .previewHeader {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     text-align: center;
 }
 
 .stickyPreviewWrapper {
-    position: -webkit-sticky;
-    position: sticky;
-    top: var(--header-height, 64px);
-    z-index: 1000;
-    margin: -1rem -1rem 1rem -1rem;
-    padding: 0.75rem 0.5rem;
     display: flex;
     justify-content: center;
-    width: calc(100% + 2rem);
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
+    width: 100%;
+}
+
+@media (max-width: 1023px) {
+    .stickyPreviewWrapper {
+        position: -webkit-sticky;
+        position: sticky;
+        top: var(--header-height, 64px);
+        z-index: 1000;
+        margin: -1rem -1rem 0 -1rem;
+        padding: 0.4rem 0.5rem;
+        width: calc(100% + 2rem);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
 }
 
 @media (min-width: 641px) {
     .stickyPreviewWrapper {
-        margin: -1rem -2rem 2rem -2rem;
-        padding: 1rem 2rem;
-        width: calc(100% + 4rem);
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        background: transparent;
+        backdrop-filter: none;
+        border-bottom: none;
+        box-shadow: none;
     }
 }
 
@@ -96,7 +124,7 @@
     display: flex;
     justify-content: center;
     width: 100%;
-    padding: 1.5rem 0;
+    padding: 0.5rem 0;
 }
 
 
@@ -152,12 +180,10 @@
 .optionsContainer {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1.5rem;
-    margin-top: 3rem;
+    gap: 1.25rem;
     width: 100%;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0;
+    min-height: 50vh;
 }
 
 @media (min-width: 1024px) {
@@ -612,62 +638,88 @@
 }
 
 
-.btnStickerFAB {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.6rem 1.2rem;
-    border-radius: 9999px;
-    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
-    border: 2px solid white;
-    color: white;
-    font-weight: 800;
-    font-size: 0.95rem;
-    box-shadow: 0 4px 6px -1px rgba(124, 58, 237, 0.2);
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
 .btnStickerText {
     display: inline;
 }
 
-@media (max-width: 640px) {
-    .btnStickerFAB {
-        padding: 0.5rem 0.9rem;
-        font-size: 0.8rem;
-    }
-
-    .btnStickerText {
-        display: none;
-        /* Hide text on small screens, keep only emoji */
-    }
-
-    .subtitle {
-        font-size: 0.85rem;
-    }
-
-    .hintText {
-        font-size: 0.8rem;
-    }
-
-    .previewHeaderDescription {
-        font-size: 0.75rem !important;
-    }
-
-    .panelTitle {
-        font-size: 1.1rem;
-    }
+.alwaysVisibleActions {
+    margin-bottom: 1.25rem;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    padding-bottom: 0.75rem;
 }
 
-.btnStickerFAB:hover {
-    transform: scale(1.05) rotate(3deg);
-    box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.3);
-    background: linear-gradient(135deg, #c084fc 0%, #9333ea 100%);
+.btnStickerActionCompact {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1.25rem;
+    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    border: none;
+    border-radius: 1rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 6px -1px rgba(124, 58, 237, 0.2);
 }
 
-.btnStickerFAB:active {
-    transform: scale(0.95);
+.btnStickerActionCompact:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px -3px rgba(124, 58, 237, 0.3);
+}
+
+.btnIconSmall {
+    font-size: 1.25rem;
+}
+
+.btnLabelMainSmall {
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.emptyStateContainerSmall {
+    text-align: left;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 1.25rem;
+    border: 2px dashed #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.emptyStateIconSmall {
+    font-size: 2rem;
+}
+
+.emptyStateTitleSmall {
+    color: #1e293b;
+    font-size: 1rem;
+    font-weight: 800;
+    margin: 0 0 0.25rem 0;
+}
+
+.emptyStateDescriptionSmall {
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .colorPickerSection {
