@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
-import Link from 'next/link';
 import {
     CHICORUN_API,
     CHICORUN_STORAGE_KEY,
@@ -15,12 +14,19 @@ import {
 interface QuestionData {
     questionId: string;
     seed: string;
+    passage: string;
     question: string;
     options: string[];
     level: number;
+    difficulty: 'easy' | 'medium' | 'hard';
+    questionType: string;
+    wordCount: number;
+    explanation: string;
     questionNumber: number;
     progressIndex: number;
     point: number;
+    questionPoint: number;
+    penaltyMessage?: string;
 }
 
 interface AnswerResult {
@@ -57,14 +63,6 @@ const START_LEVEL_OPTIONS: LevelOption[] = [
 ];
 
 // ─── 아이콘 ──────────────────────────────────────────────────────────────────────
-const IconBook = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-    </svg>
-);
-
 const IconStar = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="#eab308" stroke="#ca8a04"
         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -89,7 +87,7 @@ const IconClass = () => (
 
 // ─── 유틸 함수 ─────────────────────────────────────────────────────────────────
 function getAuthHeader(): Record<string, string> {
-    const token = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
+    const token = typeof window !== 'undefined' ? localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN) : null;
     return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -135,18 +133,11 @@ function LevelSelectModal({
     currentSelected?: number;
 }) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
-    const [dontShowAgain, setDontShowAgain] = useState(false);
 
     const handleConfirm = () => {
         const option = START_LEVEL_OPTIONS.find(o => o.id === selectedId);
         if (option) {
             onSelect(option.startLevel, !currentSelected);
-        }
-    };
-
-    const handleSkip = () => {
-        if (onSkip) {
-            onSkip();
         }
     };
 
@@ -194,19 +185,9 @@ function LevelSelectModal({
                         학습 시작하기
                     </button>
                     {onSkip && (
-                        <div className={styles.skipActionsContainer}>
-                            <button className={styles.btnSkipLevel} onClick={handleSkip}>
-                                나중에 선택할게요 (1레벨 시작)
-                            </button>
-                            <label className={styles.checkDontShowLabel}>
-                                <input
-                                    type="checkbox"
-                                    checked={dontShowAgain}
-                                    onChange={(e) => setDontShowAgain(e.target.checked)}
-                                />
-                                다시 보지 않기
-                            </label>
-                        </div>
+                        <button className={styles.btnSkipLevel} onClick={onSkip}>
+                            나중에 선택할게요 (1레벨 시작)
+                        </button>
                     )}
                 </div>
             </div>
@@ -237,15 +218,6 @@ function LevelClearOverlay({
     onNext: () => void;
     onRestart: () => void;
 }) {
-    const quotes = [
-        '"천 리 길도 한 걸음부터." - 노자',
-        '"불가능이란 단어는 바보들의 사전에나 있다." - 나폴레옹',
-        '"성공의 비결은 단 한 가지, 잘할 수 있는 일에 광적으로 집중하는 것이다." - 빌 게이츠',
-        '"실패는 성공의 어머니다." - 토마스 에디슨',
-        '"배움에는 끝이 없다." - 퇴계 이황',
-    ];
-    const quote = quotes[(level - 1) % quotes.length];
-
     return (
         <div className={styles.comboOverlay} style={{ background: 'rgba(0,0,0,0.85)' }}>
             <div className={styles.levelClearCard}>
@@ -253,24 +225,14 @@ function LevelClearOverlay({
                     <>
                         <div className={styles.comboEmoji}>🏆</div>
                         <div className={styles.levelClearTitle}>100레벨 달성!</div>
-                        <div className={styles.levelClearQuote}>
-                            모든 레벨을 완주했습니다! 정말 대단해요! 🎉
-                        </div>
-                        <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-                            <button className={styles.btnLevelNext} onClick={onRestart}
-                                style={{ background: 'linear-gradient(90deg, #a855f7, #ec4899)' }}>
-                                🔄 처음부터 다시
-                            </button>
-                        </div>
+                        <div className={styles.levelClearQuote}>모든 레벨을 완주했습니다! 정말 대단해요! 🎉</div>
+                        <button className={styles.btnLevelNext} onClick={onRestart}>🔄 다시 도전하기</button>
                     </>
                 ) : (
                     <>
                         <div className={styles.comboEmoji}>🎉</div>
                         <div className={styles.levelClearTitle}>레벨 {level - 1} 클리어!</div>
-                        <div className={styles.levelClearQuote}>{quote}</div>
-                        <button className={styles.btnLevelNext} onClick={onNext}>
-                            다음 레벨 도전 →
-                        </button>
+                        <button className={styles.btnLevelNext} onClick={onNext}>다음 레벨로 이동 →</button>
                     </>
                 )}
             </div>
@@ -284,22 +246,19 @@ export default function StudentLearnPage() {
     const [question, setQuestion] = useState<QuestionData | null>(null);
     const [feedback, setFeedback] = useState<FeedbackType>(null);
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+    const [wrongIndices, setWrongIndices] = useState<number[]>([]);
     const [answerResult, setAnswerResult] = useState<AnswerResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [failCount, setFailCount] = useState(0);
-    const [showZeroPointMsg, setShowZeroPointMsg] = useState(false);
     const [className, setClassName] = useState<string>('');
 
-    // 레벨 시스템 상태
+    // 레벨 및 난이도 시스템 상태
     const [currentLevel, setCurrentLevel] = useState<number>(1);
-    const [startLevel, setStartLevel] = useState<number | null>(null);
-    const [adjustmentCount, setAdjustmentCount] = useState<number>(0);
-    const [correctCombo, setCorrectCombo] = useState<number>(0);
-    const [incorrectTotal, setIncorrectTotal] = useState<number>(0);
+    const [selectedDifficulty, setSelectedDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
     const [showLevelModal, setShowLevelModal] = useState(false);
     const [adjustMessage, setAdjustMessage] = useState<string | null>(null);
     const [activeCombo, setActiveCombo] = useState<ComboType>(null);
     const [showLevelClear, setShowLevelClear] = useState(false);
+    const [correctCombo, setCorrectCombo] = useState<number>(0);
 
     const answerLockRef = useRef(false);
 
@@ -309,15 +268,10 @@ export default function StudentLearnPage() {
             try {
                 const info = JSON.parse(studentInfoStr);
                 setClassName(info.className || info.classCode || '');
-                const hasStarted = (info.startLevel && info.startLevel !== 0) || (info.progressIndex && info.progressIndex > 0);
+                setCurrentLevel(info.currentLevel || 1);
 
-                if (hasStarted) {
-                    const fallbackLevel = Math.floor((info.progressIndex || 0) / 100) + 1;
-                    setCurrentLevel(info.currentLevel || fallbackLevel);
-                    setStartLevel(info.startLevel || 0);
-                    setAdjustmentCount(info.adjustmentCount || 0);
-                } else {
-                    // 선택 이력이 없고, 1번 문제도 풀지 않은 완전 초기 상태인 경우에만 표시
+                // progressIndex가 0인 신입생만 모달 표시
+                if (info.progressIndex === 0 && !info.currentLevel) {
                     setShowLevelModal(true);
                 }
             } catch (e) {
@@ -326,7 +280,7 @@ export default function StudentLearnPage() {
         }
     }, []);
 
-    const fetchQuestion = useCallback(async () => {
+    const fetchQuestion = useCallback(async (difficultyOverride?: 'easy' | 'medium' | 'hard') => {
         const token = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
         if (!token) {
             router.replace(CHICORUN_ROUTES.JOIN);
@@ -335,43 +289,36 @@ export default function StudentLearnPage() {
 
         setIsLoading(true);
         try {
-            const res = await fetch(CHICORUN_API.QUESTION, {
+            const difficulty = difficultyOverride || selectedDifficulty;
+            const res = await fetch(`${CHICORUN_API.QUESTION}?difficulty=${difficulty}`, {
                 headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
             });
             const data = await res.json();
 
-            if (!data.success) {
-                if (data.error?.includes('ERROR_UNAUTHORIZED') ||
-                    data.error?.includes('ERROR_STUDENT_NOT_FOUND') ||
-                    res.status === 401 || res.status === 404) {
-                    localStorage.removeItem(CHICORUN_STORAGE_KEY.TOKEN);
-                    localStorage.removeItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
-                    router.replace(CHICORUN_ROUTES.JOIN);
-                    return;
-                }
-                throw new Error(data.error);
-            }
+            if (!data.success) throw new Error(data.error);
 
             setQuestion(data.data as QuestionData);
             setFeedback(null);
             setSelectedIndex(null);
+            setWrongIndices([]);
             setAnswerResult(null);
-            setFailCount(0);
-            setShowZeroPointMsg(false);
-            if (data.data.level) {
-                setCurrentLevel(data.data.level);
-            }
+            if (data.data.level) setCurrentLevel(data.data.level);
             answerLockRef.current = false;
         } catch (err) {
             console.error('Failed to fetch question:', err);
         } finally {
             setIsLoading(false);
         }
-    }, [router]);
+    }, [router, selectedDifficulty]);
 
     useEffect(() => {
         fetchQuestion();
     }, [fetchQuestion]);
+
+    const handleDifficultyChange = (diff: 'easy' | 'medium' | 'hard') => {
+        setSelectedDifficulty(diff);
+        fetchQuestion(diff);
+    };
 
     const handleAnswer = async (index: number) => {
         if (answerLockRef.current || feedback === 'correct' || !question) return;
@@ -387,6 +334,7 @@ export default function StudentLearnPage() {
                     questionId: question.questionId,
                     seed: question.seed,
                     selectedIndex: index,
+                    difficulty: selectedDifficulty
                 }),
             });
 
@@ -400,102 +348,32 @@ export default function StudentLearnPage() {
                 setFeedback('correct');
                 const newCombo = correctCombo + 1;
                 setCorrectCombo(newCombo);
-                setIncorrectTotal(0); // 연속 정답시 오답 카운트 초기화 (연속 정답 규칙)
 
-                // 콤보 연출
-                if (newCombo > 0 && newCombo % 10 === 0) {
-                    setActiveCombo('combo10');
-                } else if (newCombo === 5) {
-                    setActiveCombo('combo5');
-                } else if (newCombo === 3) {
-                    setActiveCombo('combo3');
-                }
+                if (newCombo > 0 && newCombo % 10 === 0) setActiveCombo('combo10');
+                else if (newCombo === 5) setActiveCombo('combo5');
+                else if (newCombo === 3) setActiveCombo('combo3');
 
-                // 자동 레벨 조정 (첫 10문제)
-                if (adjustmentCount < 10 && startLevel !== null && startLevel !== 0) {
-                    let levelOffset = 0;
-                    if (newCombo >= 8) levelOffset = 3;
-                    else if (newCombo >= 5) levelOffset = 2;
-                    else if (newCombo >= 3) levelOffset = 1;
-
-                    if (levelOffset > 0) {
-                        const nextLevel = Math.min(startLevel + 5, Math.min(100, Math.max(1, startLevel + levelOffset)));
-                        if (nextLevel > currentLevel) {
-                            await handleAutoAdjust(nextLevel);
-                        }
-                    }
-                }
-
-                if (question.point === 0 && result.newPoint === 0) {
-                    setShowZeroPointMsg(true);
-                }
-
-                // 로컬 스토리지 진도 업데이트
                 updateLocalStudentInfo({
                     progressIndex: result.newProgressIndex,
                     currentLevel: result.level,
                 });
 
                 if (result.isLevelComplete || result.isFinalComplete) {
-                    setTimeout(() => {
-                        setShowLevelClear(true);
-                    }, activeCombo ? 2000 : 800);
-                } else {
-                    if (!activeCombo) {
-                        setTimeout(fetchQuestion, 1200);
-                    }
+                    setTimeout(() => setShowLevelClear(true), activeCombo ? 2000 : 800);
+                } else if (!activeCombo) {
+                    setTimeout(fetchQuestion, 1200);
                 }
             } else {
                 setFeedback('wrong');
                 setCorrectCombo(0);
-                const newIncorrectTotal = incorrectTotal + 1;
-                setIncorrectTotal(newIncorrectTotal);
-                setFailCount(prev => prev + 1);
-
-                // 자동 레벨 조정 (오답 규칙)
-                if (adjustmentCount < 10 && startLevel !== null && startLevel !== 0) {
-                    let levelOffset = 0;
-                    if (newIncorrectTotal >= 4) levelOffset = -2;
-                    else if (newIncorrectTotal >= 2) levelOffset = -1;
-
-                    if (levelOffset < 0) {
-                        const nextLevel = Math.max(startLevel - 5, Math.max(1, startLevel + levelOffset));
-                        if (nextLevel < currentLevel) {
-                            await handleAutoAdjust(nextLevel);
-                        }
-                    }
+                if (!wrongIndices.includes(index)) {
+                    setWrongIndices(prev => [...prev, index]);
                 }
                 answerLockRef.current = false;
-            }
-
-            // 조정 카운트 증가
-            if (adjustmentCount < 10) {
-                setAdjustmentCount(prev => prev + 1);
             }
         } catch (err) {
             console.error('Failed to submit answer:', err);
             answerLockRef.current = false;
-        }
-    };
-
-    const handleAutoAdjust = async (nextLevel: number) => {
-        try {
-            const res = await fetch(CHICORUN_API.LEVEL, {
-                method: 'POST',
-                headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    level: nextLevel,
-                    adjustmentCount: adjustmentCount + 1
-                }),
-            });
-            const data = await res.json();
-            if (data.success) {
-                setCurrentLevel(nextLevel);
-                setAdjustMessage(`실력에 맞춰 레벨이 ${nextLevel}로 조정되었습니다!`);
-                updateLocalStudentInfo({ currentLevel: nextLevel, adjustmentCount: adjustmentCount + 1 });
-            }
-        } catch (e) {
-            console.error(e);
         }
     };
 
@@ -519,17 +397,9 @@ export default function StudentLearnPage() {
             const data = await res.json();
             if (data.success) {
                 setCurrentLevel(level);
-                if (isInitial) {
-                    setStartLevel(level);
-                    setAdjustmentCount(0);
-                    updateLocalStudentInfo({ currentLevel: level, startLevel: level, adjustmentCount: 0 });
-                } else {
-                    updateLocalStudentInfo({ currentLevel: level });
-                }
+                updateLocalStudentInfo({ currentLevel: level });
                 setShowLevelModal(false);
                 fetchQuestion();
-            } else {
-                alert(data.error || '레벨 변경에 실패했습니다.');
             }
         } catch (err) {
             console.error('Failed to select level:', err);
@@ -538,197 +408,142 @@ export default function StudentLearnPage() {
         }
     };
 
-    const handleResetProgress = async () => {
-        try {
-            await fetch(CHICORUN_API.RESET_PROGRESS, {
-                method: 'POST',
-                headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
-            });
-            setShowLevelClear(false);
-            fetchQuestion();
-        } catch (err) {
-            console.error('Failed to reset progress:', err);
-        }
-    };
-
-    const handleNextLevel = () => {
+    const handleRestart = async () => {
+        await fetch(CHICORUN_API.RESET_PROGRESS, {
+            method: 'POST',
+            headers: { ...getAuthHeader() },
+        });
+        updateLocalStudentInfo({ progressIndex: 0, currentLevel: 1 });
         setShowLevelClear(false);
+        setCurrentLevel(1);
         fetchQuestion();
     };
 
     const handleComboAnimationDone = useCallback(() => {
         setActiveCombo(null);
-        // 콤보 애니메이션 후 다음 문제로
-        if (feedback === 'correct' && answerResult) {
-            if (!answerResult.isLevelComplete && !answerResult.isFinalComplete) {
-                fetchQuestion();
-            } else {
-                setShowLevelClear(true);
-            }
+        if (feedback === 'correct' && answerResult && !answerResult.isLevelComplete) {
+            fetchQuestion();
         }
     }, [feedback, answerResult, fetchQuestion]);
 
-    const handleLogout = () => {
-        localStorage.removeItem(CHICORUN_STORAGE_KEY.TOKEN);
-        localStorage.removeItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
-        router.replace(CHICORUN_ROUTES.JOIN);
-    };
+    const getEstimatedTime = (wordCount: number) => `약 ${Math.ceil(wordCount / 2)}초`;
 
-    const currentPoint = answerResult?.newPoint ?? question?.point ?? 0;
-    const progressIndex = answerResult?.newProgressIndex ?? question?.progressIndex ?? 0;
-    const progressInLevel = progressIndex % CHICORUN_CONFIG.QUESTIONS_PER_LEVEL;
-    const progressPercent = (progressIndex / (CHICORUN_CONFIG.MAX_LEVEL * CHICORUN_CONFIG.QUESTIONS_PER_LEVEL)) * 100;
+    // 추천 난이도 계산
+    const recommendedDifficulty = currentLevel <= 30 ? 'easy' : currentLevel <= 70 ? 'medium' : 'hard';
 
     return (
         <div className={styles.container}>
             <main className={styles.main}>
                 {className && (
                     <div className={styles.classInfoContainer}>
-                        <div className={styles.classInfoBadge}>
-                            <IconClass />
-                            {className}
-                        </div>
+                        <div className={styles.classInfoBadge}><IconClass /> {className}</div>
                     </div>
                 )}
-                {/* 상단 정보 패널 */}
+
                 <div className={styles.topInfoPanel}>
                     <div className={styles.infoRow}>
                         <div className={styles.levelBadgeContainer}>
                             <div className={styles.levelBadge}>
-                                <IconStar />
-                                <span>Lv.{currentLevel}</span>
+                                <IconStar /> <span>현재 Lv.{currentLevel}</span>
                             </div>
-                            <button
-                                className={styles.btnLevelChange}
-                                onClick={() => setShowLevelModal(true)}
-                            >
-                                레벨 변경
-                            </button>
+                            <button className={styles.btnLevelChange} onClick={() => setShowLevelModal(true)}>레벨 변경</button>
                         </div>
-                        {correctCombo >= 3 && (
-                            <div style={{
-                                display: 'flex', alignItems: 'center', gap: '0.25rem',
-                                color: '#f97316', fontWeight: 800, fontSize: '0.95rem',
-                                animation: 'pulse 1s ease-in-out infinite',
-                            }}>
-                                🔥 {correctCombo}연속
-                            </div>
-                        )}
                         <div className={styles.pointBadge}>
-                            <IconZap />
-                            <span>{currentPoint}P</span>
+                            <IconZap /> <span>{answerResult?.newPoint ?? question?.point ?? 0}P</span>
                         </div>
                     </div>
-
                     <div className={styles.progressContainer}>
                         <div className={styles.progressLabels}>
-                            <span>레벨 {currentLevel} 진행 ({progressInLevel}/{CHICORUN_CONFIG.QUESTIONS_PER_LEVEL})</span>
-                            <span>전체 {Math.round(progressPercent)}%</span>
+                            <span>레벨 {currentLevel} 진행 ({(answerResult?.newProgressIndex ?? question?.progressIndex ?? 0) % 100}/100)</span>
                         </div>
                         <div className={styles.progressBarTrack}>
-                            <div
-                                className={styles.progressBarFill}
-                                style={{ width: `${progressPercent}%` }}
-                            />
+                            <div className={styles.progressBarFill} style={{ width: `${((answerResult?.newProgressIndex ?? question?.progressIndex ?? 0) % 100)}%` }} />
                         </div>
                     </div>
                 </div>
 
+                {/* 난이도 선택 */}
+                <div className={styles.difficultySwitcher}>
+                    {(['easy', 'medium', 'hard'] as const).map((diff) => (
+                        <button
+                            key={diff}
+                            className={`${styles.btnDifficulty} ${styles[diff]} ${selectedDifficulty === diff ? styles.active : ''}`}
+                            onClick={() => handleDifficultyChange(diff)}
+                        >
+                            {diff === 'easy' ? '🔥 초급' : diff === 'medium' ? '⚡ 중급' : '👑 고급'}
+                            {recommendedDifficulty === diff && <span className={styles.recommendBadge}>추천</span>}
+                        </button>
+                    ))}
+                </div>
 
-                {/* 문제 카드 */}
+                {question?.penaltyMessage && (
+                    <div className={styles.penaltyAlert}>⚠️ {question.penaltyMessage}</div>
+                )}
+
                 {isLoading ? (
-                    <div className={styles.questionCard} style={{ textAlign: 'center', padding: '4rem' }}>
-                        <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
-                        <p style={{ color: '#64748b', fontWeight: 600 }}>문제 불러오는 중...</p>
+                    <div className={styles.questionCard} style={{ textAlign: 'center' }}>
+                        <p>문제를 불러오는 중...</p>
                     </div>
                 ) : question ? (
                     <div key={question.questionId} className={styles.questionCard}>
                         <div className={styles.questionHeader}>
-                            <div className={styles.questionCounter}>
-                                레벨 {question.level} · 문제 {question.questionNumber} / {CHICORUN_CONFIG.QUESTIONS_PER_LEVEL}
-                            </div>
+                            <div className={styles.questionCounter}>문제 {question.questionNumber} / 100 (획득 가능: {question.questionPoint}P)</div>
                             <h2 className={styles.questionText}>{question.question}</h2>
                         </div>
 
-                        {/* 피드백 박스 */}
-                        {feedback && (
-                            <div className={`${styles.feedbackBox} ${feedback === 'correct' ? styles.feedbackCorrect : styles.feedbackWrong}`}>
-                                <div className={styles.feedbackTitle}>
-                                    {feedback === 'correct' ? '🎉 정답!' : '😅 오답!'}
+                        {question.passage && (
+                            <div className={styles.passageContainer}>
+                                <div className={styles.passageHeader}>
+                                    <div className={styles.passageMeta}>
+                                        <span>📝 {question.wordCount} 단어</span>
+                                        <span>⏱️ {getEstimatedTime(question.wordCount)}</span>
+                                    </div>
                                 </div>
-                                {feedback === 'wrong' && answerResult?.explanation && (
-                                    <div className={styles.feedbackDesc}>{answerResult.explanation}</div>
-                                )}
-                                {showZeroPointMsg && (
-                                    <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#92400e' }}>
-                                        😢 3번 시도해서 포인트가 0점이에요. 괜찮아! 다음엔 잘 할 수 있어!
-                                    </div>
-                                )}
-                                {failCount >= 3 && feedback === 'wrong' && (
-                                    <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#92400e' }}>
-                                        💪 {failCount}번째 도전 중! 포기하지 마세요!
-                                    </div>
-                                )}
+                                <div className={styles.passageBody}>{question.passage}</div>
                             </div>
                         )}
 
-                        {/* 선택지 */}
-                        <div className={styles.optionsGrid}>
-                            {question.options.map((option, idx) => {
-                                let btnClass = styles.btnOption;
-                                if (selectedIndex === idx) {
-                                    if (feedback === 'correct') btnClass += ` ${styles.correct}`;
-                                    else if (feedback === 'wrong') btnClass += ` ${styles.wrong}`;
-                                }
+                        {feedback && (
+                            <div className={`${styles.feedbackBox} ${feedback === 'correct' ? styles.feedbackCorrect : styles.feedbackWrong}`}>
+                                <div className={styles.feedbackTitle}>{feedback === 'correct' ? '🎉 정답!' : '😅 오답!'}</div>
+                                {feedback === 'wrong' && <div className={styles.feedbackDesc}>{question.explanation}</div>}
+                            </div>
+                        )}
 
-                                return (
-                                    <button
-                                        key={idx}
-                                        className={btnClass}
-                                        onClick={() => handleAnswer(idx)}
-                                        disabled={feedback === 'correct'}
-                                    >
-                                        {option}
-                                    </button>
-                                );
-                            })}
+                        <div className={styles.optionsGrid}>
+                            {question.options.map((option, idx) => (
+                                <button
+                                    key={idx}
+                                    className={`${styles.btnOption} ${(feedback === 'correct' && selectedIndex === idx) ? styles.correct :
+                                            wrongIndices.includes(idx) ? styles.wrong : ''
+                                        }`}
+                                    onClick={() => handleAnswer(idx)}
+                                    disabled={feedback === 'correct' || wrongIndices.includes(idx)}
+                                >
+                                    {selectedDifficulty === 'hard' ?
+                                        option.split(' ').map((w, i) => i % 3 === 0 ? <b key={i}>{w} </b> : w + ' ')
+                                        : option}
+                                </button>
+                            ))}
                         </div>
                     </div>
                 ) : null}
-
-                <div className={styles.hintText}>
-                    💡 정답을 선택하면 자동으로 다음 문제로 넘어갑니다
-                </div>
             </main>
 
-            {/* 콤보 오버레이 */}
             <ComboOverlay combo={activeCombo} onDone={handleComboAnimationDone} />
-
-            {/* 레벨 클리어 오버레이 */}
-            {showLevelClear && answerResult && (
+            {showLevelClear && (
                 <LevelClearOverlay
-                    level={answerResult.level}
-                    isFinal={answerResult.isFinalComplete}
-                    onNext={handleNextLevel}
-                    onRestart={handleResetProgress}
+                    level={currentLevel}
+                    isFinal={currentLevel === 100}
+                    onNext={() => { setShowLevelClear(false); fetchQuestion(); }}
+                    onRestart={handleRestart}
                 />
             )}
-
-            {/* 레벨 선택 모달 */}
             {showLevelModal && (
                 <LevelSelectModal
                     onSelect={handleSelectLevel}
-                    onSkip={startLevel === null ? () => handleSelectLevel(1, true) : undefined}
+                    onSkip={() => handleSelectLevel(1, true)}
                     onClose={() => setShowLevelModal(false)}
-                    currentSelected={currentLevel}
-                />
-            )}
-
-            {/* 자동 레벨 조정 토스트 */}
-            {adjustMessage && (
-                <LevelAdjustToast
-                    message={adjustMessage}
-                    onDone={() => setAdjustMessage(null)}
                 />
             )}
         </div>
