@@ -68,13 +68,13 @@ const stickerPlacementSchema = new Schema<IStickerPlacement>(
 
 const nicknameStyleSchema = new Schema<INicknameStyle>(
     {
-        color: { type: String, default: '#ffffff' },
+        color: { type: String, default: '#1e293b' },
         bold: { type: Boolean, default: false },
         italic: { type: Boolean, default: false },
         underline: { type: Boolean, default: false },
-        fontSize: { type: Number, default: 16 },
-        x: { type: Number, default: 120 },
-        y: { type: Number, default: 25 },
+        fontSize: { type: Number, default: 22 },
+        x: { type: Number, default: 20 },
+        y: { type: Number, default: 200 },
         rotate: { type: Number, default: 0 },
     },
     { _id: false }
@@ -110,28 +110,28 @@ const chicorunStudentSchema = new Schema<IChicorunStudent>(
         },
         badge: {
             type: String,
-            default: '🎯',
+            default: '/chicorun/badges/badge-starter-star.png',
         },
         nicknameStyle: {
             type: nicknameStyleSchema,
-            default: () => ({ color: '#ffffff', bold: false, italic: false, underline: false, rotate: 0 }),
+            default: () => ({ color: '#1e293b', bold: false, italic: false, underline: false, fontSize: 22, x: 20, y: 200, rotate: 0 }),
         },
         cardStyle: {
             type: String,
-            default: 'linear-gradient(135deg, #60a5fa, #06b6d4)',
+            default: 'white',
         },
         customize: {
             stickers: { type: [stickerPlacementSchema], default: [] },
             frameId: { type: String, default: 'default' },
             badgeId: { type: String, default: 'default' },
-            borderStyle: { type: Schema.Types.Mixed, default: () => ({ color: '#ffffff', width: 0, style: 'solid', radius: 16 }) },
-            pointStyle: { type: Schema.Types.Mixed, default: () => ({ color: '#f97316', background: 'transparent', borderWidth: 0, borderColor: '#ffffff', fontSize: 16, x: 580, y: 20 }) },
-            rankStyle: { type: Schema.Types.Mixed, default: () => ({ color: '#94a3b8', fontSize: 20, x: 24, y: 20 }) },
-            badgeStyle: { type: Schema.Types.Mixed, default: () => ({ fontSize: 24, x: 80, y: 20 }) },
+            borderStyle: { type: Schema.Types.Mixed, default: () => ({ color: '#cbd5e1', width: 2, style: 'solid', radius: 24 }) },
+            pointStyle: { type: Schema.Types.Mixed, default: () => ({ color: '#ea580c', background: 'linear-gradient(90deg, #ffedd5, #fef3c7)', borderWidth: 0, borderColor: '#ffffff', fontSize: 18, x: 20, y: 270 }) },
+            rankStyle: { type: Schema.Types.Mixed, default: () => ({ color: '#94a3b8', fontSize: 24, x: 110, y: 20 }) },
+            badgeStyle: { type: Schema.Types.Mixed, default: () => ({ fontSize: 80, x: 90, y: 60 }) },
         },
         ownedItems: {
             type: [String],
-            default: ['bg-white', 'border-solid'],
+            default: ['bg-white', 'badge-starter-star', 'border-solid'],
         },
         currentLevel: {
             type: Number,
