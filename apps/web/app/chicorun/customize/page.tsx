@@ -17,8 +17,6 @@ import { RankingCard, CARD_WIDTH, CARD_HEIGHT, CHICORUN_CARD_DEFAULTS, RankingEn
 const DEFAULT_OWNED_ITEMS = [
     'bg-white',
     'badge-starter-star',
-    'border-solid',
-    'border-dashed'
 ];
 
 // These will be derived from ALL_CHICORUN_ITEMS and ownedItems in the component
@@ -526,9 +524,7 @@ function CustomizeContent() {
         .filter(i => i.category === 'sticker' && ownedItems.includes(i.id))
         .map(i => ({ id: i.id, value: i.value }));
 
-    const AVAILABLE_BORDER_TYPES = ALL_CHICORUN_ITEMS
-        .filter(i => i.category === 'border' && ownedItems.includes(i.id))
-        .map(i => ({ id: i.id, name: i.name, value: i.value, icon: i.value === 'solid' ? '➖' : '---' }));
+
 
     const AVAILABLE_NICKNAME_COLORS = [
         '#1e293b', '#ffffff', '#ef4444', '#ea580c', '#f59e0b',
@@ -633,10 +629,9 @@ function CustomizeContent() {
         setActivePickerId(null);
         // Sync activeTab when element is selected from card
         if (selectedElement === 'base-card-bg') setActiveTab('background');
-        else if (selectedElement === 'base-card-border') setActiveTab('border');
         else if (selectedElement === 'nickname') setActiveTab('nickname');
         else if (selectedElement === 'badge') setActiveTab('badge');
-        else if (selectedElement === 'point') setActiveTab('nickname'); // Point style fits better under nickname or its own
+        else if (selectedElement === 'point') setActiveTab('nickname');
         else if (selectedElement?.startsWith('sticker-')) setActiveTab('sticker');
     }, [selectedElement]);
 
@@ -993,7 +988,6 @@ function CustomizeContent() {
                         <div className={styles.tabBar}>
                             {[
                                 { id: 'background', label: '배경' },
-                                { id: 'border', label: '테두리' },
                                 { id: 'nickname', label: '닉네임' },
                                 { id: 'badge', label: '뱃지' },
                                 { id: 'sticker', label: '스티커' }
@@ -1005,8 +999,8 @@ function CustomizeContent() {
                                         setActiveTab(tab.id as any);
                                         // If switching away from sticker or custom element, deselect it
                                         if (tab.id !== 'sticker' && selectedElement?.startsWith('sticker-')) setSelectedElement(null);
+                                        if (tab.id !== 'sticker' && selectedElement?.startsWith('sticker-')) setSelectedElement(null);
                                         if (tab.id === 'background') setSelectedElement('base-card-bg');
-                                        if (tab.id === 'border') setSelectedElement('base-card-border');
                                         if (tab.id === 'nickname') setSelectedElement('nickname');
                                         if (tab.id === 'badge') setSelectedElement('badge');
                                         if (tab.id === 'sticker' && !selectedElement?.startsWith('sticker-')) setSelectedElement(null);
@@ -1045,45 +1039,7 @@ function CustomizeContent() {
                             </div>
                         )}
 
-                        {/* 테두리 수정 메뉴 */}
-                        {activeTab === 'border' && (
-                            <div className={styles.optionSection}>
-                                <div className={styles.sectionTitle}>테두리 스타일</div>
-                                <div className={styles.gridBorderTypes}>
-                                    {AVAILABLE_BORDER_TYPES.map(type => (
-                                        <div
-                                            key={type.id}
-                                            onClick={() => setBorderStyle(p => ({ ...p, style: type.value }))}
-                                            className={`${styles.btnBorderType} ${borderStyle.style === type.value ? styles.selected : ''}`}
-                                            style={{ position: 'relative', cursor: 'pointer' }}
-                                        >
-                                            <span style={{ fontSize: '1.2rem', marginBottom: '4px' }}>{type.icon}</span>
-                                            <span style={{ fontSize: '0.8rem' }}>{type.name}</span>
-                                            {!DEFAULT_OWNED_ITEMS.includes(type.id) && (
-                                                <button
-                                                    className={styles.btnDiscardSmall}
-                                                    onClick={(e) => { e.stopPropagation(); discardItem(type.id); }}
-                                                    title="보유 목록에서 삭제"
-                                                >
-                                                    <IconTrashSmall />
-                                                </button>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className={styles.controlGroup}>
-                                    <div className={styles.controlSubTitle}>테두리 색상</div>
-                                    <ColorControl id="border-color" value={borderStyle.color} onChange={(val: string) => setBorderStyle(p => ({ ...p, color: val }))} activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
-                                </div>
 
-                                <div className={styles.sliderGroup} style={{ marginTop: '1.5rem' }}>
-                                    <div className={styles.sliderLabel}><span>테두리 두께</span> <span>{borderStyle.width}px</span></div>
-                                    <input type="range" min="0" max="15" value={borderStyle.width} onChange={e => setBorderStyle(p => ({ ...p, width: Number(e.target.value) }))} className={styles.sliderInput} />
-                                    <div className={styles.sliderLabel}><span>둥글기</span> <span>{borderStyle.radius}px</span></div>
-                                    <input type="range" min="0" max="100" value={borderStyle.radius} onChange={e => setBorderStyle(p => ({ ...p, radius: Number(e.target.value) }))} className={styles.sliderInput} />
-                                </div>
-                            </div>
-                        )}
 
 
                         {/* 스티커 추가 메뉴 */}

@@ -65,8 +65,8 @@ export const CHICORUN_CARD_DEFAULTS = {
     point: { x: 20, y: 270 }
 };
 
-const IconZap = ({ color = '#ea580c' }: { color?: string }) => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill={color} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const IconZap = ({ color = '#ea580c', size = '1.15em' }: { color?: string; size?: string | number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
     </svg>
 );
@@ -83,14 +83,14 @@ export const getBadgeStyles = (path: string) => {
 };
 
 export const getCardBorderStyle = (borderStyle: any) => {
-    if (!borderStyle) return {};
-    const { color, width, style, radius } = borderStyle;
+    // We now use a fixed, decent border for all cards as per user request
     const baseStyle: React.CSSProperties = {
-        borderRadius: `${radius !== undefined ? radius : 24}px`,
-        borderWidth: `${width !== undefined ? width : 3}px`,
-        borderColor: color || '#facc15',
-        borderStyle: ['solid', 'dashed', 'dotted'].includes(style) ? (style as any) : 'none',
+        borderRadius: '24px',
+        borderWidth: '3px',
+        borderColor: 'rgba(0, 0, 0, 0.06)',
+        borderStyle: 'solid',
         backgroundClip: 'padding-box',
+        // boxShadow is handled in the main component to account for isFirst state
     };
 
     return baseStyle;
@@ -189,8 +189,8 @@ export const RankingCard: React.FC<RankingCardProps> = ({
             ? { backgroundImage: user.cardStyle || 'white' }
             : { backgroundColor: user.cardStyle || 'white' }),
         ...getCardBorderStyle(user.customize?.borderStyle),
-        boxShadow: isFirst && user.customize?.borderStyle?.style !== 'neon' ? '0 20px 25px -5px rgba(250, 204, 21, 0.4)' : '0 4px 6px -1px rgba(0,0,0,0.1)',
-        overflow: isFirst || user.customize?.borderStyle?.style === 'ribbon' ? 'visible' : 'hidden',
+        boxShadow: isFirst ? '0 20px 25px -5px rgba(250, 204, 21, 0.4)' : '0 4px 12px rgba(0, 0, 0, 0.06), inset 0 0 0 1.5px rgba(255, 255, 255, 0.4)',
+        overflow: 'hidden', // Consistent overflow for all cards
     };
 
     return (
@@ -205,19 +205,14 @@ export const RankingCard: React.FC<RankingCardProps> = ({
                 className={styles.rankingCard}
                 style={cardStyles}
             >
-                {/* Background Click Area for Edit Mode - Moved to negative z-index to stay below content */}
-                {isEdit && [
+                {/* Background Click Area for Edit Mode - Simplified selection */}
+                {isEdit && (
                     <div
-                        key="bg-click-inner"
+                        key="bg-click-main"
                         onClick={(e) => { e.stopPropagation(); onSelectElement?.('base-card-bg'); }}
-                        style={{ position: 'absolute', inset: '20px', borderRadius: `${user.customize?.borderStyle?.radius || 24}px`, zIndex: -1, cursor: 'pointer' }}
-                    />,
-                    <div
-                        key="bg-click-outer"
-                        onClick={(e) => { e.stopPropagation(); onSelectElement?.('base-card-border'); }}
-                        style={{ position: 'absolute', inset: 0, borderRadius: `${user.customize?.borderStyle?.radius || 24}px`, zIndex: -2, cursor: 'pointer' }}
+                        style={{ position: 'absolute', inset: 0, borderRadius: '24px', zIndex: -1, cursor: 'pointer' }}
                     />
-                ]}
+                )}
 
 
                 {/* Stickers */}
@@ -340,13 +335,13 @@ export const RankingCard: React.FC<RankingCardProps> = ({
                             background: user.customize?.pointStyle?.background || 'linear-gradient(90deg, #ffedd5, #fef3c7)',
                             color: user.customize?.pointStyle?.color || '#ea580c',
                             border: user.customize?.pointStyle?.borderWidth ? `${user.customize.pointStyle.borderWidth}px solid ${user.customize.pointStyle.borderColor}` : 'none',
+                            fontSize: user.customize?.pointStyle?.fontSize ? `${user.customize.pointStyle.fontSize}px` : '1.1rem',
                         }}
                     >
                         <IconZap color={user.customize?.pointStyle?.color || '#ea580c'} />
                         <span className={styles.pointsText} style={{
                             color: user.customize?.pointStyle?.color || '#ea580c',
-                            fontSize: user.customize?.pointStyle?.fontSize ? `${user.customize.pointStyle.fontSize}px` : '1.1rem'
-                        }}>{user.point.toLocaleString()}P</span>
+                        }}>{user.point.toLocaleString()} P</span>
                     </div>,
                     {},
                     user.customize?.pointStyle?.fontSize || 18

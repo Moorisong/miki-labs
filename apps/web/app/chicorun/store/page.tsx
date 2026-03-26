@@ -22,7 +22,6 @@ const CATEGORIES = [
     { id: 'background', label: '배경' },
     { id: 'badge', label: '배지' },
     { id: 'sticker', label: '스티커' },
-    { id: 'border', label: '테두리' },
 ];
 
 
@@ -138,7 +137,7 @@ export default function StorePage() {
     const filteredItems = (activeTab === 'all'
         ? ALL_CHICORUN_ITEMS
         : ALL_CHICORUN_ITEMS.filter(item => item.category === activeTab)
-    ).filter(item => !DEFAULT_OWNED_ITEMS.includes(item.id));
+    ).filter(item => !DEFAULT_OWNED_ITEMS.includes(item.id) && item.category !== 'border');
 
     if (isLoading) {
         return <div className={styles.container}>로딩 중...</div>;
