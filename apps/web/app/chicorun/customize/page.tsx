@@ -120,6 +120,15 @@ const IconStore = () => (
     </svg>
 );
 
+const IconRefresh = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+        <path d="M21 3v5h-5"></path>
+        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+        <path d="M3 21v-5h5"></path>
+    </svg>
+);
+
 // ─── Components ────────────────────────────────────────────────────────────
 function DraggableElement({
     type,
@@ -565,11 +574,9 @@ function CustomizeContent() {
     const [activeTab, setActiveTab] = useState<'background' | 'border' | 'nickname' | 'badge' | 'sticker'>('background');
     const [activePickerId, setActivePickerId] = useState<string | null>(null);
 
-    const [isSticky, setIsSticky] = useState(false);
     const [scale, setScale] = useState(1);
     const [isMounted, setIsMounted] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
-    const stickySentinelRef = useRef<HTMLDivElement>(null);
 
     const updateScale = useCallback(() => {
         if (!containerRef.current) return;
@@ -582,20 +589,19 @@ function CustomizeContent() {
         const targetWidth = availableWidth - padding;
 
         const newScale = targetWidth / CARD_WIDTH;
-        const stickyFactor = isSticky ? 0.8 : 1;
 
         // On mobile/tablet, we want the card to be compact.
         if (availableWidth < 600) {
-            setScale(Math.min(0.95, Math.max(0.6, newScale)) * stickyFactor);
+            setScale(Math.min(0.95, Math.max(0.6, newScale)));
         } else if (availableWidth < 1024) {
-            setScale(Math.min(1, newScale) * stickyFactor);
+            setScale(Math.min(1, newScale));
         } else {
             // On desktop sidebar layout
             const sidebarTargetWidth = 320 - 40; // 320 grid col - padding
             const sidebarScale = sidebarTargetWidth / CARD_WIDTH;
-            setScale(Math.min(1, sidebarScale) * (isSticky ? 0.92 : 1));
+            setScale(Math.min(1, sidebarScale));
         }
-    }, [containerRef, isSticky]);
+    }, [containerRef]);
 
     useEffect(() => {
         setIsMounted(true);
@@ -605,23 +611,9 @@ function CustomizeContent() {
         const observer = new ResizeObserver(updateScale);
         if (containerRef.current) observer.observe(containerRef.current);
 
-        // Sticky Sentinel for compact sticky effect
-        const sentinelObserver = new IntersectionObserver(
-            ([entry]) => {
-                setIsSticky(!entry.isIntersecting);
-            },
-            {
-                rootMargin: '-65px 0px 0px 0px', // Header height is 64px
-                threshold: [0]
-            }
-        );
-
-        if (stickySentinelRef.current) sentinelObserver.observe(stickySentinelRef.current);
-
         return () => {
             window.removeEventListener('resize', updateScale);
             observer.disconnect();
-            sentinelObserver.disconnect();
         };
     }, [updateScale, isLoading]);
 
@@ -855,6 +847,16 @@ function CustomizeContent() {
     };
 
 
+    const handleReset = () => {
+        if (window.confirm('지금까지 수정한 내용을 초기화하고 마지막으로 저장된 상태로 되돌리시겠습니까?')) {
+            fetchMyInfo();
+            showToast('스타일이 초기화되었습니다.', 'success');
+            setSelectedElement(null);
+            setActivePickerId(null);
+        }
+    };
+
+
     const discardItem = (itemId: string) => {
         if (DEFAULT_OWNED_ITEMS.includes(itemId)) {
             showToast('기본 아이템은 삭제할 수 없습니다.', 'error');
@@ -926,7 +928,7 @@ function CustomizeContent() {
                             </div>
                         </div>
 
-                        <div ref={stickySentinelRef} style={{ height: '1px', width: '100%' }} />
+
 
                         {/* 미리보기영역 - 픽스 상태일때는 이 부분만 고정됨 */}
                         <div className={styles.stickyPreviewWrapper} ref={containerRef}>
@@ -1233,14 +1235,23 @@ function CustomizeContent() {
 
 
 
-                        {/* 저장 버튼은 항상 하단에 */}
-                        <div style={{ gridColumn: '1 / -1' }}>
+                        {/* 하단 액션 버튼 */}
+                        <div className={styles.actionButtons}>
+                            <button
+                                className={styles.btnReset}
+                                onClick={handleReset}
+                                disabled={isSaving || isLoading}
+                            >
+                                <IconRefresh />
+                                초기화 하기
+                            </button>
                             <button
                                 className={styles.btnSave}
                                 onClick={handleSave}
                                 disabled={isSaving}
                             >
-                                {isSaving ? '저장 중...' : '저장하기'}
+                                {isSaving ? <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>저장 중...</span> :
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><IconSave /> 저장하기</span>}
                             </button>
                         </div>
                     </div>
