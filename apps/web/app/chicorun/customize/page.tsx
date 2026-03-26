@@ -41,6 +41,7 @@ interface NicknameStyleType {
     x: number;
     y: number;
     rotate: number;
+    visible?: boolean;
 }
 interface BorderStyleType {
     color: string;
@@ -57,12 +58,14 @@ interface PointStyleType {
     x: number;
     y: number;
     rotate: number;
+    visible?: boolean;
 }
 interface BadgeStyleType {
     x: number;
     y: number;
     fontSize: number;
     rotate: number;
+    visible?: boolean;
 }
 
 // ─── Icons ─────────────────────────────────────────────────────────────────
@@ -142,7 +145,8 @@ function DraggableElement({
     isSelected = false,
     parentScale = 1,
     onSelect,
-    onUpdate
+    onUpdate,
+    initialFontSize
 }: {
     type: string;
     id?: string;
@@ -156,11 +160,16 @@ function DraggableElement({
     parentScale?: number;
     onSelect?: () => void;
     onUpdate?: (updates: { scale?: number; rotate?: number; fontSize?: number }) => void;
+    initialFontSize?: number;
 }) {
     const elementRef = useRef<HTMLDivElement>(null);
     const [isResizing, setIsResizing] = useState(false);
     const [isRotating, setIsRotating] = useState(false);
-    const [initialState, setInitialState] = useState<{ angle: number; distance: number; rotate: number; scale: number; fontSize: number } | null>(null);
+    const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+        setIsMobile(window.innerWidth < 768);
+    }, []);
+    const [initialState, setInitialState] = useState<{ angle: number; distance: number; rotate: number; scale: number; fontSize: number; centerX: number; centerY: number } | null>(null);
     const [{ isDragging, offset }, drag] = useDrag(() => ({
         type,
         item: { id, x: position.x, y: position.y },
@@ -171,29 +180,33 @@ function DraggableElement({
         canDrag: !isResizing && !isRotating, // Disable move drag when resizing/rotating
     }), [type, id, position.x, position.y, isResizing, isRotating]);
 
-    const handleHandleMouseDown = (e: React.MouseEvent | React.TouchEvent, action: 'resize' | 'rotate') => {
+    const handleHandlePointerDown = (e: React.PointerEvent, action: 'resize' | 'rotate') => {
+        if (e.button !== 0 && e.pointerType === 'mouse') return; // Only left-click for mouse
         e.stopPropagation();
-        e.preventDefault();
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
 
         const rect = elementRef.current?.getBoundingClientRect();
         if (!rect) return;
 
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
-        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-        const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+        const clientX = e.clientX;
+        const clientY = e.clientY;
 
         const angle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
         const distance = Math.sqrt(Math.pow(clientX - centerX, 2) + Math.pow(clientY - centerY, 2));
 
-        // Get current fontSize if it's a text element
-        let currentFontSize = 0;
-        if (type !== 'sticker') {
+        // Get initial fontSize from prop if provided, else fallback to computed
+        let currentFontSize = initialFontSize || 0;
+        if (!currentFontSize && type !== 'sticker') {
             const childDiv = elementRef.current?.querySelector('div, span') as HTMLElement;
-            if (childDiv) currentFontSize = parseInt(window.getComputedStyle(childDiv).fontSize);
+            if (childDiv) {
+                const computed = window.getComputedStyle(childDiv).fontSize;
+                currentFontSize = parseInt(computed) || 0;
+            }
         }
 
-        setInitialState({ angle, distance, rotate, scale, fontSize: currentFontSize });
+        setInitialState({ angle, distance, rotate, scale, fontSize: currentFontSize, centerX, centerY });
         if (action === 'resize') setIsResizing(true);
         else setIsRotating(true);
     };
@@ -201,14 +214,13 @@ function DraggableElement({
     useEffect(() => {
         if (!isResizing && !isRotating) return;
 
-        const handleMove = (e: MouseEvent | TouchEvent) => {
+        const handleMove = (e: PointerEvent) => {
             if (!initialState || !elementRef.current) return;
 
-            const rect = elementRef.current.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            const clientX = 'touches' in e ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
-            const clientY = 'touches' in e ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
+            const centerX = initialState.centerX;
+            const centerY = initialState.centerY;
+            const clientX = e.clientX;
+            const clientY = e.clientY;
 
             if (isRotating) {
                 const currentAngle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
@@ -222,27 +234,25 @@ function DraggableElement({
                     onUpdate?.({ scale: Number((initialState.scale * scaleFactor).toFixed(2)) });
                 } else {
                     const newFontSize = Math.round(initialState.fontSize * scaleFactor);
-                    onUpdate?.({ fontSize: Math.max(8, Math.min(200, newFontSize)) });
+                    onUpdate?.({ fontSize: Math.max(8, Math.min(300, newFontSize)) }); // Increased max a bit
                 }
             }
         };
 
-        const handleUp = () => {
+        const handleUp = (e: PointerEvent) => {
             setIsResizing(false);
             setIsRotating(false);
             setInitialState(null);
         };
 
-        window.addEventListener('mousemove', handleMove);
-        window.addEventListener('mouseup', handleUp);
-        window.addEventListener('touchmove', handleMove);
-        window.addEventListener('touchend', handleUp);
+        window.addEventListener('pointermove', handleMove);
+        window.addEventListener('pointerup', handleUp);
+        window.addEventListener('pointercancel', handleUp);
 
         return () => {
-            window.removeEventListener('mousemove', handleMove);
-            window.removeEventListener('mouseup', handleUp);
-            window.removeEventListener('touchmove', handleMove);
-            window.removeEventListener('touchend', handleUp);
+            window.removeEventListener('pointermove', handleMove);
+            window.removeEventListener('pointerup', handleUp);
+            window.removeEventListener('pointercancel', handleUp);
         };
     }, [isResizing, isRotating, initialState, type, onUpdate]);
 
@@ -284,14 +294,13 @@ function DraggableElement({
                 <>
                     {/* Rotation Handle (Top) */}
                     <div
-                        onMouseDown={(e) => handleHandleMouseDown(e, 'rotate')}
-                        onTouchStart={(e) => handleHandleMouseDown(e, 'rotate')}
+                        onPointerDown={(e) => handleHandlePointerDown(e, 'rotate')}
                         style={{
                             position: 'absolute',
                             top: '-24px',
                             left: '50%',
-                            width: '20px',
-                            height: '20px',
+                            width: isMobile ? '28px' : '20px',
+                            height: isMobile ? '28px' : '20px',
                             background: '#3b82f6',
                             border: '2px solid white',
                             borderRadius: '50%',
@@ -300,7 +309,7 @@ function DraggableElement({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                            boxShadow: '0 3px 6px rgba(0,0,0,0.3)',
                             zIndex: 102
                         }}
                     >
@@ -309,14 +318,13 @@ function DraggableElement({
 
                     {/* Resize Handle (Bottom Right) */}
                     <div
-                        onMouseDown={(e) => handleHandleMouseDown(e, 'resize')}
-                        onTouchStart={(e) => handleHandleMouseDown(e, 'resize')}
+                        onPointerDown={(e) => handleHandlePointerDown(e, 'resize')}
                         style={{
                             position: 'absolute',
                             bottom: '-10px',
                             right: '-10px',
-                            width: '20px',
-                            height: '20px',
+                            width: isMobile ? '28px' : '20px',
+                            height: isMobile ? '28px' : '20px',
                             background: '#3b82f6',
                             border: '2px solid white',
                             borderRadius: '50%',
@@ -324,7 +332,7 @@ function DraggableElement({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                            boxShadow: '0 3px 6px rgba(0,0,0,0.3)',
                             zIndex: 102
                         }}
                     >
@@ -537,6 +545,7 @@ function CustomizeContent() {
         x: CHICORUN_CARD_DEFAULTS.nickname.x,
         y: CHICORUN_CARD_DEFAULTS.nickname.y,
         rotate: 0,
+        visible: true,
     });
 
     const [borderStyle, setBorderStyle] = useState<BorderStyleType>({
@@ -555,6 +564,7 @@ function CustomizeContent() {
         x: CHICORUN_CARD_DEFAULTS.point.x,
         y: CHICORUN_CARD_DEFAULTS.point.y,
         rotate: 0,
+        visible: true,
     });
 
     const [badgeStyle, setBadgeStyle] = useState<BadgeStyleType>({
@@ -562,6 +572,7 @@ function CustomizeContent() {
         x: CHICORUN_CARD_DEFAULTS.badge.x,
         y: CHICORUN_CARD_DEFAULTS.badge.y,
         rotate: 0,
+        visible: true,
     });
 
     const [pointInfo, setPointInfo] = useState(0);
@@ -630,18 +641,18 @@ function CustomizeContent() {
     }, [selectedElement]);
 
 
-    const updateSelectedElement = (updates: { fontSize?: number; scale?: number; rotate?: number }) => {
+    const updateSelectedElement = (updates: { fontSize?: number; scale?: number; rotate?: number; visible?: boolean }) => {
         if (!selectedElement) return;
 
         if (selectedElement.startsWith('sticker-')) {
             const id = selectedElement.replace('sticker-', '');
             setStickers(prev => prev.map(s => s.id === id ? { ...s, scale: updates.scale ?? s.scale, rotate: updates.rotate ?? s.rotate } : s));
         } else if (selectedElement === 'nickname') {
-            setNicknameStyle(prev => ({ ...prev, fontSize: updates.fontSize ?? prev.fontSize, rotate: updates.rotate ?? prev.rotate }));
+            setNicknameStyle(prev => ({ ...prev, ...updates }));
         } else if (selectedElement === 'badge') {
-            setBadgeStyle(prev => ({ ...prev, fontSize: updates.fontSize ?? prev.fontSize, rotate: updates.rotate ?? prev.rotate }));
+            setBadgeStyle(prev => ({ ...prev, ...updates }));
         } else if (selectedElement === 'point') {
-            setPointStyle(prev => ({ ...prev, fontSize: updates.fontSize ?? prev.fontSize, rotate: updates.rotate ?? prev.rotate }));
+            setPointStyle(prev => ({ ...prev, ...updates }));
         }
     };
 
@@ -967,9 +978,7 @@ function CustomizeContent() {
                                                 {...props}
                                                 parentScale={scale}
                                                 onUpdate={(updates) => {
-                                                    if (updates.fontSize) updateSelectedElement({ fontSize: updates.fontSize });
-                                                    if (updates.scale) updateSelectedElement({ scale: updates.scale });
-                                                    if (updates.rotate !== undefined) updateSelectedElement({ rotate: updates.rotate });
+                                                    updateSelectedElement(updates);
                                                 }}
                                             />
                                         )}
@@ -1141,7 +1150,21 @@ function CustomizeContent() {
                         {/* 닉네임 선택 시 */}
                         {activeTab === 'nickname' && (
                             <div className={styles.optionSection}>
-                                <div className={styles.sectionTitle}>닉네임 스타일</div>
+                                <div className={styles.sectionTitle}>닉네임 설정</div>
+                                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                                    <button
+                                        className={`${styles.btnToggle} ${nicknameStyle.visible ? styles.active : ''}`}
+                                        onClick={() => setNicknameStyle(prev => ({ ...prev, visible: !prev.visible }))}
+                                    >
+                                        {nicknameStyle.visible ? '닉네임 표시됨' : '닉네임 숨김'}
+                                    </button>
+                                    <button
+                                        className={`${styles.btnToggle} ${pointStyle.visible ? styles.active : ''}`}
+                                        onClick={() => setPointStyle(prev => ({ ...prev, visible: !prev.visible }))}
+                                    >
+                                        {pointStyle.visible ? '포인트 표시됨' : '포인트 숨김'}
+                                    </button>
+                                </div>
                                 <div className={styles.controlGroup}>
                                     <div className={styles.controlSubTitle}>닉네임 색상</div>
                                     <div className={styles.gridColor} style={{ marginBottom: '1rem' }}>
@@ -1181,10 +1204,27 @@ function CustomizeContent() {
                         )}
 
 
-                        {/* 뱃지 선택 시 */}
                         {activeTab === 'badge' && (
                             <div className={styles.optionSection}>
-                                <div className={styles.sectionTitle}>대표 뱃지 설정</div>
+                                <div className={styles.sectionTitle}>뱃지 설정</div>
+                                <button
+                                    className={`${styles.btnToggle} ${badgeStyle.visible ? styles.active : ''}`}
+                                    onClick={() => setBadgeStyle(prev => ({ ...prev, visible: !prev.visible }))}
+                                    style={{
+                                        padding: '0.6rem 1rem',
+                                        borderRadius: '0.75rem',
+                                        border: '1px solid #e2e8f0',
+                                        background: badgeStyle.visible ? '#eff6ff' : 'white',
+                                        color: badgeStyle.visible ? '#3b82f6' : '#64748b',
+                                        fontWeight: 600,
+                                        fontSize: '0.9rem',
+                                        marginBottom: '1rem',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    {badgeStyle.visible ? '뱃지 표시됨' : '뱃지 숨김'}
+                                </button>
                                 <div className={styles.gridEmojis}>
                                     {AVAILABLE_BADGES.map(badge => (
                                         <div

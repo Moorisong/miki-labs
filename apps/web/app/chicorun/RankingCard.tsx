@@ -20,6 +20,7 @@ export interface RankingEntry {
         x?: number;
         y?: number;
         rotate?: number;
+        visible?: boolean;
     };
     customize?: {
         stickers?: { id: string; emoji: string; x: number; y: number; scale?: number; rotate?: number }[];
@@ -38,6 +39,7 @@ export interface RankingEntry {
             x: number;
             y: number;
             rotate?: number;
+            visible?: boolean;
         };
         rankStyle?: {
             color: string;
@@ -51,6 +53,7 @@ export interface RankingEntry {
             x: number;
             y: number;
             rotate?: number;
+            visible?: boolean;
         };
     };
 }
@@ -110,6 +113,7 @@ interface RankingCardProps {
         onUpdate?: (updates: { scale?: number; rotate?: number; fontSize?: number }) => void;
         children: React.ReactNode;
         style?: React.CSSProperties;
+        initialFontSize?: number;
     }) => React.ReactNode;
     selectedElement?: string | null;
     onSelectElement?: (id: string | null) => void;
@@ -134,7 +138,7 @@ export const RankingCard: React.FC<RankingCardProps> = ({
 }) => {
     const isEdit = mode === 'edit';
 
-    const renderContent = (type: string, id: string | undefined, position: { x: number; y: number }, rotate: number, scaleFactor: number, isSelected: boolean, onSelect: () => void, children: React.ReactNode, extraStyle: React.CSSProperties = {}) => {
+    const renderContent = (type: string, id: string | undefined, position: { x: number; y: number }, rotate: number, scaleFactor: number, isSelected: boolean, onSelect: () => void, children: React.ReactNode, extraStyle: React.CSSProperties = {}, fontSize?: number) => {
         const key = id || type;
         if (isEdit && renderDraggable) {
             return renderDraggable({
@@ -147,7 +151,8 @@ export const RankingCard: React.FC<RankingCardProps> = ({
                 onSelect,
                 onUpdate: updateElement,
                 children,
-                style: extraStyle
+                style: extraStyle,
+                initialFontSize: fontSize
             });
         }
 
@@ -247,7 +252,7 @@ export const RankingCard: React.FC<RankingCardProps> = ({
                 ))}
 
                 {/* Badge Icon */}
-                {renderContent(
+                {(!isEdit || user.customize?.badgeStyle?.visible !== false) && renderContent(
                     'badge',
                     undefined,
                     { x: bX, y: bY },
@@ -255,13 +260,16 @@ export const RankingCard: React.FC<RankingCardProps> = ({
                     1,
                     selectedElement === 'badge',
                     () => onSelectElement?.('badge'),
-                    <div style={{
-                        fontSize: user.customize?.badgeStyle?.fontSize ? `${user.customize.badgeStyle.fontSize}px` : '100px',
-                        lineHeight: 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
+                    <div
+                        onDoubleClick={() => isEdit && updateElement?.({ visible: false } as any)}
+                        style={{
+                            fontSize: user.customize?.badgeStyle?.fontSize ? `${user.customize.badgeStyle.fontSize}px` : '100px',
+                            lineHeight: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                    >
                         {user.badge?.startsWith('/') ? (
                             <div style={{
                                 background: getBadgeStyles(user.badge).bg,
@@ -284,11 +292,13 @@ export const RankingCard: React.FC<RankingCardProps> = ({
                                 />
                             </div>
                         ) : (user.badge || '')}
-                    </div>
+                    </div>,
+                    {},
+                    user.customize?.badgeStyle?.fontSize || 100
                 )}
 
                 {/* Nickname */}
-                {renderContent(
+                {(!isEdit || user.nicknameStyle?.visible !== false) && renderContent(
                     'nickname',
                     undefined,
                     { x: nX, y: nY },
@@ -297,6 +307,7 @@ export const RankingCard: React.FC<RankingCardProps> = ({
                     selectedElement === 'nickname',
                     () => onSelectElement?.('nickname'),
                     <div
+                        onDoubleClick={() => isEdit && updateElement?.({ visible: false } as any)}
                         className={styles.nickname}
                         style={{
                             color: user.nicknameStyle?.color || '#1e293b',
@@ -308,11 +319,13 @@ export const RankingCard: React.FC<RankingCardProps> = ({
                         }}
                     >
                         {user.nickname}
-                    </div>
+                    </div>,
+                    {},
+                    user.nicknameStyle?.fontSize || 20
                 )}
 
                 {/* Points */}
-                {renderContent(
+                {(!isEdit || user.customize?.pointStyle?.visible !== false) && renderContent(
                     'point',
                     undefined,
                     { x: pX, y: pY },
@@ -320,17 +333,23 @@ export const RankingCard: React.FC<RankingCardProps> = ({
                     1,
                     selectedElement === 'point',
                     () => onSelectElement?.('point'),
-                    <div className={styles.pointsBox} style={{
-                        background: user.customize?.pointStyle?.background || 'linear-gradient(90deg, #ffedd5, #fef3c7)',
-                        color: user.customize?.pointStyle?.color || '#ea580c',
-                        border: user.customize?.pointStyle?.borderWidth ? `${user.customize.pointStyle.borderWidth}px solid ${user.customize.pointStyle.borderColor}` : 'none',
-                    }}>
+                    <div
+                        onDoubleClick={() => isEdit && updateElement?.({ visible: false } as any)}
+                        className={styles.pointsBox}
+                        style={{
+                            background: user.customize?.pointStyle?.background || 'linear-gradient(90deg, #ffedd5, #fef3c7)',
+                            color: user.customize?.pointStyle?.color || '#ea580c',
+                            border: user.customize?.pointStyle?.borderWidth ? `${user.customize.pointStyle.borderWidth}px solid ${user.customize.pointStyle.borderColor}` : 'none',
+                        }}
+                    >
                         <IconZap color={user.customize?.pointStyle?.color || '#ea580c'} />
                         <span className={styles.pointsText} style={{
                             color: user.customize?.pointStyle?.color || '#ea580c',
                             fontSize: user.customize?.pointStyle?.fontSize ? `${user.customize.pointStyle.fontSize}px` : '1.1rem'
                         }}>{user.point.toLocaleString()}P</span>
-                    </div>
+                    </div>,
+                    {},
+                    user.customize?.pointStyle?.fontSize || 18
                 )}
             </div>
         </div>

@@ -28,9 +28,10 @@
 .nickname {
     white-space: nowrap;
     line-height: 1.2;
-    padding: 4px;
+    padding: 4px 12px;
     border-radius: 8px;
-    width: 220px;
+    max-width: 240px;
+    width: fit-content;
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -45,7 +46,8 @@
     background: linear-gradient(90deg, #ffedd5, #fef3c7);
     padding: 0.6rem 1rem;
     border-radius: 1rem;
-    width: 220px;
+    max-width: 240px;
+    width: fit-content;
     white-space: nowrap;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
