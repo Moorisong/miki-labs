@@ -392,3 +392,80 @@ export const updateClassTitle = async (
         next(error);
     }
 };
+// DELETE /api/chicorun/class/:classCode/students/:studentId
+export const deleteStudent = async (
+    req: Request,
+    res: Response<ApiResponse>,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const teacher = req.chicoTeacher;
+        if (!teacher) {
+            throw new AppError(401, 'ERROR_UNAUTHORIZED: 교사 인증이 필요합니다.');
+        }
+
+        const classCode = String(req.params.classCode);
+        const studentId = String(req.params.studentId);
+        const upperClassCode = classCode.toUpperCase();
+
+        const classDoc = await ChicorunClassModel.findOne({
+            classCode: upperClassCode,
+            teacherId: teacher.teacherId,
+        }).lean();
+
+        if (!classDoc) {
+            throw new AppError(403, 'ERROR_FORBIDDEN: 해당 클래스에 접근 권한이 없습니다.');
+        }
+
+        const deleted = await ChicorunStudentModel.findOneAndDelete({
+            _id: studentId,
+            classCode: upperClassCode,
+        });
+
+        if (!deleted) {
+            throw new AppError(404, 'ERROR_STUDENT_NOT_FOUND: 학생을 찾을 수 없습니다.');
+        }
+
+        res.json({
+            success: true,
+            data: { message: `${deleted.nickname} 학생의 정보와 기록이 모두 삭제되었습니다.` },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+// DELETE /api/chicorun/class/:classCode
+export const deleteClass = async (
+    req: Request,
+    res: Response<ApiResponse>,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const teacher = req.chicoTeacher;
+        if (!teacher) {
+            throw new AppError(401, 'ERROR_UNAUTHORIZED: 교사 인증이 필요합니다.');
+        }
+
+        const classCode = String(req.params.classCode);
+        const upperClassCode = classCode.toUpperCase();
+
+        const deletedClass = await ChicorunClassModel.findOneAndDelete({
+            classCode: upperClassCode,
+            teacherId: teacher.teacherId,
+        });
+
+        if (!deletedClass) {
+            throw new AppError(404, 'ERROR_CLASS_NOT_FOUND: 클래스를 찾을 수 없거나 접근 권한이 없습니다.');
+        }
+
+        // 해당 클래스의 모든 학생 정보 및 기록 삭제
+        await ChicorunStudentModel.deleteMany({ classCode: upperClassCode });
+
+        res.json({
+            success: true,
+            data: { message: `"${deletedClass.title}" 클래스와 모든 관련 정보가 삭제되었습니다.` },
+        });
+    } catch (error) {
+        next(error);
+    }
+};

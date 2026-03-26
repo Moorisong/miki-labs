@@ -6,6 +6,8 @@ import { useSession } from 'next-auth/react';
 import styles from './page.module.css';
 import Link from 'next/link';
 import { CHICORUN_API, CHICORUN_ROUTES } from '@/constants/chicorun';
+import { useToast } from '@/lib/hooks/use-toast';
+import Toast from '@/components/ui/toast';
 
 // ─── 타입 ──────────────────────────────────────────────────────────────────────
 interface ClassItem {
@@ -66,6 +68,16 @@ const IconChevronRight = () => (
     </svg>
 );
 
+const IconTrash = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="3 6 5 6 21 6"></polyline>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        <line x1="10" y1="11" x2="10" y2="17"></line>
+        <line x1="14" y1="11" x2="14" y2="17"></line>
+    </svg>
+);
+
 const IconGraduationCap = () => (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563eb"
         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -92,7 +104,9 @@ export default function TeacherClassManagePage() {
     const [editingClassCode, setEditingClassCode] = useState<string | null>(null);
     const [editTitleInput, setEditTitleInput] = useState<string>('');
     const [isSavingTitle, setIsSavingTitle] = useState(false);
+    const [deletingClass, setDeletingClass] = useState<ClassItem | null>(null);
 
+    const { toast, showToast, hideToast } = useToast();
     const isExchanging = useRef(false);
 
     const fetchClasses = useCallback(async (token: string) => {
@@ -221,6 +235,30 @@ export default function TeacherClassManagePage() {
         }
     };
 
+    const handleDeleteClass = async () => {
+        if (!deletingClass) return;
+        const token = getTeacherTokenFromLocal();
+        if (!token) return;
+
+        try {
+            const res = await fetch(CHICORUN_API.CLASS_DELETE(deletingClass.classCode), {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(`"${deletingClass.title}" 클래스가 성공적으로 삭제되었습니다.`, 'success');
+                await fetchClasses(token);
+                setDeletingClass(null);
+            } else {
+                showToast(data.error || '클래스 삭제에 실패했습니다.', 'error');
+            }
+        } catch (err) {
+            console.error('Failed to delete class:', err);
+            showToast('클래스 삭제 중 서버 오류가 발생했습니다.', 'error');
+        }
+    };
+
     const copyToClipboard = async (code: string) => {
         try {
             await navigator.clipboard.writeText(code);
@@ -281,13 +319,22 @@ export default function TeacherClassManagePage() {
                                     ) : (
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '1.5rem' }}>
                                             <h2 className={styles.cardTitle} style={{ margin: 0, flex: 1, wordBreak: 'break-all' }}>{cls.title}</h2>
-                                            <button
-                                                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', borderRadius: '4px' }}
-                                                onClick={() => { setEditingClassCode(cls.classCode); setEditTitleInput(cls.title); }}
-                                                title="클래스 이름 변경"
-                                            >
-                                                <IconEdit />
-                                            </button>
+                                            <div style={{ display: 'flex', gap: '4px' }}>
+                                                <button
+                                                    style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', borderRadius: '4px' }}
+                                                    onClick={() => { setEditingClassCode(cls.classCode); setEditTitleInput(cls.title); }}
+                                                    title="클래스 이름 변경"
+                                                >
+                                                    <IconEdit />
+                                                </button>
+                                                <button
+                                                    style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', borderRadius: '4px' }}
+                                                    onClick={() => setDeletingClass(cls)}
+                                                    title="클래스 삭제"
+                                                >
+                                                    <IconTrash />
+                                                </button>
+                                            </div>
                                         </div>
                                     )}
 
@@ -365,6 +412,32 @@ export default function TeacherClassManagePage() {
                     </div>
                 </div>
             )}
+
+            {/* 클래스 삭제 확인 모달 */}
+            {deletingClass && (
+                <div className={styles.modalOverlay} onClick={e => e.target === e.currentTarget && setDeletingClass(null)}>
+                    <div className={styles.modal}>
+                        <h3>클래스 삭제</h3>
+                        <p>
+                            <strong>"{deletingClass.title}"</strong> 클래스를 삭제하시겠습니까?<br />
+                            삭제 시 <strong>모든 학생 정보와 학습 기록</strong>이 영구적으로 삭제되며 복구할 수 없습니다.
+                        </p>
+                        <div className={styles.modalActions}>
+                            <button className={styles.btnCancel} onClick={() => setDeletingClass(null)}>
+                                취소
+                            </button>
+                            <button
+                                className={styles.btnModalDanger}
+                                onClick={handleDeleteClass}
+                            >
+                                삭제하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <Toast toast={toast} onHide={hideToast} />
         </div>
     );
 }

@@ -12,6 +12,8 @@ import {
     getClassRanking,
     loginTeacher,
     updateClassTitle,
+    deleteStudent,
+    deleteClass,
 } from '../controllers/chicorun-class.controller';
 
 const router = Router();
@@ -37,10 +39,12 @@ router.delete('/student/item/:itemId', chicorunStudentAuth, removeOwnedItem);
 // ─── 교사 클래스 관리 API (teacherAuth 필요) ─────────────────────────────────────
 router.post('/class', chicorunTeacherAuth, createClass);
 router.get('/class', chicorunTeacherAuth, getMyClasses);
+router.delete('/class/:classCode', chicorunTeacherAuth, deleteClass);
 router.get('/class/:classCode/students', chicorunTeacherAuth, getClassStudents);
 router.patch('/class/:classCode/title', chicorunTeacherAuth, updateClassTitle);
 router.post('/class/:classCode/reset-password', chicorunTeacherAuth, resetStudentPassword);
 router.patch('/class/:classCode/students/:studentId/nickname', chicorunTeacherAuth, updateStudentNickname);
+router.delete('/class/:classCode/students/:studentId', chicorunTeacherAuth, deleteStudent);
 
 // ─── 공통 랭킹 (인증 불필요 - 공개 랭킹) ──────────────────────────────────────────
 router.get('/class/:classCode/ranking', getClassRanking);
