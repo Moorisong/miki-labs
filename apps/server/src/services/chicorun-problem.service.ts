@@ -114,7 +114,7 @@ export class ChicorunProblemService {
 
         if (factor >= 1.0) return { factor: 1.0 };
 
-        const message = "이 난이도/레벨은 포인트가 적게 나와요. 더 도전적인 문제를 풀어보세요!";
+        const message = "이 난이도/레벨은 포인트가 적게 나와요.\n더 도전적인 문제를 풀어보세요!";
         return { factor, message };
     }
 

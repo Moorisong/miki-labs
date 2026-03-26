@@ -313,7 +313,7 @@ export default function TeacherClassManagePage() {
                                         <IconUsers />
                                         <span>학생 <strong>{cls.studentCount}</strong>명</span>
                                     </div>
-                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <div className={styles.cardActions}>
                                         <button
                                             className={styles.btnRanking}
                                             onClick={() => router.push(`${CHICORUN_ROUTES.RANKING}?classCode=${cls.classCode}`)}
