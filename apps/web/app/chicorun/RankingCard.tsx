@@ -231,7 +231,16 @@ export const RankingCard: React.FC<RankingCardProps> = ({
                             style={{ width: '1.2em', height: '1.2em', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' }}
                         >
                             {sticker.emoji.startsWith('/') ? (
-                                <img src={sticker.emoji} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="sticker" draggable={false} />
+                                <img
+                                    src={sticker.emoji}
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'contain'
+                                    }}
+                                    alt="sticker"
+                                    draggable={false}
+                                />
                             ) : sticker.emoji}
                         </div>
                     )
