@@ -227,8 +227,8 @@ function renderPreview(item: ShopItem) {
                         border: item.value.includes('badge-starter-star') ? 'none' : `4px solid ${badgeStyle.border}`,
                         borderRadius: '22%',
                         overflow: 'hidden',
-                        width: '100%',
-                        height: '100%',
+                        width: '55%',
+                        height: '55%',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center'
