@@ -456,7 +456,7 @@ export default function StudentLearnPage() {
     };
 
     const handleResetAchievedLevel = async () => {
-        if (!confirm('나의 \'최고 레벨\'을 지금 레벨로 맞추고 다시 도전할까요? 보너스를 잘 받을 수 있게 내 기록을 재조정합니다.')) return;
+        if (!confirm('나의 \'최고 레벨\'을 현재 학습 중인 레벨로 맞추고 다시 도전할까요? 보너스를 잘 받을 수 있게 내 기록을 재조정합니다.')) return;
 
         setIsLoading(true);
         try {
