@@ -9,9 +9,10 @@
 .main {
     flex: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 4rem 1rem;
+    padding: 6rem 1rem;
 }
 
 .contentBox {
@@ -178,5 +179,96 @@
 
     to {
         opacity: 1;
+    }
+}
+
+.manualSection {
+    margin-top: 6rem;
+    padding-top: 4rem;
+    border-top: 2px dashed rgba(59, 130, 246, 0.15);
+    width: 100%;
+    max-width: 900px;
+    animation: fadeIn 0.8s 1s both;
+}
+
+.manualTitle {
+    font-size: 1.75rem;
+    color: #1e293b;
+    margin-bottom: 3rem;
+    font-weight: 800;
+    text-align: center;
+}
+
+.manualGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.manualItem {
+    background: white;
+    padding: 2.5rem 1.5rem 2rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.manualItem:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(59, 130, 246, 0.08);
+}
+
+.stepNum {
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.manualItem h3 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #334155;
+    margin-bottom: 1rem;
+}
+
+.manualItem p {
+    font-size: 0.95rem;
+    color: #64748b;
+    line-height: 1.7;
+    margin: 0;
+    word-break: keep-all;
+}
+
+.manualItem strong {
+    color: #3b82f6;
+    font-weight: 700;
+}
+
+@media (max-width: 860px) {
+    .manualGrid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .manualSection {
+        margin-top: 4rem;
+        padding-top: 3rem;
     }
 }

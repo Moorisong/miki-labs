@@ -90,22 +90,28 @@ export default function ChicorunLandingPage() {
                         </button>
                     </div>
 
-                    {/* 하단 장식 */}
-                    <div className={styles.features}>
-                        <div className={styles.featureItem}>
-                            <div className={styles.dotBlue}></div>
-                            <span>빠른 시작</span>
+                </div>
+
+                {/* 이용 안내 매뉴얼 */}
+                <div className={styles.manualSection}>
+                    <h2 className={styles.manualTitle}>시작하는 방법 💡</h2>
+                    <div className={styles.manualGrid}>
+                        <div className={styles.manualItem}>
+                            <div className={styles.stepNum}>1</div>
+                            <h3>클래스 생성</h3>
+                            <p>선생님이 먼저 <strong>교사 로그인</strong> 후 학습 클래스를 생성합니다.</p>
                         </div>
-                        <div className={styles.featureItem}>
-                            <div className={styles.dotCyan}></div>
-                            <span>게임 같은 학습</span>
+                        <div className={styles.manualItem}>
+                            <div className={styles.stepNum}>2</div>
+                            <h3>주소 공유</h3>
+                            <p>클래스 관리의 <strong>'참여 링크 복사'</strong> 버튼을 눌러 학생에게 전달하세요.</p>
                         </div>
-                        <div className={styles.featureItem}>
-                            <div className={styles.dotTeal}></div>
-                            <span>몰입 경험</span>
+                        <div className={styles.manualItem}>
+                            <div className={styles.stepNum}>3</div>
+                            <h3>학생 등록</h3>
+                            <p>학생이 <strong>받은 주소로 접속</strong>하면 해당 클래스에 바로 가입할 수 있어요.</p>
                         </div>
                     </div>
-
                 </div>
             </main>
         </div>

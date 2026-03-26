@@ -179,6 +179,11 @@ export default function NavBar() {
             <img src="/logo.png" alt="Logo" className={styles.logoIcon} />
             <span className={styles.logoText}>하루상자</span>
           </Link>
+          <div className={styles.teacherLinks}>
+            <Link href={CHICORUN_ROUTES.TEACHER_DASHBOARD} className={styles.navLink} onClick={closeMenu}>
+              메인
+            </Link>
+          </div>
           <div className={styles.chicorunTeacherAuth}>
             <button onClick={handleSignOut} className={styles.logoutButton}>
               로그아웃

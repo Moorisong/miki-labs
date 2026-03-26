@@ -130,7 +130,7 @@ function JoinForm() {
                         type="text"
                         value={nickname}
                         onChange={e => setNickname(e.target.value)}
-                        placeholder="사용할 닉네임"
+                        placeholder="닉네임"
                         className={styles.input}
                         required
                         maxLength={10}
