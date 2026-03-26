@@ -136,6 +136,16 @@ function RankingContent() {
     };
 
     const myRankEntry = rankings.find(r => r.nickname === myNickname);
+    const top3 = rankings.filter(u => u.rank <= 3).sort((a, b) => a.rank - b.rank);
+    const others = rankings.filter(u => u.rank > 3);
+
+    // Sorted for podium: [2nd, 1st, 3rd]
+    const podium = [
+        top3.find(u => u.rank === 2),
+        top3.find(u => u.rank === 1),
+        top3.find(u => u.rank === 3)
+    ].filter(Boolean) as RankingEntry[];
+
 
     const scrollToMyCard = () => {
         if (!myRankEntry) return;
@@ -182,26 +192,31 @@ function RankingContent() {
 
             {!isLoading && classCode && rankings.length > 0 && (
                 <div className={styles.rankingGrid} ref={containerRef}>
-                    {/* 1등 랭커 강조 영역 */}
-                    {rankings.find(u => u.rank === 1) && (
-                        <div
-                            id={`student-card-${rankings.find(u => u.rank === 1)!.id || rankings.find(u => u.rank === 1)!.nickname}`}
-                            className={styles.firstRankerRow}
-                        >
-                            <div className={styles.cardRankWrapper}>
-                                <div className={styles.cardRankLabel}>1등</div>
-                                <RankingCard
-                                    user={rankings.find(u => u.rank === 1)!}
-                                    isFirst={true}
-                                    scale={1.2 * (scale < 1 ? scale : 1)}
-                                />
-                            </div>
+                    {/* Top 3 Podium Area */}
+                    {podium.length > 0 && (
+                        <div className={styles.podiumSection}>
+                            {podium.map((user) => (
+                                <div
+                                    key={user.id || user.nickname}
+                                    id={`student-card-${user.id || user.nickname}`}
+                                    className={`${styles.podiumCardWrapper} ${user.rank === 1 ? styles.podiumRank1 : ''}`}
+                                >
+                                    <div className={`${styles.podiumBadge} ${styles[`badgeRank${user.rank}`]}`}>
+                                        <span className={styles.rankNum}>{user.rank}</span>
+                                    </div>
+                                    <RankingCard
+                                        user={user}
+                                        isFirst={user.rank === 1}
+                                        scale={(user.rank === 1 ? 1.15 : 1.0) * (scale < 1 ? scale : 1) * 0.8}
+                                    />
+                                </div>
+                            ))}
                         </div>
                     )}
 
                     {/* 나머지 랭커들 그리드 */}
                     <div className={styles.otherRankersGrid}>
-                        {rankings.filter(u => u.rank !== 1).map((user, index) => (
+                        {others.map((user, index) => (
                             <div
                                 key={user.id || index.toString()}
                                 id={`student-card-${user.id || user.nickname}`}
@@ -218,7 +233,7 @@ function RankingContent() {
                                     <RankingCard
                                         user={user}
                                         isFirst={false}
-                                        scale={scale < 1 ? scale : 1}
+                                        scale={(scale < 1 ? scale : 1) * 0.8}
                                     />
                                 </div>
                             </div>

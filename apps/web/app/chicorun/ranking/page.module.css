@@ -1,11 +1,13 @@
 .container {
     min-height: 100vh;
-    background: linear-gradient(135deg, #e0f2fe 0%, #cffafe 50%, #ccfbf1 100%);
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+    background-attachment: fixed;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
     position: relative;
 }
+
 
 
 .main {
@@ -85,9 +87,99 @@
 .rankingGrid {
     display: flex;
     flex-direction: column;
-    gap: 4rem;
+    gap: 6rem;
     width: 100%;
 }
+
+.podiumSection {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 1.5rem;
+    padding: 3rem 0;
+    width: 100%;
+}
+
+.podiumCardWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+}
+
+.podiumRank1 {
+    transform: translateY(-40px);
+    z-index: 10;
+}
+
+.podiumRank1::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(251, 191, 36, 0.25) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    z-index: -1;
+    pointer-events: none;
+    animation: glowPulse 4s infinite ease-in-out;
+}
+
+@keyframes glowPulse {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.8;
+    }
+}
+
+.podiumBadge {
+    width: 2.75rem;
+    height: 2.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    position: relative;
+    z-index: 20;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    border: 2px solid white;
+}
+
+.rankNum {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: white;
+    z-index: 5;
+}
+
+/* Removed ribbon tails for minimal look */
+
+.badgeRank1 {
+    background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+    box-shadow: 0 8px 20px -4px rgba(234, 179, 8, 0.4);
+    transform: scale(1.1);
+}
+
+.badgeRank2 {
+    background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+    box-shadow: 0 6px 15px -4px rgba(148, 163, 184, 0.3);
+}
+
+.badgeRank3 {
+    background: linear-gradient(135deg, #fbbf24 0%, #b45309 100%);
+    box-shadow: 0 6px 15px -4px rgba(180, 83, 9, 0.3);
+}
+
+
 
 .cardRankWrapper {
     display: flex;
@@ -98,47 +190,46 @@
 }
 
 .cardRankLabel {
-    font-size: 1.15rem;
+    font-size: 1rem;
     font-weight: 900;
-    color: #475569;
+    color: #64748b;
     background: white;
-    padding: 0.3rem 1.1rem;
-    border-radius: 0.8rem;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+    padding: 0.3rem 1rem;
+    border-radius: 999px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     border: 1.5px solid #f1f5f9;
     line-height: 1;
 }
 
-.firstRankerRow .cardRankLabel {
-    font-size: 1.5rem;
-    padding: 0.5rem 1.6rem;
-    color: #ca8a04;
-    border-color: #fef08a;
-    background: linear-gradient(to bottom, #ffffff, #fffbeb);
-    box-shadow: 0 8px 16px rgba(234, 179, 8, 0.12);
-}
-
-.firstRankerRow {
-    display: flex;
-    justify-content: center;
-    padding: 2rem 0;
-    width: 100%;
-}
-
 .otherRankersGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 2.5rem 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 4rem 1.5rem;
     width: 100%;
     justify-items: center;
 }
 
+@media (max-width: 768px) {
+    .podiumSection {
+        flex-direction: column;
+        align-items: center;
+        gap: 3rem;
+    }
+
+    .podiumRank1 {
+        transform: none;
+        order: -1;
+    }
+}
+
+
 @media (max-width: 640px) {
     .otherRankersGrid {
         grid-template-columns: 1fr;
-        gap: 3.5rem;
+        gap: 4rem;
     }
 }
+
 
 .rankingItem {
     background: white;
@@ -235,9 +326,9 @@
     width: fit-content;
     max-width: calc(100vw - 2rem);
     box-sizing: border-box;
-    background: rgba(255, 255, 255, 0.94);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 999px;
     padding: 0.75rem 1.75rem;
