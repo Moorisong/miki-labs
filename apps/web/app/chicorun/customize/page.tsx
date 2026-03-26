@@ -562,6 +562,7 @@ function CustomizeContent() {
     const [isLoading, setIsLoading] = useState(true);
 
     const [selectedElement, setSelectedElement] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'background' | 'border' | 'nickname' | 'badge' | 'sticker'>('background');
     const [activePickerId, setActivePickerId] = useState<string | null>(null);
 
     const [isSticky, setIsSticky] = useState(false);
@@ -627,6 +628,13 @@ function CustomizeContent() {
     // Reset picker when element changes
     useEffect(() => {
         setActivePickerId(null);
+        // Sync activeTab when element is selected from card
+        if (selectedElement === 'base-card-bg') setActiveTab('background');
+        else if (selectedElement === 'base-card-border') setActiveTab('border');
+        else if (selectedElement === 'nickname') setActiveTab('nickname');
+        else if (selectedElement === 'badge') setActiveTab('badge');
+        else if (selectedElement === 'point') setActiveTab('nickname'); // Point style fits better under nickname or its own
+        else if (selectedElement?.startsWith('sticker-')) setActiveTab('sticker');
     }, [selectedElement]);
 
 
@@ -903,7 +911,7 @@ function CustomizeContent() {
             <main className={styles.main} onClick={(e) => { e.stopPropagation(); setActivePickerId(null); }}>
                 <div className={styles.headerRow}>
                     <div className={styles.titleArea}>
-                        <h1 className={styles.title}><IconSparkles /> 랭킹 꾸미기</h1>
+                        <h1 className={styles.title}>랭킹 꾸미기</h1>
                         <p className={styles.subtitle}>랭킹 리스트에 나타나는 나의 랭킹 영역을 자유롭게 꾸며보세요!</p>
                     </div>
                 </div>
@@ -970,38 +978,38 @@ function CustomizeContent() {
                     </div>
 
                     <div className={styles.optionsContainer} onClick={(e) => { e.stopPropagation(); setActivePickerId(null); }}>
-                        {/* 상시 보이는 스티커 추가 버튼 */}
-                        <div className={styles.alwaysVisibleActions}>
-                            <button
-                                className={styles.btnStickerActionCompact}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedElement('sticker-picker');
-                                }}
-                            >
-                                <span className={styles.btnIconSmall}>✨</span>
-                                <span className={styles.btnLabelMainSmall}>장식 스티커 추가하기</span>
-                            </button>
+                        {/* Tab Navigation */}
+                        <div className={styles.tabBar}>
+                            {[
+                                { id: 'background', label: '배경' },
+                                { id: 'border', label: '테두리' },
+                                { id: 'nickname', label: '닉네임' },
+                                { id: 'badge', label: '뱃지' },
+                                { id: 'sticker', label: '스티커' }
+                            ].map(tab => (
+                                <button
+                                    key={tab.id}
+                                    className={`${styles.tabButton} ${activeTab === tab.id ? styles.activeTab : ''}`}
+                                    onClick={() => {
+                                        setActiveTab(tab.id as any);
+                                        // If switching away from sticker or custom element, deselect it
+                                        if (tab.id !== 'sticker' && selectedElement?.startsWith('sticker-')) setSelectedElement(null);
+                                        if (tab.id === 'background') setSelectedElement('base-card-bg');
+                                        if (tab.id === 'border') setSelectedElement('base-card-border');
+                                        if (tab.id === 'nickname') setSelectedElement('nickname');
+                                        if (tab.id === 'badge') setSelectedElement('badge');
+                                        if (tab.id === 'sticker' && !selectedElement?.startsWith('sticker-')) setSelectedElement(null);
+                                    }}
+                                >
+                                    <span className={styles.tabLabel}>{tab.label}</span>
+                                </button>
+                            ))}
                         </div>
 
-                        {/* 아무것도 선택되지 않았을 때의 안내 */}
-                        {(!selectedElement) && (
-                            <div className={styles.emptyStateContainerSmall}>
-                                <div className={styles.emptyStateIconSmall}>🎨</div>
-                                <div style={{ textAlign: 'left' }}>
-                                    <h3 className={styles.emptyStateTitleSmall}>편집을 시작해보세요!</h3>
-                                    <p className={styles.emptyStateDescriptionSmall}>카드에서 수정하고 싶은 부분을 클릭하여 자유롭게 꾸며보세요.</p>
-                                </div>
-                            </div>
-                        )}
-
                         {/* 배경 수정 메뉴 */}
-                        {selectedElement === 'base-card-bg' && (
+                        {activeTab === 'background' && (
                             <div className={styles.optionSection}>
-                                <div className={styles.sectionTitleWithBack}>
-                                    <button onClick={() => setSelectedElement(null)} className={styles.btnBack}>←</button>
-                                    🎨 랭킹 배경
-                                </div>
+                                <div className={styles.sectionTitle}>랭킹 배경 선택</div>
                                 <div className={styles.gridBackgrounds}>
                                     {AVAILABLE_BACKGROUNDS.map(bg => (
                                         <div
@@ -1027,12 +1035,9 @@ function CustomizeContent() {
                         )}
 
                         {/* 테두리 수정 메뉴 */}
-                        {selectedElement === 'base-card-border' && (
-                            <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
-                                <div className={styles.sectionTitleWithBack}>
-                                    <button onClick={() => setSelectedElement(null)} className={styles.btnBack}>←</button>
-                                    🖼️ 테두리 스타일
-                                </div>
+                        {activeTab === 'border' && (
+                            <div className={styles.optionSection}>
+                                <div className={styles.sectionTitle}>테두리 스타일</div>
                                 <div className={styles.gridBorderTypes}>
                                     {AVAILABLE_BORDER_TYPES.map(type => (
                                         <div
@@ -1040,13 +1045,6 @@ function CustomizeContent() {
                                             onClick={() => setBorderStyle(p => ({ ...p, style: type.value }))}
                                             className={`${styles.btnBorderType} ${borderStyle.style === type.value ? styles.selected : ''}`}
                                             style={{ position: 'relative', cursor: 'pointer' }}
-                                            role="button"
-                                            tabIndex={0}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter' || e.key === ' ') {
-                                                    setBorderStyle(p => ({ ...p, style: type.value }));
-                                                }
-                                            }}
                                         >
                                             <span style={{ fontSize: '1.2rem', marginBottom: '4px' }}>{type.icon}</span>
                                             <span style={{ fontSize: '0.8rem' }}>{type.name}</span>
@@ -1060,10 +1058,12 @@ function CustomizeContent() {
                                                 </button>
                                             )}
                                         </div>
-
                                     ))}
                                 </div>
-                                <ColorControl id="border-color" value={borderStyle.color} onChange={(val: string) => setBorderStyle(p => ({ ...p, color: val }))} activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
+                                <div className={styles.controlGroup}>
+                                    <div className={styles.controlSubTitle}>테두리 색상</div>
+                                    <ColorControl id="border-color" value={borderStyle.color} onChange={(val: string) => setBorderStyle(p => ({ ...p, color: val }))} activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
+                                </div>
 
                                 <div className={styles.sliderGroup} style={{ marginTop: '1.5rem' }}>
                                     <div className={styles.sliderLabel}><span>테두리 두께</span> <span>{borderStyle.width}px</span></div>
@@ -1074,13 +1074,11 @@ function CustomizeContent() {
                             </div>
                         )}
 
+
                         {/* 스티커 추가 메뉴 */}
-                        {selectedElement === 'sticker-picker' && (
-                            <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
-                                <div className={styles.sectionTitleWithBack}>
-                                    <button onClick={() => setSelectedElement(null)} className={styles.btnBack}>←</button>
-                                    ✨ 장식 스티커 추가
-                                </div>
+                        {activeTab === 'sticker' && (
+                            <div className={styles.optionSection}>
+                                <div className={styles.sectionTitle}>장식 스티커</div>
                                 <div className={styles.gridEmojis}>
                                     {AVAILABLE_STICKERS.map(sticker => (
                                         <div
@@ -1115,24 +1113,47 @@ function CustomizeContent() {
                                         </div>
                                     ))}
                                 </div>
+
+                                {stickers.length > 0 && (
+                                    <div className={styles.stickerManagement}>
+                                        <div className={styles.controlSubTitle}>스티커 관리</div>
+                                        <div className={styles.stickerCount}>현재 배치된 스티커: {stickers.length}개</div>
+                                        <button
+                                            className={styles.btnRemoveAllStickers}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (window.confirm('모든 스티커를 제거하시겠습니까?')) {
+                                                    setStickers([]);
+                                                    setSelectedElement(null);
+                                                }
+                                            }}
+                                        >
+                                            모든 스티커 제거하기
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         )}
 
+
                         {/* 닉네임 선택 시 */}
-                        {selectedElement === 'nickname' && (
-                            <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
-                                <div className={styles.sectionTitle}>📝 닉네임 스타일</div>
-                                <div className={styles.gridColor} style={{ marginBottom: '1rem' }}>
-                                    {AVAILABLE_NICKNAME_COLORS.map(color => (
-                                        <div
-                                            key={color}
-                                            onClick={() => setNicknameStyle(p => ({ ...p, color }))}
-                                            className={`${styles.colorCircle} ${nicknameStyle.color === color ? styles.selected : ''}`}
-                                            style={{ background: color }}
-                                        />
-                                    ))}
+                        {activeTab === 'nickname' && (
+                            <div className={styles.optionSection}>
+                                <div className={styles.sectionTitle}>닉네임 스타일</div>
+                                <div className={styles.controlGroup}>
+                                    <div className={styles.controlSubTitle}>닉네임 색상</div>
+                                    <div className={styles.gridColor} style={{ marginBottom: '1rem' }}>
+                                        {AVAILABLE_NICKNAME_COLORS.map(color => (
+                                            <div
+                                                key={color}
+                                                onClick={() => setNicknameStyle(p => ({ ...p, color }))}
+                                                className={`${styles.colorCircle} ${nicknameStyle.color === color ? styles.selected : ''}`}
+                                                style={{ background: color }}
+                                            />
+                                        ))}
+                                    </div>
+                                    <ColorControl id="nick-color" value={nicknameStyle.color} onChange={(val: string) => setNicknameStyle(p => ({ ...p, color: val }))} activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
                                 </div>
-                                <ColorControl id="nick-color" value={nicknameStyle.color} onChange={(val: string) => setNicknameStyle(p => ({ ...p, color: val }))} activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
 
 
                                 <div className={styles.textStyleControls}>
@@ -1140,13 +1161,28 @@ function CustomizeContent() {
                                     <button className={`${styles.btnTextStyle} ${nicknameStyle.italic ? styles.active : ''}`} onClick={() => toggleStyle('italic')}>Italic</button>
                                     <button className={`${styles.btnTextStyle} ${nicknameStyle.underline ? styles.active : ''}`} onClick={() => toggleStyle('underline')}>Underline</button>
                                 </div>
+
+                                <div className={styles.divider} />
+
+                                <div className={styles.sectionTitle} style={{ marginTop: '1.5rem' }}>포인트 스타일</div>
+                                <div className={styles.gridPoints}>
+                                    <div className={styles.controlGroup}>
+                                        <div className={styles.controlSubTitle}>글자 색상</div>
+                                        <ColorControl id="p-text-color" value={pointStyle.color} onChange={(val: string) => setPointStyle(p => ({ ...p, color: val }))} activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
+                                    </div>
+                                    <div className={styles.controlGroup}>
+                                        <div className={styles.controlSubTitle}>배경 색상</div>
+                                        <ColorControl id="p-bg-color" value={pointStyle.background} onChange={(val: string) => setPointStyle(p => ({ ...p, background: val }))} showGradientOption activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
+                                    </div>
+                                </div>
                             </div>
                         )}
 
+
                         {/* 뱃지 선택 시 */}
-                        {selectedElement === 'badge' && (
-                            <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
-                                <div className={styles.sectionTitle}>🎖️ 대표 뱃지 설정</div>
+                        {activeTab === 'badge' && (
+                            <div className={styles.optionSection}>
+                                <div className={styles.sectionTitle}>대표 뱃지 설정</div>
                                 <div className={styles.gridEmojis}>
                                     {AVAILABLE_BADGES.map(badge => (
                                         <div
@@ -1194,62 +1230,8 @@ function CustomizeContent() {
                             </div>
                         )}
 
-                        {/* 포인트 선택 시 */}
-                        {selectedElement === 'point' && (
-                            <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
-                                <div className={styles.sectionTitle}>💎 포인트 스타일 편집</div>
-
-                                <div style={{ marginBottom: '1.5rem' }}>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '0.5rem' }}>글자 색상</div>
-                                    <ColorControl id="p-text-color" value={pointStyle.color} onChange={(val: string) => setPointStyle(p => ({ ...p, color: val }))} activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
-
-                                </div>
-
-                                <div style={{ marginBottom: '1.5rem' }}>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '0.5rem' }}>배경 색상</div>
-                                    <ColorControl id="p-bg-color" value={pointStyle.background} onChange={(val: string) => setPointStyle(p => ({ ...p, background: val }))} showGradientOption activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
-
-                                </div>
-
-                                <div style={{ marginBottom: '1.5rem' }}>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '0.5rem' }}>테두리 색상</div>
-                                    <ColorControl id="p-border-color" value={pointStyle.borderColor} onChange={(val: string) => setPointStyle(p => ({ ...p, borderColor: val }))} activePickerId={activePickerId} setActivePickerId={setActivePickerId} />
-
-                                </div>
-
-                                <div className={styles.sliderGroup}>
-                                    <div className={styles.sliderLabel}><span>테두리 두께</span> <span>{pointStyle.borderWidth}px</span></div>
-                                    <input
-                                        type="range"
-                                        min="0" max="8"
-                                        value={pointStyle.borderWidth}
-                                        onChange={e => setPointStyle(p => ({ ...p, borderWidth: Number(e.target.value) }))}
-                                        className={styles.sliderInput}
-                                    />
-                                </div>
-                            </div>
-                        )}
 
 
-                        {/* 스티커 선택 시 - 삭제 팁 및 전체 제거 */}
-                        {selectedElement?.toString().startsWith('sticker-') && (
-                            <div className={styles.optionSection} style={{ gridColumn: '1 / -1' }}>
-                                <div className={styles.sectionTitle}>✨ 선택된 스티커</div>
-                                <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1rem' }}>스티커를 두 번 빠르게 터치/클릭하면 삭제할 수 있습니다.</p>
-                                <button
-                                    className={styles.btnRemoveAllStickers}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (window.confirm('모든 스티커를 제거하시겠습니까?')) {
-                                            setStickers([]);
-                                            setSelectedElement(null);
-                                        }
-                                    }}
-                                >
-                                    <IconTrash /> 모든 스티커 제거하기
-                                </button>
-                            </div>
-                        )}
 
                         {/* 저장 버튼은 항상 하단에 */}
                         <div style={{ gridColumn: '1 / -1' }}>
@@ -1258,7 +1240,7 @@ function CustomizeContent() {
                                 onClick={handleSave}
                                 disabled={isSaving}
                             >
-                                {isSaving ? '저장 중...' : <><IconSave /> 저장하기</>}
+                                {isSaving ? '저장 중...' : '저장하기'}
                             </button>
                         </div>
                     </div>
