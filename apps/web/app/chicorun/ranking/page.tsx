@@ -188,9 +188,10 @@ function RankingContent() {
             )}
 
             {!isLoading && hasSearched && rankings.length === 0 && (
-                <p className={styles.mockNotice}>
-                    해당 클래스의 랭킹 데이터가 없거나 코드가 올바르지 않습니다.
-                </p>
+                <div className={styles.mockNotice}>
+                    <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🍃</div>
+                    해당 클래스의 랭킹 데이터가 없거나<br />코드가 올바르지 않습니다.
+                </div>
             )}
 
             {!isLoading && classCode && rankings.length > 0 && (
@@ -250,11 +251,10 @@ function RankingContent() {
             )}
 
             {!isLoading && !classCode && (
-                <div style={{ textAlign: 'center', padding: '3rem', background: 'white', borderRadius: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-                    <p style={{ color: '#64748b' }}>
-                        로그인 정보가 없거나 잘못된 접근입니다.<br />
-                        선생님이 공유해주신 링크로 다시 접속해 주세요.
-                    </p>
+                <div className={styles.mockNotice}>
+                    <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>❌</div>
+                    로그인 정보가 없거나 잘못된 접근입니다.<br />
+                    선생님이 공유해주신 링크로 다시 접속해 주세요.
                 </div>
             )}
 

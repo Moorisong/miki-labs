@@ -102,6 +102,22 @@
     margin: 0;
 }
 
+.mockNotice {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #475569;
+    font-size: 1.1rem;
+    background: white;
+    border-radius: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    margin: 3rem auto;
+    max-width: 500px;
+    line-height: 1.7;
+    word-break: keep-all;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    animation: slideUp 0.5s ease-out forwards;
+}
+
 
 
 .podiumSection {
