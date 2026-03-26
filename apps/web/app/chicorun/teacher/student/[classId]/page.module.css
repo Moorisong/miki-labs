@@ -44,6 +44,7 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     border: 1px solid #e2e8f0;
     overflow: hidden;
+    overflow-x: auto;
     animation: slideDown 0.4s ease-out forwards;
 }
 
@@ -54,6 +55,7 @@
     justify-content: space-between;
     align-items: center;
     background: white;
+    min-width: fit-content;
 }
 
 @media (max-width: 640px) {
@@ -97,11 +99,13 @@
 .table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
+    box-sizing: border-box;
 }
 
 .table th {
-    padding: 1rem 2rem;
-    text-align: left;
+    padding: 1rem 1rem;
+    text-align: center;
     font-size: 0.875rem;
     font-weight: 600;
     color: #475569;
@@ -109,9 +113,73 @@
     border-bottom: 1px solid #f1f5f9;
 }
 
+.table th:first-child,
+.table td:first-child {
+    padding-left: 2rem;
+}
+
+.table th:last-child,
+.table td:last-child {
+    padding-right: 2rem;
+}
+
+.sortableHeader {
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+
+.sortableHeader:hover {
+    background: #f1f5f9 !important;
+    color: #2563eb;
+}
+
+.colLevel {
+    text-align: center;
+    width: 140px;
+}
+
+.colBadge {
+    width: 120px;
+    text-align: center;
+}
+
+.colPoint {
+    text-align: center;
+    width: 150px;
+}
+
+.colNickname {
+    text-align: left !important;
+}
+
+.colAction {
+    text-align: right;
+    width: 130px;
+}
+
+.badgeBox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    overflow: hidden;
+    background: #f1f5f9;
+    border-radius: 0.5rem;
+    width: 40px;
+    height: 40px;
+}
+
+.mobileSortArea {
+    display: none;
+}
+
 .table td {
-    padding: 1rem 2rem;
+    padding: 0.75rem 1rem;
     border-bottom: 1px solid #f8fafc;
+    vertical-align: middle;
+    box-sizing: border-box;
 }
 
 .table tr {
@@ -123,64 +191,177 @@
 }
 
 @media (max-width: 640px) {
+    .table {
+        table-layout: auto !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .mobileSortArea {
+        display: flex;
+        justify-content: flex-end;
+        padding: 0.75rem 1rem;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .sortSelect {
+        width: 160px;
+        padding: 0.5rem 2rem 0.5rem 1rem;
+        border-radius: 2rem;
+        border: 1px solid #cbd5e1;
+        background: white;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #334155;
+        outline: none;
+        cursor: pointer;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 0.9rem;
+        appearance: none;
+        text-align: center;
+        text-align-last: center;
+        transition: all 0.2s;
+    }
+
+    .sortSelect:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+
     .table thead {
-        display: none;
+        display: none !important;
+    }
+
+    .table thead tr {
+        display: grid;
+        grid-template-columns: 44px 1fr 70px;
+        grid-template-areas: "level profile points";
+        gap: 0 0.5rem;
+        padding: 0.6rem 0.5rem;
+        align-items: center;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .table thead th {
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        font-size: 0.7rem !important;
+        text-align: center;
+    }
+
+    .colBadge {
+        display: none !important;
+    }
+
+    .colAction {
+        display: none !important;
+    }
+
+    /* Adjusted nth-child selectors due to removal of colBadge */
+    .table thead th:nth-child(2) {
+        /* This was colLevel, now it's the first visible th */
+        grid-area: level;
+    }
+
+    .table thead th:nth-child(3) {
+        /* This was colNickname, now it's the second visible th */
+        grid-area: profile;
+    }
+
+    .table thead th:nth-child(4) {
+        /* This was colPoint, now it's the third visible th */
+        grid-area: points;
     }
 
     .table tr {
         display: grid;
-        grid-template-columns: auto 1fr auto;
+        grid-template-columns: 44px 1fr 70px;
         grid-template-areas:
-            "badge profile points"
-            "badge actions actions";
-        padding: 1.25rem 1rem;
+            "level profile points"
+            "actions actions actions";
+        padding: 0.75rem 1rem;
         border-bottom: 1px solid #f1f5f9;
-        gap: 0.5rem 1rem;
+        gap: 0.6rem 0.5rem;
         align-items: center;
+        background: white;
+        width: 100%;
+        box-sizing: border-box;
+        min-width: 0;
     }
 
     .table td {
-        padding: 0;
-        border: none;
-        display: contents;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
     }
 
-    /* 뱃지 위치 */
+    /* 뱃지 숨김 */
     .table td:nth-child(1) {
-        grid-area: badge;
+        display: none !important;
     }
 
-    /* 프로필(닉네임/레벨) 위치 */
+    /* 레벨 위치 */
     .table td:nth-child(2) {
+        grid-area: level;
+        display: flex;
+        justify-content: center;
+        width: 100% !important;
+    }
+
+    /* 프로필(닉네임) 위치 */
+    .table td:nth-child(3) {
         grid-area: profile;
         display: block;
+        min-width: 0;
+        width: 100% !important;
+        text-align: left !important;
     }
 
     /* 포인트 위치 */
-    .table td:nth-child(3) {
+    .table td:nth-child(4) {
         grid-area: points;
         display: block;
-        text-align: right;
+        text-align: right !important;
+        font-size: 0.8rem;
+        font-weight: 700;
+        white-space: nowrap;
+        width: 100% !important;
     }
 
     /* 액션 버튼 위치 */
-    .table td:nth-child(4) {
+    .table td:nth-child(5) {
         grid-area: actions;
         display: flex;
         justify-content: flex-end;
-        border-top: 1px solid #f8fafc;
-        padding-top: 0.75rem;
+        padding-top: 0.5rem !important;
         margin-top: 0.25rem;
+        border-top: 1px solid #f1f5f9 !important;
     }
 
     .actionBtn {
-        margin-left: 0.75rem;
+        margin-left: 0.4rem;
         background: #f8fafc;
-        width: 40px;
-        height: 40px;
+        width: 34px;
+        height: 34px;
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 0;
+    }
+
+    .nameLine {
+        flex-wrap: nowrap;
+        min-width: 0;
+    }
+
+    .colNickname {
+        padding-left: 0.2rem !important;
     }
 }
 
@@ -193,7 +374,8 @@
 .profileWrap {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
+    min-width: 0;
 }
 
 .dummyBadge {
@@ -215,6 +397,11 @@
     font-weight: 600;
     color: #000000;
     line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    flex: 1;
 }
 
 .nameLine {
@@ -234,7 +421,11 @@
 }
 
 .actionCell {
-    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.25rem;
+    height: 100%;
 }
 
 .actionBtn {
@@ -245,7 +436,9 @@
     cursor: pointer;
     border-radius: 0.5rem;
     transition: all 0.2s;
-    margin-left: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .actionBtn.edit:hover {

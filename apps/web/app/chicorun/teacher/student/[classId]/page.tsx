@@ -71,6 +71,21 @@ const IconTrash2 = () => (
     </svg>
 );
 
+const IconSort = ({ active, order }: { active: boolean; order: 'asc' | 'desc' }) => (
+    <span style={{
+        display: 'inline-flex',
+        flexDirection: 'column',
+        marginLeft: '4px',
+        fontSize: '10px',
+        color: active ? '#2563eb' : '#94a3b8',
+        verticalAlign: 'middle',
+        lineHeight: '0.8'
+    }}>
+        <span style={{ opacity: active && order === 'asc' ? 1 : 0.3 }}>▲</span>
+        <span style={{ opacity: active && order === 'desc' ? 1 : 0.3 }}>▼</span>
+    </span>
+);
+
 function getLevelBadgeStyle(level: number): React.CSSProperties {
     if (level > 70) return { borderColor: '#fca5a5', color: '#000000', background: '#fee2e2' };
     if (level > 30) return { borderColor: '#fde047', color: '#000000', background: '#fef9c3' };
@@ -99,6 +114,9 @@ export default function TeacherStudentManagePage() {
     const [confirmReset, setConfirmReset] = useState<StudentItem | null>(null);
     const [confirmDelete, setConfirmDelete] = useState<StudentItem | null>(null);
     const [confirmNickname, setConfirmNickname] = useState<{ student: StudentItem; name: string } | null>(null);
+
+    const [sortField, setSortField] = useState<'nickname' | 'level' | 'point'>('nickname');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
     const isExchanging = useRef(false);
 
@@ -272,6 +290,28 @@ export default function TeacherStudentManagePage() {
         }
     };
 
+    const handleSort = (field: 'nickname' | 'level' | 'point') => {
+        if (sortField === field) {
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortField(field);
+            // 닉네임은 가나다순(asc), 레벨과 포인트는 높은순(desc)이 기본값
+            setSortOrder(field === 'nickname' ? 'asc' : 'desc');
+        }
+    };
+
+    const sortedStudents = [...students].sort((a, b) => {
+        if (sortField === 'nickname') {
+            const result = a.nickname.localeCompare(b.nickname);
+            return sortOrder === 'asc' ? result : -result;
+        } else if (sortField === 'level') {
+            return sortOrder === 'asc' ? a.level - b.level : b.level - a.level;
+        } else if (sortField === 'point') {
+            return sortOrder === 'asc' ? a.point - b.point : b.point - a.point;
+        }
+        return 0;
+    });
+
     return (
         <div className={styles.container}>
 
@@ -282,13 +322,28 @@ export default function TeacherStudentManagePage() {
                             <h1 className={styles.panelTitle}>
                                 {classInfo?.title ?? '클래스'} 학생 관리
                             </h1>
-                            <p className={styles.panelSubtitle}>
-                                총 {students.length}명의 학생이 이 클래스에 등록되어 있습니다.
-                            </p>
+                            <p className={styles.panelSubtitle}>전체 {students.length}명의 학생</p>
                         </div>
                         <div className={styles.codeBadge}>
                             코드: {classInfo?.classCode ?? '...'}
                         </div>
+                    </div>
+
+                    <div className={styles.mobileSortArea}>
+                        <select
+                            className={styles.sortSelect}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (val === 'nickname') handleSort('nickname');
+                                else if (val === 'level') handleSort('level');
+                                else if (val === 'point') handleSort('point');
+                            }}
+                            value={sortField}
+                        >
+                            <option value="nickname">가나다순 (닉네임)</option>
+                            <option value="level">랭킹 순 (레벨 높은 순)</option>
+                            <option value="point">포인트 순 (많은 순)</option>
+                        </select>
                     </div>
 
                     {isLoading ? (
@@ -299,23 +354,36 @@ export default function TeacherStudentManagePage() {
                         <table className={styles.table}>
                             <thead>
                                 <tr>
-                                    <th>뱃지</th>
-                                    <th>닉네임 / 레벨</th>
-                                    <th>포인트</th>
-                                    <th style={{ textAlign: 'right' }}>관리 액션</th>
+                                    <th className={styles.colBadge}>뱃지</th>
+                                    <th
+                                        onClick={() => handleSort('level')}
+                                        className={`${styles.sortableHeader} ${styles.colLevel}`}
+                                    >
+                                        레벨
+                                        <IconSort active={sortField === 'level'} order={sortOrder} />
+                                    </th>
+                                    <th
+                                        onClick={() => handleSort('nickname')}
+                                        className={`${styles.sortableHeader} ${styles.colNickname}`}
+                                    >
+                                        닉네임
+                                        <IconSort active={sortField === 'nickname'} order={sortOrder} />
+                                    </th>
+                                    <th
+                                        onClick={() => handleSort('point')}
+                                        className={`${styles.sortableHeader} ${styles.colPoint}`}
+                                    >
+                                        포인트
+                                        <IconSort active={sortField === 'point'} order={sortOrder} />
+                                    </th>
+                                    <th className={styles.colAction}>관리 액션</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {students.map(student => (
+                                {sortedStudents.map(student => (
                                     <tr key={student.id}>
                                         <td>
-                                            <div style={{
-                                                width: '40px', height: '40px', borderRadius: '0.5rem',
-                                                display: 'flex',
-                                                alignItems: 'center', justifyContent: 'center',
-                                                fontSize: '1.5rem',
-                                                overflow: 'hidden'
-                                            }}>
+                                            <div className={styles.badgeBox} style={typeof window !== 'undefined' && window.innerWidth < 640 ? { width: '32px', height: '32px' } : {}}>
                                                 {student.badge?.startsWith('/') ? (
                                                     <img
                                                         src={student.badge}
@@ -332,7 +400,12 @@ export default function TeacherStudentManagePage() {
                                                 )}
                                             </div>
                                         </td>
-                                        <td>
+                                        <td className={styles.colLevel}>
+                                            <div className={styles.levelTag} style={getLevelBadgeStyle(student.level)}>
+                                                Lv.{student.level}
+                                            </div>
+                                        </td>
+                                        <td className={styles.colNickname}>
                                             <div className={styles.profileWrap}>
                                                 <div className={styles.nameLine}>
                                                     {editTarget === student.id ? (
@@ -361,13 +434,10 @@ export default function TeacherStudentManagePage() {
                                                             {student.nickname}
                                                         </div>
                                                     )}
-                                                    <div className={styles.levelTag} style={getLevelBadgeStyle(student.level)}>
-                                                        Lv.{student.level}
-                                                    </div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td style={{ fontWeight: 700, color: '#ea580c' }}>
+                                        <td className={styles.colPoint} style={{ fontWeight: 700, color: '#2563eb' }}>
                                             {student.point.toLocaleString()}P
                                         </td>
                                         <td className={styles.actionCell}>
