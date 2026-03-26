@@ -161,7 +161,7 @@ export default function TeacherClassManagePage() {
                         localStorage.setItem('chicorun_teacher_token', data.data.token);
                         fetchClasses(data.data.token);
                     } else {
-                        alert('치코런 교사 권한을 가져오는데 실패했습니다.');
+                        showToast('치코런 교사 권한을 가져오는데 실패했습니다.', 'error');
                         router.push(CHICORUN_ROUTES.LANDING);
                     }
                 } catch (err) {
@@ -176,7 +176,7 @@ export default function TeacherClassManagePage() {
     }, [status, session, fetchClasses, router]);
 
     const handleCreateClass = async () => {
-        if (!newClassName.trim()) return;
+        if (!newClassName.trim() || isCreating) return;
 
         const token = getTeacherTokenFromLocal();
         if (!token) return;
@@ -196,8 +196,9 @@ export default function TeacherClassManagePage() {
                 await fetchClasses(token);
                 setIsModalOpen(false);
                 setNewClassName('');
+                showToast(`"${newClassName.trim()}" 클래스가 생성되었습니다.`, 'success');
             } else {
-                alert(data.error || '클래스 생성에 실패했습니다.');
+                showToast(data.error || '클래스 생성에 실패했습니다.', 'error');
             }
         } catch (err) {
             console.error('Failed to create class:', err);
@@ -225,8 +226,9 @@ export default function TeacherClassManagePage() {
             if (data.success) {
                 setClasses(classes.map(c => c.classCode === classCode ? { ...c, title: editTitleInput.trim() } : c));
                 setEditingClassCode(null);
+                showToast('클래스 이름이 변경되었습니다.', 'success');
             } else {
-                alert(data.error || '클래스 이름 변경에 실패했습니다.');
+                showToast(data.error || '클래스 이름 변경에 실패했습니다.', 'error');
             }
         } catch (err) {
             console.error('Failed to update class title:', err);
@@ -263,9 +265,10 @@ export default function TeacherClassManagePage() {
         try {
             await navigator.clipboard.writeText(code);
             setCopiedCode(code);
+            showToast('참여 링크가 복사되었습니다.', 'success');
             setTimeout(() => setCopiedCode(null), 2000);
         } catch {
-            alert('복사에 실패했습니다: ' + code);
+            showToast('복사에 실패했습니다.', 'error');
         }
     };
 
