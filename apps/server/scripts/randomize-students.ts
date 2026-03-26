@@ -26,21 +26,17 @@ const ALL_CHICORUN_ITEMS = [
     { id: 'badge-leaning-giraffe', category: 'badge', value: '/chicorun/badges/leaning-giraffe.png' },
 
     // Stickers
-    { id: 'sticker-star', category: 'sticker', value: '/chicorun/stickers/simple-star.svg' },
-    { id: 'sticker-heart', category: 'sticker', value: '/chicorun/stickers/bling-heart.svg' },
-    { id: 'sticker-zap', category: 'sticker', value: '/chicorun/stickers/funky-zap.svg' },
-    { id: 'sticker-smile', category: 'sticker', value: '/chicorun/stickers/vivid-smile.svg' },
-    { id: 'sticker-cloud', category: 'sticker', value: '/chicorun/stickers/pastel-cloud.svg' },
-    { id: 'sticker-chico', category: 'sticker', value: '/chicorun/stickers/text-chico.svg' },
-    { id: 'sticker-diamond', category: 'sticker', value: '/chicorun/stickers/diamond-bling.svg' },
-    { id: 'sticker-paw', category: 'sticker', value: '/chicorun/stickers/cute-paw.svg' },
-    { id: 'sticker-music', category: 'sticker', value: '/chicorun/stickers/music-note.svg' },
-    { id: 'sticker-wow', category: 'sticker', value: '/chicorun/stickers/wow-bubble.svg' },
-    { id: 'sticker-sun-sparkle', category: 'sticker', value: '/chicorun/stickers/sun-sparkle.svg' },
-    { id: 'sticker-cool-shades', category: 'sticker', value: '/chicorun/stickers/cool-shades.svg' },
-    { id: 'sticker-go-text', category: 'sticker', value: '/chicorun/stickers/go-text.svg' },
-    { id: 'sticker-pastel-moon', category: 'sticker', value: '/chicorun/stickers/pastel-moon.svg' },
-    { id: 'sticker-vivid-fire', category: 'sticker', value: '/chicorun/stickers/vivid-fire.svg' },
+    // MZ Stickers (SVGs)
+    { id: 'sticker-heart-mz', category: 'sticker', value: '/chicorun/mz-stickers/heart-pink.svg' },
+    { id: 'sticker-star-mz', category: 'sticker', value: '/chicorun/mz-stickers/star-silver.svg' },
+    { id: 'sticker-cherry-mz', category: 'sticker', value: '/chicorun/mz-stickers/cherry.svg' },
+    { id: 'sticker-smiley-mz', category: 'sticker', value: '/chicorun/mz-stickers/smiley-neon.svg' },
+    { id: 'sticker-butterfly-mz', category: 'sticker', value: '/chicorun/mz-stickers/butterfly-blue.svg' },
+    { id: 'sticker-diamond-mz', category: 'sticker', value: '/chicorun/mz-stickers/diamond-bling.svg' },
+    { id: 'sticker-paw-mz', category: 'sticker', value: '/chicorun/mz-stickers/paw-pink.svg' },
+    { id: 'sticker-bubble-mz', category: 'sticker', value: '/chicorun/mz-stickers/bubble-cluster.svg' },
+    { id: 'sticker-check-mz', category: 'sticker', value: '/chicorun/mz-stickers/check-mz.svg' },
+    { id: 'sticker-eye-mz', category: 'sticker', value: '/chicorun/mz-stickers/eye-mz.svg' },
 
     // Borders
     { id: 'border-dashed', category: 'border', value: 'dashed' },
