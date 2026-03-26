@@ -249,6 +249,7 @@
   font-weight: 700;
   color: var(--color-text);
   font-size: 0.95rem;
+  white-space: nowrap;
 }
 
 .profilePoints {
@@ -647,26 +648,30 @@
   }
 
   .mobileProfileHeader {
-    flex-direction: column;
-    padding: var(--space-md);
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-md);
     background: rgba(162, 155, 254, 0.1);
     border-radius: var(--radius-md);
-    margin-bottom: var(--space-sm);
+    margin-bottom: var(--space-xs);
     gap: var(--space-sm);
+    width: 100%;
   }
 
   .mobileProfileInfo {
     display: flex;
-    justify-content: center;
-    gap: var(--space-lg);
-    width: 100%;
-    margin-top: 4px;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-md);
+    flex: 1;
   }
 
   .mobilePoints {
     color: #fbbf24;
     font-weight: 800;
     font-size: 1rem;
+    white-space: nowrap;
   }
 
   .mobileClassCode {
@@ -674,6 +679,7 @@
     font-weight: 700;
     font-size: 0.9rem;
     opacity: 0.8;
+    white-space: nowrap;
   }
 
   .mobileProfileActions {

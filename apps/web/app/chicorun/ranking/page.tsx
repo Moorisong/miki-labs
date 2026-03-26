@@ -40,6 +40,7 @@ function RankingContent() {
 
     const [scale, setScale] = useState(1);
     const [isMounted, setIsMounted] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
     const updateScale = useCallback(() => {
@@ -49,6 +50,8 @@ function RankingContent() {
         const docWidth = document.documentElement.clientWidth;
 
         const availableWidth = Math.min(rectWidth > 0 ? rectWidth : winWidth, winWidth, docWidth);
+        setIsMobile(availableWidth < 768);
+
         // 1등 카드는 1.2배 스케일이므로 이를 고려한 기준 너비 설정
         const baseWidth = (CARD_WIDTH * 1.2) + 40;
 
@@ -201,13 +204,14 @@ function RankingContent() {
                                     id={`student-card-${user.id || user.nickname}`}
                                     className={`${styles.podiumCardWrapper} ${user.rank === 1 ? styles.podiumRank1 : ''}`}
                                 >
-                                    <div className={`${styles.podiumBadge} ${styles[`badgeRank${user.rank}`]}`}>
-                                        <span className={styles.rankNum}>{user.rank}</span>
+                                    <div className={styles.cardRankHeader}>
+                                        <div className={styles.cardRankLabel}>{user.rank}등</div>
+                                        <div className={styles.cardNicknameLabel}>{user.nickname}</div>
                                     </div>
                                     <RankingCard
                                         user={user}
                                         isFirst={user.rank === 1}
-                                        scale={(user.rank === 1 ? 1.15 : 1.0) * (scale < 1 ? scale : 1) * 0.8}
+                                        scale={(user.rank === 1 && !isMobile ? 1.15 : 1.0) * (scale < 1 ? scale : 1) * 0.8}
                                     />
                                 </div>
                             ))}
@@ -229,7 +233,10 @@ function RankingContent() {
                                 }}
                             >
                                 <div className={styles.cardRankWrapper}>
-                                    <div className={styles.cardRankLabel}>{user.rank}등</div>
+                                    <div className={styles.cardRankHeader}>
+                                        <div className={styles.cardRankLabel}>{user.rank}등</div>
+                                        <div className={styles.cardNicknameLabel}>{user.nickname}</div>
+                                    </div>
                                     <RankingCard
                                         user={user}
                                         isFirst={false}
