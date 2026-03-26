@@ -191,10 +191,7 @@ export default function StorePage() {
                                 {isOwned ? (
                                     <>보유 중</>
                                 ) : (
-                                    <>
-                                        <span className={styles.price}>{item.price === 0 ? 'FREE' : `${item.price} CP`}</span>
-                                        구매하기
-                                    </>
+                                    <span className={styles.price}>{item.price === 0 ? 'FREE' : `${item.price} CP`}</span>
                                 )}
                             </button>
                         </div>
