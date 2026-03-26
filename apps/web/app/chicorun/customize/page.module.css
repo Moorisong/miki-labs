@@ -1197,3 +1197,31 @@
     align-items: center;
     justify-content: center;
 }
+
+.btnToggle {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    padding: 0.6rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    gap: 0.5rem;
+}
+
+.btnToggle:hover {
+    background: #e2e8f0;
+    transform: translateY(-1px);
+}
+
+.btnToggle.active {
+    background: #eff6ff !important;
+    color: #3b82f6 !important;
+    border-color: #3b82f6 !important;
+}
