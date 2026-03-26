@@ -143,125 +143,87 @@ export const ALL_CHICORUN_ITEMS: ShopItem[] = [
     },
 
     // Stickers
+    // MZ Style Stickers (Bling-bling, Compact, Pretty)
+    // MZ Style Stickers (Truly Transparent SVGs)
     {
-        id: 'sticker-star',
-        name: '골드 스타',
-        description: '반짝이는 골드 스타 스티커 (Simple)',
-        price: 200,
+        id: 'sticker-heart-mz',
+        name: 'MZ 블러썸 하트 [Animated]',
+        description: '두근두근 움직이는 핑크 블링 하트 (Pulsing)',
+        price: 400,
         category: 'sticker',
-        value: '/chicorun/stickers/simple-star.svg'
+        value: '/chicorun/mz-stickers/heart-pink.svg'
     },
     {
-        id: 'sticker-heart',
-        name: '블링 하트',
-        description: '사랑스러운 핑크 블링 하트 (Bling-bling)',
-        price: 200,
+        id: 'sticker-star-mz',
+        name: 'Y2K 메탈 스타 [Animated]',
+        description: '반짝이며 커졌다 작아지는 실버 스타 (Twinkling)',
+        price: 400,
         category: 'sticker',
-        value: '/chicorun/stickers/bling-heart.svg'
+        value: '/chicorun/mz-stickers/star-silver.svg'
     },
     {
-        id: 'sticker-zap',
-        name: '펑키 썬더',
-        description: '강렬한 벼락 모양 스티커 (Funky)',
-        price: 200,
+        id: 'sticker-cherry-mz',
+        name: '팝 체리',
+        description: '광택이 흐르는 레드 더블 체리 (Glossy)',
+        price: 300,
         category: 'sticker',
-        value: '/chicorun/stickers/funky-zap.svg'
+        value: '/chicorun/mz-stickers/cherry.svg'
     },
     {
-        id: 'sticker-smile',
-        name: '비비드 스마일',
-        description: '밝게 웃고 있는 오렌지 스마일리 (Vivid)',
-        price: 200,
+        id: 'sticker-smiley-mz',
+        name: '사이버 스마일 [Animated]',
+        description: '눈을 깜빡이며 빛나는 네온 스마일리 (Blinking)',
+        price: 400,
         category: 'sticker',
-        value: '/chicorun/stickers/vivid-smile.svg'
+        value: '/chicorun/mz-stickers/smiley-neon.svg'
     },
     {
-        id: 'sticker-cloud',
-        name: '파스텔 클라우드',
-        description: '포근한 파스텔톤 구름 (Pastel)',
-        price: 200,
+        id: 'sticker-butterfly-mz',
+        name: '시스루 나비 [Animated]',
+        description: '훨훨 날아다니는 퍼플 나비 (Aesthetic/Flapping)',
+        price: 400,
         category: 'sticker',
-        value: '/chicorun/stickers/pastel-cloud.svg'
+        value: '/chicorun/mz-stickers/butterfly-blue.svg'
     },
     {
-        id: 'sticker-chico',
-        name: '치코 레터',
-        description: '보라색 버블 텍스트 치코 (Text)',
-        price: 200,
+        id: 'sticker-diamond-mz',
+        name: '프리즘 다이아 [Animated]',
+        description: '영롱하게 회전하며 빛나는 보석 (Rotating)',
+        price: 600,
         category: 'sticker',
-        value: '/chicorun/stickers/text-chico.svg'
+        value: '/chicorun/mz-stickers/diamond-bling.svg'
     },
     {
-        id: 'sticker-diamond',
-        name: '다이아 크리스탈',
-        description: '투명하고 화려한 다이아몬드 (Bling-bling)',
-        price: 200,
+        id: 'sticker-paw-mz',
+        name: '젤리 냥발',
+        description: '투명하고 말캉한 핑크 발바닥 (Jelly)',
+        price: 300,
         category: 'sticker',
-        value: '/chicorun/stickers/diamond-bling.svg'
+        value: '/chicorun/mz-stickers/paw-pink.svg'
     },
     {
-        id: 'sticker-paw',
-        name: '핑크 젤리',
-        description: '귀여운 고양이 발바닥 (Cute)',
-        price: 200,
+        id: 'sticker-bubble-mz',
+        name: '버블 클러스터',
+        description: '몽글몽글 모여있는 파스텔 버블 (Pastel)',
+        price: 300,
         category: 'sticker',
-        value: '/chicorun/stickers/cute-paw.svg'
+        value: '/chicorun/mz-stickers/bubble-cluster.svg'
     },
     {
-        id: 'sticker-music',
-        name: '멜로디 그린',
-        description: '즐거운 음악 선율 (Vivid)',
-        price: 200,
+        id: 'sticker-check-mz',
+        name: 'MZ 체크박스',
+        description: '트렌디한 느낌의 체크 마크 (Funky)',
+        price: 300,
         category: 'sticker',
-        value: '/chicorun/stickers/music-note.svg'
+        value: '/chicorun/mz-stickers/check-mz.svg'
     },
     {
-        id: 'sticker-wow',
-        name: '와우! 팝아트',
-        description: '강렬한 인상의 WOW! 말풍선 (Comic)',
-        price: 200,
+        id: 'sticker-eye-mz',
+        name: '펑키 아이 [Animated]',
+        description: '주변을 두리번거리며 깜빡이는 눈 (Unique/Looking)',
+        price: 400,
         category: 'sticker',
-        value: '/chicorun/stickers/wow-bubble.svg'
-    },
-    {
-        id: 'sticker-sun-sparkle',
-        name: '눈부신 태양',
-        description: '반짝반짝 빛나는 블링블링 태양 (Bling)',
-        price: 200,
-        category: 'sticker',
-        value: '/chicorun/stickers/sun-sparkle.svg'
-    },
-    {
-        id: 'sticker-cool-shades',
-        name: '선글라스 표정',
-        description: '자신감 넘치는 쿨한 선글라스 페이스 (Emoji)',
-        price: 200,
-        category: 'sticker',
-        value: '/chicorun/stickers/cool-shades.svg'
-    },
-    {
-        id: 'sticker-go-text',
-        name: '고! 전진',
-        description: '속도감이 느껴지는 펑키한 GO! 텍스트 (Text)',
-        price: 200,
-        category: 'sticker',
-        value: '/chicorun/stickers/go-text.svg'
-    },
-    {
-        id: 'sticker-pastel-moon',
-        name: '파스텔 달님',
-        description: '포근하고 은은한 느낌의 파스텔 달 (Pastel)',
-        price: 200,
-        category: 'sticker',
-        value: '/chicorun/stickers/pastel-moon.svg'
-    },
-    {
-        id: 'sticker-vivid-fire',
-        name: '활활 불꽃',
-        description: '열정적인 에너지를 뿜는 비비드 불꽃 (Vivid)',
-        price: 200,
-        category: 'sticker',
-        value: '/chicorun/stickers/vivid-fire.svg'
+        value: '/chicorun/mz-stickers/eye-mz.svg'
     },
 
     // Borders
