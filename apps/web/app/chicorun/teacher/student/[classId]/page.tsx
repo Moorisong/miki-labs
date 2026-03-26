@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import styles from './page.module.css';
 import Link from 'next/link';
+import { useToast } from '@/lib/hooks/use-toast';
+import Toast from '@/components/ui/toast';
 import {
     CHICORUN_API,
     CHICORUN_ROUTES,
@@ -59,10 +61,20 @@ const IconBook = () => (
     </svg>
 );
 
+const IconTrash2 = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="3 6 5 6 21 6"></polyline>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        <line x1="10" y1="11" x2="10" y2="17"></line>
+        <line x1="14" y1="11" x2="14" y2="17"></line>
+    </svg>
+);
+
 function getLevelBadgeStyle(level: number): React.CSSProperties {
-    if (level > 70) return { borderColor: '#fca5a5', color: '#dc2626', background: '#fee2e2' };
-    if (level > 30) return { borderColor: '#fde047', color: '#ca8a04', background: '#fef9c3' };
-    return { borderColor: '#86efac', color: '#16a34a', background: '#dcfce7' };
+    if (level > 70) return { borderColor: '#fca5a5', color: '#000000', background: '#fee2e2' };
+    if (level > 30) return { borderColor: '#fde047', color: '#000000', background: '#fef9c3' };
+    return { borderColor: '#86efac', color: '#000000', background: '#dcfce7' };
 }
 
 function getTeacherTokenFromLocal(): string | null {
@@ -75,6 +87,7 @@ export default function TeacherStudentManagePage() {
     const router = useRouter();
     const params = useParams();
     const classId = String(params.classId ?? '');
+    const { toast, showToast, hideToast } = useToast();
 
     const [students, setStudents] = useState<StudentItem[]>([]);
     const [classInfo, setClassInfo] = useState<{ title: string; classCode: string } | null>(null);
@@ -84,6 +97,7 @@ export default function TeacherStudentManagePage() {
     const [newNickname, setNewNickname] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [confirmReset, setConfirmReset] = useState<StudentItem | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState<StudentItem | null>(null);
     const [confirmNickname, setConfirmNickname] = useState<{ student: StudentItem; name: string } | null>(null);
 
     const isExchanging = useRef(false);
@@ -159,7 +173,7 @@ export default function TeacherStudentManagePage() {
                         localStorage.setItem('chicorun_teacher_token', data.data.token);
                         fetchStudents(data.data.token);
                     } else {
-                        alert('치코런 교사 권한을 가져오는데 실패했습니다.');
+                        showToast('치코런 교사 권한을 가져오는데 실패했습니다.', 'error');
                         router.push(CHICORUN_ROUTES.LANDING);
                     }
                 } catch (err) {
@@ -188,14 +202,41 @@ export default function TeacherStudentManagePage() {
             });
             const data = await res.json();
             if (data.success) {
-                alert(data.data.message ?? '비밀번호가 초기화되었습니다.');
+                showToast(data.data.message ?? '비밀번호가 초기화되었습니다.', 'success');
             } else {
-                alert(data.error || '비밀번호 초기화에 실패했습니다.');
+                showToast(data.error || '비밀번호 초기화에 실패했습니다.', 'error');
             }
         } catch (err) {
             console.error('Failed to reset password:', err);
         } finally {
             setConfirmReset(null);
+        }
+    };
+
+    const handleDeleteStudent = async (student: StudentItem) => {
+        const token = getTeacherTokenFromLocal();
+        if (!classInfo || !token) return;
+
+        setIsSaving(true);
+        try {
+            const res = await fetch(CHICORUN_API.CLASS_DELETE_STUDENT(classInfo.classCode, student.id), {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(`${student.nickname} 학생의 정보와 기록이 삭제되었습니다.`, 'success');
+                await fetchStudents(token);
+            } else {
+                showToast(data.error || '학생 삭제에 실패했습니다.', 'error');
+            }
+        } catch (err) {
+            console.error('Failed to delete student:', err);
+        } finally {
+            setIsSaving(false);
+            setConfirmDelete(null);
         }
     };
 
@@ -220,8 +261,9 @@ export default function TeacherStudentManagePage() {
             if (data.success) {
                 await fetchStudents(token);
                 setEditTarget(null);
+                showToast('닉네임이 성공적으로 변경되었습니다.', 'success');
             } else {
-                alert(data.error?.includes('DUPLICATE') ? '이미 사용 중인 닉네임입니다.' : '닉네임 변경에 실패했습니다.');
+                showToast(data.error?.includes('DUPLICATE') ? '이미 사용 중인 닉네임입니다.' : '닉네임 변경에 실패했습니다.', 'error');
             }
         } catch (err) {
             console.error('Failed to update nickname:', err);
@@ -234,11 +276,6 @@ export default function TeacherStudentManagePage() {
         <div className={styles.container}>
 
             <main className={styles.main}>
-                <button className={styles.btnBack}
-                    onClick={() => router.push(CHICORUN_ROUTES.TEACHER_DASHBOARD)}>
-                    <IconArrowLeft /> 클래스 목록으로 돌아가기
-                </button>
-
                 <div className={styles.cardPanel}>
                     <div className={styles.panelHeader}>
                         <div>
@@ -274,7 +311,7 @@ export default function TeacherStudentManagePage() {
                                         <td>
                                             <div style={{
                                                 width: '40px', height: '40px', borderRadius: '0.5rem',
-                                                background: student.cardStyle || '#f1f5f9', display: 'flex',
+                                                display: 'flex',
                                                 alignItems: 'center', justifyContent: 'center',
                                                 fontSize: '1.5rem',
                                                 overflow: 'hidden'
@@ -287,7 +324,7 @@ export default function TeacherStudentManagePage() {
                                                             width: '85%',
                                                             height: '85%',
                                                             objectFit: 'contain',
-                                                            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                                                            border: 'none'
                                                         }}
                                                     />
                                                 ) : (
@@ -297,7 +334,7 @@ export default function TeacherStudentManagePage() {
                                         </td>
                                         <td>
                                             <div className={styles.profileWrap}>
-                                                <div>
+                                                <div className={styles.nameLine}>
                                                     {editTarget === student.id ? (
                                                         <div className={styles.editForm}>
                                                             <input
@@ -320,10 +357,7 @@ export default function TeacherStudentManagePage() {
                                                             </button>
                                                         </div>
                                                     ) : (
-                                                        <div className={styles.nicknameText} style={{
-                                                            color: student.nicknameStyle.color === '#ffffff' ? '#1e293b' : student.nicknameStyle.color,
-                                                            fontWeight: student.nicknameStyle.bold ? 800 : 500,
-                                                        }}>
+                                                        <div className={styles.nicknameText}>
                                                             {student.nickname}
                                                         </div>
                                                     )}
@@ -353,6 +387,14 @@ export default function TeacherStudentManagePage() {
                                                 title="비밀번호 초기화(0000)"
                                             >
                                                 <IconKeyRound />
+                                            </button>
+                                            <button
+                                                onClick={() => setConfirmDelete(student)}
+                                                className={`${styles.actionBtn} ${styles.reset}`}
+                                                style={{ color: '#ef4444' }}
+                                                title="학생 삭제"
+                                            >
+                                                <IconTrash2 />
                                             </button>
                                         </td>
                                     </tr>
@@ -407,6 +449,27 @@ export default function TeacherStudentManagePage() {
                     </div>
                 </div>
             )}
+
+            {/* 학생 삭제 확인 모달 */}
+            {confirmDelete && (
+                <div className={styles.modalOverlay} onClick={e => e.target === e.currentTarget && setConfirmDelete(null)}>
+                    <div className={styles.modal}>
+                        <h3 style={{ color: '#ef4444' }}>⚠️ 학생 정보 삭제</h3>
+                        <p>
+                            <strong>{confirmDelete.nickname}</strong> 학생의 모든 정보와 학습 기록을 삭제하시겠습니까?
+                            <br /><br />
+                            <span style={{ color: '#ef4444', fontWeight: 'bold' }}>삭제 시 복구 및 데이터 조회가 불가능합니다.</span>
+                        </p>
+                        <div className={styles.modalActions}>
+                            <button className={styles.btnModalCancel} onClick={() => setConfirmDelete(null)}>취소</button>
+                            <button className={styles.btnModalDanger} onClick={() => handleDeleteStudent(confirmDelete)} disabled={isSaving}>
+                                {isSaving ? '삭제 중...' : '영구 삭제'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            <Toast toast={toast} onHide={hideToast} />
         </div>
     );
 }

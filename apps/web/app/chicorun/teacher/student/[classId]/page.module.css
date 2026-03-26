@@ -11,7 +11,13 @@
 .main {
     max-width: 900px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 4rem 1.5rem;
+}
+
+@media (max-width: 640px) {
+    .main {
+        padding: 2rem 1rem;
+    }
 }
 
 .btnBack {
@@ -50,6 +56,15 @@
     background: white;
 }
 
+@media (max-width: 640px) {
+    .panelHeader {
+        padding: 1.25rem 1.25rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+}
+
 .panelTitle {
     font-size: 1.5rem;
     font-weight: 800;
@@ -59,7 +74,7 @@
 
 @media (max-width: 640px) {
     .panelTitle {
-        font-size: 1.25rem;
+        font-size: 1.1rem;
     }
 }
 
@@ -107,6 +122,68 @@
     background: #f1f5f9;
 }
 
+@media (max-width: 640px) {
+    .table thead {
+        display: none;
+    }
+
+    .table tr {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        grid-template-areas:
+            "badge profile points"
+            "badge actions actions";
+        padding: 1.25rem 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        gap: 0.5rem 1rem;
+        align-items: center;
+    }
+
+    .table td {
+        padding: 0;
+        border: none;
+        display: contents;
+    }
+
+    /* 뱃지 위치 */
+    .table td:nth-child(1) {
+        grid-area: badge;
+    }
+
+    /* 프로필(닉네임/레벨) 위치 */
+    .table td:nth-child(2) {
+        grid-area: profile;
+        display: block;
+    }
+
+    /* 포인트 위치 */
+    .table td:nth-child(3) {
+        grid-area: points;
+        display: block;
+        text-align: right;
+    }
+
+    /* 액션 버튼 위치 */
+    .table td:nth-child(4) {
+        grid-area: actions;
+        display: flex;
+        justify-content: flex-end;
+        border-top: 1px solid #f8fafc;
+        padding-top: 0.75rem;
+        margin-top: 0.25rem;
+    }
+
+    .actionBtn {
+        margin-left: 0.75rem;
+        background: #f8fafc;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
 .idCol {
     color: #94a3b8;
     font-family: monospace;
@@ -134,8 +211,17 @@
 }
 
 .nicknameText {
-    font-size: 1.125rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #000000;
     line-height: 1.2;
+}
+
+.nameLine {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .levelTag {
@@ -145,7 +231,6 @@
     font-weight: 700;
     border-radius: 0.25rem;
     border: 1px solid;
-    margin-top: 0.25rem;
 }
 
 .actionCell {
@@ -184,8 +269,18 @@
     border-radius: 0.25rem;
     padding: 0.25rem 0.5rem;
     font-size: 0.875rem;
-    width: 120px;
+    width: 140px;
     outline: none;
+}
+
+@media (max-width: 480px) {
+    .editInput {
+        width: 100px;
+    }
+
+    .editForm {
+        gap: 0.25rem;
+    }
 }
 
 .editInput:focus {
@@ -250,6 +345,7 @@
     font-size: 1.2rem;
     font-weight: 800;
     margin: 0 0 0.5rem 0;
+    color: #0f172a;
 }
 
 .modal p {

@@ -17,12 +17,15 @@ export const CHICORUN_API = {
     RESET_PROGRESS: `${API_BASE}/api/chicorun/reset-progress`,
     RESET_ACHIEVED_LEVEL: `${API_BASE}/api/chicorun/reset-achieved-level`,
     CLASS: `${API_BASE}/api/chicorun/class`,
+    CLASS_DELETE: (classCode: string) => `${API_BASE}/api/chicorun/class/${classCode}`,
     CLASS_STUDENTS: (classCode: string) => `${API_BASE}/api/chicorun/class/${classCode}/students`,
     CLASS_RANKING: (classCode: string) => `${API_BASE}/api/chicorun/class/${classCode}/ranking`,
     CLASS_RESET_PASSWORD: (classCode: string) =>
         `${API_BASE}/api/chicorun/class/${classCode}/reset-password`,
     CLASS_UPDATE_NICKNAME: (classCode: string, studentId: string) =>
         `${API_BASE}/api/chicorun/class/${classCode}/students/${studentId}/nickname`,
+    CLASS_DELETE_STUDENT: (classCode: string, studentId: string) =>
+        `${API_BASE}/api/chicorun/class/${classCode}/students/${studentId}`,
     CLASS_UPDATE_TITLE: (classCode: string) =>
         `${API_BASE}/api/chicorun/class/${classCode}/title`,
     TEACHER_LOGIN: `${API_BASE}/api/chicorun/teacher/login`,
