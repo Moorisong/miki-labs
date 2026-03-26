@@ -109,6 +109,7 @@ async function randomize() {
                 x: nPos.x,
                 y: nPos.y,
                 rotate: nPos.rotate,
+                visible: true,
             };
 
             // 5. Human-like Sticker Placement (Clusters or Patterns)
@@ -177,6 +178,7 @@ async function randomize() {
                     x: pPos.x,
                     y: pPos.y,
                     rotate: pPos.rotate,
+                    visible: true,
                 },
                 rankStyle: {
                     color: mainColor,
@@ -190,6 +192,7 @@ async function randomize() {
                     x: bPos.x,
                     y: bPos.y,
                     rotate: bPos.rotate,
+                    visible: true,
                 }
             };
 
