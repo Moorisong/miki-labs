@@ -19,7 +19,17 @@
     padding-bottom: 8rem;
 }
 
+.rankingGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 7.5rem;
+    /* PC에서 1~3등과 나머지 등수 사이 여백 키움 */
+    width: 100%;
+    align-items: center;
+}
+
 @media (max-width: 768px) {
+
     .main {
         padding: 2rem 0.75rem 7rem 0.75rem;
     }
@@ -92,19 +102,14 @@
     margin: 0;
 }
 
-.rankingGrid {
-    display: flex;
-    flex-direction: column;
-    gap: 4rem;
-    width: 100%;
-    align-items: center;
-}
+
 
 .podiumSection {
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    gap: 1.5rem;
+    gap: 4rem;
+    /* Increased gap for PC mode */
     padding-top: 3rem;
     width: 100%;
 }

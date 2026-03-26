@@ -13,8 +13,8 @@ const DEFAULTS = CHICORUN_CARD_DEFAULTS;
 
 // Using imported RankingEntry from RankingCard.tsx
 
-const IconZap = ({ color = '#ea580c' }: { color?: string }) => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill={color} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const IconZap = ({ color = '#ea580c', size = '1em' }: { color?: string; size?: string | number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
     </svg>
 );
@@ -273,7 +273,7 @@ function RankingContent() {
                     </div>
                     <div className={styles.myRankPoints}>
                         <IconZap />
-                        {myRankEntry.point.toLocaleString()}P
+                        {myRankEntry.point.toLocaleString()} P
                     </div>
                     <div className={styles.jumpHint}>
                         내 카드로 이동 ➔
