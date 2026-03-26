@@ -56,38 +56,6 @@
     letter-spacing: -0.01em;
 }
 
-/* TOP 1 Badge */
-.topBadge {
-    position: absolute;
-    top: -16px;
-    left: -16px;
-    background: linear-gradient(135deg, #fef08a, #ca8a04);
-    color: #fff;
-    padding: 0.4rem 1rem;
-    border-radius: 1rem;
-    font-weight: 900;
-    font-size: 1.1rem;
-    box-shadow: 0 8px 16px rgba(234, 179, 8, 0.3);
-    transform: rotate(-10deg);
-    z-index: 30;
-    border: 2px solid white;
-    pointer-events: none;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        transform: rotate(-10deg) scale(1);
-    }
-
-    50% {
-        transform: rotate(-10deg) scale(1.05);
-    }
-
-    100% {
-        transform: rotate(-10deg) scale(1);
-    }
-}
 
 /* Sticker Hover */
 .sticker {

@@ -214,12 +214,6 @@ export const RankingCard: React.FC<RankingCardProps> = ({
                     />
                 ]}
 
-                {/* Top 1 Badge */}
-                {isFirst && (
-                    <div key="top-badge" className={styles.topBadge}>
-                        👑 TOP 1
-                    </div>
-                )}
 
                 {/* Stickers */}
                 {user.customize?.stickers?.map((sticker) => (
