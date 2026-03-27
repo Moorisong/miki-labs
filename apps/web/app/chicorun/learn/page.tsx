@@ -166,7 +166,7 @@ function LevelSelectModal({
                         </svg>
                     </button>
                 )}
-                <h2 className={styles.levelSelectTitle}>시작 레벨을 선택해주세요</h2>
+                <h2 className={styles.levelSelectTitle}>레벨을 선택해주세요</h2>
                 <p className={styles.levelSelectDesc}>
                     현재 영어 실력에 맞는 레벨에서 시작하면<br />더 재미있게 공부할 수 있어요!
                 </p>
@@ -321,7 +321,7 @@ export default function StudentLearnPage() {
         setIsLoading(true);
         try {
             const difficulty = difficultyOverride || selectedDifficulty;
-            const res = await fetch(`${CHICORUN_API.QUESTION}?difficulty=${difficulty}`, {
+            const res = await fetch(`${CHICORUN_API.QUESTION}?difficulty=${difficulty}&_t=${Date.now()}`, {
                 headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
             });
             const data = await res.json();

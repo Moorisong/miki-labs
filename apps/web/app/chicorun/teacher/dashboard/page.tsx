@@ -308,16 +308,17 @@ export default function TeacherClassManagePage() {
                             <div key={cls.id} className={styles.card} style={{ animationDelay: `${i * 0.1}s` }}>
                                 <div>
                                     {editingClassCode === cls.classCode ? (
-                                        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', alignItems: 'center' }}>
+                                        <div className={styles.editTitleRow}>
                                             <input
-                                                className={styles.inputField}
-                                                style={{ marginBottom: 0, padding: '0.5rem', flex: 1 }}
+                                                className={styles.editTitleInput}
                                                 value={editTitleInput}
                                                 onChange={e => setEditTitleInput(e.target.value)}
                                                 autoFocus
                                             />
-                                            <button className={styles.btnPrimary} style={{ padding: '0.5rem' }} onClick={() => handleUpdateTitle(cls.classCode)} disabled={isSavingTitle}>저장</button>
-                                            <button className={styles.btnSecondary} style={{ padding: '0.5rem' }} onClick={() => setEditingClassCode(null)}>취소</button>
+                                            <button className={styles.btnSave} onClick={() => handleUpdateTitle(cls.classCode)} disabled={isSavingTitle}>
+                                                {isSavingTitle ? '...' : '저장'}
+                                            </button>
+                                            <button className={styles.btnCancelEdit} onClick={() => setEditingClassCode(null)}>취소</button>
                                         </div>
                                     ) : (
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '1.5rem' }}>

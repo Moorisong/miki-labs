@@ -132,13 +132,18 @@ export const submitAnswer = async (
 
             let achievedMaxLevel = studentDoc.achievedMaxLevel;
             let finalUpdate: any = {
-                $inc: { point: rewardPoints, progressIndex: 1 },
+                $inc: { point: rewardPoints, progressIndex: (isFinalComplete ? 0 : 1) }, // 최대치 도달 시 더 이상 증가 안함
                 $set: { currentQuestionAttempts: 1 }
             };
 
+            // 만약 이미 완료된 상태에서 또 제출하면 증가시키지 않음
+            if (studentDoc.progressIndex >= 1500) {
+                finalUpdate.$inc.progressIndex = 0;
+            }
+
             // 레벨 클리어 시 조건 검증 및 achievedMaxLevel 업데이트
             if (isLevelComplete) {
-                // 조건: 정확도 70%(고급 60%) 이상 + 연속 정답 5회 이상
+                // ... (생략된 기존 검증 로직 유지)
                 const accuracyThreshold = currentProblemLevel > 70 ? 0.6 : 0.7;
                 const accuracy = newSolvedCount / newTotalCount;
                 const streakCondition = newMaxStreak >= 5;
@@ -147,7 +152,6 @@ export const submitAnswer = async (
                     achievedMaxLevel = Math.max(achievedMaxLevel, currentProblemLevel);
                 }
 
-                // 레벨 클리어 시 통계 초기화 및 achievedMaxLevel 반영
                 finalUpdate.$set = {
                     ...finalUpdate.$set,
                     currentLevelTotalCount: 0,
@@ -158,7 +162,6 @@ export const submitAnswer = async (
                     achievedMaxLevel
                 };
             } else {
-                // 레벨 진행 중이면 통계 업데이트 (모두 $set으로 통일하여 충돌 방지)
                 finalUpdate.$set = {
                     ...finalUpdate.$set,
                     currentLevelTotalCount: newTotalCount,
@@ -184,17 +187,17 @@ export const submitAnswer = async (
                     newProgressIndex: updatedStudent.progressIndex,
                     newPoint: updatedStudent.point,
                     earnedPoints: rewardPoints,
-                    level: nextLevel,
+                    level: (isFinalComplete ? 100 : nextLevel),
                     isLevelComplete,
                     isFinalComplete,
                 },
             });
         } else {
             // 오답 처리: 시도 횟수 증가, 스트릭 초기화, 토탈 카운트 증가
-            await ChicorunStudentModel.findByIdAndUpdate(student.studentId, {
+            const updatedStudent = await ChicorunStudentModel.findByIdAndUpdate(student.studentId, {
                 $inc: { currentQuestionAttempts: 1, currentLevelTotalCount: 1 },
                 $set: { currentLevelCurrentStreak: 0 }
-            });
+            }, { new: true });
 
             const { level } = ChicorunProblemService.getLevelAndOrderIndex(studentDoc.progressIndex);
             res.json({
@@ -203,8 +206,8 @@ export const submitAnswer = async (
                     isCorrect: false,
                     explanation: problem.explanation,
                     correctIndex: problem.answer,
-                    newProgressIndex: studentDoc.progressIndex,
-                    newPoint: studentDoc.point,
+                    newProgressIndex: updatedStudent?.progressIndex || studentDoc.progressIndex,
+                    newPoint: updatedStudent?.point || studentDoc.point,
                     level: level,
                     isLevelComplete: false,
                     isFinalComplete: false,

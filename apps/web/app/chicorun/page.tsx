@@ -112,6 +112,9 @@ export default function ChicorunLandingPage() {
                             <p>학생이 <strong>받은 주소로 접속</strong>하면 해당 클래스에 바로 가입할 수 있어요.</p>
                         </div>
                     </div>
+                    <div className={styles.manualNote}>
+                        💡 이미 가입한 학생은 언제든지 <strong>치코런 메인</strong>에서 로그인하여 접속할 수 있습니다.
+                    </div>
                 </div>
             </main>
         </div>

@@ -60,12 +60,15 @@ export class ChicorunProblemService {
                 level: Math.floor(offset / 15) + 31,
                 orderIndex: (offset % 15) + 1,
             };
-        } else {
-            const offset = Math.min(progressIndex - 960, 539); // 최대 1499까지
+        } else if (progressIndex < 1500) {
+            const offset = progressIndex - 960;
             return {
                 level: Math.floor(offset / 18) + 71,
                 orderIndex: (offset % 18) + 1,
             };
+        } else {
+            // 1500번 이상 (종료 상태)
+            return { level: 100, orderIndex: 19 };
         }
     }
 
@@ -152,11 +155,11 @@ export class ChicorunProblemService {
                 level,
                 difficulty: targetDifficulty,
                 orderIndex,
-                passage: "문제가 준비 중입니다.",
-                question: "조금만 기다려주세요!",
-                choices: ["대기 1", "대기 2", "대기 3", "대기 4"],
+                passage: "새로운 문제가 곧 추가될 예정입니다. 🔥",
+                question: `[Lv.${level} - ${orderIndex}번] 문제가 준비 중입니다.`,
+                choices: ["잠시만 기다려주세요", "다른 문제 풀기", "복습하러 가기", "대기 중"],
                 answer: 0,
-                explanation: "새로운 문제가 곧 추가될 예정입니다! 🔥",
+                explanation: `${level}레벨 ${orderIndex}번 문제가 아직 준비되지 않았어요! 조금만 기다려주세요.`,
                 questionType: 'vocab',
                 wordCount: 5,
                 seed: this.generateSeed(studentId, classCode, progressIndex),
