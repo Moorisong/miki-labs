@@ -44,32 +44,18 @@ const IconBook = () => (
 
 function JoinForm() {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const urlClassCode = searchParams.get('classCode') || '';
-
     const [nickname, setNickname] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // 이미 로그인된 경우 학습 페이지로 리다이렉트 (링크의 클래스코드와 일치할 때만)
+    // 이미 로그인된 경우 학습 페이지로 리다이렉트
     useEffect(() => {
         const token = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
-        const studentInfoStr = localStorage.getItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
-
-        if (token && studentInfoStr) {
-            try {
-                const info = JSON.parse(studentInfoStr);
-                // URL에 특정 클래스 코드가 상주하는데, 현재 토큰의 클래스와 다르다면 리다이렉트 하지 않음 (새 가입 유도)
-                if (urlClassCode && info.classCode !== urlClassCode.toUpperCase()) {
-                    return;
-                }
-                router.replace(CHICORUN_ROUTES.LEARN);
-            } catch {
-                // ignore
-            }
+        if (token) {
+            router.replace(CHICORUN_ROUTES.LEARN);
         }
-    }, [router, urlClassCode]);
+    }, [router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -84,7 +70,6 @@ function JoinForm() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    classCode: urlClassCode ? urlClassCode.toUpperCase().trim() : undefined,
                     nickname: nickname.trim(),
                     password,
                 }),
@@ -94,12 +79,8 @@ function JoinForm() {
 
             if (!data.success) {
                 const msg = data.error?.message ?? data.error ?? '로그인에 실패했습니다.';
-                if (msg.includes('ERROR_CLASS_NOT_FOUND')) {
-                    setError('존재하지 않는 클래스 코드입니다. 담당 선생님께 확인하세요.');
-                } else if (msg.includes('ERROR_WRONG_PASSWORD')) {
-                    setError('비밀번호가 틀렸어요. 다시 시도하거나 선생님께 초기화를 요청하세요.');
-                } else if (msg.includes('ERROR_CLASS_CODE_REQUIRED')) {
-                    setError('등록되지 않은 닉네임입니다. 오타가 없는지 확인하거나, 처음 방문하셨다면 선생님이 공유해주신 "전체 링크"로 접속해 주세요.');
+                if (msg.includes('ERROR_WRONG_PASSWORD')) {
+                    setError('비밀번호가 틀렸어요. 다시 시도하세요.');
                 } else {
                     setError(msg);
                 }
@@ -109,7 +90,7 @@ function JoinForm() {
             // 토큰 및 학생 정보 저장
             const { token, student } = data.data as { token: string; student: any };
             localStorage.setItem(CHICORUN_STORAGE_KEY.TOKEN, token);
-            localStorage.setItem(CHICORUN_STORAGE_KEY.STUDENT_INFO, JSON.stringify(student));
+            localStorage.setItem(CHICORUN_STORAGE_KEY.USER_INFO, JSON.stringify(student));
 
             router.push(CHICORUN_ROUTES.LEARN);
         } catch {
@@ -188,22 +169,6 @@ function JoinForm() {
                     </>
                 )}
             </button>
-
-            {!urlClassCode && (
-                <div style={{
-                    marginTop: '0.5rem',
-                    padding: '0.875rem 1rem',
-                    background: '#f8fafc',
-                    color: '#64748b',
-                    borderRadius: '0.75rem',
-                    fontSize: '0.8rem',
-                    lineHeight: 1.5,
-                    border: '1px solid #e2e8f0'
-                }}>
-                    ℹ️ <b>처음 방문하시나요?</b><br />
-                    새로운 클래스에 참여하려면 선생님이 보내주신 <b>전체 링크</b>를 눌러 접속하세요.
-                </div>
-            )}
         </form>
     );
 }

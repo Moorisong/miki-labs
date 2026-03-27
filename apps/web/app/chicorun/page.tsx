@@ -21,18 +21,11 @@ export default function ChicorunLandingPage() {
     useEffect(() => {
         if (status === "loading") return;
 
-        const studentToken = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
-        const teacherToken = localStorage.getItem(CHICORUN_STORAGE_KEY.TEACHER_TOKEN);
+        const userToken = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
 
-        // 학생 로그인 상태면 학습 페이지로 이동
-        if (studentToken) {
+        // 로그인 상태면 학습 페이지로 이동
+        if (userToken) {
             router.replace(CHICORUN_ROUTES.LEARN);
-            return;
-        }
-
-        // 교사 로그인 상태면 대시보드로 이동
-        if (teacherToken || session) {
-            router.replace(CHICORUN_ROUTES.TEACHER_DASHBOARD);
             return;
         }
 
@@ -45,23 +38,14 @@ export default function ChicorunLandingPage() {
         </svg>
     );
 
-    const IconGraduationCap = () => (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-            <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
-        </svg>
-    );
-
     if (isChecking || status === "loading") {
         return null;
     }
 
     return (
         <div className={styles.container}>
-
             <main className={styles.main}>
                 <div className={styles.contentBox}>
-
                     {/* 타이틀 */}
                     <div className={styles.titleWrapper}>
                         <h1 className={styles.title}>Chicorun</h1>
@@ -78,42 +62,30 @@ export default function ChicorunLandingPage() {
                             onClick={() => router.push("/chicorun/join")}
                         >
                             <IconZap />
-                            학생 시작
-                        </button>
-
-                        <button
-                            className={styles.btnTeacher}
-                            onClick={() => router.push("/chicorun/teacher/dashboard")}
-                        >
-                            <IconGraduationCap />
-                            교사 로그인
+                            시작하기
                         </button>
                     </div>
-
                 </div>
 
-                {/* 이용 안내 매뉴얼 */}
+                {/* 이용 안내 */}
                 <div className={styles.manualSection}>
                     <h2 className={styles.manualTitle}>시작하는 방법 💡</h2>
                     <div className={styles.manualGrid}>
                         <div className={styles.manualItem}>
                             <div className={styles.stepNum}>1</div>
-                            <h3>클래스 생성</h3>
-                            <p>선생님이 먼저 <strong>교사 로그인</strong> 후 학습 클래스를 생성합니다.</p>
+                            <h3>닉네임 설정</h3>
+                            <p>사용할 닉네임과 비밀번호를 입력하고 입장하세요.</p>
                         </div>
                         <div className={styles.manualItem}>
                             <div className={styles.stepNum}>2</div>
-                            <h3>주소 공유</h3>
-                            <p>클래스 관리의 <strong>'참여 링크 복사'</strong> 버튼을 눌러 학생에게 전달하세요.</p>
+                            <h3>레벨 테스트</h3>
+                            <p>나의 실력에 맞는 레벨을 선택해 보세요.</p>
                         </div>
                         <div className={styles.manualItem}>
                             <div className={styles.stepNum}>3</div>
-                            <h3>학생 등록</h3>
-                            <p>학생이 <strong>받은 주소로 접속</strong>하면 해당 클래스에 바로 가입할 수 있어요.</p>
+                            <h3>학습과 랭킹</h3>
+                            <p>문제를 풀고 포인트를 쌓아 랭킹에 도전하세요!</p>
                         </div>
-                    </div>
-                    <div className={styles.manualNote}>
-                        💡 이미 가입한 학생은 언제든지 <strong>치코런 메인</strong>에서 로그인하여 접속할 수 있습니다.
                     </div>
                 </div>
             </main>

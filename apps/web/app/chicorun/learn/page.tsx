@@ -276,7 +276,6 @@ export default function StudentLearnPage() {
     const [wrongIndices, setWrongIndices] = useState<number[]>([]);
     const [answerResult, setAnswerResult] = useState<AnswerResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [className, setClassName] = useState<string>('');
 
     // 레벨 및 난이도 시스템 상태
     const [currentLevel, setCurrentLevel] = useState<number>(1);
@@ -292,11 +291,10 @@ export default function StudentLearnPage() {
     const answerLockRef = useRef(false);
 
     useEffect(() => {
-        const studentInfoStr = localStorage.getItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
-        if (studentInfoStr) {
+        const userInfoStr = localStorage.getItem(CHICORUN_STORAGE_KEY.USER_INFO);
+        if (userInfoStr) {
             try {
-                const info = JSON.parse(studentInfoStr);
-                setClassName(info.className || info.classCode || '');
+                const info = JSON.parse(userInfoStr);
                 setCurrentLevel(info.currentLevel || 1);
                 setAchievedMaxLevel(info.achievedMaxLevel || 1);
                 setStartLevel(info.startLevel || null);
@@ -412,11 +410,11 @@ export default function StudentLearnPage() {
     };
 
     const updateLocalStudentInfo = (updates: any) => {
-        const infoStr = localStorage.getItem(CHICORUN_STORAGE_KEY.STUDENT_INFO);
+        const infoStr = localStorage.getItem(CHICORUN_STORAGE_KEY.USER_INFO);
         if (infoStr) {
             const info = JSON.parse(infoStr);
             const newInfo = { ...info, ...updates };
-            localStorage.setItem(CHICORUN_STORAGE_KEY.STUDENT_INFO, JSON.stringify(newInfo));
+            localStorage.setItem(CHICORUN_STORAGE_KEY.USER_INFO, JSON.stringify(newInfo));
         }
     };
 
@@ -494,12 +492,6 @@ export default function StudentLearnPage() {
     return (
         <div className={styles.container}>
             <main className={styles.main}>
-                {className && (
-                    <div className={styles.classInfoContainer}>
-                        <div className={styles.classInfoBadge}><IconClass /> {className}</div>
-                    </div>
-                )}
-
                 <div className={styles.topInfoPanel}>
                     <div className={styles.levelHeader}>
                         <div className={styles.mainLevelInfo}>
@@ -614,6 +606,15 @@ export default function StudentLearnPage() {
                 ) : null
                 }
             </main >
+
+            <footer className={styles.footerNav}>
+                <button onClick={() => router.push(CHICORUN_ROUTES.RANKING)}>랭킹 보기</button>
+                <button onClick={() => {
+                    localStorage.removeItem(CHICORUN_STORAGE_KEY.TOKEN);
+                    localStorage.removeItem(CHICORUN_STORAGE_KEY.USER_INFO);
+                    router.push(CHICORUN_ROUTES.LANDING);
+                }}>로그아웃</button>
+            </footer>
 
             <ComboOverlay combo={activeCombo} onDone={handleComboAnimationDone} />
             {
