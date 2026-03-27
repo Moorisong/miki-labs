@@ -85,8 +85,8 @@ export class ChicorunProblemService {
         }
     }
 
-    static generateSeed(studentId: string, classCode: string, progressIndex: number): string {
-        const data = `${studentId}-${classCode}-${progressIndex}`;
+    static generateSeed(studentId: string, progressIndex: number): string {
+        const data = `${studentId}-${progressIndex}`;
         return crypto.createHash('sha256').update(data).digest('hex').substring(0, 16);
     }
 
@@ -126,7 +126,6 @@ export class ChicorunProblemService {
      */
     static async getQuestion(
         studentId: string,
-        classCode: string,
         progressIndex: number,
         difficulty?: 'easy' | 'medium' | 'hard',
         achievedMaxLevel: number = 1
@@ -162,7 +161,7 @@ export class ChicorunProblemService {
                 explanation: `${level}레벨 ${orderIndex}번 문제가 아직 준비되지 않았어요! 조금만 기다려주세요.`,
                 questionType: 'vocab',
                 wordCount: 5,
-                seed: this.generateSeed(studentId, classCode, progressIndex),
+                seed: this.generateSeed(studentId, progressIndex),
                 progressIndex,
                 questionNumber: orderIndex,
                 point: adjustedPoint,
@@ -183,7 +182,7 @@ export class ChicorunProblemService {
             explanation: problemDoc.explanation,
             questionType: problemDoc.questionType,
             wordCount: problemDoc.wordCount,
-            seed: this.generateSeed(studentId, classCode, progressIndex),
+            seed: this.generateSeed(studentId, progressIndex),
             progressIndex,
             questionNumber: orderIndex,
             point: adjustedPoint,

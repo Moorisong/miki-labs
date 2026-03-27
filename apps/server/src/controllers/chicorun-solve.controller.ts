@@ -24,9 +24,9 @@ export const getQuestion = async (
             throw new AppError(404, 'ERROR_STUDENT_NOT_FOUND: 학생 정보를 찾을 수 없습니다.');
         }
 
-        const { progressIndex, classCode } = studentDoc;
+        const { progressIndex } = studentDoc;
         const difficulty = req.query.difficulty as 'easy' | 'medium' | 'hard';
-        const problem = await ChicorunProblemService.getQuestion(student.studentId, classCode, progressIndex, difficulty, studentDoc.achievedMaxLevel);
+        const problem = await ChicorunProblemService.getQuestion(student.studentId, progressIndex, difficulty, studentDoc.achievedMaxLevel);
 
         res.json({
             success: true,
@@ -90,7 +90,6 @@ export const submitAnswer = async (
         // 서버에서 해당 progressIndex의 문제를 다시 조회하여 검증
         const problem = await ChicorunProblemService.getQuestion(
             student.studentId,
-            studentDoc.classCode,
             studentDoc.progressIndex,
             difficulty as 'easy' | 'medium' | 'hard',
             studentDoc.achievedMaxLevel

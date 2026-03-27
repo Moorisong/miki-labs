@@ -5,7 +5,6 @@ import { ApiResponse } from '../types/api.types';
 
 export interface ChicoStudentPayload {
     studentId: string;
-    classCode: string;
     nickname: string;
 }
 
@@ -34,7 +33,7 @@ export const chicorunStudentAuth = (
 
         const payload = jwt.verify(token, secret) as ChicoStudentPayload;
 
-        if (!payload.studentId || !payload.classCode || !payload.nickname) {
+        if (!payload.studentId || !payload.nickname) {
             throw new AppError(401, 'ERROR_INVALID_TOKEN: 유효하지 않은 토큰입니다.');
         }
 
