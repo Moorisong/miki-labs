@@ -34,9 +34,8 @@ export default function NavBar() {
 
   useEffect(() => {
     const fetchLatestInfo = async () => {
-      const studentToken = localStorage.getItem('chicorun_student_token');
-      const teacherToken = localStorage.getItem('chicorun_teacher_token');
-      setHasChicoToken(!!(studentToken || teacherToken));
+      const studentToken = localStorage.getItem('chicorun_user_token');
+      setHasChicoToken(!!studentToken);
 
       if (studentToken) {
         try {
@@ -47,9 +46,7 @@ export default function NavBar() {
           if (data.success && data.data) {
             const info = data.data;
             setStudentNickname(info.nickname || null);
-            setStudentClassCode(info.classCode || '알 수 없음');
             setStudentPoints(info.point || 0);
-            setStudentBadge(info.badge || '🌱');
           }
         } catch (err) {
           console.error('Failed to fetch latest student info in NavBar', err);
@@ -83,11 +80,8 @@ export default function NavBar() {
   const handleSignOut = () => {
     closeMenu();
     // Chicorun 관련 모든 로컬 스토리지 데이터 삭제
-    Object.keys(localStorage).forEach(key => {
-      if (key.startsWith('chicorun_')) {
-        localStorage.removeItem(key);
-      }
-    });
+    localStorage.removeItem('chicorun_user_token');
+    localStorage.removeItem('chicorun_user_info');
 
     // 자아탐험 관련 페이지에서 로그아웃 시 자아탐험 랜딩 페이지로 이동
     const redirectUrl = pathname.startsWith('/htsm') ? '/htsm' : isChicorun ? '/chicorun' : pathname;
@@ -113,7 +107,7 @@ export default function NavBar() {
       return;
     }
 
-    const token = localStorage.getItem('chicorun_student_token');
+    const token = localStorage.getItem('chicorun_user_token');
     if (!token) return;
 
     setIsChangingPassword(true);
@@ -148,20 +142,14 @@ export default function NavBar() {
   // Chicorun 바로가기 링크 (로그인 상태에 따라 학생/선생님 버튼 필터링)
   const CHICORUN_LINKS = [
     { href: '/chicorun', label: '학습' },
-    // 학생 로그인 시에만 랭킹, 상점 버튼 표시
+    // 학생 로그인 시에만 랭킹 버튼 표시
     ...(studentNickname ? [
-      { href: '/chicorun/ranking', label: '랭킹' },
-      { href: '/chicorun/store', label: '상점' }
+      { href: '/chicorun/ranking', label: '랭킹' }
     ] : []),
-    // 로그인하지 않은 학생의 경우 참여 페이지로 이동 (학생(닉네임) 버튼은 별도 렌더링)
+    // 로그인하지 않은 학생의 경우 참여 페이지로 이동
     ...(!teacherName && !studentNickname ? [{
       href: '/chicorun/join',
-      label: '학생이에요'
-    }] : []),
-    // 학생이 로그인한 경우 선생님 대시보드 버튼 숨김
-    ...(!studentNickname ? [{
-      href: '/chicorun/teacher/dashboard',
-      label: teacherName ? `선생님(${teacherName})` : '선생님이에요'
+      label: '시작하기'
     }] : []),
   ];
 
@@ -170,29 +158,6 @@ export default function NavBar() {
     return null;
   }
 
-  // 치코런 선생님 로그인 시: 로그아웃 버튼만 있는 간소화된 헤더
-  if (isChicorunTeacher) {
-    return (
-      <header className={styles.header}>
-        <nav className={styles.nav}>
-          <Link href="/" className={styles.logo} onClick={closeMenu}>
-            <img src="/logo.png" alt="Logo" className={styles.logoIcon} />
-            <span className={styles.logoText}>하루상자</span>
-          </Link>
-          <div className={styles.teacherLinks}>
-            <Link href={CHICORUN_ROUTES.TEACHER_DASHBOARD} className={styles.navLink} onClick={closeMenu}>
-              메인
-            </Link>
-          </div>
-          <div className={styles.chicorunTeacherAuth}>
-            <button onClick={handleSignOut} className={styles.logoutButton}>
-              로그아웃
-            </button>
-          </div>
-        </nav>
-      </header>
-    );
-  }
 
   return (
     <>
@@ -297,27 +262,7 @@ export default function NavBar() {
                     <ul className={`${styles.dropdownMenu} ${isStudentDropdownOpen ? styles.show : ''}`}>
                       <li className={styles.dropdownProfileRow}>
                         <div className={styles.profileBadgeName}>
-                          <span className={styles.profileBadge}>
-                            {studentBadge.startsWith('/') ? (
-                              <div style={{
-                                background: getBadgeStyles(studentBadge).bg,
-                                border: `2px solid ${getBadgeStyles(studentBadge).border}`,
-                                borderRadius: '22%',
-                                width: '1.4em',
-                                height: '1.4em',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                overflow: 'hidden'
-                              }}>
-                                <img
-                                  src={studentBadge}
-                                  alt="badge"
-                                  style={{ width: '100%', height: '100%', objectFit: 'contain', mixBlendMode: 'multiply' }}
-                                />
-                              </div>
-                            ) : studentBadge}
-                          </span>
+                          <span className={styles.profileBadge}>🏃‍♂️</span>
                           <span className={styles.profileName}>{studentNickname}</span>
                         </div>
                         <Link
@@ -332,32 +277,6 @@ export default function NavBar() {
                         </Link>
                       </li>
                       <li className={styles.dropdownDivider}></li>
-                      <li className={styles.dropdownInfoItem}>
-                        <span className={styles.infoLabel}>클래스</span>
-                        <Link
-                          href={CHICORUN_ROUTES.LEARN}
-                          className={styles.infoValueLink}
-                          onClick={() => {
-                            closeMenu();
-                            setIsStudentDropdownOpen(false);
-                          }}
-                        >
-                          {studentClassCode}
-                        </Link>
-                      </li>
-                      <li className={styles.dropdownDivider}></li>
-                      <li>
-                        <Link
-                          href="/chicorun/customize"
-                          className={`${styles.dropdownItem} ${styles.dropdownActionBtn}`}
-                          onClick={() => {
-                            closeMenu();
-                            setIsStudentDropdownOpen(false);
-                          }}
-                        >
-                          꾸미기
-                        </Link>
-                      </li>
                       <li>
                         <button
                           className={`${styles.dropdownItem} ${styles.dropdownActionBtn}`}
@@ -383,42 +302,14 @@ export default function NavBar() {
                   <>
                     <li className={`${styles.mobileOnly} ${styles.mobileProfileHeader}`}>
                       <div className={styles.profileBadgeName}>
-                        <span className={styles.profileBadge}>
-                          {studentBadge.startsWith('/') ? (
-                            <div style={{
-                              background: getBadgeStyles(studentBadge).bg,
-                              border: `2px solid ${getBadgeStyles(studentBadge).border}`,
-                              borderRadius: '22%',
-                              width: '1.5em',
-                              height: '1.5em',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              overflow: 'hidden'
-                            }}>
-                              <img
-                                src={studentBadge}
-                                alt="badge"
-                                style={{ width: '100%', height: '100%', objectFit: 'contain', mixBlendMode: 'multiply' }}
-                              />
-                            </div>
-                          ) : studentBadge}
-                        </span>
+                        <span className={styles.profileBadge}>🏃‍♂️</span>
                         <span className={styles.profileName}>{studentNickname}</span>
                       </div>
                       <div className={styles.mobileProfileInfo}>
                         <span className={styles.mobilePoints}>{studentPoints} P</span>
-                        <span className={styles.mobileClassCode}>{studentClassCode}</span>
                       </div>
                     </li>
                     <li className={`${styles.mobileOnly} ${styles.mobileProfileActions}`}>
-                      <Link
-                        href="/chicorun/customize"
-                        className={styles.mobileActionBtn}
-                        onClick={closeMenu}
-                      >
-                        꾸미기
-                      </Link>
                       <button
                         className={styles.mobileActionBtn}
                         onClick={() => {

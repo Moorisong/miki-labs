@@ -1,34 +1,19 @@
 /**
  * 치코런 API 경로 상수
  */
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 export const CHICORUN_API = {
     BASE: `${API_BASE}/api/chicorun`,
     STUDENT_LOGIN: `${API_BASE}/api/chicorun/student/login`,
     STUDENT_ME: `${API_BASE}/api/chicorun/student/me`,
-    STUDENT_CUSTOMIZE: `${API_BASE}/api/chicorun/student/customize`,
-    STUDENT_CHANGE_PASSWORD: `${API_BASE}/api/chicorun/student/password`,
-    STUDENT_DEDUCT_POINT: `${API_BASE}/api/chicorun/student/point`,
-    STUDENT_REMOVE_ITEM: (itemId: string) => `${API_BASE}/api/chicorun/student/item/${itemId}`,
+    STUDENT_CHANGE_PASSWORD: `${API_BASE}/api/chicorun/student/change-password`,
     QUESTION: `${API_BASE}/api/chicorun/question`,
     ANSWER: `${API_BASE}/api/chicorun/answer`,
     LEVEL: `${API_BASE}/api/chicorun/level`,
     RESET_PROGRESS: `${API_BASE}/api/chicorun/reset-progress`,
     RESET_ACHIEVED_LEVEL: `${API_BASE}/api/chicorun/reset-achieved-level`,
-    CLASS: `${API_BASE}/api/chicorun/class`,
-    CLASS_DELETE: (classCode: string) => `${API_BASE}/api/chicorun/class/${classCode}`,
-    CLASS_STUDENTS: (classCode: string) => `${API_BASE}/api/chicorun/class/${classCode}/students`,
-    CLASS_RANKING: (classCode: string) => `${API_BASE}/api/chicorun/class/${classCode}/ranking`,
-    CLASS_RESET_PASSWORD: (classCode: string) =>
-        `${API_BASE}/api/chicorun/class/${classCode}/reset-password`,
-    CLASS_UPDATE_NICKNAME: (classCode: string, studentId: string) =>
-        `${API_BASE}/api/chicorun/class/${classCode}/students/${studentId}/nickname`,
-    CLASS_DELETE_STUDENT: (classCode: string, studentId: string) =>
-        `${API_BASE}/api/chicorun/class/${classCode}/students/${studentId}`,
-    CLASS_UPDATE_TITLE: (classCode: string) =>
-        `${API_BASE}/api/chicorun/class/${classCode}/title`,
-    TEACHER_LOGIN: `${API_BASE}/api/chicorun/teacher/login`,
+    RANKING: `${API_BASE}/api/chicorun/ranking`,
 } as const;
 
 /**
@@ -39,19 +24,14 @@ export const CHICORUN_ROUTES = {
     JOIN: '/chicorun/join',
     LEARN: '/chicorun/learn',
     RANKING: '/chicorun/ranking',
-    CUSTOMIZE: '/chicorun/customize',
-    STORE: '/chicorun/store',
-    TEACHER_DASHBOARD: '/chicorun/teacher/dashboard',
-    TEACHER_STUDENT: (classId: string) => `/chicorun/teacher/student/${classId}`,
 } as const;
 
 /**
  * 치코런 스토리지 키 상수
  */
 export const CHICORUN_STORAGE_KEY = {
-    TOKEN: 'chicorun_student_token',
-    STUDENT_INFO: 'chicorun_student_info',
-    TEACHER_TOKEN: 'chicorun_teacher_token',
+    TOKEN: 'chicorun_user_token',
+    USER_INFO: 'chicorun_user_info',
 } as const;
 
 /**
