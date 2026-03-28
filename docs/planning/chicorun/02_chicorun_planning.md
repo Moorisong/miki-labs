@@ -1,13 +1,11 @@
 # 치코런(Chicorun) - 기술 및 기획 통합 명세
 
-## 1. 서비스 개요
-교사가 클래스를 생성하고 학생들이 참여하여 게임 방식으로 영어 학습을 진행하는 웹 서비스입니다. 닉네임과 비밀번호만으로 빠르게 접속하며, 최초 로그인 이후에는 JWT 기반 인증이 유지됩니다.
+교사가 없이 학생들이 개별적으로 참여하여 게임 방식으로 영어 학습을 진행하는 웹 서비스입니다. 닉네임과 비밀번호만으로 빠르게 접속하며, 최초 로그인 이후에는 JWT 기반 인증이 유지됩니다. 모든 순위는 전체 사용자를 대상으로 하는 글로벌 랭킹 시스템으로 관리됩니다.
 
 ---
 
 ## 2. 사용자 구조
-- **교사**: 클래스 생성, 학생 관리, 학습 진행 상황 확인 (카카오 로그인 연동).
-- **학생**: 클래스 링크 입장, 닉네임+비밀번호 등록 및 학습 진행 (JWT 인증).
+- **학생**: 닉네임+비밀번호 등록 및 학습 진행 (JWT 인증). 개인별 진행도 및 포인트가 저장되며, 글로벌 랭킹에 도전합니다.
 
 ---
 
@@ -15,29 +13,17 @@
 
 ### students
 - **_id**: ObjectId
-- **classCode**: String (클래스 고유 코드)
 - **nickname**: String (유니크 닉네임)
 - **passwordHash**: String (bcrypt 해시)
 - **progressIndex**: Number (완료한 총 문제 수, 0~1499)
 - **point**: Number (보유 포인트)
-- **badge**: String (배지 이미지 경로)
-- **nicknameStyle**: { color, bold, italic, underline, fontSize, x, y, rotate }
-- **cardStyle**: String (배경 색상 또는 그라디언트)
-- **customize**:
-    - **stickers**: Array of { id, emoji, x, y, scale, rotate }
-    - **frameId**: String
-    - **badgeId**: String
-    - **borderStyle**: { color, width, style, radius }
-    - **pointStyle**: { color, background, borderWidth, borderColor, fontSize, x, y, rotate }
-    - **rankStyle**: { color, fontSize, x, y, rotate }
-    - **badgeStyle**: { fontSize, x, y, rotate }
-- **ownedItems**: Array of itemIds
 - **currentLevel**: Number (현재 플레이 레벨)
 - **achievedMaxLevel**: Number (검증된 최고 레벨, 페널티 기준)
-- **currentLevelSolvedCount/TotalCount**: 통계
+- **currentLevelSolvedCount/TotalCount**: 레벨별 통계
 - **currentLevelMaxStreak/CurrentStreak**: 연속 정답 정보
-
-👉 **카드 규격**: 260px x 340px (모든 커스터마이징 좌표는 이 범위 내에 존재해야 함)
+- **currentQuestionAttempts**: 현재 문제의 시도 횟수
+- **startLevel**: 최초 시작 레벨 (레벨 배정 테스트 결과 등)
+- **adjustmentCount**: 레벨 조정 횟수
 
 ---
 
@@ -74,17 +60,9 @@
 
 ---
 
-## 6. 🏆 랭킹 및 꾸미기 페이지
-
 ### 랭킹 페이지
-- 포인트 기준 클래스 내 실시간 랭킹.
-- 커스터마이징된 프로필 카드 노출.
-- 등수(#n)는 카드 외부 상단에 별도 표시.
-
-### 꾸미기 페이지
-- 배지, 배경, 스티커 배치 가능.
-- 드래그 앤 드롭으로 스티커 위치 및 크기, 회전 조절.
-- 저장 시 포인트 차감 (일일 횟수별 차등 차감: 1회 100P, 2회 200P...).
+- 포인트 기준 전체 사용자 실시간 랭킹 (Top 30).
+- 닉네임, 등수, 포인트, 도달 레벨을 리스트 형태로 출력.
 
 ---
 
@@ -92,4 +70,4 @@
 - **bcrypt** 기반 비밀번호 해시 저장.
 - **JWT** 기반 무상위(Stateless) 인증.
 - **progressIndex + seed** 기반 문제 유효성 검증.
-- 랭킹 및 대량 조회 시 인덱스 최적화 (`{ classCode: 1, point: -1 }`).
+- 랭킹 및 대량 조회 시 포인트 기준 인덱스 최적화 (`{ point: -1 }`).

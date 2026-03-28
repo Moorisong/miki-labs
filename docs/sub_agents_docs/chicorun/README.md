@@ -9,23 +9,15 @@
 
 ## 🚀 에이전트별 작업 분리 리스트 (독립/병렬 작업 가능)
 
-각 에이전트는 다른 에이전트의 작업 완료를 기다리지 말고(API 미완성시 Mock Data 활용), 본인의 영역에만 집중해 코드를 완성해야 합니다.
+각 에이전트는 본인의 영역에만 집중해 코드를 완성해야 합니다.
 
 ### 1. 백엔드 전담 에이전트 (Backend Agent)
-- **담당**: DB 스키마 설계, JWT 인증, 문제 생성 로직, API 엔드포인트 구현 (토큰 최적화 및 DB 원자적 업데이트 보장)
+- **담당**: DB 스키마 설계(Student, Problem), JWT 인증, 문제 조회 및 정답 검정 로직, 글로벌 랭킹 API
 - **문서 참조**: `docs/sub_agents_docs/chicorun/01_backend_agent.md`
 
-### 2. 학생 학습 프론트엔드 에이전트 (Frontend - Student)
-- **담당**: 학생 랜딩/로그인, 1~100레벨 학습 로직 엔진, 정답/오답 연출, 콤보 연출, 엔딩
+### 2. 학생 학습/랭킹 프론트엔드 에이전트 (Frontend - Student & Ranking)
+- **담당**: 학생 랜딩/로그인, 1~100레벨 학습 로직 엔진, 정답/오답/콤보 연출, 레벨 선택 모달, 글로벌 Top 30 랭킹 페이지
 - **문서 참조**: `docs/sub_agents_docs/chicorun/02_frontend_student_agent.md`
-
-### 3. 교사 대시보드 프론트엔드 에이전트 (Frontend - Teacher & Ranking)
-- **담당**: 교사 관리자 페이지 (비밀번호 초기화, 클래스 코드 발급), 랭킹 리스트 페이지
-- **문서 참조**: `docs/sub_agents_docs/chicorun/03_frontend_teacher_agent.md`
-
-### 4. 커스터마이징 프론트엔드 에이전트 (Frontend - Customizing)
-- **담당**: 뱃지 스티커 Drag&Drop UI, 닉네임 스타일, 프론트엔드 이미지 합성 렌더러 구현
-- **문서 참조**: `docs/sub_agents_docs/chicorun/04_frontend_customizing_agent.md`
 
 ---
 > **병렬 개발 원칙 (필수 숙지)**

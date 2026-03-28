@@ -48,13 +48,15 @@ interface IChicorunStudent {
 학생이 자신의 `achievedMaxLevel`보다 훨씬 높은 레벨로 수동 변경하려고 할 때 경고창 노출.
 - "고급 레벨로 이동하면 문제를 풀 수는 있지만, 이 레벨을 완주(정확도 및 연속 정답 조건 충족)하지 않으면 포인트 기준인 '최고 레벨'은 올라가지 않아요. 계속 진행하시겠어요?"
 
-### B. 학습 레벨 초기화 (Reset Feature)
-학생이 자신의 실력에 비해 기준 레벨이 너무 높아졌다고 느낄 때를 위한 수동 초기화 기능 (설정 또는 프로필 화면).
-- **기능**: `achievedMaxLevel`을 현재 플레이 중인 `currentLevel`로 동기화하고, 현재 레벨의 진행도를 리셋.
+### B. 학습 레벨 및 최고 레벨 관리 (Learn Modal)
+별도의 설정 페이지 대신, 학습 화면 상단의 '변경' 버튼을 통해 노출되는 **레벨 선택 모달(LevelSelectModal)**에서 다음 기능을 제공한다.
+- **레벨 이동**: 원하는 레벨 구간을 선택하여 현재 학습 중인 `currentLevel`을 즉시 변경 (최초 시작 시 필수 선택).
+- **최고 레벨 초기화 (Reset Achieved Level)**: 본인의 실제 실력보다 `achievedMaxLevel`이 너무 높게 설정되어 포인트 페널티를 받는 경우, 이를 현재 `currentLevel`로 동기화하는 기능.
 
-## 7. 구현 단계
-1. **서버 모델 업데이트**: `ChicorunStudent` 모델에 통계 필드 추가 및 `maxLevel`을 `achievedMaxLevel`로 의미 변경.
-2. **정답 처리 로직 수정**: `submitAnswer` 시 현재 레벨 통계(정확도, 스트릭)를 업데이트하고, 클리어 시점에만 `achievedMaxLevel`을 갱신하도록 수정.
-3. **포인트 페널티 로직 수정**: `achievedMaxLevel` 기반으로 페널티 계산.
-4. **프론트엔드 모달 추가**: 레벨 선택 시 경고 로직 추가.
-5. **설정 화면 추가**: 레벨 초기화 API 및 버튼 구현.
+---
+
+## 7. 구현 현황
+1. **서버 모델**: `ChicorunStudent` 모델에 통계 필드(`solvedCount`, `streak` 등) 구현 완료.
+2. **정답 처리**: `submitAnswer` 시 실시간 통계 업데이트 및 클리어 시점에만 `achievedMaxLevel` 갱신 로직 반영.
+3. **포인트 페널티**: `achievedMaxLevel`과 `currentLevel` 차이에 따른 보상 차등 지급 API(`GET /question`) 반영.
+4. **학습 화면 모달**: `LevelSelectModal`을 통해 레벨 점프 경고 및 최고 레벨 초기화 기능 구현 완료.

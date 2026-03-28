@@ -6,37 +6,40 @@
 ## 📝 작업 내용
 
 ### 1. DB 모델(Schema) 및 레벨 시스템
-* `Student` 모델에 `selectedLevel` (enum: beginner, intermediate, advanced) 필드 추가 (기본값: beginner).
-* 레벨 선택 시 `progressIndex` 재매핑 및 `level offset` 적용 로직 구현.
-  * beginner: 0 ~ 2999
-  * intermediate: 3000 ~ 6999
-  * advanced: 7000 ~ 9999
+* `ChicorunStudent` 모델 구현:
+    - `progressIndex`: 0~1499 (현재 풀고 있는 전체 문제 번호)
+    - `currentLevel`: 1~100 (현재 플레이 중인 레벨)
+    - `achievedMaxLevel`: 검증된 최고 레벨 (포인트 페널티 및 레벨 점프 판단 기준)
+    - 레벨별 문제 수: 1-30레벨(12개), 31-70레벨(15개), 71-100레벨(18개)
+* `ChicorunProblem` 모델 구현:
+    - `level`, `orderIndex`, `difficulty` ('easy'|'medium'|'hard') 기반 조회
 
-### 2. 🧠 문제 생성 엔진 (`generateQuestion`)
-* **핵심 원칙**: DB 저장 없음, 서버 사이드 생성, deterministic.
-* **Seed 생성**: `hash(studentId + classCode + progressIndex)`.
-* **문제 유형**: `sentence_choice`, `word_order`, `fill_blank`, `translation`, `transformation`, `error_detection`, `word_meaning`.
-* **레벨별 비율 적용**: `getTypeByIndex(progressIndex)` 로직 (동일 유형 3회 연속 금지).
-* **템플릿 시스템**: `TEMPLATES` 및 `WORDS` 풀 구축 (레벨별 단어/문법 제약 적용).
-* **오답 생성**: 최소 2가지 오류 혼합 (시제, 수일치, 어순 등).
+### 2. 🧠 문제 조회 및 정답 검정 로직
+* **핵심 원칙**: 미리 시딩된 DB에서 `level`, `orderIndex`, `difficulty`에 맞춰 조회.
+* **Seed 생성**: `hash(studentId + progressIndex)`를 통해 프론트엔드와 무결성 검증.
+* **포인트 시스템**: 
+    - 시도 횟수 페널티: 1차=5P, 2차=3P, 3차이상=1P
+    - 레벨/난이도 페널티: `achievedMaxLevel`보다 훨씬 낮은 레벨을 풀 때 factor(0.3~0.6) 적용.
 
 ### 3. API 엔드포인트 구현
-* `GET /api/chicorun/question`: 현재 `progressIndex`와 `seed`에 기반한 문제 생성 및 반환.
-* `POST /api/chicorun/answer`: `questionId`와 `seed` 무결성 검증, 정답 시 `$inc`를 사용한 원자적 업데이트.
-* `POST /api/chicorun/level`: 레벨 선택 API (progressIndex 범위 이동).
+* `GET /api/chicorun/question`: 현재 진도에 맞는 문제 및 예상 획득 포인트 반환.
+* `POST /api/chicorun/answer`: 정답 여부 확인 및 포인트/통계/진도 원자적 업데이트.
+* `POST /api/chicorun/level`: 레벨 선택 및 시작 지점 설정.
+* `POST /api/chicorun/reset-achieved-level`: 최고 레벨 기록 초기화.
+* `GET /api/chicorun/ranking`: 글로벌 Top 30 랭킹 API.
 
 ---
 
 ## AI 작업 지침
 
 ### 목적
-서버 부하를 최소화하면서 10,000개의 고품질 영어 학습 문제를 동적으로 생성하고 검증하는 시스템 구축.
+데이터베이스 기반의 견고한 학습 시스템을 구축하고, 개별 학생의 진도와 실력을 정확하게 추적하며 보상을 관리합니다.
 
 ### 작업 단계
-1. `ChicorunStudent` 모델 업데이트 (selectedLevel 추가).
-2. `ProblemEngine` 유틸리티 서비시 생성 (타입 결정, 템플릿 선택, 단어 조합).
-3. `solveController.ts` 내 기존 placeholder 로직을 신규 엔진으로 교체.
-4. 레벨 변경 API 구현.
+1. `ChicorunStudent` 및 `ChicorunProblem` 스키마 완성.
+2. `getLevelAndOrderIndex(progressIndex)` 유틸리티 함수 구현.
+3. `submitAnswer` 내 통계(정확도, 스트릭) 업데이트 및 레벨 클리어 조건 로직 구현.
+4. 글로벌 랭킹 API (`point` 기준 내림차순) 구현.
 
 ### 주의사항
 * **보안**: `questionId`는 반드시 서버의 시크릿과 `seed`, `progressIndex`를 조합하여 생성/검증해야 함.

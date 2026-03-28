@@ -48,7 +48,7 @@
 ## 4. 문제 데이터 구조
 ```typescript
 interface Problem {
-  id: string;                    // UUID 또는 level-problemIndex
+  id: string;                    // UUID 또는 level-orderIndex
   level: number;                 // 1~100
   difficulty: 'easy' | 'medium' | 'hard';
   orderIndex: number;            // 같은 레벨 내 순서 (1부터 시작)
@@ -59,7 +59,6 @@ interface Problem {
   explanation: string;           // 오답 시 힌트 (2~3줄 MZ 말투, 정답 직접 언급 금지)
   questionType: string;          // 상단에 나열한 유형 중 하나
   wordCount: number;
-  createdAt: string;
 }
 ```
 
@@ -72,9 +71,9 @@ interface Problem {
     - 나중에 문제 수정/보완 용이.
 
 ### 구현 방법
-- 백엔드에 `problemSeeder.ts` (또는 Python 스크립트)를 작성하여 한 번에 모든 문제 생성.
-- MongoDB/Mongoose를 사용하여 저장. (현재 프로젝트는 MongoDB/Mongoose 사용 중)
-- 프론트엔드는 API `GET /problems/level/{level}/index/{progressIndex}` 로 순서대로 받아옴.
+- 모든 문제는 `ChicorunProblemModel`을 통해 관리됩니다.
+- 프론트엔드는 API `GET /api/chicorun/question?difficulty={difficulty}` 로 현재 진도(`progressIndex`)에 맞는 문제를 받아옵니다.
+- 정답 제출은 `POST /api/chicorun/answer` 를 통해 처리됩니다.
 
 ## 6. 문제 생성 검증 규칙 (구멍 방지)
 아래 조건을 자동 체크하며, 하나라도 위반되면 해당 문제를 재생성한다.
@@ -95,15 +94,17 @@ interface Problem {
 - 예시: “야 이건 지문에서 ‘however’ 뒤가 찐이야! 반대 의미인 거 체크함? 가보자고! �”
 - 정답인 경우 해설 없이 바로 다음 문제로 이동 (기존 UX 유지).
 
-### 시도 횟수별 포인트 차등 지급
-학습 동기 부여를 위해 시도 횟수에 따라 포인트를 다르게 지급함.
-- **1차 시도 (Perfect!)**: **5P** (한 번에 맞힘)
-- **2차 시도 (Great!)**: **3P** (한 번 틀리고 맞힘)
-- **3차 시도 (Good!)**: **1P** (두 번 틀리고 맞힘)
-- **4차 시도 (Nice!)**: **1P** (세 번 틀리고 맞힘)
+### 시도 횟수별 및 난이도별 포인트 규칙
+- **기본 보상 (1회차 기준)**: **5P**
+- **시도 횟수 페널티**: 
+  - 1차 시도 (Perfect!): **100% (5P)**
+  - 2차 시도 (Great!): **60% (3P)**
+  - 3차 시도 이상 (Good!): **20% (1P)**
+- **난이도 및 레벨 차이 페널티**: 현재 최대로 검증된 레벨(`achievedMaxLevel`)보다 낮은 레벨을 풀거나, 추천 난이도보다 낮은 난이도를 선택한 경우 위 보상에 **factor(0.3~0.6)**가 곱해져 최소 1P까지 감소합니다.
 
-## 8. 구현 우선순위
-1. `problemSeeder` 스크립트 작성 (레벨별 난이도·유형 자동 배분)
-2. Mock 데이터 1~10레벨까지 먼저 생성해서 프론트 테스트
-3. 백엔드 API 연동 (`/problems` 엔드포인트)
-4. 프론트에서 `progressIndex` 기반 순차 로드
+## 8. 주요 API 리스트
+1. `GET /api/chicorun/question`: 현재 진도 및 난이도에 맞는 문제 조회
+2. `POST /api/chicorun/answer`: 정답 제출 및 포인트/진도/통계 업데이트
+3. `POST /api/chicorun/level`: 학습 레벨 변경 및 시작 진도 설정
+4. `POST /api/chicorun/reset-achieved-level`: 최고 레벨 기록 초기화
+5. `GET /api/chicorun/ranking`: 글로벌 Top 30 랭킹 조회
