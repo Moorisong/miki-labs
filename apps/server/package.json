@@ -10,7 +10,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed:test": "ts-node scripts/create-random-test.ts",
     "seed:eval": "ts-node scripts/add-random-evaluations.ts",
-    "seed:chicorun-random": "ts-node scripts/randomize-students.ts"
+    "seed:chicorun-randomize": "ts-node scripts/randomize-students.ts",
+    "seed:chicorun-add-random": "ts-node scripts/seed-chicorun-random.ts"
   },
   "keywords": [],
   "author": "",
