@@ -338,14 +338,25 @@ export default function NavBar() {
 
                 {/* 친구 아이콘 (학생 로그인 시에만) */}
                 {studentNickname && !teacherName && (
-                  <li className={styles.desktopOnly}>
+                  <li className={styles.desktopOnly} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    marginLeft: 'auto',
+                    marginRight: isFriendsPanelOpen ? '450px' : '0',
+                    transition: 'margin-right 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+                  }}>
                     <button
                       className={styles.friendButton}
                       onClick={() => setIsFriendsPanelOpen(true)}
                       title="친구 관리"
+                      style={{ margin: 0 }}
                     >
                       <IconFriends />
                       {pendingRequestsCount > 0 && <span className={styles.badge}>{pendingRequestsCount}</span>}
+                    </button>
+                    <button onClick={handleSignOut} className={styles.logoutButton}>
+                      로그아웃
                     </button>
                   </li>
                 )}
@@ -389,7 +400,7 @@ export default function NavBar() {
               </>
             )}
 
-            <li className={styles.authItem}>
+            <li className={`${styles.authItem} ${studentNickname && !teacherName ? styles.hideAuthOnDesktop : ''}`}>
               {status === 'loading' ? (
                 <span className={styles.authLoading}>...</span>
               ) : (session || hasChicoToken) ? (

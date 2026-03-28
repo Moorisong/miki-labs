@@ -358,6 +358,16 @@
   /* Push the auth section to the right */
 }
 
+.authItem.hideAuthOnDesktop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .authItem.hideAuthOnDesktop {
+    display: flex;
+  }
+}
+
 .authLoading {
   color: var(--color-text-muted);
 }
@@ -538,7 +548,7 @@
   position: absolute;
   top: -4px;
   right: -4px;
-  background: #ef4444;
+  background: #6c5ce7;
   color: white;
   font-size: 0.7rem;
   font-weight: 700;
@@ -549,7 +559,7 @@
   align-items: center;
   justify-content: center;
   border: 2px solid #1a1a2e;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 10px rgba(108, 92, 231, 0.5);
 }
 
 .divider {
