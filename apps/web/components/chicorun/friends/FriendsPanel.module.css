@@ -179,14 +179,23 @@
 }
 
 .avatar {
-    font-size: 1.5rem;
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     background: rgba(162, 155, 254, 0.1);
-    border-radius: 10px;
+    border: 1px solid rgba(162, 155, 254, 0.2);
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--color-primary);
+    box-shadow: inset 0 0 10px rgba(162, 155, 254, 0.1);
+    transition: all 0.3s ease;
+}
+
+.friendItem:hover .avatar {
+    background: rgba(162, 155, 254, 0.2);
+    transform: scale(1.05) rotate(-5deg);
+    box-shadow: 0 0 15px rgba(162, 155, 254, 0.3);
 }
 
 .info {
@@ -317,20 +326,33 @@
 
 @media (max-width: 640px) {
     .panel {
+        width: 100%;
         max-width: 100%;
+        height: 85vh;
+        background: rgba(26, 26, 46, 0.95);
         border-left: none;
-        background: #1a1a2e;
-        /* Fully opaque to prevent bleed-through */
+        border-radius: 32px 32px 0 0;
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+        position: relative;
+        animation: slideUpMobile 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     .panelOverlay {
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(8px);
+        align-items: flex-end;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
         z-index: 10000;
+    }
+
+    .dragHandle {
+        display: block;
     }
 
     .header {
         padding: 16px;
         border-bottom: none;
-        /* Removed to avoid double line with tabs or navbar */
     }
 
     .header h2 {
@@ -386,7 +408,6 @@
         font-size: 0.95rem;
     }
 
-    /* Hide the desktop close button on mobile if we have the back button */
     .closeButton {
         display: none;
     }
@@ -412,4 +433,42 @@
         font-size: 1rem;
         cursor: pointer;
     }
+}
+
+.dragHandle {
+    display: none;
+    width: 40px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    margin: 12px auto 0;
+}
+
+@keyframes slideUpMobile {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.addFriendPromptBtn {
+    margin-top: 16px;
+    padding: 12px 24px;
+    background: var(--gradient-primary);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+}
+
+.addFriendPromptBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
 }

@@ -210,6 +210,8 @@ export default function FriendsPanel({ onClose, onUpdateCount }: FriendsPanelPro
     return (
         <div className={styles.panelOverlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
             <div className={styles.panel}>
+                {/* 모바일 하단 시트 느낌을 위한 핸들바 */}
+                <div className={styles.dragHandle}></div>
                 <div className={styles.header}>
                     <button className={styles.mobileCloseBtn} onClick={onClose}>
                         <span className={styles.backIcon}>←</span>
@@ -251,7 +253,7 @@ export default function FriendsPanel({ onClose, onUpdateCount }: FriendsPanelPro
                         <input
                             type="text"
                             className={styles.searchInput}
-                            placeholder="닉네임으로 친구 찾기..."
+                            placeholder="닉네임 검색으로 추가"
                             value={searchQuery}
                             onChange={(e) => {
                                 setSearchQuery(e.target.value);
@@ -265,7 +267,7 @@ export default function FriendsPanel({ onClose, onUpdateCount }: FriendsPanelPro
                     {activeTab === 'list' && (
                         friends.length > 0 ? friends.map(friend => (
                             <div key={friend.id || friend._id} className={styles.friendItem}>
-                                <div className={styles.avatar}>🏃‍♂️</div>
+                                <div className={styles.avatar}><IconFriends /></div>
                                 <div className={styles.info}>
                                     <div className={styles.nickname}>{friend.nickname}</div>
                                     <div className={styles.stats}>
@@ -284,8 +286,14 @@ export default function FriendsPanel({ onClose, onUpdateCount }: FriendsPanelPro
                             </div>
                         )) : (
                             <div className={styles.emptyState}>
-                                <div className={styles.emptyIcon}>👥</div>
+                                <div className={styles.emptyIcon}><IconFriends size={48} /></div>
                                 <p>아직 친구가 없습니다.</p>
+                                <button
+                                    className={styles.addFriendPromptBtn}
+                                    onClick={() => setActiveTab('search')}
+                                >
+                                    친구가 되어 볼 사람 찾기 🔍
+                                </button>
                             </div>
                         )
                     )}
@@ -293,7 +301,7 @@ export default function FriendsPanel({ onClose, onUpdateCount }: FriendsPanelPro
                     {activeTab === 'received' && (
                         receivedRequests.length > 0 ? receivedRequests.map(req => (
                             <div key={req._id} className={styles.friendItem}>
-                                <div className={styles.avatar}>📩</div>
+                                <div className={styles.avatar}><IconReceived /></div>
                                 <div className={styles.info}>
                                     <div className={styles.nickname}>{req.fromUser?.nickname}</div>
                                     <div className={styles.stats}>
@@ -316,7 +324,7 @@ export default function FriendsPanel({ onClose, onUpdateCount }: FriendsPanelPro
                     {activeTab === 'sent' && (
                         sentRequests.length > 0 ? sentRequests.map(req => (
                             <div key={req._id} className={styles.friendItem}>
-                                <div className={styles.avatar}>📤</div>
+                                <div className={styles.avatar}><IconSent /></div>
                                 <div className={styles.info}>
                                     <div className={styles.nickname}>{req.toUser?.nickname}</div>
                                     <div className={styles.stats}>
@@ -338,7 +346,7 @@ export default function FriendsPanel({ onClose, onUpdateCount }: FriendsPanelPro
                     {activeTab === 'search' && (
                         searchResults.length > 0 ? searchResults.map(res => (
                             <div key={res.id} className={styles.friendItem}>
-                                <div className={styles.avatar}>🔍</div>
+                                <div className={styles.avatar}><IconSearch /></div>
                                 <div className={styles.info}>
                                     <div className={styles.nickname}>
                                         {res.nickname}
@@ -379,3 +387,33 @@ export default function FriendsPanel({ onClose, onUpdateCount }: FriendsPanelPro
         </div>
     );
 }
+
+const IconFriends = ({ size = 20 }: { size?: number }) => (
+    <svg width={size} height={size * 1} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M23 21V19C22.9993 18.1137 22.7044 17.2521 22.1614 16.5523C21.6184 15.8524 20.8581 15.3516 20 15.13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.4" />
+        <path d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11903 19.0078 7.005" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.4" />
+    </svg>
+);
+
+const IconReceived = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="9 10 4 15 9 20"></polyline>
+        <path d="M20 4v7a4 4 0 0 1-4 4H4"></path>
+    </svg>
+);
+
+const IconSent = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+    </svg>
+);
+
+const IconSearch = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+);

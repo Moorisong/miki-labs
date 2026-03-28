@@ -53,6 +53,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-lg);
+  flex: 1;
+  /* Allow the container to fill space */
 }
 
 .navLink {
@@ -352,7 +354,8 @@
 .authItem {
   display: flex;
   align-items: center;
-  margin-left: var(--space-md);
+  margin-left: auto;
+  /* Push the auth section to the right */
 }
 
 .authLoading {
@@ -527,6 +530,10 @@
   transform: scale(1.05);
 }
 
+.headerFriendBtn {
+  display: none !important;
+}
+
 .badge {
   position: absolute;
   top: -4px;
@@ -590,8 +597,22 @@
     font-size: var(--font-size-md) !important;
   }
 
+  .headerFriendBtn {
+    display: flex !important;
+    margin-left: auto !important;
+    /* Push everything after Logo to the right */
+    order: 2;
+  }
+
   .hamburger {
     display: flex;
+    margin-left: 8px !important;
+    /* Small gap from friend button */
+    order: 3;
+  }
+
+  .logo {
+    order: 1;
   }
 
   .navLinks {
