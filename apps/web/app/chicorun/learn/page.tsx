@@ -608,14 +608,7 @@ export default function StudentLearnPage() {
                 }
             </main >
 
-            <footer className={styles.footerNav}>
-                <button onClick={() => router.push(CHICORUN_ROUTES.RANKING)}>랭킹 보기</button>
-                <button onClick={() => {
-                    localStorage.removeItem(CHICORUN_STORAGE_KEY.TOKEN);
-                    localStorage.removeItem(CHICORUN_STORAGE_KEY.USER_INFO);
-                    router.push(CHICORUN_ROUTES.LANDING);
-                }}>로그아웃</button>
-            </footer>
+
 
             <ComboOverlay combo={activeCombo} onDone={handleComboAnimationDone} />
             {
