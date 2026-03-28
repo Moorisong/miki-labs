@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { chicorunStudentAuth } from '../middlewares/chicorun-student-auth';
 import { getQuestion, submitAnswer, resetProgress, selectLevel, resetAchievedLevel } from '../controllers/chicorun-solve.controller';
 import { studentLogin, getStudentMe, getGlobalRanking, changePassword } from '../controllers/chicorun-student.controller';
+import { getFriends, getFriendRequests, searchFriendsByNickname, sendFriendRequest, respondToFriendRequest, removeFriend, cancelFriendRequest } from '../controllers/friend.controller';
 
 const router = Router();
 
@@ -9,6 +10,15 @@ const router = Router();
 router.post('/student/login', studentLogin);
 router.get('/student/me', chicorunStudentAuth, getStudentMe);
 router.patch('/student/change-password', chicorunStudentAuth, changePassword);
+
+// ─── 친구 시스템 API (auth 필요) ────────────────────────────────────────────────
+router.get('/friends', chicorunStudentAuth, getFriends);
+router.get('/friends/requests', chicorunStudentAuth, getFriendRequests);
+router.get('/friends/search', chicorunStudentAuth, searchFriendsByNickname);
+router.post('/friends/request', chicorunStudentAuth, sendFriendRequest);
+router.post('/friends/respond', chicorunStudentAuth, respondToFriendRequest);
+router.delete('/friends/:friendId', chicorunStudentAuth, removeFriend);
+router.delete('/friends/request/:requestId', chicorunStudentAuth, cancelFriendRequest);
 
 // ─── 학습 API (auth 필요) ────────────────────────────────────────────────────
 router.get('/question', chicorunStudentAuth, getQuestion);

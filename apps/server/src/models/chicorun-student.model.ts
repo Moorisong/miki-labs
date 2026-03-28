@@ -45,6 +45,7 @@ export interface IChicorunStudent extends Document {
     startLevel: number;
     adjustmentCount: number;
     currentQuestionAttempts: number; // 현재 문제 시도 횟수 (1부터 시작, 정답 시 1로 리셋)
+    friends: mongoose.Types.ObjectId[]; // 수락된 친구들의 _id 배열
     createdAt: Date;
     updatedAt: Date;
 }
@@ -109,6 +110,11 @@ const chicorunStudentSchema = new Schema<IChicorunStudent>(
             default: 1,
             min: 1,
         },
+        friends: [{
+            type: Schema.Types.ObjectId,
+            ref: 'ChicorunStudent',
+            default: [],
+        }],
     },
     {
         timestamps: true,

@@ -14,6 +14,11 @@ export const CHICORUN_API = {
     RESET_PROGRESS: `${API_BASE}/api/chicorun/reset-progress`,
     RESET_ACHIEVED_LEVEL: `${API_BASE}/api/chicorun/reset-achieved-level`,
     RANKING: `${API_BASE}/api/chicorun/ranking`,
+    FRIENDS: `${API_BASE}/api/chicorun/friends`,
+    FRIEND_REQUESTS: `${API_BASE}/api/chicorun/friends/requests`,
+    FRIEND_SEARCH: `${API_BASE}/api/chicorun/friends/search`,
+    FRIEND_REQUEST: `${API_BASE}/api/chicorun/friends/request`,
+    FRIEND_RESPOND: `${API_BASE}/api/chicorun/friends/respond`,
 } as const;
 
 /**
