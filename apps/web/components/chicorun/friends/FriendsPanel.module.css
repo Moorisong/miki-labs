@@ -41,6 +41,34 @@
     }
 }
 
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(100%);
+    }
+}
+
+.closingOverlay {
+    animation: fadeOut 0.3s ease forwards;
+}
+
+.closingPanel {
+    animation: slideOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
 .header {
     padding: 24px;
     /* border-bottom removal to fix double line */
@@ -298,7 +326,7 @@
 }
 
 .badge {
-    background: #ef4444;
+    background: #6c5ce7;
     color: white;
     font-size: 0.7rem;
     padding: 2px 6px;
@@ -344,6 +372,10 @@
         justify-content: center;
         animation: fadeIn 0.3s ease;
         z-index: 10000;
+    }
+
+    .closingPanel {
+        animation: slideDownMobile 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
     }
 
     .dragHandle {
@@ -451,6 +483,16 @@
 
     to {
         transform: translateY(0);
+    }
+}
+
+@keyframes slideDownMobile {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(100%);
     }
 }
 

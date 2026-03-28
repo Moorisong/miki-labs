@@ -41,6 +41,14 @@ export default function FriendsPanel({ onClose, onUpdateCount }: FriendsPanelPro
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isClosing, setIsClosing] = useState(false);
+
+    const handleClose = useCallback(() => {
+        setIsClosing(true);
+        setTimeout(() => {
+            onClose();
+        }, 300);
+    }, [onClose]);
 
     const fetchFriends = useCallback(async () => {
         const token = localStorage.getItem('chicorun_user_token');
@@ -208,17 +216,17 @@ export default function FriendsPanel({ onClose, onUpdateCount }: FriendsPanelPro
     };
 
     return (
-        <div className={styles.panelOverlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
-            <div className={styles.panel}>
+        <div className={`${styles.panelOverlay} ${isClosing ? styles.closingOverlay : ''}`} onClick={(e) => e.target === e.currentTarget && handleClose()}>
+            <div className={`${styles.panel} ${isClosing ? styles.closingPanel : ''}`}>
                 {/* 모바일 하단 시트 느낌을 위한 핸들바 */}
                 <div className={styles.dragHandle}></div>
                 <div className={styles.header}>
-                    <button className={styles.mobileCloseBtn} onClick={onClose}>
+                    <button className={styles.mobileCloseBtn} onClick={handleClose}>
                         <span className={styles.backIcon}>←</span>
                         <span className={styles.closeLabel}>닫기</span>
                     </button>
                     <h2>친구 관리</h2>
-                    <button className={styles.closeButton} onClick={onClose}>✕</button>
+                    <button className={styles.closeButton} onClick={handleClose}>✕</button>
                 </div>
 
                 <div className={styles.tabs}>
@@ -226,7 +234,7 @@ export default function FriendsPanel({ onClose, onUpdateCount }: FriendsPanelPro
                         className={`${styles.tab} ${activeTab === 'list' ? styles.active : ''}`}
                         onClick={() => setActiveTab('list')}
                     >
-                        목록
+                        목록 {friends.length > 0 && <span className={styles.badge}>{friends.length}</span>}
                     </button>
                     <button
                         className={`${styles.tab} ${activeTab === 'received' ? styles.active : ''}`}
@@ -379,7 +387,7 @@ export default function FriendsPanel({ onClose, onUpdateCount }: FriendsPanelPro
                     )}
                 </div>
                 <div className={styles.panelFooter}>
-                    <button className={styles.footerCloseBtn} onClick={onClose}>
+                    <button className={styles.footerCloseBtn} onClick={handleClose}>
                         닫기
                     </button>
                 </div>
