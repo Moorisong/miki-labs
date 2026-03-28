@@ -504,6 +504,47 @@
   display: none !important;
 }
 
+.friendButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(162, 155, 254, 0.1);
+  border: 1px solid rgba(162, 155, 254, 0.2);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: 1.2rem;
+  padding: 0;
+  margin-left: 8px;
+}
+
+.friendButton:hover {
+  background: rgba(162, 155, 254, 0.2);
+  border-color: rgba(162, 155, 254, 0.4);
+  transform: scale(1.05);
+}
+
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #1a1a2e;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
 .divider {
   width: 1px;
   height: 24px;
@@ -575,9 +616,9 @@
     transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
     overflow-y: visible;
     /* 내부 스크롤 대신 전체 페이지 스크롤 사용 */
-    border-bottom: 1px solid rgba(162, 155, 254, 0.1);
-    border-top: 1px solid rgba(162, 155, 254, 0.1);
-    /* 메뉴 상단 구분선 추가 */
+    /* Remove redundant borders that cause double lines on mobile */
+    /* border-bottom: 1px solid rgba(162, 155, 254, 0.1); */
+    /* border-top: 1px solid rgba(162, 155, 254, 0.1); */
     z-index: 999;
   }
 

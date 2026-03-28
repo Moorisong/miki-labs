@@ -1,0 +1,415 @@
+.panelOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    z-index: 2000;
+    display: flex;
+    justify-content: flex-end;
+    animation: fadeIn 0.3s ease;
+}
+
+.panel {
+    width: 100%;
+    max-width: 450px;
+    height: 100%;
+    background: rgba(26, 26, 46, 0.98);
+    border-left: 1px solid rgba(162, 155, 254, 0.2);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+    animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.header {
+    padding: 24px;
+    /* border-bottom removal to fix double line */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+.closeButton {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    transition: all 0.2s;
+}
+
+.closeButton:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: rotate(90deg);
+}
+
+.tabs {
+    display: flex;
+    padding: 0 16px;
+    margin-top: 16px;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* Firefox */
+    border-bottom: 1px solid rgba(162, 155, 254, 0.1);
+    /* Single clean divider below tabs */
+    padding-bottom: 8px;
+}
+
+.tabs::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Edge */
+}
+
+.tab {
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: transparent;
+    border: none;
+    /* No default border */
+    color: var(--color-text-muted);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    position: relative;
+}
+
+.tab:hover {
+    background: rgba(162, 155, 254, 0.05);
+}
+
+.tab.active {
+    background: rgba(162, 155, 254, 0.15);
+    color: var(--color-primary);
+}
+
+.tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    /* Align with .tabs border-bottom */
+    left: 10%;
+    width: 80%;
+    height: 2px;
+    background: var(--color-primary);
+    border-radius: 2px;
+}
+
+.searchContainer {
+    padding: 16px;
+}
+
+.searchInputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(162, 155, 254, 0.2);
+    border-radius: 12px;
+    color: white;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.searchInput:focus {
+    border-color: var(--color-primary);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 15px rgba(108, 92, 231, 0.2);
+}
+
+.resultsList {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.friendItem {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    gap: 12px;
+}
+
+.avatar {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    background: rgba(162, 155, 254, 0.1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    /* Allow text ellipsis to work */
+}
+
+.nickname {
+    font-weight: 700;
+    color: var(--color-text);
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stats {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.points {
+    color: #fbbf24;
+    font-weight: 700;
+    margin-right: 8px;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+.actionBtn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.acceptBtn {
+    background: var(--gradient-primary);
+    border: none;
+    color: white;
+}
+
+.rejectBtn {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.cancelBtn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--color-text-muted);
+}
+
+.removeBtn {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.removeBtn:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.requestBtn {
+    background: rgba(162, 155, 254, 0.1);
+    border: 1px solid rgba(162, 155, 254, 0.3);
+    color: var(--color-primary);
+}
+
+.requestBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--color-text-muted);
+    gap: 12px;
+}
+
+.emptyIcon {
+    font-size: 3rem;
+    opacity: 0.3;
+}
+
+.badge {
+    background: #ef4444;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 4px;
+}
+
+.meBadge {
+    background: var(--color-primary);
+    color: white;
+    font-size: 0.7rem;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    display: inline-block;
+}
+
+.mobileCloseBtn {
+    display: none;
+}
+
+.panelFooter {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    .panel {
+        max-width: 100%;
+        border-left: none;
+        background: #1a1a2e;
+        /* Fully opaque to prevent bleed-through */
+    }
+
+    .panelOverlay {
+        z-index: 10000;
+    }
+
+    .header {
+        padding: 16px;
+        border-bottom: none;
+        /* Removed to avoid double line with tabs or navbar */
+    }
+
+    .header h2 {
+        font-size: 1.25rem;
+    }
+
+    .resultsList {
+        padding: 12px;
+        gap: 8px;
+    }
+
+    .friendItem {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 1.2rem;
+    }
+
+    .nickname {
+        font-size: 0.9rem;
+    }
+
+    .stats {
+        font-size: 0.75rem;
+    }
+
+    .actionBtn {
+        padding: 4px 8px;
+        font-size: 0.75rem;
+    }
+
+    .mobileCloseBtn {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: transparent;
+        border: none;
+        color: var(--color-primary);
+        font-weight: 600;
+        cursor: pointer;
+        padding: 8px 4px;
+    }
+
+    .backIcon {
+        font-size: 1.2rem;
+    }
+
+    .closeLabel {
+        font-size: 0.95rem;
+    }
+
+    /* Hide the desktop close button on mobile if we have the back button */
+    .closeButton {
+        display: none;
+    }
+
+    .panelFooter {
+        display: block;
+        padding: 16px;
+        border-top: 1px solid rgba(162, 155, 254, 0.1);
+        background: #1a1a2e;
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+    }
+
+    .footerCloseBtn {
+        width: 100%;
+        padding: 14px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+}
