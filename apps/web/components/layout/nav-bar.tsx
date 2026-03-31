@@ -22,6 +22,7 @@ export default function NavBar() {
   const [studentNickname, setStudentNickname] = useState<string | null>(null);
   const [studentClassCode, setStudentClassCode] = useState<string | null>(null);
   const [studentPoints, setStudentPoints] = useState<number>(0);
+  const [studentRank, setStudentRank] = useState<number>(0);
   const [studentBadge, setStudentBadge] = useState<string>('🌱');
   const [isStudentDropdownOpen, setIsStudentDropdownOpen] = useState(false);
 
@@ -52,6 +53,7 @@ export default function NavBar() {
             const info = data.data;
             setStudentNickname(info.nickname || null);
             setStudentPoints(info.point || 0);
+            setStudentRank(info.rank || 0);
           }
 
           // 친구 요청 수 별도 조회 (또는 ME API 확장)
@@ -283,59 +285,6 @@ export default function NavBar() {
                   </li>
                 ))}
 
-                {/* 학생 프로필 (PC: 드롭다운) */}
-                {studentNickname && !teacherName && (
-                  <li
-                    className={`${styles.dropdownContainer} ${styles.desktopOnly}`}
-                    onMouseEnter={() => window.innerWidth > 768 && setIsStudentDropdownOpen(true)}
-                    onMouseLeave={() => window.innerWidth > 768 && setIsStudentDropdownOpen(false)}
-                  >
-                    <button
-                      className={`${styles.navLink} ${styles.chicorunLink} ${styles.studentProfileBtn}`}
-                      onClick={() => setIsStudentDropdownOpen(!isStudentDropdownOpen)}
-                      aria-haspopup="true"
-                      aria-expanded={isStudentDropdownOpen}
-                    >
-                      학생({studentNickname}) <span className={`${styles.arrow} ${isStudentDropdownOpen ? styles.arrowRotate : ''}`}>▾</span>
-                    </button>
-                    <ul className={`${styles.dropdownMenu} ${isStudentDropdownOpen ? styles.show : ''}`}>
-                      <li className={styles.dropdownProfileRow}>
-                        <div className={styles.profileBadgeName}>
-                          <span className={styles.profileBadge}>🏃‍♂️</span>
-                          <span className={styles.profileName}>{studentNickname}</span>
-                        </div>
-                        <Link
-                          href={CHICORUN_ROUTES.RANKING}
-                          className={styles.profilePointsLink}
-                          onClick={() => {
-                            closeMenu();
-                            setIsStudentDropdownOpen(false);
-                          }}
-                        >
-                          {studentPoints} P
-                        </Link>
-                      </li>
-                      <li className={styles.dropdownDivider}></li>
-                      <li>
-                        <button
-                          className={`${styles.dropdownItem} ${styles.dropdownActionBtn}`}
-                          onClick={() => {
-                            closeMenu();
-                            setIsStudentDropdownOpen(false);
-                            setIsPasswordModalOpen(true);
-                            setPasswordError('');
-                            setCurrentPassword('');
-                            setNewPassword('');
-                            setConfirmNewPassword('');
-                          }}
-                        >
-                          비밀번호 변경
-                        </button>
-                      </li>
-                    </ul>
-                  </li>
-                )}
-
                 {/* 친구 아이콘 (학생 로그인 시에만) */}
                 {studentNickname && !teacherName && (
                   <li className={styles.desktopOnly} style={{
@@ -361,42 +310,7 @@ export default function NavBar() {
                   </li>
                 )}
 
-                {/* 학생 프로필 (모바일: 모두 펼침) */}
-                {studentNickname && !teacherName && (
-                  <>
-                    <li className={`${styles.mobileOnly} ${styles.mobileProfileHeader}`}>
-                      <div className={styles.profileBadgeName}>
-                        <span className={styles.profileBadge}>🏃‍♂️</span>
-                        <span className={styles.profileName}>{studentNickname}</span>
-                      </div>
-                      <div className={styles.mobileProfileInfo}>
-                        <span className={styles.mobilePoints}>{studentPoints} P</span>
-                        {/* 햄버거 메뉴 안에서도 유지하되, 전체적인 시인성 개선 */}
-                        <button
-                          className={styles.friendButton}
-                          onClick={() => {
-                            closeMenu();
-                            setIsFriendsPanelOpen(true);
-                          }}
-                        >
-                          <IconFriends />
-                          {pendingRequestsCount > 0 && <span className={styles.badge}>{pendingRequestsCount}</span>}
-                        </button>
-                      </div>
-                    </li>
-                    <li className={`${styles.mobileOnly} ${styles.mobileProfileActions}`}>
-                      <button
-                        className={styles.mobileActionBtn}
-                        onClick={() => {
-                          closeMenu();
-                          setIsPasswordModalOpen(true);
-                        }}
-                      >
-                        비밀번호 변경
-                      </button>
-                    </li>
-                  </>
-                )}
+                {/* 학생 프로필 (모바일: 모두 펼침) -> 제거됨 (마이페이지 패널로 통합) */}
               </>
             )}
 
@@ -477,6 +391,10 @@ export default function NavBar() {
         <FriendsPanel
           onClose={() => setIsFriendsPanelOpen(false)}
           onUpdateCount={(count) => setPendingRequestsCount(count)}
+          nickname={studentNickname || ''}
+          points={studentPoints}
+          rank={studentRank}
+          onOpenPasswordModal={() => setIsPasswordModalOpen(true)}
         />
       )}
 
@@ -498,10 +416,8 @@ export default function NavBar() {
 
 const IconFriends = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="url(#friends_gradient_shared)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z" stroke="url(#friends_gradient_shared)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M23 21V19C22.9993 18.1137 22.7044 17.2521 22.1614 16.5523C21.6184 15.8524 20.8581 15.3516 20 15.13" stroke="url(#friends_gradient_muted_shared)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11903 19.0078 7.005" stroke="url(#friends_gradient_muted_shared)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="url(#friends_gradient_shared)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="url(#friends_gradient_shared)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
