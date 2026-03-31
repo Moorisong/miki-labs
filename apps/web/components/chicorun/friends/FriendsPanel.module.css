@@ -106,6 +106,90 @@
     transform: rotate(90deg);
 }
 
+.myProfileSection {
+    margin: 0 16px 16px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(162, 155, 254, 0.1), rgba(108, 92, 231, 0.05));
+    border: 1px solid rgba(162, 155, 254, 0.2);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.profileInfo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.profileAvatar {
+    width: 48px;
+    height: 48px;
+    background: var(--gradient-primary);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+}
+
+.profileText {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.profileNickname {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: white;
+}
+
+.profilePoints {
+    font-size: 0.9rem;
+    color: #fbbf24;
+    font-weight: 700;
+}
+
+.profileStatsRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.profileRank {
+    font-size: 0.8rem;
+    color: #a29bfe;
+    font-weight: 600;
+    background: rgba(162, 155, 254, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.passwordChangeBtn {
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.passwordChangeBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
 .tabs {
     display: flex;
     padding: 0 16px;

@@ -30,9 +30,13 @@ interface SearchResult extends Friend {
 interface FriendsPanelProps {
     onClose: () => void;
     onUpdateCount?: (count: number) => void;
+    nickname: string;
+    points: number;
+    rank: number;
+    onOpenPasswordModal: () => void;
 }
 
-export default function FriendsPanel({ onClose, onUpdateCount }: FriendsPanelProps) {
+export default function FriendsPanel({ onClose, onUpdateCount, nickname, points, rank, onOpenPasswordModal }: FriendsPanelProps) {
     const [activeTab, setActiveTab] = useState<'list' | 'received' | 'sent' | 'search'>('list');
     const [friends, setFriends] = useState<Friend[]>([]);
     const [receivedRequests, setReceivedRequests] = useState<RequestItem[]>([]);
@@ -225,8 +229,26 @@ export default function FriendsPanel({ onClose, onUpdateCount }: FriendsPanelPro
                         <span className={styles.backIcon}>←</span>
                         <span className={styles.closeLabel}>닫기</span>
                     </button>
-                    <h2>친구 관리</h2>
+                    <h2>마이페이지 & 친구</h2>
                     <button className={styles.closeButton} onClick={handleClose}>✕</button>
+                </div>
+
+                <div className={styles.myProfileSection}>
+                    <div className={styles.profileInfo}>
+                        <div className={styles.profileAvatar}>
+                            <IconFriends size={24} />
+                        </div>
+                        <div className={styles.profileText}>
+                            <div className={styles.profileNickname}>{nickname}</div>
+                            <div className={styles.profileStatsRow}>
+                                <span className={styles.profilePoints}>{points.toLocaleString()} P</span>
+                                <span className={styles.profileRank}>랭킹 {rank}위</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button className={styles.passwordChangeBtn} onClick={onOpenPasswordModal}>
+                        비밀번호 변경
+                    </button>
                 </div>
 
                 <div className={styles.tabs}>
