@@ -95,6 +95,8 @@ export const getStudentMe = async (
             throw new AppError(404, 'ERROR_STUDENT_NOT_FOUND: 학생 정보를 찾을 수 없습니다.');
         }
 
+        const rank = await ChicorunStudentModel.countDocuments({ point: { $gt: studentDoc.point } }) + 1;
+
         res.json({
             success: true,
             data: {
@@ -106,6 +108,7 @@ export const getStudentMe = async (
                 achievedMaxLevel: studentDoc.achievedMaxLevel,
                 startLevel: studentDoc.startLevel,
                 adjustmentCount: studentDoc.adjustmentCount,
+                rank,
             },
         });
     } catch (error) {
