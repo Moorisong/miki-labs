@@ -19,6 +19,10 @@ export const CHICORUN_API = {
     FRIEND_SEARCH: `${API_BASE}/api/chicorun/friends/search`,
     FRIEND_REQUEST: `${API_BASE}/api/chicorun/friends/request`,
     FRIEND_RESPOND: `${API_BASE}/api/chicorun/friends/respond`,
+    // Word Rain 게임 API
+    WORD_RAIN_START: `${API_BASE}/api/chicorun/word-rain/start`,
+    WORD_RAIN_INPUT: `${API_BASE}/api/chicorun/word-rain/input`,
+    WORD_RAIN_END: `${API_BASE}/api/chicorun/word-rain/end`,
 } as const;
 
 /**
@@ -29,6 +33,8 @@ export const CHICORUN_ROUTES = {
     JOIN: '/chicorun/join',
     LEARN: '/chicorun/learn',
     RANKING: '/chicorun/ranking',
+    GAME: '/chicorun/game',
+    GAME_WORD_RAIN: '/chicorun/game/word-rain',
 } as const;
 
 /**
