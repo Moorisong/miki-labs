@@ -3,6 +3,7 @@ import { chicorunStudentAuth } from '../middlewares/chicorun-student-auth';
 import { getQuestion, submitAnswer, resetProgress, selectLevel, resetAchievedLevel } from '../controllers/chicorun-solve.controller';
 import { studentLogin, getStudentMe, getGlobalRanking, changePassword } from '../controllers/chicorun-student.controller';
 import { getFriends, getFriendRequests, searchFriendsByNickname, sendFriendRequest, respondToFriendRequest, removeFriend, cancelFriendRequest } from '../controllers/friend.controller';
+import { startWordRain, inputWordRain, endWordRain } from '../controllers/word-rain.controller';
 
 const router = Router();
 
@@ -26,6 +27,11 @@ router.post('/answer', chicorunStudentAuth, submitAnswer);
 router.post('/level', chicorunStudentAuth, selectLevel);
 router.post('/reset-progress', chicorunStudentAuth, resetProgress);
 router.post('/reset-achieved-level', chicorunStudentAuth, resetAchievedLevel);
+
+// ─── Word Rain 게임 API (auth 필요) ──────────────────────────────────────────
+router.post('/word-rain/start', chicorunStudentAuth, startWordRain);
+router.post('/word-rain/input', chicorunStudentAuth, inputWordRain);
+router.post('/word-rain/end', chicorunStudentAuth, endWordRain);
 
 // ─── 공통 랭킹 (공개) ──────────────────────────────────────────────────────────
 router.get('/ranking', getGlobalRanking);
