@@ -161,7 +161,8 @@ export default function NavBar() {
     { href: '/chicorun', label: '학습' },
     // 학생 로그인 시에만 랭킹 버튼 표시
     ...(studentNickname ? [
-      { href: '/chicorun/ranking', label: '랭킹' }
+      { href: '/chicorun/ranking', label: '랭킹' },
+      { href: CHICORUN_ROUTES.GAME, label: '게임' }
     ] : []),
     // 로그인하지 않은 학생의 경우 참여 페이지로 이동
     ...(!teacherName && !studentNickname ? [{
