@@ -40,11 +40,9 @@ type GameState = 'idle' | 'playing' | 'paused' | 'success' | 'failed';
 const GAME_WIDTH = 100;
 const GAME_HEIGHT = 100;
 const BOTTOM_THRESHOLD = 92;
-const BASE_FALL_SPEED = 0.08;
-const SPEED_INCREMENT = 0.005;
-const SPAWN_INTERVAL_BASE = 3000;
-const SPAWN_INTERVAL_MIN = 1200;
-const SPAWN_INTERVAL_DECREMENT = 100;
+const BASE_FALL_SPEED = 0.05;
+const SPAWN_INTERVAL_BASE = 2000;
+const SPAWN_INTERVAL_MIN = 800;
 const ANIMATION_FPS = 60;
 const ANIMATION_INTERVAL = 1000 / ANIMATION_FPS;
 
@@ -107,6 +105,11 @@ export default function WordRainGamePage() {
     const allSpawnedRef = useRef<boolean>(false);
     const gameEndedRef = useRef<boolean>(false);
 
+    // Section-based Speed System
+    const speedMultiplierRef = useRef<number>(1.0);
+    const lastCheckpointTimeRef = useRef<number>(0);
+    const lastSectionCountRef = useRef<number>(0);
+
     // fallingWordsRef 동기화
     useEffect(() => {
         fallingWordsRef.current = fallingWords;
@@ -168,6 +171,11 @@ export default function WordRainGamePage() {
             setIsFrozen(false);
             setResult(null);
             setFeedback(null);
+
+            speedMultiplierRef.current = 1.0;
+            lastCheckpointTimeRef.current = 0;
+            lastSectionCountRef.current = 0;
+
             setGameState('playing');
         } catch (error) {
             console.error('게임 시작 오류:', error);
@@ -250,7 +258,7 @@ export default function WordRainGamePage() {
             problem,
             x: 10 + Math.random() * (GAME_WIDTH - 30),
             y: -8,
-            speed: BASE_FALL_SPEED + (elapsedTimeRef.current * SPEED_INCREMENT) / 10,
+            speed: BASE_FALL_SPEED * speedMultiplierRef.current,
             isAnswered: false,
             isCorrect: null,
         };
@@ -278,13 +286,17 @@ export default function WordRainGamePage() {
                 lastTime = currentTime;
 
                 if (!frozenRef.current) {
+                    const currentMultiplier = speedMultiplierRef.current;
+                    const currentSpeed = BASE_FALL_SPEED * currentMultiplier;
+
                     setFallingWords(prev => {
                         const updated = prev
                             .map(word => {
                                 if (word.isAnswered) return word;
                                 return {
                                     ...word,
-                                    y: word.y + word.speed * (deltaTime / 16),
+                                    speed: currentSpeed,
+                                    y: word.y + currentSpeed * (deltaTime / 16),
                                 };
                             })
                             .filter(word => {
@@ -338,9 +350,10 @@ export default function WordRainGamePage() {
         spawnWord();
 
         const scheduleNextSpawn = () => {
+            const currentMultiplier = speedMultiplierRef.current;
             const interval = Math.max(
                 SPAWN_INTERVAL_MIN,
-                SPAWN_INTERVAL_BASE - elapsedTimeRef.current * SPAWN_INTERVAL_DECREMENT
+                SPAWN_INTERVAL_BASE / currentMultiplier
             );
 
             spawnTimerRef.current = setTimeout(() => {
@@ -358,6 +371,27 @@ export default function WordRainGamePage() {
             if (spawnTimerRef.current) clearTimeout(spawnTimerRef.current);
         };
     }, [gameState, spawnWord, problems.length]);
+
+    // ─── 속도 시스템 (Section-based) ─────────────────────────────────────────────
+
+    useEffect(() => {
+        if (gameState !== 'playing' || correctCount === 0 || correctCount % 5 !== 0) return;
+        if (lastSectionCountRef.current === correctCount) return;
+
+        lastSectionCountRef.current = correctCount;
+
+        const currentTime = elapsedTimeRef.current;
+        const sectionTime = currentTime - lastCheckpointTimeRef.current;
+
+        let newMultiplier = speedMultiplierRef.current;
+        if (sectionTime < 8) newMultiplier += 0.5;
+        else if (sectionTime < 12) newMultiplier += 0.25;
+        else if (sectionTime < 15) newMultiplier += 0.1;
+        else newMultiplier -= 0.1;
+
+        speedMultiplierRef.current = Math.max(0.8, Math.min(2.5, newMultiplier));
+        lastCheckpointTimeRef.current = currentTime;
+    }, [correctCount, gameState]);
 
     // ─── 경과 시간 ──────────────────────────────────────────────────────────────
 
