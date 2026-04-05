@@ -19,7 +19,6 @@ export interface WordRainSession {
 interface SessionState {
     used: { wid: number; mid: number }[];
     recentWids: number[];
-    prevMid: number | null;
 }
 
 // ─── 상수 ────────────────────────────────────────────────────────────────────────
@@ -80,8 +79,8 @@ export class WordRainService {
             level: { $gte: Math.max(1, targetLevel - 2), $lte: targetLevel + 2 },
         }).lean();
 
-        // 해당 레벨 범위에 문제가 충분하지 않으면 전체 단어에서 fallback
-        if (this.countAvailableMeanings(words) < PROBLEMS_PER_GAME) {
+        // 해당 레벨 범위에 고유 단어(wid)가 충분하지 않으면 전체 단어에서 fallback
+        if (words.length < PROBLEMS_PER_GAME) {
             words = await WordModel.find({}).lean();
         }
 
@@ -92,7 +91,6 @@ export class WordRainService {
         const session: SessionState = {
             used: [],
             recentWids: [],
-            prevMid: null,
         };
 
         const problems: WordRainProblem[] = [];
@@ -125,14 +123,15 @@ export class WordRainService {
         for (const word of words) {
             if (session.recentWids.includes(word.wid)) continue;
 
+            // 1세션 내에서 동일 wid 중복 출제 완전 방지
+            const isWidUsed = session.used.some(u => u.wid === word.wid);
+            if (isWidUsed) continue;
+
             for (const meaning of word.meanings) {
                 const isUsed = session.used.some(
                     u => u.wid === word.wid && u.mid === meaning.mid
                 );
                 if (isUsed) continue;
-
-                // 동일 mid 연속 방지
-                if (session.prevMid !== null && meaning.mid === session.prevMid) continue;
 
                 candidates.push({ word, meaning });
             }
@@ -143,7 +142,6 @@ export class WordRainService {
                 // 단어 풀이 작아 후보가 모두 소진된 경우, 사용 기록과 중복 제한을 초기화하고 재시도
                 session.used = [];
                 session.recentWids = [];
-                session.prevMid = null;
                 return this.generateSingleProblem(words, session, true);
             }
             return null;
@@ -178,7 +176,6 @@ export class WordRainService {
         if (session.recentWids.length > RECENT_WID_LIMIT) {
             session.recentWids.shift();
         }
-        session.prevMid = meaning.mid;
 
         return {
             wid: word.wid,
