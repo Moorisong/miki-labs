@@ -50,15 +50,49 @@
 
 # ⚡ 5. 난이도 시스템
 
-## 시간 기반 증가
+## 구간별 섹션 기반 속도 시스템 (Section-based Speed System)
+👉 “속도는 시간 자체가 아니라, ‘구간 클리어 속도’에 따라 결정된다”
 
-- 단어 수 증가
-- 낙하 속도 증가
+### 1) 기본 개념
+- 총 문제 수는 20개로 고정되며, 5문제 단위로 구간(Section)을 나누어 속도를 동적으로 조정한다.
+- 속도는 플레이어가 해당 구간을 얼마나 빨리 해결했는지(sectionTime)에 기반하여 유동적으로 변화한다.
 
+### 2) 입력 값 및 상태 정의
+- `totalWords` = 20 (총 문제 수)
+- `sectionSize` = 5 (구간 크기)
+- `baseSpeed` = 기본 낙하 속도
+- `speedMultiplier` = 1.0 (초기 속도 배율)
+- `lastCheckpointTime` = 마지막 구간 시작 시간 (초기값: 게임 시작 시간)
+- `sectionTime` = `currentTime - lastCheckpointTime` (초 단위)
+
+### 3) 체크포인트 계산 로직
+정답 수(`correctCount`)가 5의 배수(`[5, 10, 15, 20]`)가 될 때마다 아래 로직으로 속도 배율을 갱신한다.
+
+```javascript
+// 구간 클리어 시간에 따른 배율 증감
+if (sectionTime < 8) {
+  speedMultiplier += 0.5;     // 매우 빠름 -> 난이도 대폭 상승 (이전 0.3)
+} else if (sectionTime < 12) {
+  speedMultiplier += 0.25;    // 빠름 -> 난이도 크게 상승 (이전 0.15)
+} else if (sectionTime < 15) {
+  speedMultiplier += 0.1;     // 보통 -> 난이도 소폭 상승 (이전 0.05)
+} else {
+  speedMultiplier -= 0.1;     // 느림 -> 난이도 완화
+}
+
+// 배율 한계 (속도 제한)
+speedMultiplier = Math.max(0.8, speedMultiplier);
+speedMultiplier = Math.min(2.5, speedMultiplier);
+
+// 갱신 및 적용
+fallSpeed = baseSpeed * speedMultiplier;
+lastCheckpointTime = currentTime;
 ```
-fallSpeed += time * multiplier
-spawnCount += time
-```
+
+### 4) 플레이 의도
+- 빠르게 맞출수록 다음 구간의 난이도가 가파르게 상승한다.
+- 실수가 많거나 생각할 시간이 길어지면 난이도가 자동으로 완화된다.
+- 플레이어의 실력에 맞춘 동적 난이도(Dynamic Difficulty Adjustment) 연출.
 
 ---
 
