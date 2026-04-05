@@ -3,6 +3,7 @@ import { ApiResponse } from '../types/api.types';
 import { AppError } from '../middlewares/error-handler';
 import { ChicorunStudentModel } from '../models/chicorun-student.model';
 import { WordRainService } from '../services/word-rain.service';
+import { ChicorunSkillScoreService } from '../services/chicorun-skill-score.service';
 
 /**
  * POST /api/chicorun/word-rain/start
@@ -29,8 +30,17 @@ export const startWordRain = async (
             );
         }
 
-        const level = studentDoc.currentLevel || 1;
-        const session = await WordRainService.generateProblems(level);
+        let skillScore = studentDoc.skillScore;
+        if (skillScore === undefined || skillScore === null) {
+            skillScore = ChicorunSkillScoreService.initializeSkillScore(studentDoc.achievedMaxLevel || 1);
+            await ChicorunStudentModel.findByIdAndUpdate(studentDoc._id, { skillScore });
+        }
+
+        const targetDifficulty = ChicorunSkillScoreService.getTargetDifficulty(
+            skillScore,
+            ChicorunSkillScoreService.GAME_MODIFIER.WORD_RAIN
+        );
+        const session = await WordRainService.generateProblems(targetDifficulty);
         const config = WordRainService.getGameConfig();
 
         res.json({
@@ -155,15 +165,27 @@ export const endWordRain = async (
             correctCount
         );
 
-        // 포인트 적립
+        const studentDoc = await ChicorunStudentModel.findById(student.studentId).lean();
+
+        // SkillScore 갱신 계산
+        const accuracy = totalProblems > 0 ? correctCount / totalProblems : 0;
+        const avgResponseTime = totalProblems > 0 ? clearTimeSeconds / totalProblems : 0;
+        const delta = ChicorunSkillScoreService.calculateDelta(accuracy, maxCombo, avgResponseTime, isSuccess);
+
+        const currentSkillScore = studentDoc?.skillScore ?? ChicorunSkillScoreService.initializeSkillScore(studentDoc?.achievedMaxLevel || 1);
+        const newSkillScore = ChicorunSkillScoreService.applyDelta(currentSkillScore, delta);
+
+        const updateData: any = {
+            $set: { skillScore: newSkillScore },
+        };
         if (reward.totalPoint > 0) {
-            await ChicorunStudentModel.findByIdAndUpdate(student.studentId, {
-                $inc: { point: reward.totalPoint },
-            });
+            updateData.$inc = { point: reward.totalPoint };
         }
 
-        const updatedStudent = await ChicorunStudentModel.findById(
-            student.studentId
+        const updatedStudent = await ChicorunStudentModel.findByIdAndUpdate(
+            student.studentId,
+            updateData,
+            { new: true }
         ).lean();
 
         res.json({
