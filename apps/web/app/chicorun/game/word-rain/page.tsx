@@ -55,6 +55,7 @@ export default function WordRainGamePage() {
 
     // 게임 상태
     const [gameState, setGameState] = useState<GameState>('idle');
+    const [countdown, setCountdown] = useState<number | null>(10);
     const [problems, setProblems] = useState<WordRainProblem[]>([]);
     const [fallingWords, setFallingWords] = useState<FallingWord[]>([]);
     const [selectedWord, setSelectedWord] = useState<FallingWord | null>(null);
@@ -172,8 +173,33 @@ export default function WordRainGamePage() {
             console.error('게임 시작 오류:', error);
             const message = error instanceof Error ? error.message : '알 수 없는 오류';
             alert(`게임을 시작할 수 없습니다: ${message}`);
+            setCountdown(null);
         }
     }, [getToken, router]);
+
+    // ─── 자동 시작 타이머 ───────────────────────────────────────────────────────
+    useEffect(() => {
+        if (gameState !== 'idle') {
+            setCountdown(10);
+            return;
+        }
+
+        if (countdown === null) return;
+
+        const timer = setInterval(() => {
+            setCountdown((prev) => {
+                if (prev === null) return null;
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    setTimeout(() => startGame(), 0);
+                    return null;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [gameState, countdown, startGame]);
 
     const endGame = useCallback(async (isSuccess: boolean) => {
         setGameState(isSuccess ? 'success' : 'failed');
@@ -453,6 +479,13 @@ export default function WordRainGamePage() {
         return (
             <div className={styles.container}>
                 <div className={styles.idleScreen}>
+                    <button
+                        className={styles.btnCloseModal}
+                        onClick={() => router.push(CHICORUN_ROUTES.GAME)}
+                        aria-label="닫기"
+                    >
+                        ✕
+                    </button>
                     <div className={styles.titleGroup}>
                         <h1 className={styles.title}>Word Rain</h1>
                         <p className={styles.subtitle}>떨어지는 한글 뜻에 맞는 영어를 선택하세요!</p>
@@ -468,8 +501,8 @@ export default function WordRainGamePage() {
                         </ul>
                     </div>
 
-                    <button className={styles.btnStart} onClick={startGame}>
-                        게임 시작 🚀
+                    <button className={styles.btnStart} onClick={startGame} disabled={countdown === null}>
+                        {countdown !== null ? `게임이 ${countdown}초 후 시작됩니다 🚀` : '게임 시작 중... 🚀'}
                     </button>
                     <button
                         className={styles.btnBack}
