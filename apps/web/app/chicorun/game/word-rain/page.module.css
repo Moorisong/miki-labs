@@ -1,6 +1,7 @@
 /* ─── 공통 ─────────────────────────────────────────────────────────────────── */
 .container {
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
     background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 60%, #020617 100%);
     color: #f1f5f9;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -304,10 +305,6 @@
 
 /* ─── HUD (헤드업 디스플레이) ────────────────────────────────────────────────── */
 .hud {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -393,13 +390,15 @@
 .gameField {
     position: relative;
     flex: 1;
-    margin-top: 60px;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .bottomLine {
     position: absolute;
-    bottom: 8%;
+    bottom: 12%;
+    /* 바닥선이 가이드라인 위에 오도록 조정 */
     left: 0;
     right: 0;
     height: 2px;

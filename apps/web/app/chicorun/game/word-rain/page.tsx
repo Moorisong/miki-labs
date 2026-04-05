@@ -39,7 +39,7 @@ type GameState = 'idle' | 'playing' | 'paused' | 'success' | 'failed';
 
 const GAME_WIDTH = 100;
 const GAME_HEIGHT = 100;
-const BOTTOM_THRESHOLD = 92;
+const BOTTOM_THRESHOLD = 88;
 const BASE_FALL_SPEED = 0.07;
 const SPAWN_INTERVAL_BASE = 2000;
 const SPAWN_INTERVAL_MIN = 800;
