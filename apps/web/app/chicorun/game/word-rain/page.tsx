@@ -40,7 +40,7 @@ type GameState = 'idle' | 'playing' | 'paused' | 'success' | 'failed';
 const GAME_WIDTH = 100;
 const GAME_HEIGHT = 100;
 const BOTTOM_THRESHOLD = 92;
-const BASE_FALL_SPEED = 0.05;
+const BASE_FALL_SPEED = 0.07;
 const SPAWN_INTERVAL_BASE = 2000;
 const SPAWN_INTERVAL_MIN = 800;
 const ANIMATION_FPS = 60;
@@ -48,10 +48,10 @@ const ANIMATION_INTERVAL = 1000 / ANIMATION_FPS;
 
 // ─── 컴포넌트 ────────────────────────────────────────────────────────────────────
 
-function DemoSquareItem({ 
-    sq, 
-    onRemove 
-}: { 
+function DemoSquareItem({
+    sq,
+    onRemove
+}: {
     sq: { id: number; left: number; speed: number; delay: number };
     onRemove: (id: number) => void;
 }) {
@@ -102,10 +102,10 @@ function DemoAnimation() {
     useEffect(() => {
         let idCounter = 0;
         const spawnSquare = () => {
-            setSquares(prev => [...prev.slice(-3), { 
-                id: ++idCounter, 
-                left: Math.random() * 50 + 25, 
-                speed: Math.random() * 1.0 + 3.0,
+            setSquares(prev => [...prev.slice(-3), {
+                id: ++idCounter,
+                left: Math.random() * 50 + 25,
+                speed: Math.random() * 0.8 + 2.2,
                 delay: 0
             }]);
         };
