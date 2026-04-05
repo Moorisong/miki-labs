@@ -26,7 +26,7 @@ interface SessionState {
 
 const RECENT_WID_LIMIT = 10;
 const WRONG_ANSWER_COUNT = 3;
-const PROBLEMS_PER_GAME = 15;
+const PROBLEMS_PER_GAME = 20;
 
 const COMBO_MULTIPLIER: Record<number, number> = {
     1: 1,
@@ -80,8 +80,8 @@ export class WordRainService {
             level: { $gte: Math.max(1, targetLevel - 2), $lte: targetLevel + 2 },
         }).lean();
 
-        // 해당 레벨 범위에 단어가 없으면 전체 단어에서 fallback
-        if (words.length === 0) {
+        // 해당 레벨 범위에 문제가 충분하지 않으면 전체 단어에서 fallback
+        if (this.countAvailableMeanings(words) < PROBLEMS_PER_GAME) {
             words = await WordModel.find({}).lean();
         }
 
@@ -96,10 +96,10 @@ export class WordRainService {
         };
 
         const problems: WordRainProblem[] = [];
-        const maxProblems = Math.min(PROBLEMS_PER_GAME, this.countAvailableMeanings(words));
+        const maxProblems = PROBLEMS_PER_GAME;
 
         for (let i = 0; i < maxProblems; i++) {
-            const problem = this.generateSingleProblem(words, session);
+            const problem = this.generateSingleProblem(words, session, false);
             if (!problem) break;
             problems.push(problem);
         }
@@ -116,7 +116,8 @@ export class WordRainService {
      */
     private static generateSingleProblem(
         words: IWord[],
-        session: SessionState
+        session: SessionState,
+        isFallback: boolean
     ): WordRainProblem | null {
         // 후보 필터링: used 제외, recentWids 제외
         const candidates: { word: IWord; meaning: IMeaning }[] = [];
@@ -137,7 +138,16 @@ export class WordRainService {
             }
         }
 
-        if (candidates.length === 0) return null;
+        if (candidates.length === 0) {
+            if (!isFallback) {
+                // 단어 풀이 작아 후보가 모두 소진된 경우, 사용 기록과 중복 제한을 초기화하고 재시도
+                session.used = [];
+                session.recentWids = [];
+                session.prevMid = null;
+                return this.generateSingleProblem(words, session, true);
+            }
+            return null;
+        }
 
         // 랜덤 선택
         const selected = candidates[Math.floor(Math.random() * candidates.length)];
