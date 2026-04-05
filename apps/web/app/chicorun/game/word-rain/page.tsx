@@ -155,7 +155,8 @@ export default function WordRainGamePage() {
     // 아이템 (시간 정지)
     const [freezeCount, setFreezeCount] = useState<number>(0);
     const [isFrozen, setIsFrozen] = useState<boolean>(false);
-    const [freezeUsed, setFreezeUsed] = useState<number>(0);
+    const MAX_ITEM_COUNT = 2;
+    const FREEZE_DURATION = 5000;
 
     // 타이머
     const [elapsedTime, setElapsedTime] = useState<number>(0);
@@ -254,7 +255,6 @@ export default function WordRainGamePage() {
             setSelectedWord(null);
             setElapsedTime(0);
             setFreezeCount(0);
-            setFreezeUsed(0);
             setIsFrozen(false);
             setResult(null);
             setFeedback(null);
@@ -499,26 +499,20 @@ export default function WordRainGamePage() {
     }, [gameState]);
 
     // ─── 프리즈 아이템 ──────────────────────────────────────────────────────────
-
-    useEffect(() => {
-        // 특정 점수 도달 시 프리즈 아이템 부여
-        if (config && score >= config.freezeGrantScoreThreshold && freezeCount === 0 && freezeUsed === 0) {
-            setFreezeCount(1);
-        }
-    }, [score, config, freezeCount, freezeUsed]);
+    // (기존 스코어 기반 지급 로직 제거됨 - 콤보 기반으로 변경)
 
     const activateFreeze = useCallback(() => {
-        if (freezeCount <= 0 || isFrozen || !config) return;
-        if (freezeUsed >= config.maxFreezePerGame) return;
+        if (freezeCount <= 0 || isFrozen) return;
 
         setFreezeCount(prev => prev - 1);
-        setFreezeUsed(prev => prev + 1);
         setIsFrozen(true);
+        frozenRef.current = true; // 프레임 스킵을 위해 ref 즉시 업데이트
 
         setTimeout(() => {
             setIsFrozen(false);
-        }, config.freezeDurationMs);
-    }, [freezeCount, isFrozen, config, freezeUsed]);
+            frozenRef.current = false;
+        }, FREEZE_DURATION);
+    }, [freezeCount, isFrozen]);
 
     // ─── 단어 클릭 → 선택 ──────────────────────────────────────────────────────
 
@@ -559,6 +553,11 @@ export default function WordRainGamePage() {
                         : w
                 )
             );
+
+            // 아이템 지급 (3 콤보 달성 시)
+            if (newCombo === 3) {
+                setFreezeCount(prev => Math.min(MAX_ITEM_COUNT, prev + 1));
+            }
         } else {
             setCombo(0);
 
@@ -638,7 +637,7 @@ export default function WordRainGamePage() {
             <div className={styles.container}>
                 <div className={styles.resultScreen}>
                     <h1 className={gameState === 'success' ? styles.resultTitleSuccess : styles.resultTitleFailed}>
-                        {gameState === 'success' ? '🎉 클리어!' : '💥 게임 오버'}
+                        {gameState === 'success' ? '🎉 클리어!' : '게임 오버'}
                     </h1>
 
                     <div className={styles.resultStats}>
@@ -666,7 +665,7 @@ export default function WordRainGamePage() {
 
                     {result && (
                         <div className={styles.rewardCard}>
-                            <h3 className={styles.rewardTitle}>💰 획득 포인트</h3>
+                            <h3 className={styles.rewardTitle}>획득 포인트</h3>
                             <div className={styles.rewardBreakdown}>
                                 {result.baseReward > 0 && (
                                     <div className={styles.rewardRow}>
@@ -688,7 +687,7 @@ export default function WordRainGamePage() {
                                 )}
                                 {result.perfectBonus > 0 && (
                                     <div className={styles.rewardRow}>
-                                        <span>완벽 보너스 ⭐</span>
+                                        <span>완벽 보너스</span>
                                         <span>+{result.perfectBonus}</span>
                                     </div>
                                 )}
@@ -702,7 +701,7 @@ export default function WordRainGamePage() {
 
                     <div className={styles.resultActions}>
                         <button className={styles.btnStart} onClick={startGame}>
-                            다시 하기 🔄
+                            다시 하기
                         </button>
                         <button
                             className={styles.btnBack}

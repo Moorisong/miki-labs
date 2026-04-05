@@ -154,7 +154,8 @@
     animation-play-state: paused !important;
     transform: translateX(-50%) scale(0) !important;
     opacity: 0;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        opacity 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .demoSquareClicked::after {
@@ -420,7 +421,10 @@
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 1rem;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        background 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
     backdrop-filter: blur(12px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -442,7 +446,8 @@
 .fallingWordAnswered {
     opacity: 0;
     transform: translate(-50%, -50%) scale(1.5);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        opacity 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     pointer-events: none;
     filter: brightness(2);
 }
