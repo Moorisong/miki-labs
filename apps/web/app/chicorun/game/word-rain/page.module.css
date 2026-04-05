@@ -1,7 +1,7 @@
 /* ─── 공통 ─────────────────────────────────────────────────────────────────── */
 .container {
     min-height: 100vh;
-    background: #0f172a;
+    background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 60%, #020617 100%);
     color: #f1f5f9;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     display: flex;
@@ -9,6 +9,20 @@
     position: relative;
     overflow: hidden;
     user-select: none;
+}
+
+.container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 80% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
 }
 
 /* ─── 대기 화면 ──────────────────────────────────────────────────────────────── */
@@ -21,6 +35,8 @@
     padding: 2rem;
     gap: 2rem;
     animation: fadeInUp 0.6s ease-out;
+    position: relative;
+    z-index: 10;
 }
 
 .btnCloseModal {
@@ -69,68 +85,211 @@
     font-weight: 500;
 }
 
-.rulesCard {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1.5rem;
-    padding: 2rem;
-    max-width: 420px;
+/* 데모 애니메이션 */
+.demoArea {
     width: 100%;
-}
-
-.rulesTitle {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    color: #e2e8f0;
-}
-
-.rulesList {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+    max-width: 460px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.5rem;
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-}
-
-.rulesList li {
-    font-size: 1rem;
-    color: #94a3b8;
-    padding-left: 1.5rem;
+    gap: 1.5rem;
+    align-items: center;
     position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
-.rulesList li::before {
-    content: '▸';
+.demoField {
+    width: 100%;
+    height: 220px;
+    position: relative;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.demoLine {
     position: absolute;
+    bottom: 0px;
     left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.6), transparent);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
+.demoSquare {
+    position: absolute;
+    top: -40px;
+    padding: 0.6rem 1.2rem;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    border-radius: 1rem;
+    color: #e2e8f0;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    user-select: none;
+    animation-name: fallDown;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+    transition: transform 0.1s, border-color 0.2s, background 0.2s;
+    backdrop-filter: blur(8px);
+    transform: translateX(-50%);
+}
+
+.demoSquare:hover {
+    border-color: rgba(59, 130, 246, 0.8);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(139, 92, 246, 0.25));
+    transform: translateX(-50%) scale(1.05);
+}
+
+.demoSquareClicked {
+    animation-play-state: paused !important;
+    transform: translateX(-50%) scale(0) !important;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.demoSquareClicked::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 250%;
+    height: 250%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.6) 20%, transparent 60%);
+    animation: popBlast 0.4s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes popBlast {
+    0% {
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+.demoFinger {
+    position: absolute;
+    bottom: -35px;
+    right: -30px;
+    font-size: 2.2rem;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+    opacity: 0;
+    transform: translate(20px, 20px) rotate(-15deg);
+    animation: fingerAppear 0.4s ease-out forwards;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.demoFingerClick {
+    animation: fingerPress 0.15s ease-in forwards !important;
+}
+
+@keyframes fingerAppear {
+    to {
+        opacity: 1;
+        transform: translate(0, 0) rotate(-15deg);
+    }
+}
+
+@keyframes fingerPress {
+    0% {
+        transform: translate(0, 0) rotate(-15deg) scale(1);
+    }
+
+    100% {
+        transform: translate(-5px, -5px) rotate(-15deg) scale(0.85);
+    }
+}
+
+@keyframes fallDown {
+    0% {
+        top: -40px;
+    }
+
+    100% {
+        top: 220px;
+    }
+}
+
+.demoText {
+    font-size: 1.1rem;
+    color: #94a3b8;
+    text-align: center;
+    font-weight: 500;
+}
+
+.demoHighlight {
     color: #3b82f6;
+    font-weight: 800;
+    background: rgba(59, 130, 246, 0.15);
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.4rem;
 }
 
 .btnStart {
-    padding: 1rem 3rem;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    padding: 1.25rem 4rem;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
     color: white;
     border: none;
-    border-radius: 1rem;
-    font-size: 1.2rem;
-    font-weight: 700;
+    border-radius: 999px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
     cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.btnStart::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
 .btnStart:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 15px 35px -5px rgba(59, 130, 246, 0.5);
+}
+
+.btnStart:hover::after {
+    opacity: 1;
+}
+
+.btnStart:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 .btnBack {
     padding: 0.75rem 2rem;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
     color: #94a3b8;
     font-weight: 600;
     cursor: pointer;
@@ -138,7 +297,7 @@
 }
 
 .btnBack:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.1);
     color: #e2e8f0;
     transform: translateY(-2px);
 }
@@ -152,11 +311,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 1.5rem;
-    background: rgba(15, 23, 42, 0.9);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1.25rem 2rem;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 100;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
 }
 
 .hudLeft {
@@ -256,14 +416,15 @@
 .fallingWord {
     position: absolute;
     transform: translate(-50%, -50%);
-    padding: 0.6rem 1.2rem;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    padding: 0.7rem 1.4rem;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 1rem;
     cursor: pointer;
-    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .fallingWord:hover {
@@ -281,9 +442,23 @@
 
 .fallingWordAnswered {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.5);
-    transition: all 0.3s ease-out;
+    transform: translate(-50%, -50%) scale(1.5);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     pointer-events: none;
+    filter: brightness(2);
+}
+
+.fallingWordAnswered::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200%;
+    height: 200%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.6) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: popBlast 0.4s ease-out forwards;
 }
 
 .fallingWordWrong {
@@ -293,10 +468,11 @@
 }
 
 .wordKo {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #e2e8f0;
-    text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 10px rgba(59, 130, 246, 0.4);
+    letter-spacing: 0.02em;
 }
 
 /* ─── 선택지 패널 ────────────────────────────────────────────────────────────── */
@@ -305,12 +481,13 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 1.25rem;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(24px);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 1.5rem;
     z-index: 200;
-    animation: slideUp 0.2s ease-out;
+    animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
 }
 
 .answerQuestion {
@@ -611,13 +788,26 @@
         font-size: 2.75rem;
     }
 
-    .answerGrid {
-        grid-template-columns: 1fr;
+    .subtitle {
+        font-size: 1rem;
     }
 
-    .answerBtn {
-        padding: 0.85rem;
-        font-size: 1rem;
+    .demoText {
+        font-size: 0.95rem;
+    }
+
+    .demoSquare {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .btnStart {
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+    }
+
+    .hud {
+        padding: 1rem;
     }
 
     .hudScore {
@@ -625,7 +815,35 @@
     }
 
     .hudCombo {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
+    }
+
+    .hudTime,
+    .hudProgress {
+        font-size: 0.9rem;
+    }
+
+    .fallingWord {
+        padding: 0.6rem 1.1rem;
+    }
+
+    .wordKo {
+        font-size: 1.05rem;
+    }
+
+    .answerQuestion {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .answerGrid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .answerBtn {
+        padding: 0.75rem;
+        font-size: 1rem;
     }
 
     .feedback {
@@ -635,5 +853,13 @@
     .resultTitleSuccess,
     .resultTitleFailed {
         font-size: 2.25rem;
+    }
+
+    .statValue {
+        font-size: 1rem;
+    }
+
+    .rewardTotal {
+        font-size: 1.1rem;
     }
 }

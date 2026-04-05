@@ -48,6 +48,93 @@ const ANIMATION_INTERVAL = 1000 / ANIMATION_FPS;
 
 // ─── 컴포넌트 ────────────────────────────────────────────────────────────────────
 
+function DemoSquareItem({ 
+    sq, 
+    onRemove 
+}: { 
+    sq: { id: number; left: number; speed: number; delay: number };
+    onRemove: (id: number) => void;
+}) {
+    const [status, setStatus] = useState<'falling' | 'fingerAppear' | 'fingerClick' | 'popped'>('falling');
+
+    useEffect(() => {
+        // 떨어지는 시간의 절반 즈음에 손가락 등장
+        const appearDelay = sq.speed * 1000 * 0.45;
+        const clickDelay = appearDelay + 400; // 등장 후 0.4초 뒤 터치
+        const popDelay = clickDelay + 150;    // 터치 후 0.15초 뒤 터짐
+        const removeDelay = popDelay + 400;   // 터진 후 잔상 제거
+
+        const appearTimer = setTimeout(() => setStatus('fingerAppear'), appearDelay);
+        const clickTimer = setTimeout(() => setStatus('fingerClick'), clickDelay);
+        const popTimer = setTimeout(() => setStatus('popped'), popDelay);
+        const removeTimer = setTimeout(() => onRemove(sq.id), removeDelay);
+
+        return () => {
+            clearTimeout(appearTimer);
+            clearTimeout(clickTimer);
+            clearTimeout(popTimer);
+            clearTimeout(removeTimer);
+        };
+    }, [sq, onRemove]);
+
+    return (
+        <div
+            className={`${styles.demoSquare} ${status === 'popped' ? styles.demoSquareClicked : ''}`}
+            style={{
+                left: `${sq.left}%`,
+                animationDuration: `${sq.speed}s`,
+                animationDelay: `${sq.delay}s`
+            }}
+        >
+            단어
+            {(status === 'fingerAppear' || status === 'fingerClick') && (
+                <div className={`${styles.demoFinger} ${status === 'fingerClick' ? styles.demoFingerClick : ''}`}>
+                    👆
+                </div>
+            )}
+        </div>
+    );
+}
+
+function DemoAnimation() {
+    const [squares, setSquares] = useState<{ id: number; left: number; speed: number; delay: number }[]>([]);
+
+    useEffect(() => {
+        let idCounter = 0;
+        const spawnSquare = () => {
+            setSquares(prev => [...prev.slice(-3), { 
+                id: ++idCounter, 
+                left: Math.random() * 50 + 25, 
+                speed: Math.random() * 1.0 + 3.0,
+                delay: 0
+            }]);
+        };
+
+        const intervalId = setInterval(spawnSquare, 1400);
+        spawnSquare();
+
+        return () => clearInterval(intervalId);
+    }, []);
+
+    const handleRemove = useCallback((id: number) => {
+        setSquares(prev => prev.filter(sq => sq.id !== id));
+    }, []);
+
+    return (
+        <div className={styles.demoArea}>
+            <div className={styles.demoField}>
+                {squares.map(sq => (
+                    <DemoSquareItem key={sq.id} sq={sq} onRemove={handleRemove} />
+                ))}
+                <div className={styles.demoLine} />
+            </div>
+            <p className={styles.demoText}>
+                단어가 바닥에 닿기 전 <span className={styles.demoHighlight}>터치</span>해서 맞추는 게임입니다!
+            </p>
+        </div>
+    );
+}
+
 export default function WordRainGamePage() {
     const router = useRouter();
 
@@ -525,15 +612,7 @@ export default function WordRainGamePage() {
                         <p className={styles.subtitle}>떨어지는 한글 뜻에 맞는 영어를 선택하세요!</p>
                     </div>
 
-                    <div className={styles.rulesCard}>
-                        <h3 className={styles.rulesTitle}>🎮 게임 방법</h3>
-                        <ul className={styles.rulesList}>
-                            <li>위에서 한글 뜻이 떨어집니다</li>
-                            <li>떨어지는 단어를 클릭한 후 정답을 선택하세요</li>
-                            <li>단어가 바닥에 닿으면 게임 오버!</li>
-                            <li>연속 정답으로 콤보 보너스를 획득하세요</li>
-                        </ul>
-                    </div>
+                    <DemoAnimation />
 
                     <button className={styles.btnStart} onClick={startGame} disabled={countdown === null}>
                         {countdown !== null ? `게임이 ${countdown}초 후 시작됩니다 🚀` : '게임 시작 중... 🚀'}
