@@ -462,21 +462,25 @@ export default function WordRainGamePage() {
     // ─── 속도 시스템 (Section-based) ─────────────────────────────────────────────
 
     useEffect(() => {
-        if (gameState !== 'playing' || correctCount === 0 || correctCount % 5 !== 0) return;
+        // 3문제마다 속도 체크 (더 빈번하게)
+        if (gameState !== 'playing' || correctCount === 0 || correctCount % 3 !== 0) return;
         if (lastSectionCountRef.current === correctCount) return;
 
         lastSectionCountRef.current = correctCount;
 
         const currentTime = elapsedTimeRef.current;
-        const sectionTime = currentTime - lastCheckpointTimeRef.current;
+        const sectionTime = currentTime - lastCheckpointTimeRef.current; // 3문제를 푸는 데 걸린 시간
 
         let newMultiplier = speedMultiplierRef.current;
-        if (sectionTime < 8) newMultiplier += 0.5;
-        else if (sectionTime < 12) newMultiplier += 0.25;
-        else if (sectionTime < 15) newMultiplier += 0.1;
-        else newMultiplier -= 0.1;
 
-        speedMultiplierRef.current = Math.max(0.8, Math.min(2.5, newMultiplier));
+        // 3문제를 아주 빨리 풀었을 때 (가속도 강화)
+        if (sectionTime < 4) newMultiplier += 0.6;
+        else if (sectionTime < 6) newMultiplier += 0.35;
+        else if (sectionTime < 9) newMultiplier += 0.15;
+        else newMultiplier -= 0.15; // 너무 느리면 조금 감속
+
+        // 최대 배수 상향 조정 2.5 -> 4.0
+        speedMultiplierRef.current = Math.max(0.8, Math.min(4.0, newMultiplier));
         lastCheckpointTimeRef.current = currentTime;
     }, [correctCount, gameState]);
 
