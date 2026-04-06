@@ -58,9 +58,9 @@ function DemoSquareItem({
     const [status, setStatus] = useState<'falling' | 'fingerAppear' | 'fingerClick' | 'popped'>('falling');
 
     useEffect(() => {
-        // 떨어지는 시간의 절반 즈음에 손가락 등장
-        const appearDelay = sq.speed * 1000 * 0.45;
-        const clickDelay = appearDelay + 400; // 등장 후 0.4초 뒤 터치
+        // 떨어지기 시작한 직후 손가락 등장
+        const appearDelay = sq.speed * 1000 * 0.2;
+        const clickDelay = appearDelay + 500; // fingerAppear 애니메이션(400ms) 완료 + 100ms 대기 후 터치
         const popDelay = clickDelay + 150;    // 터치 후 0.15초 뒤 터짐
         const removeDelay = popDelay + 400;   // 터진 후 잔상 제거
 
