@@ -155,7 +155,8 @@ export default function WordRainGamePage() {
     // 아이템 (시간 정지)
     const [freezeCount, setFreezeCount] = useState<number>(0);
     const [isFrozen, setIsFrozen] = useState<boolean>(false);
-    const MAX_ITEM_COUNT = 2;
+    const [itemEarnedCount, setItemEarnedCount] = useState<number>(0);
+    const MAX_ITEM_EARN_COUNT = 2;
     const FREEZE_DURATION = 5000;
 
     // 타이머
@@ -255,6 +256,7 @@ export default function WordRainGamePage() {
             setSelectedWord(null);
             setElapsedTime(0);
             setFreezeCount(0);
+            setItemEarnedCount(0);
             setIsFrozen(false);
             setResult(null);
             setFeedback(null);
@@ -502,17 +504,17 @@ export default function WordRainGamePage() {
     // (기존 스코어 기반 지급 로직 제거됨 - 콤보 기반으로 변경)
 
     const activateFreeze = useCallback(() => {
-        if (freezeCount <= 0 || isFrozen) return;
+        if (freezeCount <= 0 || frozenRef.current) return;
 
+        frozenRef.current = true; // 즉시 동기 가드 설정 (더블클릭 방지)
         setFreezeCount(prev => prev - 1);
         setIsFrozen(true);
-        frozenRef.current = true; // 프레임 스킵을 위해 ref 즉시 업데이트
 
         setTimeout(() => {
             setIsFrozen(false);
             frozenRef.current = false;
         }, FREEZE_DURATION);
-    }, [freezeCount, isFrozen]);
+    }, [freezeCount]);
 
     // ─── 단어 클릭 → 선택 ──────────────────────────────────────────────────────
 
@@ -554,9 +556,10 @@ export default function WordRainGamePage() {
                 )
             );
 
-            // 아이템 지급 (3 콤보 달성 시)
-            if (newCombo === 3) {
-                setFreezeCount(prev => Math.min(MAX_ITEM_COUNT, prev + 1));
+            // 아이템 지급 (3의 배수 콤보 달성 시, 게임당 최대 지급 횟수 제한)
+            if (newCombo % 3 === 0 && itemEarnedCount < MAX_ITEM_EARN_COUNT) {
+                setFreezeCount(prev => prev + 1);
+                setItemEarnedCount(prev => prev + 1);
             }
         } else {
             setCombo(0);
@@ -570,7 +573,7 @@ export default function WordRainGamePage() {
         }
 
         setSelectedWord(null);
-    }, [selectedWord, gameState, combo]);
+    }, [selectedWord, gameState, combo, itemEarnedCount]);
 
     // ─── 피드백 자동 해제 ───────────────────────────────────────────────────────
 
