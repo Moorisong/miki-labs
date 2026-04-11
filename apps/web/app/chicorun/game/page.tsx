@@ -23,7 +23,7 @@ export default function ChicorunGameHubPage() {
             description: '하늘에서 떨어지는 단어를 맞혀보세요! 단어 실력을 키우는 가장 재미있는 방법입니다.',
             route: CHICORUN_ROUTES.GAME_WORD_RAIN,
             icon: <IconCloudRain />,
-            color: '#3b82f6'
+            color: '#6c5ce7'
         },
         // 나중에 다른 게임 추가 가능
     ];
