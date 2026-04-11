@@ -4,10 +4,11 @@
   left: 0;
   right: 0;
   z-index: var(--z-sticky);
-  background: rgba(26, 26, 46, 1);
+  background: rgba(245, 243, 255, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(162, 155, 254, 0.1);
+  border-bottom: 1px solid rgba(108, 92, 231, 0.15);
+  box-shadow: 0 4px 15px rgba(108, 92, 231, 0.05);
 }
 
 .nav {
@@ -120,15 +121,15 @@
   top: calc(100% + 12px);
   left: 50%;
   transform: translateX(-50%) translateY(10px);
-  background: rgba(30, 30, 55, 0.98);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(24px);
-  border: 1px solid rgba(162, 155, 254, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: var(--radius-lg);
   min-width: 220px;
   padding: 8px 0;
   display: none;
   flex-direction: column;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   opacity: 0;
   transition: all var(--transition-fast);
@@ -452,17 +453,18 @@
 .loginButton {
   padding: var(--space-sm) var(--space-lg);
   background: var(--gradient-primary);
-  color: var(--color-text);
+  color: white !important;
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: 700;
   border-radius: var(--radius-full);
   transition: all var(--transition-fast);
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
 }
 
 .loginButton:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-glow);
-  color: var(--color-text);
+  box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
+  color: white !important;
 }
 
 .logoutButton {
@@ -535,8 +537,8 @@
 }
 
 .friendButton:hover {
-  background: rgba(162, 155, 254, 0.2);
-  border-color: rgba(162, 155, 254, 0.4);
+  background: rgba(108, 92, 231, 0.1);
+  border-color: rgba(108, 92, 231, 0.3);
   transform: scale(1.05);
 }
 
@@ -558,8 +560,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #1a1a2e;
-  box-shadow: 0 0 10px rgba(108, 92, 231, 0.5);
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3);
 }
 
 .divider {
@@ -637,7 +639,7 @@
     justify-content: flex-start;
     padding: var(--space-xl);
     gap: var(--space-md);
-    background: rgba(26, 26, 46, 0.98);
+    background: rgba(245, 243, 255, 0.98);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     transform: translateY(-20px);

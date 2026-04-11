@@ -3,18 +3,18 @@
   --color-primary: #6C5CE7;
   --color-secondary: #A29BFE;
   --color-accent: #FD79A8;
-  --color-background: #1A1A2E;
-  --color-surface: #16213E;
-  --color-text: #EAEAEA;
-  --color-text-muted: #A0A0A0;
-  --color-success: #00B894;
-  --color-warning: #FDCB6E;
-  --color-error: #E17055;
+  --color-background: #F1F5F9;
+  --color-surface: #FFFFFF;
+  --color-text: #1E293B;
+  --color-text-muted: #64748B;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
 
   /* Gradients */
   --gradient-primary: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%);
   --gradient-accent: linear-gradient(135deg, #FD79A8 0%, #FDCB6E 100%);
-  --gradient-dark: linear-gradient(180deg, #1A1A2E 0%, #16213E 100%);
+  --gradient-light: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%);
 
   /* Spacing */
   --space-xs: 4px;
@@ -32,10 +32,10 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 20px rgba(108, 92, 231, 0.4);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 15px rgba(108, 92, 231, 0.2);
 
   /* Typography */
   --font-size-xs: 12px;
