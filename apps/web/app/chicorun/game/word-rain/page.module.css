@@ -1,14 +1,13 @@
 /* ─── 공통 ─────────────────────────────────────────────────────────────────── */
 .container {
-    height: 100vh;
-    height: 100dvh;
-    background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 60%, #020617 100%);
-    color: #f1f5f9;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: calc(100vh - var(--header-height));
+    min-height: calc(100dvh - var(--header-height));
+    background: linear-gradient(135deg, #f5f3ff 0%, #f1f5f9 100%);
+    color: #1e293b;
+    font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     display: flex;
     flex-direction: column;
     position: relative;
-    overflow: hidden;
     user-select: none;
 }
 
@@ -20,8 +19,8 @@
     right: 0;
     bottom: 0;
     background-image:
-        radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 80% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 40%);
+        radial-gradient(circle at 20% 50%, rgba(108, 92, 231, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 80% 30%, rgba(162, 155, 254, 0.08) 0%, transparent 40%);
     pointer-events: none;
     z-index: 0;
 }
@@ -32,8 +31,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
-    padding: 2rem;
+    min-height: calc(100vh - var(--header-height));
+    padding: 3rem 2rem;
     gap: 2rem;
     animation: fadeInUp 0.6s ease-out;
     position: relative;
@@ -72,7 +71,7 @@
 .title {
     font-size: 4rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #8b5cf6 100%);
+    background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 50%, #8b5cf6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -82,7 +81,7 @@
 
 .subtitle {
     font-size: 1.25rem;
-    color: #94a3b8;
+    color: #64748b;
     font-weight: 500;
 }
 
@@ -90,8 +89,8 @@
 .demoArea {
     width: 100%;
     max-width: 460px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: white;
+    border: 1px solid rgba(162, 155, 254, 0.2);
     border-radius: 1.5rem;
     padding: 1.5rem;
     display: flex;
@@ -100,18 +99,17 @@
     align-items: center;
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 30px rgba(108, 92, 231, 0.06);
 }
 
 .demoField {
     width: 100%;
     height: 220px;
     position: relative;
-    background: rgba(0, 0, 0, 0.3);
+    background: #f8fafc;
     border-radius: 1rem;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid #e2e8f0;
 }
 
 .demoLine {
@@ -128,10 +126,10 @@
     position: absolute;
     top: -40px;
     padding: 0.6rem 1.2rem;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
-    border: 1px solid rgba(59, 130, 246, 0.4);
-    border-radius: 1rem;
-    color: #e2e8f0;
+    background: white;
+    border: 1px solid rgba(162, 155, 254, 0.4);
+    border-radius: 0.75rem;
+    color: #1e293b;
     font-weight: 700;
     font-size: 1rem;
     cursor: pointer;
@@ -145,8 +143,8 @@
 }
 
 .demoSquare:hover {
-    border-color: rgba(59, 130, 246, 0.8);
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(139, 92, 246, 0.25));
+    border-color: rgba(162, 155, 254, 0.8);
+    background: linear-gradient(135deg, rgba(162, 155, 254, 0.25), rgba(108, 92, 231, 0.25));
     transform: translateX(-50%) scale(1.05);
 }
 
@@ -167,7 +165,7 @@
     height: 250%;
     transform: translate(-50%, -50%);
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.6) 20%, transparent 60%);
+    background: radial-gradient(circle, rgba(108, 92, 231, 0.6) 20%, transparent 60%);
     animation: popBlast 0.4s ease-out forwards;
     pointer-events: none;
 }
@@ -230,22 +228,22 @@
 
 .demoText {
     font-size: 1.1rem;
-    color: #94a3b8;
+    color: #64748b;
     text-align: center;
     font-weight: 500;
 }
 
 .demoHighlight {
-    color: #3b82f6;
+    color: #6C5CE7;
     font-weight: 800;
-    background: rgba(59, 130, 246, 0.15);
+    background: rgba(108, 92, 231, 0.15);
     padding: 0.2rem 0.5rem;
     border-radius: 0.4rem;
 }
 
 .btnStart {
     padding: 1.25rem 4rem;
-    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
     color: white;
     border: none;
     border-radius: 999px;
@@ -254,7 +252,7 @@
     letter-spacing: 0.05em;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 10px 25px -5px rgba(108, 92, 231, 0.4);
     position: relative;
     overflow: hidden;
 }
@@ -273,7 +271,7 @@
 
 .btnStart:hover {
     transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 15px 35px -5px rgba(59, 130, 246, 0.5);
+    box-shadow: 0 15px 35px -5px rgba(108, 92, 231, 0.5);
 }
 
 .btnStart:hover::after {
@@ -289,18 +287,18 @@
 
 .btnBack {
     padding: 0.75rem 2rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: white;
+    border: 1px solid rgba(162, 155, 254, 0.3);
     border-radius: 999px;
-    color: #94a3b8;
+    color: #64748b;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .btnBack:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #e2e8f0;
+    background: rgba(162, 155, 254, 0.1);
+    color: #6c5ce7;
     transform: translateY(-2px);
 }
 
@@ -310,11 +308,11 @@
     align-items: center;
     justify-content: space-between;
     padding: 1.25rem 2rem;
-    background: rgba(15, 23, 42, 0.7);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(245, 243, 255, 0.85);
+    backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(162, 155, 254, 0.2);
     z-index: 100;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
 }
 
 .hudLeft {
@@ -326,7 +324,7 @@
 .hudScore {
     font-size: 1.5rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -335,20 +333,20 @@
 .hudCombo {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #f97316;
+    color: #6c5ce7;
     animation: comboPulse 0.3s ease-out;
 }
 
 .comboMultiplier {
     font-size: 0.8rem;
-    color: #fb923c;
+    color: #a29bfe;
     margin-left: 0.25rem;
 }
 
 .hudCenter {
     font-size: 1.2rem;
     font-weight: 600;
-    color: #94a3b8;
+    color: #64748b;
 }
 
 .hudTime {
@@ -364,26 +362,26 @@
 .hudProgress {
     font-size: 1rem;
     font-weight: 600;
-    color: #3b82f6;
+    color: #a29bfe;
 }
 
 .btnFreeze {
     padding: 0.5rem 1rem;
-    background: rgba(6, 182, 212, 0.2);
-    border: 1px solid rgba(6, 182, 212, 0.4);
+    background: rgba(162, 155, 254, 0.15);
+    border: 1px solid rgba(162, 155, 254, 0.3);
     border-radius: 0.5rem;
-    color: #06b6d4;
+    color: #a29bfe;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .btnFreeze:hover {
-    background: rgba(6, 182, 212, 0.3);
+    background: rgba(162, 155, 254, 0.25);
 }
 
 .btnFreezeActive {
-    background: rgba(6, 182, 212, 0.5);
+    background: rgba(162, 155, 254, 0.4);
     animation: freezePulse 0.5s infinite alternate;
 }
 
@@ -391,6 +389,7 @@
 .gameField {
     position: relative;
     flex: 1;
+    min-height: 500px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -405,11 +404,11 @@
     height: 2px;
     background: linear-gradient(90deg,
             transparent 0%,
-            rgba(239, 68, 68, 0.6) 20%,
-            rgba(239, 68, 68, 0.8) 50%,
-            rgba(239, 68, 68, 0.6) 80%,
+            rgba(108, 92, 231, 0.6) 20%,
+            rgba(162, 155, 254, 0.8) 50%,
+            rgba(108, 92, 231, 0.6) 80%,
             transparent 100%);
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 0 20px rgba(108, 92, 231, 0.3);
 }
 
 /* ─── 떨어지는 단어 ──────────────────────────────────────────────────────────── */
@@ -417,8 +416,8 @@
     position: absolute;
     transform: translate(-50%, -50%);
     padding: 0.7rem 1.4rem;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(162, 155, 254, 0.3);
     border-radius: 1rem;
     cursor: pointer;
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
@@ -427,19 +426,19 @@
         opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
     backdrop-filter: blur(12px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 .fallingWord:hover {
-    border-color: rgba(59, 130, 246, 0.7);
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(139, 92, 246, 0.25));
+    border-color: rgba(108, 92, 231, 0.8);
+    background: rgba(255, 255, 255, 1);
     transform: translate(-50%, -50%) scale(1.05);
 }
 
 .fallingWordSelected {
-    border-color: #fbbf24;
-    background: rgba(251, 191, 36, 0.15);
-    box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+    border-color: #6c5ce7;
+    background: rgba(108, 92, 231, 0.1);
+    box-shadow: 0 0 20px rgba(108, 92, 231, 0.2);
     animation: selectedPulse 0.8s infinite alternate;
 }
 
@@ -460,7 +459,7 @@
     width: 200%;
     height: 200%;
     transform: translate(-50%, -50%);
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.6) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(108, 92, 231, 0.6) 0%, transparent 70%);
     border-radius: 50%;
     animation: popBlast 0.4s ease-out forwards;
 }
@@ -474,8 +473,8 @@
 .wordKo {
     font-size: 1.2rem;
     font-weight: 800;
-    color: #ffffff;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 10px rgba(59, 130, 246, 0.4);
+    color: #1e293b;
+    text-shadow: 0 0 10px rgba(108, 92, 231, 0.1);
     letter-spacing: 0.02em;
 }
 
@@ -485,20 +484,20 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(24px);
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(32px);
+    border-top: 1px solid rgba(162, 155, 254, 0.2);
     padding: 1.5rem;
     z-index: 200;
     animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 -10px 40px rgba(108, 92, 231, 0.12);
 }
 
 .answerQuestion {
     text-align: center;
     font-size: 1.1rem;
     font-weight: 600;
-    color: #cbd5e1;
+    color: #475569;
     margin-bottom: 1rem;
 }
 
@@ -512,10 +511,10 @@
 
 .answerBtn {
     padding: 1rem;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: 0.75rem;
-    color: #e2e8f0;
+    color: #1e293b;
     font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
@@ -523,8 +522,8 @@
 }
 
 .answerBtn:hover {
-    background: rgba(59, 130, 246, 0.2);
-    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(108, 92, 231, 0.2);
+    border-color: rgba(162, 155, 254, 0.5);
     transform: translateY(-2px);
 }
 
@@ -561,14 +560,13 @@
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    background: rgba(6, 182, 212, 0.08);
+    background: rgba(162, 155, 254, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 3rem;
     font-weight: 900;
-    color: rgba(6, 182, 212, 0.5);
+    color: rgba(162, 155, 254, 0.5);
     z-index: 50;
     pointer-events: none;
     animation: frozenPulse 1s infinite alternate;
@@ -579,17 +577,16 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 2rem;
-    gap: 1.5rem;
+    justify-content: flex-start;
+    padding: 3rem 2rem 5rem;
+    gap: 1.25rem;
     animation: fadeInUp 0.6s ease-out;
 }
 
 .resultTitleSuccess {
     font-size: 3rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #22c55e, #06b6d4);
+    background: linear-gradient(135deg, #10b981, #6c5ce7);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -605,8 +602,8 @@
 }
 
 .resultStats {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: white;
+    border: 1px solid rgba(162, 155, 254, 0.15);
     border-radius: 1.5rem;
     padding: 1.5rem;
     width: 100%;
@@ -614,6 +611,7 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
 }
 
 .statRow {
@@ -621,28 +619,29 @@
     justify-content: space-between;
     align-items: center;
     font-size: 1rem;
-    color: #94a3b8;
+    color: #64748b;
 }
 
 .statValue {
     font-weight: 700;
     font-size: 1.2rem;
-    color: #e2e8f0;
+    color: #1e293b;
 }
 
 .rewardCard {
-    background: rgba(251, 191, 36, 0.05);
-    border: 1px solid rgba(251, 191, 36, 0.2);
+    background: linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%);
+    border: 1px solid rgba(108, 92, 231, 0.15);
     border-radius: 1.5rem;
     padding: 1.5rem;
     width: 100%;
     max-width: 400px;
+    box-shadow: 0 10px 25px rgba(108, 92, 231, 0.05);
 }
 
 .rewardTitle {
     font-size: 1.2rem;
-    font-weight: 700;
-    color: #fbbf24;
+    font-weight: 800;
+    color: #6c5ce7;
     margin-bottom: 1rem;
     text-align: center;
 }
@@ -657,21 +656,21 @@
     display: flex;
     justify-content: space-between;
     font-size: 0.95rem;
-    color: #94a3b8;
+    color: #64748b;
 }
 
 .rewardRow span:last-child {
-    color: #fbbf24;
-    font-weight: 600;
+    color: #6c5ce7;
+    font-weight: 700;
 }
 
 .rewardTotal {
     display: flex;
     justify-content: space-between;
     font-size: 1.2rem;
-    font-weight: 800;
-    color: #fbbf24;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 900;
+    color: #6c5ce7;
+    border-top: 1px solid rgba(162, 155, 254, 0.2);
     padding-top: 0.75rem;
     margin-top: 0.5rem;
 }
@@ -742,11 +741,11 @@
 
 @keyframes selectedPulse {
     from {
-        box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);
+        box-shadow: 0 0 15px rgba(108, 92, 231, 0.2);
     }
 
     to {
-        box-shadow: 0 0 25px rgba(251, 191, 36, 0.5);
+        box-shadow: 0 0 25px rgba(108, 92, 231, 0.4);
     }
 }
 
@@ -778,11 +777,11 @@
 
 @keyframes frozenPulse {
     from {
-        background: rgba(6, 182, 212, 0.05);
+        background: rgba(162, 155, 254, 0.05);
     }
 
     to {
-        background: rgba(6, 182, 212, 0.12);
+        background: rgba(162, 155, 254, 0.12);
     }
 }
 
