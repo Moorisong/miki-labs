@@ -36,24 +36,24 @@
 .supportButton {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 14px 32px;
+    gap: 0.6rem;
+    padding: 16px 40px;
     border-radius: var(--radius-full);
-    background: rgba(108, 92, 231, 0.12);
-    border: 1px solid rgba(108, 92, 231, 0.25);
-    color: var(--color-secondary);
-    font-size: 1rem;
-    font-weight: 600;
+    background: var(--gradient-primary);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 800;
+    border: none;
     cursor: pointer;
     transition: all var(--transition-normal);
+    box-shadow: 0 10px 20px rgba(108, 92, 231, 0.2);
     letter-spacing: -0.01em;
 }
 
 .supportButton:hover {
-    background: rgba(108, 92, 231, 0.2);
-    border-color: rgba(162, 155, 254, 0.4);
-    color: #c4b5fd;
-    transform: translateY(-1px);
+    background: var(--gradient-primary);
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px rgba(108, 92, 231, 0.3);
 }
 
 .supportButton:active {
@@ -122,21 +122,21 @@
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    padding: 5px 12px;
-    border-radius: var(--radius-full);
-    background: rgba(108, 92, 231, 0.1);
-    border: 1px solid rgba(108, 92, 231, 0.2);
-    color: var(--color-secondary);
-    font-size: 0.78rem;
-    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: var(--color-primary);
+    font-size: 0.85rem;
+    font-weight: 700;
     cursor: pointer;
     transition: all var(--transition-fast);
     white-space: nowrap;
 }
 
 .copyButton:hover {
-    background: rgba(108, 92, 231, 0.2);
-    border-color: rgba(162, 155, 254, 0.35);
+    background: #e2e8f0;
+    color: var(--color-primary);
 }
 
 .accountHolder {
