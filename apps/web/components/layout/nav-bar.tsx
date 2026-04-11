@@ -158,7 +158,7 @@ export default function NavBar() {
 
   // Chicorun 바로가기 링크 (로그인 상태에 따라 학생/선생님 버튼 필터링)
   const CHICORUN_LINKS = [
-    { href: '/chicorun', label: '학습' },
+    { href: '/chicorun/learn', label: '학습' },
     // 학생 로그인 시에만 랭킹 버튼 표시
     ...(studentNickname ? [
       { href: '/chicorun/ranking', label: '랭킹' },
