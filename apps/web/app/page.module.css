@@ -170,24 +170,41 @@
 
 @media (max-width: 768px) {
     .container {
-        padding-top: 4rem;
+        padding-top: 3rem;
+        padding-bottom: 2rem;
+    }
+
+    .header {
+        margin-bottom: 3rem;
     }
 
     .title {
-        font-size: 3rem;
+        font-size: 2.5rem;
     }
 
     .subtitle {
-        font-size: 1.15rem;
+        font-size: 1rem;
     }
 
     .grid {
         grid-template-columns: 1fr;
-        gap: 2rem;
+        gap: 1.5rem;
     }
 
     .cardContent {
-        padding: 2rem 1.5rem;
+        padding: 1.5rem 1.25rem;
+    }
+
+    .cardImageWrapper {
+        height: 160px;
+    }
+
+    .cardTitle {
+        font-size: 1.4rem;
+    }
+
+    .cardDescription {
+        font-size: 0.95rem;
     }
 }
 

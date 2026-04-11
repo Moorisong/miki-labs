@@ -251,19 +251,54 @@
 }
 
 @media (max-width: 860px) {
-    .manualGrid {
-        grid-template-columns: 1fr;
-        gap: 4rem;
-        padding: 0 1rem;
-    }
-
-    .manualTitle {
-        font-size: 1.75rem;
-        margin-bottom: 4rem;
+    .container {
+        padding-top: 1rem;
     }
 
     .main {
-        padding-top: 2rem;
+        padding-top: 1.5rem;
+    }
+
+    .contentBox {
+        padding: 1.5rem;
+        border-radius: 1.5rem;
+    }
+
+    .title {
+        font-size: 2.75rem;
+    }
+
+    .subtitle {
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .btnStudent {
+        padding: 1rem 2rem;
+        font-size: 1.25rem;
+    }
+
+    .manualGrid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+        padding: 0 0.5rem;
+    }
+
+    .manualTitle {
+        font-size: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .manualItem {
+        padding: 2.5rem 1.25rem 1.5rem;
+    }
+
+    .manualItem h3 {
+        font-size: 1.25rem;
+    }
+
+    .manualItem p {
+        font-size: 0.95rem;
     }
 }
 
