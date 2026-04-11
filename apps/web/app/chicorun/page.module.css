@@ -17,6 +17,8 @@
     position: relative;
     background: var(--bg-gradient);
     flex: 1;
+    overflow: visible;
+    /* 가로 스크롤은 globals.css의 body에서 처리하므로 여기서는 스크롤이 중복되지 않게 visible로 설정 */
 }
 
 
@@ -53,7 +55,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 8rem 1.5rem 6rem;
+    padding: 6rem 1.5rem 4rem;
     z-index: 1;
     width: 100%;
 }
@@ -61,9 +63,9 @@
 
 .contentBox {
     text-align: center;
-    max-width: 640px;
+    max-width: 520px;
     width: 100%;
-    padding: 3rem;
+    padding: 2.5rem;
     background: var(--card-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -78,7 +80,7 @@
 }
 
 .title {
-    font-size: 5rem;
+    font-size: 4rem;
     font-weight: 900;
     letter-spacing: -0.04em;
     line-height: 1;
@@ -91,7 +93,7 @@
     animation: titlePop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     .title {
         font-size: 3.5rem;
     }
@@ -102,11 +104,22 @@
     }
 }
 
+@media (max-width: 480px) {
+    .title {
+        font-size: 2.25rem;
+    }
+
+    .contentBox {
+        padding: 1.5rem 1.25rem;
+        border-radius: 1.25rem;
+    }
+}
+
 .subtitle {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     color: var(--text-main);
     font-weight: 600;
-    margin-bottom: 3rem;
+    margin-bottom: 2.5rem;
     opacity: 0;
     animation: fadeIn 0.6s 0.3s forwards;
     display: flex;
@@ -132,9 +145,9 @@
     width: 100%;
     background: linear-gradient(135deg, var(--primary) 0%, #2563eb 100%);
     color: white;
-    padding: 1.25rem 2.5rem;
+    padding: 1.1rem 2rem;
     border-radius: 1.25rem;
-    font-size: 1.5rem;
+    font-size: 1.35rem;
     font-weight: 700;
     border: none;
     cursor: pointer;
@@ -250,55 +263,77 @@
     word-break: keep-all;
 }
 
+@media (max-width: 1024px) {
+    .manualGrid {
+        gap: 1.5rem;
+    }
+}
+
 @media (max-width: 860px) {
-    .container {
-        padding-top: 1rem;
-    }
-
     .main {
-        padding-top: 1.5rem;
-    }
-
-    .contentBox {
-        padding: 1.5rem;
-        border-radius: 1.5rem;
-    }
-
-    .title {
-        font-size: 2.75rem;
-    }
-
-    .subtitle {
-        font-size: 1.25rem;
-        margin-bottom: 2rem;
-    }
-
-    .btnStudent {
-        padding: 1rem 2rem;
-        font-size: 1.25rem;
+        padding: 6rem 1.5rem 4rem;
     }
 
     .manualGrid {
         grid-template-columns: 1fr;
         gap: 2.5rem;
-        padding: 0 0.5rem;
+        max-width: 500px;
+    }
+
+    .manualTitle {
+        font-size: 1.85rem;
+        margin-bottom: 3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding-top: 0;
+    }
+
+    .main {
+        padding: 3rem 1rem 2.5rem;
+    }
+
+    .subtitle {
+        font-size: 1.1rem;
+        margin-bottom: 1.75rem;
+    }
+
+    .btnStudent {
+        padding: 1rem 1.25rem;
+        font-size: 1.15rem;
+        border-radius: 1rem;
+    }
+
+    .manualSection {
+        margin-top: 4rem;
     }
 
     .manualTitle {
         font-size: 1.5rem;
-        margin-bottom: 3rem;
+        margin-bottom: 2.5rem;
     }
 
     .manualItem {
         padding: 2.5rem 1.25rem 1.5rem;
+        border-radius: 1.5rem;
     }
 
     .manualItem h3 {
-        font-size: 1.25rem;
+        font-size: 1.2rem;
+        margin-bottom: 0.75rem;
     }
 
     .manualItem p {
         font-size: 0.95rem;
+    }
+
+    .stepNum {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+        top: -20px;
     }
 }
 
@@ -362,4 +397,11 @@
     pointer-events: none;
     animation: float 10s infinite ease-in-out;
     background-clip: padding-box;
+}
+
+@media (max-width: 480px) {
+    .decoration {
+        width: 150px;
+        height: 150px;
+    }
 }

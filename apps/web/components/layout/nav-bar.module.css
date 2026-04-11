@@ -77,6 +77,16 @@
   color: var(--color-primary);
 }
 
+.navLink:active {
+  transform: scale(0.97);
+  opacity: 0.8;
+}
+
+.navLink:focus-visible {
+  outline: none !important;
+  background: rgba(108, 92, 231, 0.1);
+}
+
 .navLink.active::after {
   content: '';
   position: absolute;
@@ -486,37 +496,66 @@
   border-color: var(--color-primary);
 }
 
-/* Chicorun Specific Styles */
+/* Chicorun Specific Styles (Redesigned from scratch) */
 .chicorunLinkItem {
   display: flex;
   align-items: center;
 }
 
 .chicorunLink {
-  color: #a29bfe !important;
-  font-weight: 600 !important;
-  background: rgba(162, 155, 254, 0.05);
-  border: 1px solid rgba(162, 155, 254, 0.1);
-  font-size: var(--font-size-sm) !important;
-  padding: 6px 14px !important;
-  border-radius: 8px !important;
+  /* Reset all potential inherited styles */
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  /* Initial State */
+  color: #6c5ce7;
+  background: rgba(108, 92, 231, 0.05);
+  border: 1px solid rgba(108, 92, 231, 0.15);
+  border-radius: 10px;
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  text-decoration: none;
 }
 
 .chicorunLink:hover {
-  background: rgba(162, 155, 254, 0.15) !important;
-  border-color: rgba(162, 155, 254, 0.3) !important;
+  background: rgba(108, 92, 231, 0.1);
+  border-color: rgba(108, 92, 231, 0.3);
   transform: translateY(-1px);
 }
 
-.chicorunLink.active {
-  background: var(--gradient-primary) !important;
-  color: white !important;
-  border-color: transparent !important;
-  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+.chicorunLink:active {
+  transform: translateY(0.5px) scale(0.96);
+  background: rgba(108, 92, 231, 0.15);
 }
 
+/* Active Page State */
+.chicorunLink.active {
+  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%) !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: 0 4px 10px rgba(108, 92, 231, 0.2);
+}
+
+/* Ensure NO global or inherited pseudo-elements appear */
+.chicorunLink::after,
 .chicorunLink.active::after {
+  content: none !important;
   display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Focus state for accessibility without visual glitch */
+.chicorunLink:focus-visible {
+  outline: 2px solid rgba(108, 92, 231, 0.3);
+  outline-offset: 2px;
 }
 
 .friendButton {
