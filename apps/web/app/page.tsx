@@ -49,13 +49,15 @@ export default function Home() {
         {
             id: 'toby',
             title: 'TOBY',
-            description: '학교 선생님들을 위한 서비스 툴 모음.\n수업과 학급 관리에 유용한 도구들을 만나보세요!',
+            description: '학교 선생님들을 위한 서비스 툴 모음.\n수업과 학급 관리에 유용한 도구들!',
             image: '/sample/toby-logo.png',
             link: '/toby',
             newTab: true,
             badge: 'New',
+            badgeType: styles.badgeNew,
             active: true,
         },
+
         {
             id: 'htsm',
             title: '자아탐험',
@@ -63,12 +65,13 @@ export default function Home() {
             image: '/htsm-logo-v6.png',
             link: '/htsm',
             badge: 'Hot',
+            badgeType: styles.badgeHot,
             active: true,
         },
         {
             id: 'rolling-paper',
             title: '롤링페이퍼',
-            description: '친구들과 추억을 나누는 롤링페이퍼',
+            description: '친구들과 추억을 나누는 익명 롤링페이퍼.\n마음을 전하는 따뜻한 시간!',
             image: '/sample/r-paper-logo.png',
             link: 'https://r-paper-web.haroo.site',
             active: true,
@@ -79,7 +82,7 @@ export default function Home() {
         <div className={styles.container}>
             <header className={styles.header}>
                 <h1 className={styles.title}>하루상자</h1>
-                <p className={styles.subtitle}>오늘의 작은 재미를 담다</p>
+                <p className={styles.subtitle}>매일 새로운 즐거움과 유익함이 담긴 곳</p>
             </header>
 
             <div className={styles.grid}>
@@ -92,18 +95,17 @@ export default function Home() {
                             {...((content as any).newTab || content.link.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                         >
                             <div className={styles.cardImageWrapper}>
-                                {(content.badge || ('extraBadge' in content && (content as any).extraBadge)) && (
+                                {content.badge && (
                                     <div className={styles.badgeGroup}>
-                                        {content.badge && <span className={styles.badge}>{content.badge}</span>}
-                                        {'extraBadge' in content && (content as any).extraBadge && <span className={`${styles.badge} ${styles.badgeWebOnly}`}>{(content as any).extraBadge}</span>}
+                                        <span className={`${styles.badge} ${content.badgeType || ''}`}>{content.badge}</span>
                                     </div>
                                 )}
 
                                 <Image
                                     src={content.image}
                                     alt={content.title}
-                                    width={150}
-                                    height={150}
+                                    width={180}
+                                    height={180}
                                     className={styles.cardImage}
                                     priority
                                 />
@@ -115,14 +117,12 @@ export default function Home() {
                         </Link>
                     ) : (
                         <div key={content.id} className={`${styles.card} ${styles.disabled}`}>
-                            <div className={styles.comingSoonOverlay}>Coming Soon</div>
                             <div className={styles.cardImageWrapper}>
-                                {content.badge && <span className={styles.badge} style={{ background: '#94a3b8' }}>{content.badge}</span>}
                                 <Image
                                     src={content.image}
                                     alt={content.title}
-                                    width={150}
-                                    height={150}
+                                    width={180}
+                                    height={180}
                                     className={styles.cardImage}
                                     style={{ filter: 'grayscale(100%)', opacity: 0.5 }}
                                 />
@@ -138,8 +138,8 @@ export default function Home() {
 
             <AdBanner className={styles.adBanner} />
 
-            <footer style={{ marginTop: 'auto', paddingTop: '2rem', color: 'var(--color-text-muted)', fontSize: '0.875rem', textAlign: 'center' }}>
-                <p>하루상자는 하루의 소소한 재미를 담아두는 작은 놀이 상자입니다.</p>
+            <footer style={{ marginTop: 'auto', paddingTop: '4rem', color: 'var(--color-text-muted)', fontSize: '1rem', textAlign: 'center', fontWeight: 500 }}>
+                <p>하루상자는 일상의 소소한 재미를 담아두는 작은 놀이 상자입니다.</p>
 
                 {SUPPORT_CONFIG.showOnMain && (
                     <Link href={ROUTES.SUPPORT} className={styles.supportLink} id="main-support-link">
@@ -150,3 +150,4 @@ export default function Home() {
         </div>
     );
 }
+
