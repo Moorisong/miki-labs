@@ -44,6 +44,11 @@ export default function ChicorunLandingPage() {
 
     return (
         <div className={styles.container}>
+            {/* Soft decorative elements */}
+            <div className={styles.decoration} style={{ top: '15%', left: '10%', animationDelay: '0s' }}></div>
+            <div className={styles.decoration} style={{ top: '65%', left: '85%', animationDelay: '-2s' }}></div>
+            <div className={styles.decoration} style={{ top: '80%', left: '15%', animationDelay: '-4s' }}></div>
+
             <main className={styles.main}>
                 <div className={styles.contentBox}>
                     {/* 타이틀 */}
@@ -52,7 +57,7 @@ export default function ChicorunLandingPage() {
                     </div>
 
                     <p className={styles.subtitle}>
-                        영어를 게임처럼 배우자 ⚡
+                        영어를 <span>게임</span>처럼 배우자 ⚡
                     </p>
 
                     {/* 버튼 부 */}
@@ -92,3 +97,4 @@ export default function ChicorunLandingPage() {
         </div>
     );
 }
+
