@@ -229,7 +229,7 @@ export default function FriendsPanel({ onClose, onUpdateCount, nickname, points,
                         <span className={styles.backIcon}>←</span>
                         <span className={styles.closeLabel}>닫기</span>
                     </button>
-                    <h2>마이페이지 & 친구</h2>
+                    <h2>친구 목록</h2>
                     <button className={styles.closeButton} onClick={handleClose}>✕</button>
                 </div>
 
