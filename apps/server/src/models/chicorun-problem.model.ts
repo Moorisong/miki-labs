@@ -12,6 +12,9 @@ export interface IChicorunProblem extends Document {
     explanation: string;         // 오답 시에만 사용 (MZ 말투)
     questionType: string;        // vocab, basic_grammar 등
     wordCount: number;
+    topic: string;               // 지문 주제 (nature, daily_life, science 등)
+    source: 'manual' | 'template'; // 문제 출처
+    tags: string[];              // 세부 분류 태그
     createdAt: Date;
 }
 
@@ -70,6 +73,21 @@ const chicorunProblemSchema = new Schema<IChicorunProblem>(
         wordCount: {
             type: Number,
             required: true,
+        },
+        topic: {
+            type: String,
+            required: true,
+            default: 'general',
+        },
+        source: {
+            type: String,
+            enum: ['manual', 'template'],
+            required: true,
+            default: 'template',
+        },
+        tags: {
+            type: [String],
+            default: [],
         },
     },
     {
