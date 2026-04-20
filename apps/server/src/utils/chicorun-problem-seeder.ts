@@ -9,7 +9,7 @@ const REAL_PROBLEMS = [
         question: "[초급] 지문에서 나무는 어떤 색인가요?",
         choices: ["빨간색", "초록색", "노란색", "보라색"],
         correctAnswerIndex: 1,
-        explanation: "지문의 첫 번째 문장에서 'green trees'라고 한 거 보여? 나무 색깔을 다시 확인해봐! 🌳",
+        explanation: "첫 문장에서 나무 색깔 힌트 줬다! 👀\n자연하면 떠오르는 그 색깔 맞음 🌳",
         questionType: 'vocab', wordCount: 11, topic: 'nature', source: 'manual' as const, tags: ['color', 'nature'],
     },
     {
@@ -18,7 +18,7 @@ const REAL_PROBLEMS = [
         question: "[초급] 고양이는 어디에 있나요?",
         choices: ["침대 위", "상자 안", "소파 위", "테이블 아래"],
         correctAnswerIndex: 2,
-        explanation: "고양이가 어디서 자고 있는지 첫 번째 문장에서 장소를 찾아봐. 침대는 아니야! 🐱",
+        explanation: "첫 줄에서 어디서 꿀잠 자는지 찾아보셈!\n푹신푹신한 거기 맞음 🐱",
         questionType: 'simple_fact', wordCount: 11, topic: 'animals', source: 'manual' as const, tags: ['location', 'pets'],
     },
     {
@@ -27,7 +27,7 @@ const REAL_PROBLEMS = [
         question: "[초급] 'have'와 뜻이 같은 단어는 무엇인가요?",
         choices: ["먹다(Eat)", "소유하다(Possess)", "주다(Give)", "잃어버리다(Lose)"],
         correctAnswerIndex: 1,
-        explanation: "무언가를 '가지고 있다'는 뜻의 다른 단어를 찾아봐. '소유하다'라는 뜻의 단어가 보일 거야! 🔥",
+        explanation: "내 손안에 딱 쥐고 있다는 거임!\n내 거라는 느낌 살려서 골라봐 🔥",
         questionType: 'synonym', wordCount: 9, topic: 'food', source: 'manual' as const, tags: ['synonym', 'basic_verb'],
     },
     {
@@ -36,7 +36,7 @@ const REAL_PROBLEMS = [
         question: "[초급] Mike는 어떤 종류의 책을 읽는 것을 좋아하나요?",
         choices: ["요리 책", "우주에 관한 책", "스포츠 책", "음악 책"],
         correctAnswerIndex: 1,
-        explanation: "지문 두 번째 줄에 Mike가 어떤 주제에 미쳐있는지 나와있어! '우주'랑 '별'이 핵심이야 🚀",
+        explanation: "지문 중간에 Mike가 꽂힌 주제 나옴!\n별이랑 달 나오는 거 뭐게? 🚀",
         questionType: 'vocab', wordCount: 26, topic: 'science', source: 'manual' as const, tags: ['hobby', 'reading'],
     },
     {
@@ -45,7 +45,7 @@ const REAL_PROBLEMS = [
         question: "[초급] 빈칸에 알맞은 단어를 고르세요.",
         choices: ["work", "works", "working", "worked"],
         correctAnswerIndex: 1,
-        explanation: "주어가 Sarah니까 동사 형태가 어떻게 변해야 할까? 3인칭 단수를 떠올려봐! 🔥",
+        explanation: "주어가 Sarah(나도 너도 아닌 3인칭 단수)면\n동사 뒤에 짝꿍 하나 붙여야 함! 🔥",
         questionType: 'basic_grammar', wordCount: 21, topic: 'jobs', source: 'manual' as const, tags: ['3rd_person', 'present_tense'],
     },
     {
@@ -54,7 +54,7 @@ const REAL_PROBLEMS = [
         question: "[초급] 가족들은 해변에서 무엇을 할 예정인가요?",
         choices: ["쇼핑하기", "피자 먹기", "바다에서 수영하기", "영화 보기"],
         correctAnswerIndex: 2,
-        explanation: "날씨가 더워서 바다에 갔대. 거기서 몸을 담그고 하는 활동이 뭔지 지문 끝부분을 찾아봐! 🌊",
+        explanation: "더워서 해변 갔는데 뭐할지 끝부분에 나옴\n물속에 풍덩 들어가는 액티비티! 🌊",
         questionType: 'simple_fact', wordCount: 26, topic: 'weather', source: 'manual' as const, tags: ['activity', 'beach'],
     },
     {
@@ -63,7 +63,7 @@ const REAL_PROBLEMS = [
         question: "[초급] 'present'와 뜻이 같은 단어는 무엇인가요?",
         choices: ["미래(Future)", "선물(Gift)", "과제(Task)", "게임(Game)"],
         correctAnswerIndex: 1,
-        explanation: "생일 때 받으면 기분 좋은 '선물'이라는 뜻의 다른 단어를 골라봐! 🎁",
+        explanation: "생일날 아빠한테 받는 거! 🎁\n포장지 뜯을 때 제일 설레는 그거 찾아봐",
         questionType: 'synonym', wordCount: 16, topic: 'daily_life', source: 'manual' as const, tags: ['synonym', 'birthday'],
     },
 ];
