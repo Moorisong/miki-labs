@@ -75,16 +75,30 @@ const LEVEL_TYPES: Record<string, string[]> = {
     high: ['long_inference', 'blank_grammar', 'attitude', 'long_inference', 'blank_grammar', 'attitude'],
 };
 
-// ─── 소수 기반 분산 해싱 (대소수: 콘텐츠 고르게 분배) ─────────────────────────
+// ─── 개선된 콘텐츠 분배 (레벨별 회전 + 같은 레벨 중복 방지) ────────────────
 const PRIMES = [31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
 
 function getContentIndex(level: number, orderIndex: number, diffIdx: number, poolSize: number): number {
-    // 소수 기반 해싱을 통한 더 고른 분배
-    const prime1 = PRIMES[level % PRIMES.length];
-    const prime2 = PRIMES[(orderIndex + 3) % PRIMES.length];
-    const prime3 = PRIMES[(diffIdx + 7) % PRIMES.length];
-    const hash = (level * prime1 + orderIndex * prime2 + diffIdx * prime3) % poolSize;
-    return Math.abs(hash) % poolSize;
+    // 레벨별 오프셋: 인접 레벨이 풀의 다른 위치에서 시작하도록 회전
+    const levelOffset = (level * 7 + diffIdx * 13) % poolSize;
+    // orderIndex를 더해서 같은 레벨 내에서 순차적으로 다른 아이템 선택
+    return (levelOffset + orderIndex * 3) % poolSize;
+}
+
+// 같은 레벨+유형+난이도에서 이미 사용된 인덱스를 피하는 dedup 함수
+function getUniqueContentIndex(
+    level: number, orderIndex: number, diffIdx: number,
+    poolSize: number, usedInLevel: Set<number>
+): number {
+    let idx = getContentIndex(level, orderIndex, diffIdx, poolSize);
+    let attempts = 0;
+    // 이미 사용된 인덱스면 다음 것으로 회전
+    while (usedInLevel.has(idx) && attempts < poolSize) {
+        idx = (idx + 1) % poolSize;
+        attempts++;
+    }
+    usedInLevel.add(idx);
+    return idx;
 }
 
 // ─── 메인 시더 함수 ───────────────────────────────────────────────────────────
@@ -105,6 +119,9 @@ export const seedChicorunProblems = async () => {
             const currentRange = lv <= 30 ? 'low' : lv <= 70 ? 'mid' : 'high';
             const availableTypes = LEVEL_TYPES[currentRange];
 
+            // 레벨 내 유형별 사용된 콘텐츠 인덱스 추적 (중복 방지)
+            const usedPerLevelType: Record<string, Set<number>> = {};
+
             for (let idx = 1; idx <= problemsCount; idx++) {
                 for (let dIdx = 0; dIdx < difficulties.length; dIdx++) {
                     const diff = difficulties[dIdx];
@@ -119,15 +136,19 @@ export const seedChicorunProblems = async () => {
                         continue;
                     }
 
-                    // 유형 결정 (순환 + 연속 방지)
+                    // 유형 결정 (순환)
                     const qType = availableTypes[(idx - 1) % availableTypes.length];
                     const pool = CONTENT_POOL[qType] || CONTENT_POOL['vocab'];
 
-                    // 소수 기반 콘텐츠 선택
-                    const sceneIdx = getContentIndex(lv, idx, dIdx, pool.length);
+                    // 레벨+유형+난이도별 dedup 키
+                    const dedupKey = `${qType}-${dIdx}`;
+                    if (!usedPerLevelType[dedupKey]) usedPerLevelType[dedupKey] = new Set();
+
+                    // 중복 방지 콘텐츠 선택
+                    const sceneIdx = getUniqueContentIndex(lv, idx, dIdx, pool.length, usedPerLevelType[dedupKey]);
                     const scene = pool[sceneIdx];
 
-                    // 통계 추적
+                    // 글로벌 통계 추적
                     const trackKey = `${qType}-${diff}`;
                     if (!usedContentTracker[trackKey]) usedContentTracker[trackKey] = new Set();
                     usedContentTracker[trackKey].add(sceneIdx);

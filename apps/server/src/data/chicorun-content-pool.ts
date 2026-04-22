@@ -231,23 +231,47 @@ export const ATTITUDE: ContentItem[] = [
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 통합 콘텐츠 풀 Export
+// 확장 콘텐츠 Import (새 파일에서 확장된 콘텐츠 가져오기)
+// ═══════════════════════════════════════════════════════════════════════════════
+import {
+    VOCAB as EXPANDED_VOCAB,
+    BASIC_GRAMMAR as EXPANDED_BASIC_GRAMMAR,
+    SIMPLE_FACT as EXPANDED_SIMPLE_FACT,
+    SYNONYM as EXPANDED_SYNONYM,
+} from './chicorun-content-low';
+
+import {
+    CONTEXT_VOCAB as EXPANDED_CONTEXT_VOCAB,
+    INFERENCE as EXPANDED_INFERENCE,
+    CONNECTOR as EXPANDED_CONNECTOR,
+    MAIN_IDEA as EXPANDED_MAIN_IDEA,
+    PURPOSE as EXPANDED_PURPOSE,
+} from './chicorun-content-mid';
+
+import {
+    LONG_INFERENCE as EXPANDED_LONG_INFERENCE,
+    BLANK_GRAMMAR as EXPANDED_BLANK_GRAMMAR,
+    ATTITUDE as EXPANDED_ATTITUDE,
+} from './chicorun-content-high';
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 통합 콘텐츠 풀 Export (전 유형 확장 완료)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const CONTENT_POOL: Record<string, ContentItem[]> = {
-    // 초급
-    vocab: VOCAB,
-    basic_grammar: BASIC_GRAMMAR,
-    simple_fact: SIMPLE_FACT,
-    synonym: SYNONYM,
-    // 중급
-    context_vocab: CONTEXT_VOCAB,
-    inference: INFERENCE,
-    connector: CONNECTOR,
-    main_idea: MAIN_IDEA,
-    purpose: PURPOSE,
-    // 고급
-    long_inference: LONG_INFERENCE,
-    blank_grammar: BLANK_GRAMMAR,
-    attitude: ATTITUDE,
+    // 초급 (확장 완료: 각 50개)
+    vocab: EXPANDED_VOCAB,
+    basic_grammar: EXPANDED_BASIC_GRAMMAR,
+    simple_fact: EXPANDED_SIMPLE_FACT,
+    synonym: EXPANDED_SYNONYM,
+    // 중급 (전 유형 확장 완료: 40개, 40개, 40개, 40개, 35개)
+    context_vocab: EXPANDED_CONTEXT_VOCAB,
+    inference: EXPANDED_INFERENCE,
+    connector: EXPANDED_CONNECTOR,
+    main_idea: EXPANDED_MAIN_IDEA,
+    purpose: EXPANDED_PURPOSE,
+    // 고급 (전 유형 확장 완료: 35개, 35개, 35개)
+    long_inference: EXPANDED_LONG_INFERENCE,
+    blank_grammar: EXPANDED_BLANK_GRAMMAR,
+    attitude: EXPANDED_ATTITUDE,
 };
