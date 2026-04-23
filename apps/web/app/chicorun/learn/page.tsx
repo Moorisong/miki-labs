@@ -98,15 +98,26 @@ function getAuthHeader(): Record<string, string> {
 
 // ─── 콤보 오버레이 컴포넌트 ────────────────────────────────────────────────────
 function ComboOverlay({ combo, onDone }: { combo: ComboType; onDone: () => void }) {
+    const [isFadingOut, setIsFadingOut] = useState(false);
+
     useEffect(() => {
-        if (!combo) return;
-        const timer = setTimeout(onDone, 1200);
-        return () => clearTimeout(timer);
+        if (!combo) {
+            setIsFadingOut(false);
+            return;
+        }
+        setIsFadingOut(false);
+        const fadeTimer = setTimeout(() => setIsFadingOut(true), 800);
+        const doneTimer = setTimeout(onDone, 1100);
+
+        return () => {
+            clearTimeout(fadeTimer);
+            clearTimeout(doneTimer);
+        };
     }, [combo, onDone]);
 
     if (!combo) return null;
 
-    const comboMessages = {
+    const comboMessages: Record<string, { emoji: string; text: string; color: string; sub: string }> = {
         combo3: { emoji: '🔥', text: '3연속 정답!', color: '#f97316', sub: 'HOT STREAK' },
         combo5: { emoji: '⚡', text: '5연속 정답!', color: '#eab308', sub: 'POWER SURGE' },
         combo10: {
@@ -115,11 +126,11 @@ function ComboOverlay({ combo, onDone }: { combo: ComboType; onDone: () => void 
         },
     };
 
-    const { emoji, text, color, sub } = comboMessages[combo];
+    const { emoji, text, color, sub } = comboMessages[combo as string];
 
     return (
-        <div className={styles.comboOverlay}>
-            <div className={styles.comboCard} style={{ borderColor: color }}>
+        <div className={`${styles.comboOverlay} ${isFadingOut ? styles.comboFadeOut : ''}`}>
+            <div className={`${styles.comboCard} ${isFadingOut ? styles.comboCardFadeOut : ''}`} style={{ borderColor: color }}>
                 <div className={styles.comboEmoji}>{emoji}</div>
                 <div className={styles.comboText} style={{ color }}>{text}</div>
                 <div className={styles.comboSub}>{sub}</div>
@@ -351,9 +362,12 @@ export default function StudentLearnPage() {
                 const newCombo = correctCombo + 1;
                 setCorrectCombo(newCombo);
 
-                if (newCombo > 0 && newCombo % 10 === 0) setActiveCombo('combo10');
-                else if (newCombo === 5) setActiveCombo('combo5');
-                else if (newCombo === 3) setActiveCombo('combo3');
+                let comboType: ComboType = null;
+                if (newCombo > 0 && newCombo % 10 === 0) comboType = 'combo10';
+                else if (newCombo === 5) comboType = 'combo5';
+                else if (newCombo === 3) comboType = 'combo3';
+
+                if (comboType) setActiveCombo(comboType);
 
                 updateLocalStudentInfo({
                     progressIndex: result.newProgressIndex,
@@ -363,9 +377,9 @@ export default function StudentLearnPage() {
                 if (result.achievedMaxLevel) setAchievedMaxLevel(result.achievedMaxLevel);
 
                 if (result.isLevelComplete || result.isFinalComplete) {
-                    setTimeout(() => setShowLevelClear(true), activeCombo ? 1200 : 800);
-                } else if (!activeCombo) {
-                    setTimeout(fetchQuestion, 1200);
+                    setTimeout(() => setShowLevelClear(true), comboType ? 1000 : 800);
+                } else if (!comboType) {
+                    setTimeout(fetchQuestion, 1000); // 콤보 없을 때 다음문제 부드럽게
                 }
             } else {
                 setFeedback('wrong');
