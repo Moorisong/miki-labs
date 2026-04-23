@@ -100,7 +100,7 @@ function getAuthHeader(): Record<string, string> {
 function ComboOverlay({ combo, onDone }: { combo: ComboType; onDone: () => void }) {
     useEffect(() => {
         if (!combo) return;
-        const timer = setTimeout(onDone, 1800);
+        const timer = setTimeout(onDone, 1200);
         return () => clearTimeout(timer);
     }, [combo, onDone]);
 
@@ -130,26 +130,17 @@ function ComboOverlay({ combo, onDone }: { combo: ComboType; onDone: () => void 
 
 // ─── 레벨 선택 모달 ───────────────────────────────────────────────────────────
 function LevelSelectModal({
-    onSelect, onSkip, onClose, onReset, currentSelected, achievedMaxLevel,
+    onSelect, onSkip, onClose, currentSelected,
 }: {
     onSelect: (level: number, isInitial: boolean) => void;
     onSkip?: () => void;
     onClose?: () => void;
-    onReset?: () => void;
     currentSelected?: number;
-    achievedMaxLevel?: number;
 }) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
-    const [showWarning, setShowWarning] = useState(false);
-
     const handleConfirm = () => {
         const option = START_LEVEL_OPTIONS.find(o => o.id === selectedId);
         if (option) {
-            // 점프 조건: 선택한 레벨이 achievedMaxLevel보다 10레벨 이상 높을 때
-            if (achievedMaxLevel && option.startLevel > achievedMaxLevel + 10 && !showWarning) {
-                setShowWarning(true);
-                return;
-            }
             onSelect(option.startLevel, !currentSelected);
         }
     };
@@ -176,7 +167,7 @@ function LevelSelectModal({
                         <div
                             key={opt.id}
                             className={`${styles.levelOptionCard} ${selectedId === opt.id ? styles.selected : ''}`}
-                            onClick={() => { setSelectedId(opt.id); setShowWarning(false); }}
+                            onClick={() => { setSelectedId(opt.id); }}
                         >
                             <div className={styles.levelOptionInfo}>
                                 <div className={styles.levelOptionLabel}>{opt.label}</div>
@@ -188,13 +179,6 @@ function LevelSelectModal({
                         </div>
                     ))}
                 </div>
-
-                {showWarning && (
-                    <div className={styles.jumpWarning}>
-                        <p>⚠️ <strong>여긴 상대적으로 어려운 레벨이에요!</strong></p>
-                        <p>이 레벨의 모든 문제를 끝까지 다 풀어서 &apos;클리어&apos;해야만 진짜 내 레벨로 인정받을 수 있어요. 한두 문제만 맞히는 걸로는 최고 레벨로 인정되지 않으니 주의하세요! 그래도 도전해 볼까요?</p>
-                    </div>
-                )}
 
                 <div className={styles.levelSelectActions}>
                     <button
@@ -208,11 +192,6 @@ function LevelSelectModal({
                         {onSkip && (
                             <button className={styles.btnSkipLevel} onClick={onSkip}>
                                 나중에 선택할게요 (1레벨 시작)
-                            </button>
-                        )}
-                        {!onSkip && onReset && (
-                            <button className={styles.btnResetLevelLink} onClick={onReset}>
-                                최고 레벨 초기화하기
                             </button>
                         )}
                     </div>
@@ -384,7 +363,7 @@ export default function StudentLearnPage() {
                 if (result.achievedMaxLevel) setAchievedMaxLevel(result.achievedMaxLevel);
 
                 if (result.isLevelComplete || result.isFinalComplete) {
-                    setTimeout(() => setShowLevelClear(true), activeCombo ? 2000 : 800);
+                    setTimeout(() => setShowLevelClear(true), activeCombo ? 1200 : 800);
                 } else if (!activeCombo) {
                     setTimeout(fetchQuestion, 1200);
                 }
@@ -446,29 +425,7 @@ export default function StudentLearnPage() {
         fetchQuestion();
     };
 
-    const handleResetAchievedLevel = async () => {
-        if (!confirm('나의 \'최고 레벨\'을 현재 학습 중인 레벨로 맞추고 다시 도전할까요? 보너스를 잘 받을 수 있게 내 기록을 재조정합니다.')) return;
-
-        setIsLoading(true);
-        try {
-            const res = await fetch(CHICORUN_API.RESET_ACHIEVED_LEVEL, {
-                method: 'POST',
-                headers: { ...getAuthHeader() },
-            });
-            const data = await res.json();
-            if (data.success) {
-                setAchievedMaxLevel(currentLevel);
-                updateLocalStudentInfo({ achievedMaxLevel: currentLevel, progressIndex: (currentLevel - 1) * 12 });
-                setShowLevelModal(false);
-                fetchQuestion();
-                alert('내 실력 기록이 지금 레벨로 바뀌었어요! ⚡');
-            }
-        } catch (err) {
-            console.error('Failed to reset achieved level:', err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    // 최고 레벨 초기화 기능은 제거됨
 
     const handleComboAnimationDone = useCallback(() => {
         setActiveCombo(null);
@@ -488,8 +445,8 @@ export default function StudentLearnPage() {
                         <div className={styles.mainLevelInfo}>
                             <div className={styles.medalWrapper}><IconStar /></div>
                             <div className={styles.levelTexts}>
-                                <span className={styles.levelLabel}>나의 최고 레벨</span>
-                                <span className={styles.levelValue}>Lv.{achievedMaxLevel}</span>
+                                <span className={styles.levelLabel}>현재 레벨</span>
+                                <span className={styles.levelValue}>Lv.{currentLevel}</span>
                             </div>
                             <button className={styles.btnLevelModify} onClick={() => setShowLevelModal(true)} title="레벨 변경">
                                 변경
@@ -503,11 +460,7 @@ export default function StudentLearnPage() {
                     <div className={styles.progressStatusArea}>
                         <div className={styles.progressInfo}>
                             <span className={styles.currentStatusText}>
-                                {currentLevel === achievedMaxLevel ? (
-                                    <>지금은 <strong>레벨 {currentLevel}</strong> 학습 중!</>
-                                ) : (
-                                    <>현재 <strong>레벨 {currentLevel}</strong> 복습 중</>
-                                )}
+                                현재 <strong>레벨 {currentLevel}</strong> 학습 중!
                             </span>
                             <span className={styles.questionStep}>
                                 {question?.questionNumber ?? 1} / {question?.totalProblemsInLevel ?? 12}
@@ -598,9 +551,7 @@ export default function StudentLearnPage() {
                         onSelect={handleSelectLevel}
                         onSkip={startLevel === null ? (() => handleSelectLevel(1, true)) : undefined}
                         onClose={() => setShowLevelModal(false)}
-                        onReset={handleResetAchievedLevel}
                         currentSelected={startLevel || undefined}
-                        achievedMaxLevel={achievedMaxLevel}
                     />
                 )
             }
