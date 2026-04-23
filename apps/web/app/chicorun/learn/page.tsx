@@ -19,7 +19,6 @@ interface QuestionData {
     question: string;
     options: string[];
     level: number;
-    difficulty: 'easy' | 'medium' | 'hard';
     questionType: string;
     wordCount: number;
     explanation: string;
@@ -27,11 +26,11 @@ interface QuestionData {
     progressIndex: number;
     point: number;
     questionPoint: number;
-    penaltyMessage?: string;
     totalProblemsInLevel: number;
     currentQuestionAttempts: number;
     achievedMaxLevel: number;
 }
+
 
 interface AnswerResult {
     isCorrect: boolean;
@@ -278,11 +277,10 @@ export default function StudentLearnPage() {
     const [answerResult, setAnswerResult] = useState<AnswerResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    // 레벨 및 난이도 시스템 상태
+    // 레벨 시스템 상태
     const [currentLevel, setCurrentLevel] = useState<number>(1);
     const [achievedMaxLevel, setAchievedMaxLevel] = useState<number>(1);
     const [startLevel, setStartLevel] = useState<number | null>(null);
-    const [selectedDifficulty, setSelectedDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
     const [showLevelModal, setShowLevelModal] = useState(false);
     const [adjustMessage, setAdjustMessage] = useState<string | null>(null);
     const [activeCombo, setActiveCombo] = useState<ComboType>(null);
@@ -310,7 +308,7 @@ export default function StudentLearnPage() {
         }
     }, []);
 
-    const fetchQuestion = useCallback(async (difficultyOverride?: 'easy' | 'medium' | 'hard') => {
+    const fetchQuestion = useCallback(async () => {
         const token = localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN);
         if (!token) {
             router.replace(CHICORUN_ROUTES.JOIN);
@@ -319,8 +317,7 @@ export default function StudentLearnPage() {
 
         setIsLoading(true);
         try {
-            const difficulty = difficultyOverride || selectedDifficulty;
-            const res = await fetch(`${CHICORUN_API.QUESTION}?difficulty=${difficulty}&_t=${Date.now()}`, {
+            const res = await fetch(`${CHICORUN_API.QUESTION}?_t=${Date.now()}`, {
                 headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
             });
             const data = await res.json();
@@ -340,16 +337,12 @@ export default function StudentLearnPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [router, selectedDifficulty]);
+    }, [router]);
 
     useEffect(() => {
         fetchQuestion();
     }, [fetchQuestion]);
 
-    const handleDifficultyChange = (diff: 'easy' | 'medium' | 'hard') => {
-        setSelectedDifficulty(diff);
-        fetchQuestion(diff);
-    };
 
     const handleAnswer = async (index: number) => {
         if (answerLockRef.current || feedback === 'correct' || !question) return;
@@ -365,7 +358,6 @@ export default function StudentLearnPage() {
                     questionId: question.questionId,
                     seed: question.seed,
                     selectedIndex: index,
-                    difficulty: selectedDifficulty
                 }),
             });
 
@@ -487,8 +479,6 @@ export default function StudentLearnPage() {
 
     const getEstimatedTime = (wordCount: number) => `약 ${Math.ceil(wordCount / 2)}초`;
 
-    // 추천 난이도 계산
-    const recommendedDifficulty = currentLevel <= 30 ? 'easy' : currentLevel <= 70 ? 'medium' : 'hard';
 
     return (
         <div className={styles.container}>
@@ -529,23 +519,6 @@ export default function StudentLearnPage() {
                     </div>
                 </div>
 
-                {/* 난이도 선택 */}
-                <div className={styles.difficultySwitcher}>
-                    {(['easy', 'medium', 'hard'] as const).map((diff) => (
-                        <button
-                            key={diff}
-                            className={`${styles.btnDifficulty} ${styles[diff]} ${selectedDifficulty === diff ? styles.active : ''}`}
-                            onClick={() => handleDifficultyChange(diff)}
-                        >
-                            {diff === 'easy' ? '🔥 초급' : diff === 'medium' ? '⚡ 중급' : '👑 고급'}
-                            {recommendedDifficulty === diff && <span className={styles.recommendBadge}>추천</span>}
-                        </button>
-                    ))}
-                </div>
-
-                {question?.penaltyMessage && (
-                    <div className={styles.penaltyAlert}>⚠️ {question.penaltyMessage}</div>
-                )}
 
                 {isLoading ? (
                     <div className={styles.questionCard} style={{ textAlign: 'center' }}>
@@ -597,9 +570,7 @@ export default function StudentLearnPage() {
                                     onClick={() => handleAnswer(idx)}
                                     disabled={feedback === 'correct' || wrongIndices.includes(idx)}
                                 >
-                                    {selectedDifficulty === 'hard' ?
-                                        option.split(' ').map((w, i) => i % 3 === 0 ? <b key={i}>{w} </b> : w + ' ')
-                                        : option}
+                                    {option}
                                 </button>
                             ))}
                         </div>

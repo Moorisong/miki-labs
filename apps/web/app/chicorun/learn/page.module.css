@@ -509,85 +509,7 @@
     }
 }
 
-.difficultySwitcher {
-    display: flex;
-    gap: 0.5rem;
-    margin: 1.5rem 0;
-    padding: 0.4rem;
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 1.25rem;
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(8px);
-}
 
-.btnDifficulty {
-    flex: 1;
-    padding: 0.75rem;
-    border: none;
-    border-radius: 0.85rem;
-    font-size: 0.95rem;
-    font-weight: 800;
-    cursor: pointer;
-    background: transparent;
-    color: #64748b;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    position: relative;
-}
-
-.recommendBadge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: #3b82f6;
-    color: white;
-    font-size: 0.65rem;
-    padding: 2px 6px;
-    border-radius: 999px;
-    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
-    border: 1px solid white;
-}
-
-.penaltyAlert {
-    background: #fff7ed;
-    color: #c2410c;
-    border: 1px solid #fed7aa;
-    padding: 0.75rem 1rem;
-    border-radius: 1rem;
-    font-size: 0.875rem;
-    font-weight: 700;
-    margin-bottom: 2rem;
-    text-align: center;
-    animation: slideDown 0.4s ease-out;
-    white-space: pre-wrap;
-}
-
-.btnDifficulty:hover:not(.active) {
-    background: rgba(255, 255, 255, 0.8);
-    color: #1e293b;
-    transform: translateY(-1px);
-}
-
-.btnDifficulty.active {
-    background: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transform: translateY(-1px);
-}
-
-.btnDifficulty.active.easy {
-    color: #f97316;
-}
-
-.btnDifficulty.active.medium {
-    color: #3b82f6;
-}
-
-.btnDifficulty.active.hard {
-    color: #a855f7;
-}
 
 .passageContainer {
     background: #f8fafc;
@@ -648,33 +570,6 @@
     border-bottom: 2px solid #3b82f633;
 }
 
-.difficultyBadge {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.35rem 0.75rem;
-    border-radius: 0.75rem;
-    font-size: 0.75rem;
-    font-weight: 800;
-}
-
-.difficultyBadge.easy {
-    background: #fff7ed;
-    color: #ea580c;
-    border: 1px solid #fed7aa;
-}
-
-.difficultyBadge.medium {
-    background: #eff6ff;
-    color: #2563eb;
-    border: 1px solid #bfdbfe;
-}
-
-.difficultyBadge.hard {
-    background: #faf5ff;
-    color: #9333ea;
-    border: 1px solid #e9d5ff;
-}
 
 .btnLevelModify:hover {
     background: #2563eb;
@@ -1139,26 +1034,7 @@
         line-height: 1.6;
     }
 
-    /* Difficulty Switcher Mobile Optimization */
 
-    .difficultySwitcher {
-        margin: 1rem 0;
-        padding: 0.3rem;
-        gap: 0.3rem;
-    }
-
-    .btnDifficulty {
-        padding: 0.6rem 0.2rem;
-        font-size: 0.75rem;
-        gap: 0.2rem;
-    }
-
-    .recommendBadge {
-        top: -6px;
-        right: -4px;
-        font-size: 0.55rem;
-        padding: 1px 4px;
-    }
 }
 
 .footerNav {
