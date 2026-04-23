@@ -359,15 +359,24 @@ export default function StudentLearnPage() {
 
             if (result.isCorrect) {
                 setFeedback('correct');
-                const newCombo = correctCombo + 1;
-                setCorrectCombo(newCombo);
 
                 let comboType: ComboType = null;
-                if (newCombo > 0 && newCombo % 10 === 0) comboType = 'combo10';
-                else if (newCombo === 5) comboType = 'combo5';
-                else if (newCombo === 3) comboType = 'combo3';
 
-                if (comboType) setActiveCombo(comboType);
+                // 한 문제에서 한번이라도 오답을 선택했다면 콤보에 포함하지 않음
+                const isPerfect = wrongIndices.length === 0;
+
+                if (isPerfect) {
+                    const newCombo = correctCombo + 1;
+                    setCorrectCombo(newCombo);
+
+                    if (newCombo > 0 && newCombo % 10 === 0) comboType = 'combo10';
+                    else if (newCombo === 5) comboType = 'combo5';
+                    else if (newCombo === 3) comboType = 'combo3';
+
+                    if (comboType) setActiveCombo(comboType);
+                } else {
+                    setCorrectCombo(0);
+                }
 
                 updateLocalStudentInfo({
                     progressIndex: result.newProgressIndex,
