@@ -487,12 +487,12 @@ export default function StudentLearnPage() {
                 </div>
 
 
-                {isLoading ? (
+                {!question ? (
                     <div className={styles.questionCard} style={{ textAlign: 'center' }}>
                         <p>문제를 불러오는 중...</p>
                     </div>
-                ) : question ? (
-                    <div key={question.questionId} className={styles.questionCard}>
+                ) : (
+                    <div key={question.questionId} className={`${styles.questionCard} ${isLoading ? styles.loadingNextCard : ''}`}>
                         <div className={styles.questionHeader}>
                             <div className={styles.questionCounter}>
                                 문제 {question.questionNumber} / {question.totalProblemsInLevel}
@@ -542,8 +542,7 @@ export default function StudentLearnPage() {
                             ))}
                         </div>
                     </div>
-                ) : null
-                }
+                )}
             </main >
 
 
