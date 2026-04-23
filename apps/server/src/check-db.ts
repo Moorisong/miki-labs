@@ -11,7 +11,7 @@ async function check() {
         const docs = await db.collection('chicorunproblems').find({ level: 45, orderIndex: 1 }).toArray();
         console.log('Docs for Level 45, Order 1:');
         docs.forEach(d => {
-            console.log(`- Difficulty: ${d.difficulty}, Passage: ${d.passage.substring(0, 30)}...`);
+            console.log(`- Passage: ${d.passage.substring(0, 30)}...`);
         });
     }
     await mongoose.disconnect();

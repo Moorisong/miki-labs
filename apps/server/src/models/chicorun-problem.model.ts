@@ -3,7 +3,6 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IChicorunProblem extends Document {
     problemId: string;           // UUID 또는 level-orderIndex
     level: number;               // 1~100
-    difficulty: 'easy' | 'medium' | 'hard';
     orderIndex: number;          // 같은 레벨 내 순서 (1부터 시작)
     passage: string;             // 지문
     question: string;            // 문제 stem
@@ -31,11 +30,7 @@ const chicorunProblemSchema = new Schema<IChicorunProblem>(
             required: true,
             index: true,
         },
-        difficulty: {
-            type: String,
-            enum: ['easy', 'medium', 'hard'],
-            required: true,
-        },
+
         orderIndex: {
             type: Number,
             required: true,
@@ -95,8 +90,8 @@ const chicorunProblemSchema = new Schema<IChicorunProblem>(
     }
 );
 
-// 레벨 내 순서 조회 최적화 (난이도별 고유값 부여)
-chicorunProblemSchema.index({ level: 1, orderIndex: 1, difficulty: 1 }, { unique: true });
+// 레벨 내 순서 조회 최적화
+chicorunProblemSchema.index({ level: 1, orderIndex: 1 }, { unique: true });
 
 export const ChicorunProblemModel = mongoose.models.ChicorunProblem as mongoose.Model<IChicorunProblem> ||
     mongoose.model<IChicorunProblem>('ChicorunProblem', chicorunProblemSchema);

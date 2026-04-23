@@ -25,8 +25,7 @@ export const getQuestion = async (
         }
 
         const { progressIndex } = studentDoc;
-        const difficulty = req.query.difficulty as 'easy' | 'medium' | 'hard';
-        const problem = await ChicorunProblemService.getQuestion(student.studentId, progressIndex, difficulty, studentDoc.achievedMaxLevel);
+        const problem = await ChicorunProblemService.getQuestion(student.studentId, progressIndex);
 
         res.json({
             success: true,
@@ -35,7 +34,6 @@ export const getQuestion = async (
                 seed: problem.seed,
                 level: problem.level,
                 achievedMaxLevel: studentDoc.achievedMaxLevel,
-                difficulty: problem.difficulty,
                 passage: problem.passage,
                 question: problem.question,
                 options: problem.choices,
@@ -45,7 +43,6 @@ export const getQuestion = async (
                 progressIndex,
                 point: studentDoc.point,
                 questionPoint: problem.point,
-                penaltyMessage: problem.penaltyMessage,
                 questionNumber: problem.questionNumber,
                 totalProblemsInLevel: problem.totalProblemsInLevel,
                 currentQuestionAttempts: studentDoc.currentQuestionAttempts || 1,
@@ -71,11 +68,10 @@ export const submitAnswer = async (
             throw new AppError(401, 'ERROR_UNAUTHORIZED: 학생 인증이 필요합니다.');
         }
 
-        const { questionId, seed, selectedIndex, difficulty } = req.body as {
+        const { questionId, seed, selectedIndex } = req.body as {
             questionId: string;
             seed: string;
             selectedIndex: number;
-            difficulty?: string;
         };
 
         if (!questionId || !seed || selectedIndex === undefined) {
@@ -91,8 +87,6 @@ export const submitAnswer = async (
         const problem = await ChicorunProblemService.getQuestion(
             student.studentId,
             studentDoc.progressIndex,
-            difficulty as 'easy' | 'medium' | 'hard',
-            studentDoc.achievedMaxLevel
         );
 
         // questionId 및 seed 검증 (무결성)
@@ -102,17 +96,14 @@ export const submitAnswer = async (
 
         const isCorrect = selectedIndex === problem.answer;
 
-        // 1. 시도 횟수 및 난이도 기반 포인트 계산 (정답일 때만 사용)
+        // 1. 시도 횟수 기반 포인트 계산 (정답일 때만 사용)
         const attempts = studentDoc.currentQuestionAttempts || 1;
-        let baseReward = 1;
-        if (attempts === 1) baseReward = 5;
-        else if (attempts === 2) baseReward = 3;
-        else baseReward = 1;
+        let rewardPoints = 1;
+        if (attempts === 1) rewardPoints = 5;
+        else if (attempts === 2) rewardPoints = 3;
+        else rewardPoints = 1;
 
         const { level: currentProblemLevel } = ChicorunProblemService.getLevelAndOrderIndex(studentDoc.progressIndex);
-        const targetDifficulty = (difficulty as 'easy' | 'medium' | 'hard') || ChicorunProblemService.getRecommendedDifficulty(currentProblemLevel);
-        const { factor } = ChicorunProblemService.getDifficultyPenalty(targetDifficulty, currentProblemLevel, studentDoc.achievedMaxLevel);
-        const rewardPoints = Math.max(1, Math.floor(baseReward * factor));
 
         // 2. 새로운 통계 계산 (무조건 1회 시도로 간주)
         const newTotalCount = (studentDoc.currentLevelTotalCount || 0) + 1;
