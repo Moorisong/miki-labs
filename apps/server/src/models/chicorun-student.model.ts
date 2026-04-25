@@ -47,6 +47,15 @@ export interface IChicorunStudent extends Document {
     currentQuestionAttempts: number; // 현재 문제 시도 횟수 (1부터 시작, 정답 시 1로 리셋)
     skillScore?: number; // 공통 게임 스킬스코어 (0~1000)
     friends: mongoose.Types.ObjectId[]; // 수락된 친구들의 _id 배열
+
+    // Word Rush 속성
+    rankPoint: number;
+    coin: number;
+    ownedPets: string[];
+    equippedPet?: string;
+    ownedSkins: { skinId: string; acquiredAt: Date; type: string }[];
+    equippedSkin?: string;
+
     createdAt: Date;
     updatedAt: Date;
 }
@@ -120,6 +129,32 @@ const chicorunStudentSchema = new Schema<IChicorunStudent>(
             ref: 'ChicorunStudent',
             default: [],
         }],
+        rankPoint: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+        coin: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+        ownedPets: [{
+            type: String,
+        }],
+        equippedPet: {
+            type: String,
+            default: null,
+        },
+        ownedSkins: [{
+            skinId: { type: String, required: true },
+            acquiredAt: { type: Date, default: Date.now },
+            type: { type: String, required: true },
+        }],
+        equippedSkin: {
+            type: String,
+            default: null,
+        },
     },
     {
         timestamps: true,
