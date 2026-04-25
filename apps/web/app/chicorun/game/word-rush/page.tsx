@@ -15,18 +15,19 @@ function DemoTypingAnimation() {
         <div className={styles.demoArea}>
             <div className={styles.demoField}>
                 <div className={`${styles.pet} ${styles.userPet}`}>
-                    <img src="/chicorun/user_player.png" alt="user character" style={{ width: '100px', height: '100px', objectFit: 'contain' }} />
+                    <img src="/chicorun/user_player.png" alt="user character" className={styles.demoUserImg} />
                 </div>
                 <div className={styles.demoWord}>&quot;사과&quot;</div>
                 <div className={`${styles.pet} ${styles.legendPet}`}>
-                    <img src="/chicorun/legend_boss.png" alt="legend boss" style={{ width: '50px', height: '50px', objectFit: 'contain' }} />
+                    <img src="/chicorun/legend_boss.png" alt="legend boss" className={styles.demoBossImg} />
                 </div>
             </div>
             <div className={styles.demoTypingBox}>
                 <span className={styles.demoTypedText}></span>
             </div>
             <p className={styles.demoText}>
-                의미를 이해하고 바르게 타이핑하여 <span className={styles.demoHighlight}>레전드</span>에 도전하세요!
+                의미를 이해하고 바르게 타이핑하여 <br />
+                <span className={styles.demoHighlight}>레전드</span>에 도전하세요!
             </p>
         </div>
     );
@@ -58,19 +59,22 @@ export default function WordRushGamePage() {
                 headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }
             });
             const data = await res.json();
-            if (data?.success) {
+
+            if (data?.success && data.data?.problems?.length > 0) {
                 setProblems(data.data.problems);
-            } else {
-                throw new Error(data.error);
+                return;
             }
+
+            // 데이터가 없거나 실패한 경우 경고만 출력하고 Mock 데이터로 진행
+            console.warn('API returned success but no problems found. Falling back to mock data.', data);
         } catch (err) {
-            console.error(err);
-            // 예외 발생 시 mock 데이터로 진행 테스트 가능
-            setProblems([
-                { wid: 1, mid: 1, hintId: '1', hint: 'An animal that barks', answers: ['dog'] },
-                { wid: 1, mid: 2, hintId: '2', hint: 'A fruit that is red and crunchy', answers: ['apple'] }
-            ]);
+            console.warn('Failed to fetch problems from API. Falling back to mock data.', err);
         } finally {
+            // 예외 발생 혹은 데이터 없음 시 mock 데이터로 진행 
+            setProblems((prev) => prev.length > 0 ? prev : [
+                { wid: 1, mid: 1, hintId: '000000000000000000000001', hint: 'An animal that barks', answers: ['dog'] },
+                { wid: 1, mid: 2, hintId: '000000000000000000000002', hint: 'A fruit that is red and crunchy', answers: ['apple'] }
+            ]);
             setLoading(false);
         }
     };
@@ -105,7 +109,7 @@ export default function WordRushGamePage() {
     const game = useWordRushGame({
         problems,
         onGameEnd,
-        timeLimit: 60,
+        timeLimit: 180,
     });
 
     const handleStart = async () => {
@@ -146,7 +150,7 @@ export default function WordRushGamePage() {
     };
 
     return (
-        <div className={styles.container}>
+        <div className={`${styles.container} ${game.gameState === 'PLAYING' ? styles.containerPlaying : ''}`}>
             {game.gameState !== 'READY' && (
                 <Hud
                     rankPoint={userStats.rankPoint}
@@ -166,7 +170,7 @@ export default function WordRushGamePage() {
                     </button>
                     <div className={styles.titleGroup}>
                         <h1 className={styles.title}>Word Rush</h1>
-                        <p className={styles.subtitle}>빠르게 타이핑하여 레전드에 도전하세요!</p>
+                        <p className={styles.subtitle}>빠르게 타이핑하여 <br />레전드에 도전하세요!</p>
                     </div>
 
                     <DemoTypingAnimation />
