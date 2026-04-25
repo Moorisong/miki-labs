@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import { Hud } from './components/Hud';
@@ -8,7 +8,29 @@ import { CombatScene } from './components/CombatScene';
 import { TypingArea } from './components/TypingArea';
 import { ResultModal } from './components/ResultModal';
 import { useWordRushGame, Problem } from './hooks/useWordRushGame';
-import { CHICORUN_API, CHICORUN_STORAGE_KEY } from '@/constants/chicorun';
+import { CHICORUN_API, CHICORUN_STORAGE_KEY, CHICORUN_ROUTES } from '@/constants/chicorun';
+
+function DemoTypingAnimation() {
+    return (
+        <div className={styles.demoArea}>
+            <div className={styles.demoField}>
+                <div className={`${styles.pet} ${styles.userPet}`}>
+                    <img src="/chicorun/user_player.png" alt="user character" style={{ width: '100px', height: '100px', objectFit: 'contain' }} />
+                </div>
+                <div className={styles.demoWord}>&quot;사과&quot;</div>
+                <div className={`${styles.pet} ${styles.legendPet}`}>
+                    <img src="/chicorun/legend_boss.png" alt="legend boss" style={{ width: '50px', height: '50px', objectFit: 'contain' }} />
+                </div>
+            </div>
+            <div className={styles.demoTypingBox}>
+                <span className={styles.demoTypedText}></span>
+            </div>
+            <p className={styles.demoText}>
+                의미를 이해하고 바르게 타이핑하여 <span className={styles.demoHighlight}>레전드</span>에 도전하세요!
+            </p>
+        </div>
+    );
+}
 
 export default function WordRushGamePage() {
     const router = useRouter();
@@ -23,6 +45,7 @@ export default function WordRushGamePage() {
 
     // 로컬 상태 (HUD 표시용 mock 데이터)
     const [userStats, setUserStats] = useState({ rankPoint: 12450, coin: 3200 });
+    const [countdown, setCountdown] = useState<number | null>(10);
 
     const getToken = () => typeof window !== 'undefined' ? localStorage.getItem(CHICORUN_STORAGE_KEY.TOKEN) : null;
 
@@ -86,9 +109,34 @@ export default function WordRushGamePage() {
     });
 
     const handleStart = async () => {
+        setCountdown(null);
         await fetchProblems();
         game.startGame();
     };
+
+    useEffect(() => {
+        if (game.gameState !== 'READY') {
+            setCountdown(10);
+            return;
+        }
+
+        if (countdown === null) return;
+
+        const timer = setInterval(() => {
+            setCountdown((prev) => {
+                if (prev === null) return null;
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    setTimeout(() => handleStart(), 0);
+                    return null;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [game.gameState, countdown]);
 
     const handleSubmit = (input: string) => {
         const isCorrect = game.submitAnswer(input);
@@ -99,23 +147,44 @@ export default function WordRushGamePage() {
 
     return (
         <div className={styles.container}>
-            <Hud
-                rankPoint={userStats.rankPoint}
-                coin={userStats.coin}
-                timeLeft={game.timeLeft}
-            />
+            {game.gameState !== 'READY' && (
+                <Hud
+                    rankPoint={userStats.rankPoint}
+                    coin={userStats.coin}
+                    timeLeft={game.timeLeft}
+                />
+            )}
 
             {game.gameState === 'READY' && (
-                <div style={{ margin: 'auto', textAlign: 'center' }}>
-                    <h1>Word Rush</h1>
-                    <p>의미를 이해하고 바르게 타이핑하여 레전드에 도전하세요!</p>
+                <div className={styles.idleScreen}>
                     <button
-                        className={styles.submitBtn}
-                        onClick={handleStart}
-                        disabled={loading}
-                        style={{ marginTop: 20 }}
+                        className={styles.btnCloseModal}
+                        onClick={() => router.push(CHICORUN_ROUTES.GAME)}
+                        aria-label="닫기"
                     >
-                        {loading ? '로딩중...' : '게임 시작'}
+                        ✕
+                    </button>
+                    <div className={styles.titleGroup}>
+                        <h1 className={styles.title}>Word Rush</h1>
+                        <p className={styles.subtitle}>빠르게 타이핑하여 레전드에 도전하세요!</p>
+                    </div>
+
+                    <DemoTypingAnimation />
+
+                    <button
+                        className={styles.btnStart}
+                        onClick={handleStart}
+                        disabled={countdown === null || loading}
+                    >
+                        {loading || countdown === null
+                            ? '게임 시작 중... 🚀'
+                            : `게임이 ${countdown}초 후 시작됩니다 🚀`}
+                    </button>
+                    <button
+                        className={styles.btnBack}
+                        onClick={() => router.push(CHICORUN_ROUTES.GAME)}
+                    >
+                        게임 센터로 돌아가기
                     </button>
                 </div>
             )}
