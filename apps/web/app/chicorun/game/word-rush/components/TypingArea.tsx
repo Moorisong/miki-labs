@@ -1,4 +1,4 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, useEffect, useRef } from 'react';
 import styles from '../page.module.css';
 
 interface TypingAreaProps {
@@ -9,6 +9,12 @@ interface TypingAreaProps {
 
 export function TypingArea({ hint, onSubmit, disabled }: TypingAreaProps) {
     const [value, setValue] = useState('');
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        // 타이핑 영역이 나타날 때 입력을 포커스하되, 스크롤이 튀는 것을 방지
+        inputRef.current?.focus({ preventScroll: true });
+    }, []);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -25,13 +31,13 @@ export function TypingArea({ hint, onSubmit, disabled }: TypingAreaProps) {
             </div>
             <form onSubmit={handleSubmit} className={styles.inputForm}>
                 <input
+                    ref={inputRef}
                     type="text"
                     className={styles.wordInput}
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
                     disabled={disabled}
                     placeholder="정답을 입력하세요..."
-                    autoFocus
                     autoComplete="off"
                 />
                 <button type="submit" className={styles.submitBtn} disabled={disabled}>

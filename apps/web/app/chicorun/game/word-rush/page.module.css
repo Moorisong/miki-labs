@@ -12,9 +12,14 @@
 }
 
 .containerPlaying {
-    height: 100vh;
-    height: 100dvh;
+    position: fixed;
+    top: var(--header-height, 0px);
+    left: 0;
+    width: 100%;
+    height: calc(100vh - var(--header-height, 0px));
+    height: calc(100dvh - var(--header-height, 0px));
     overflow: hidden;
+    z-index: 1000;
 }
 
 .container::before {
@@ -79,7 +84,9 @@
 
 /* Combat Scene */
 .combatScene {
-    flex: 1;
+    flex: none;
+    height: 120px;
+    margin: 10px 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -710,14 +717,14 @@
 
 /* Image Sizes */
 .combatUserImg {
-    width: 120px;
-    height: 120px;
+    width: 90px;
+    height: 90px;
     object-fit: contain;
 }
 
 .combatBossImg {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     object-fit: contain;
 }
 
@@ -745,6 +752,7 @@
 
     .combatScene {
         padding: 0 5%;
+        height: 90px;
     }
 
     .typingArea {
@@ -816,13 +824,13 @@
 
     /* Image Scaling */
     .combatUserImg {
-        width: 80px;
-        height: 80px;
+        width: 70px;
+        height: 70px;
     }
 
     .combatBossImg {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
     }
 
     .demoUserImg {

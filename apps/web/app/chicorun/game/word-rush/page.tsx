@@ -149,6 +149,17 @@ export default function WordRushGamePage() {
         }
     };
 
+    useEffect(() => {
+        if (game.gameState === 'PLAYING') {
+            // 여러 차례 걸쳐 최상단 스크롤 강제 (포커스 등으로 인한 밀림 방지)
+            window.scrollTo(0, 0);
+            const timer = setTimeout(() => {
+                window.scrollTo(0, 0);
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [game.gameState]);
+
     return (
         <div className={`${styles.container} ${game.gameState === 'PLAYING' ? styles.containerPlaying : ''}`}>
             {game.gameState !== 'READY' && (
