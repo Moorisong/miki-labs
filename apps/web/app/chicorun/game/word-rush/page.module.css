@@ -2,10 +2,26 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
-    background-color: #1a1a2e;
-    color: #fff;
-    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #f5f3ff 0%, #f1f5f9 100%);
+    color: #1e293b;
+    font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     overflow: hidden;
+    position: relative;
+    user-select: none;
+}
+
+.container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        radial-gradient(circle at 20% 50%, rgba(108, 92, 231, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 80% 30%, rgba(162, 155, 254, 0.08) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
 }
 
 /* HUD */
@@ -14,8 +30,11 @@
     justify-content: space-between;
     align-items: center;
     padding: 20px 40px;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(10px);
+    background: rgba(245, 243, 255, 0.85);
+    /* Lighter background */
+    backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(162, 155, 254, 0.2);
+    z-index: 100;
 }
 
 .pointsWrapper {
@@ -27,23 +46,27 @@
 .rankPoint {
     font-size: 1.5rem;
     font-weight: 800;
-    color: #ffd700;
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .coin {
     font-size: 1rem;
-    font-weight: 500;
-    color: #4CAF50;
+    font-weight: 600;
+    color: #10b981;
     opacity: 0.9;
 }
 
 .timer {
     font-size: 1.5rem;
     font-weight: bold;
+    color: #475569;
 }
 
 .timerWarning {
-    color: #ff4444;
+    color: #ef4444;
     animation: pulse 1s infinite alternate;
 }
 
@@ -55,12 +78,14 @@
     align-items: center;
     padding: 0 10%;
     position: relative;
+    z-index: 10;
 }
 
 .pet {
     font-size: 5rem;
     position: relative;
     transition: transform 0.2s ease;
+    filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
 }
 
 .userPet {
@@ -76,7 +101,7 @@
     top: -30px;
     left: 50%;
     transform: translateX(-50%);
-    background: #ff9800;
+    background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
     color: white;
     padding: 5px 10px;
     border-radius: 20px;
@@ -84,6 +109,7 @@
     font-weight: bold;
     white-space: nowrap;
     animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
 }
 
 .combatEffectArea {
@@ -113,9 +139,13 @@
     flex-direction: column;
     align-items: center;
     gap: 20px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(162, 155, 254, 0.2);
     border-top-left-radius: 30px;
     border-top-right-radius: 30px;
+    box-shadow: 0 -10px 40px rgba(108, 92, 231, 0.08);
+    z-index: 100;
 }
 
 .hintBox {
@@ -128,6 +158,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #1e293b;
 }
 
 .inputForm {
@@ -141,29 +172,37 @@
     flex: 1;
     padding: 15px 25px;
     font-size: 1.2rem;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(162, 155, 254, 0.3);
     border-radius: 25px;
-    background: rgba(0, 0, 0, 0.3);
-    color: #fff;
+    background: #ffffff;
+    color: #1e293b;
     outline: none;
     transition: all 0.2s;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
 }
 
 .wordInput:focus {
-    border-color: #ffd700;
-    background: rgba(0, 0, 0, 0.5);
+    border-color: #6c5ce7;
+    background: #f8fafc;
+    box-shadow: 0 0 15px rgba(108, 92, 231, 0.15);
 }
 
 .submitBtn {
     padding: 0 30px;
     border-radius: 25px;
-    background: #ffd700;
-    color: #000;
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    color: white;
     font-weight: bold;
     font-size: 1.1rem;
     border: none;
     cursor: pointer;
-    transition: transform 0.1s;
+    transition: transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+}
+
+.submitBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
 }
 
 .submitBtn:active {
@@ -177,7 +216,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(4px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -185,24 +225,26 @@
 }
 
 .modalContent {
-    background: #2a2a4a;
+    background: #ffffff;
     padding: 40px;
-    border-radius: 20px;
+    border-radius: 24px;
     text-align: center;
-    min-width: 300px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    min-width: 320px;
+    box-shadow: 0 20px 50px rgba(108, 92, 231, 0.15);
+    border: 1px solid rgba(162, 155, 254, 0.2);
     animation: slideUp 0.4s ease;
+    color: #1e293b;
 }
 
 .modalContent h2 {
     margin-top: 0;
     font-size: 2rem;
-    color: #fff;
+    color: #1e293b;
 }
 
 .newLegendBadge {
-    background: linear-gradient(45deg, #ff9800, #ffeb3b);
-    color: #000;
+    background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+    color: white;
     padding: 10px;
     border-radius: 10px;
     font-weight: bold;
@@ -218,9 +260,10 @@
 }
 
 .statItem {
-    background: rgba(0, 0, 0, 0.3);
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     padding: 15px;
-    border-radius: 10px;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -228,12 +271,12 @@
 
 .statItem span {
     font-size: 0.9rem;
-    color: #aaa;
+    color: #64748b;
 }
 
 .statItem strong {
     font-size: 1.5rem;
-    color: #fff;
+    color: #1e293b;
 }
 
 .rewardBox {
@@ -246,12 +289,15 @@
 .rewardPoint {
     font-size: 2rem;
     font-weight: 800;
-    color: #ffd700;
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .rewardCoin {
     font-size: 1.2rem;
-    color: #4CAF50;
+    color: #10b981;
     /* 카운트업 딜레이 구현용 */
     animation: fadeIn 0.5s ease 0.5s both;
 }
@@ -259,13 +305,20 @@
 .closeBtn {
     width: 100%;
     padding: 15px;
-    background: #fff;
-    color: #000;
-    border: none;
-    border-radius: 10px;
+    background: #f8fafc;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
     font-weight: bold;
     font-size: 1.1rem;
     cursor: pointer;
+    transition: all 0.2s;
+}
+
+.closeBtn:hover {
+    background: rgba(162, 155, 254, 0.1);
+    color: #6c5ce7;
+    border-color: rgba(162, 155, 254, 0.3);
 }
 
 /* Animations */
@@ -323,22 +376,22 @@
 @keyframes hit {
     0% {
         transform: translateX(0);
-        filter: brightness(1);
+        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1)) brightness(1);
     }
 
     25% {
         transform: translateX(-10px);
-        filter: brightness(2) hue-rotate(-50deg);
+        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1)) brightness(1.5) hue-rotate(-30deg);
     }
 
     75% {
         transform: translateX(10px);
-        filter: brightness(2) hue-rotate(-50deg);
+        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1)) brightness(1.5) hue-rotate(-30deg);
     }
 
     100% {
         transform: translateX(0);
-        filter: brightness(1);
+        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1)) brightness(1);
     }
 }
 
@@ -382,9 +435,10 @@
     position: absolute;
     top: 1.5rem;
     right: 1.5rem;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.05);
+    /* Light style */
     border: none;
-    color: #cbd5e1;
+    color: #64748b;
     font-size: 1.5rem;
     width: 2.5rem;
     height: 2.5rem;
@@ -398,8 +452,8 @@
 }
 
 .btnCloseModal:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
+    background: rgba(0, 0, 0, 0.1);
+    color: #1e293b;
     transform: scale(1.1);
 }
 
@@ -410,7 +464,7 @@
 .title {
     font-size: 4rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #ffd700 0%, #ff9800 50%, #ffeb3b 100%);
+    background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 50%, #8b5cf6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -421,7 +475,7 @@
 
 .subtitle {
     font-size: 1.25rem;
-    color: #aaa;
+    color: #64748b;
     font-weight: 500;
     margin: 0;
 }
@@ -430,9 +484,9 @@
 .demoArea {
     width: 100%;
     max-width: 460px;
-    background: rgba(255, 255, 255, 0.05);
-    /* Dark theme variant */
-    border: 1px solid rgba(255, 215, 0, 0.2);
+    background: white;
+    /* Light theme */
+    border: 1px solid rgba(162, 155, 254, 0.2);
     border-radius: 1.5rem;
     padding: 1.5rem;
     display: flex;
@@ -441,17 +495,17 @@
     align-items: center;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 30px rgba(108, 92, 231, 0.06);
 }
 
 .demoField {
     width: 100%;
     height: 220px;
     position: relative;
-    background: rgba(0, 0, 0, 0.2);
+    background: #f8fafc;
     border-radius: 1rem;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid #e2e8f0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -465,7 +519,7 @@
     transform: translateX(-50%);
     font-weight: bold;
     font-size: 1.5rem;
-    color: #fff;
+    color: #1e293b;
     opacity: 0;
     animation: typingAppear 3s infinite;
 }
@@ -475,14 +529,14 @@
     width: 80%;
     margin: 0.5rem auto 0;
     height: 45px;
-    background: rgba(0, 0, 0, 0.5);
-    border: 2px solid rgba(255, 215, 0, 0.5);
+    background: white;
+    border: 2px solid rgba(162, 155, 254, 0.5);
     border-radius: 25px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.2rem;
-    color: #fff;
+    color: #1e293b;
 }
 
 .demoTypingBox::after {
@@ -491,7 +545,7 @@
 }
 
 .demoTypedText {
-    color: #fff;
+    color: #1e293b;
 }
 
 .demoTypedText::before {
@@ -565,24 +619,24 @@
 
 .demoText {
     font-size: 1.1rem;
-    color: #aaa;
+    color: #64748b;
     text-align: center;
     font-weight: 500;
     margin: 0;
 }
 
 .demoHighlight {
-    color: #ffd700;
+    color: #6c5ce7;
     font-weight: 800;
-    background: rgba(255, 215, 0, 0.15);
+    background: rgba(108, 92, 231, 0.15);
     padding: 0.2rem 0.5rem;
     border-radius: 0.4rem;
 }
 
 .btnStart {
     padding: 1.25rem 4rem;
-    background: linear-gradient(135deg, #ffd700, #ffb300);
-    color: #000;
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    color: white;
     border: none;
     border-radius: 999px;
     font-size: 1.25rem;
@@ -590,7 +644,7 @@
     letter-spacing: 0.05em;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 10px 25px -5px rgba(255, 215, 0, 0.4);
+    box-shadow: 0 10px 25px -5px rgba(108, 92, 231, 0.4);
     position: relative;
     overflow: hidden;
     display: flex;
@@ -605,14 +659,14 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 60%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 60%);
     opacity: 0;
     transition: opacity 0.3s;
 }
 
 .btnStart:hover {
     transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 15px 35px -5px rgba(255, 215, 0, 0.5);
+    box-shadow: 0 15px 35px -5px rgba(108, 92, 231, 0.5);
 }
 
 .btnStart:hover::after {
@@ -624,23 +678,23 @@
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
-    background: #555;
-    color: #ccc;
+    background: #e2e8f0;
+    color: #94a3b8;
 }
 
 .btnBack {
     padding: 0.75rem 2rem;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: white;
+    border: 1px solid rgba(162, 155, 254, 0.3);
     border-radius: 999px;
-    color: #aaa;
+    color: #64748b;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .btnBack:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: rgba(162, 155, 254, 0.1);
+    color: #6c5ce7;
     transform: translateY(-2px);
 }
