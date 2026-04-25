@@ -30,12 +30,12 @@ export function TypingArea({ hint, onSubmit, disabled }: TypingAreaProps) {
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
                     disabled={disabled}
-                    placeholder="Type the word here..."
+                    placeholder="정답을 입력하세요..."
                     autoFocus
                     autoComplete="off"
                 />
                 <button type="submit" className={styles.submitBtn} disabled={disabled}>
-                    Enter
+                    입력
                 </button>
             </form>
         </div>

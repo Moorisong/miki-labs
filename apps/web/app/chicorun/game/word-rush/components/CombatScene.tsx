@@ -21,9 +21,9 @@ export function CombatScene({ combo, triggerAttack }: CombatSceneProps) {
         <div className={styles.combatScene}>
             {/* 유저 펫 (좌측) */}
             <div className={`${styles.pet} ${styles.userPet} ${attacking ? styles.attackAnim : ''}`}>
-                🧑‍🚀
+                <img src="/chicorun/user_player.png" alt="user character" className={styles.combatUserImg} />
                 {combo > 1 && (
-                    <div className={styles.comboBadge}>{combo} Combo!</div>
+                    <div className={styles.comboBadge}>{combo} 콤보!</div>
                 )}
             </div>
 
@@ -34,7 +34,7 @@ export function CombatScene({ combo, triggerAttack }: CombatSceneProps) {
 
             {/* 레전드 펫 (우측) */}
             <div className={`${styles.pet} ${styles.legendPet} ${attacking ? styles.hitAnim : ''}`}>
-                🐉
+                <img src="/chicorun/legend_boss.png" alt="legend boss" className={styles.combatBossImg} />
             </div>
         </div>
     );
