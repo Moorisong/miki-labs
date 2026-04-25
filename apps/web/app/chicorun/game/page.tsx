@@ -13,6 +13,12 @@ const IconCloudRain = () => (
     </svg>
 );
 
+const IconBolt = () => (
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+    </svg>
+);
+
 export default function ChicorunGameHubPage() {
     const router = useRouter();
 
@@ -25,7 +31,14 @@ export default function ChicorunGameHubPage() {
             icon: <IconCloudRain />,
             color: '#6c5ce7'
         },
-        // 나중에 다른 게임 추가 가능
+        {
+            id: 'word-rush',
+            name: 'Word Rush',
+            description: '설명을 읽고 가장 빠르게 단어를 타이핑하세요! 레전드에 도전하여 포인트를 획득하세요.',
+            route: CHICORUN_ROUTES.GAME_WORD_RUSH,
+            icon: <IconBolt />,
+            color: '#f39c12'
+        },
     ];
 
     return (

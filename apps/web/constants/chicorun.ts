@@ -23,6 +23,9 @@ export const CHICORUN_API = {
     WORD_RAIN_START: `${API_BASE}/api/chicorun/word-rain/start`,
     WORD_RAIN_INPUT: `${API_BASE}/api/chicorun/word-rain/input`,
     WORD_RAIN_END: `${API_BASE}/api/chicorun/word-rain/end`,
+    // Word Rush 게임 API
+    WORD_RUSH_START: `${API_BASE}/api/chicorun/word-rush/start`,
+    WORD_RUSH_END: `${API_BASE}/api/chicorun/word-rush/end`,
 } as const;
 
 /**
@@ -35,6 +38,7 @@ export const CHICORUN_ROUTES = {
     RANKING: '/chicorun/ranking',
     GAME: '/chicorun/game',
     GAME_WORD_RAIN: '/chicorun/game/word-rain',
+    GAME_WORD_RUSH: '/chicorun/game/word-rush',
 } as const;
 
 /**
