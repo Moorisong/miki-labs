@@ -103,8 +103,8 @@ export default function Home() {
                                 <Image
                                     src={content.image}
                                     alt={content.title}
-                                    width={180}
-                                    height={180}
+                                    width={140}
+                                    height={140}
                                     className={styles.cardImage}
                                     priority
                                 />
@@ -120,8 +120,8 @@ export default function Home() {
                                 <Image
                                     src={content.image}
                                     alt={content.title}
-                                    width={180}
-                                    height={180}
+                                    width={140}
+                                    height={140}
                                     className={styles.cardImage}
                                     style={{ filter: 'grayscale(100%)', opacity: 0.5 }}
                                 />
@@ -136,10 +136,6 @@ export default function Home() {
             </div>
 
             <AdBanner className={styles.adBanner} />
-
-            <footer style={{ marginTop: 'auto', paddingTop: '4rem', color: 'var(--color-text-muted)', fontSize: '1rem', textAlign: 'center', fontWeight: 500 }}>
-                <p>하루상자는 일상의 소소한 재미를 담아두는 작은 놀이 상자입니다.</p>
-            </footer>
         </div>
     );
 }
