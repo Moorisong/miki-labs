@@ -11,9 +11,12 @@ const SESSION_EXPIRY_MS = 10 * 60 * 1000;
 export const MIN_GAME_DURATION_MS = 3000;
 
 // 서버 전용 시크릿 (환경 변수에서 가져옴 - 필수)
-const SESSION_SECRET = process.env.GAME_SESSION_SECRET;
-if (!SESSION_SECRET) {
-  throw new Error('GAME_SESSION_SECRET 환경변수가 설정되지 않았습니다.');
+function getSessionSecret(): string {
+  const secret = process.env.GAME_SESSION_SECRET;
+  if (!secret) {
+    throw new Error('GAME_SESSION_SECRET 환경변수가 설정되지 않았습니다.');
+  }
+  return secret;
 }
 
 /**
@@ -22,7 +25,8 @@ if (!SESSION_SECRET) {
  */
 function generateSessionToken(kakaoId: string, startTime: number): string {
   const payload = `${kakaoId}:${startTime}:${crypto.randomBytes(16).toString('hex')}`;
-  const hmac = crypto.createHmac('sha256', SESSION_SECRET!);
+  const secret = getSessionSecret();
+  const hmac = crypto.createHmac('sha256', secret);
   hmac.update(payload);
   const signature = hmac.digest('hex');
 
