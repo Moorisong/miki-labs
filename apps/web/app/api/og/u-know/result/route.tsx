@@ -25,7 +25,9 @@ export async function GET(req: NextRequest) {
 
     // 질문이 너무 길면 잘라서 '...' 처리
     const maxLen = 100;
-    const displayQuestion = question.length > maxLen ? question.slice(0, maxLen) + '...' : question;
+    // OG 이미지에서는 줄바꿈을 공백으로 치환하여 한 줄로 표시
+    const sanitizedQuestion = question.replace(/\n/g, ' ');
+    const displayQuestion = sanitizedQuestion.length > maxLen ? sanitizedQuestion.slice(0, maxLen) + '...' : sanitizedQuestion;
 
     // 길이에 따라 폰트 크기 조절
     const qFontSize = displayQuestion.length <= 20 ? 46 : displayQuestion.length <= 40 ? 38 : 32;
@@ -85,7 +87,7 @@ export async function GET(req: NextRequest) {
                 textAlign: 'center',
                 wordBreak: 'keep-all',
                 lineHeight: 1.3,
-                whiteSpace: 'pre-wrap',
+                whiteSpace: 'normal',
                 justifyContent: 'center',
               }}
             >

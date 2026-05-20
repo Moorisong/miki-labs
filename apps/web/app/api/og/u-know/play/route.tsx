@@ -36,7 +36,9 @@ export async function GET(req: NextRequest) {
 
     // 질문이 너무 길면 잘라서 '...' 처리
     const maxLen = 100;
-    const displayQuestion = question.length > maxLen ? question.slice(0, maxLen) + '...' : question;
+    // OG 이미지에서는 줄바꿈을 공백으로 치환하여 한 줄로 표시
+    const sanitizedQuestion = question.replace(/\n/g, ' ');
+    const displayQuestion = sanitizedQuestion.length > maxLen ? sanitizedQuestion.slice(0, maxLen) + '...' : sanitizedQuestion;
 
     const bgPath = path.join(process.cwd(), 'public', 'images', 'u-know', 'og-play-bg.png');
     const bgData = fs.readFileSync(bgPath).toString('base64');
@@ -93,7 +95,7 @@ export async function GET(req: NextRequest) {
               lineHeight: 1.4,
               textAlign: 'center',
               width: '100%',
-              whiteSpace: 'pre-wrap',
+              whiteSpace: 'normal',
               wordBreak: 'keep-all',
             }}
           >
