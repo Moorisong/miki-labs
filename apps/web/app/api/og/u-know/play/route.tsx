@@ -22,11 +22,11 @@ async function getFont(text: string) {
 // 질문 길이에 따라 동적으로 폰트 크기 결정
 function getQuestionFontSize(text: string): number {
   const len = text.length;
-  if (len <= 15) return 56;
-  if (len <= 25) return 46;
-  if (len <= 40) return 38;
-  if (len <= 55) return 32;
-  return 26;
+  if (len <= 15) return 36;
+  if (len <= 25) return 30;
+  if (len <= 40) return 26;
+  if (len <= 55) return 22;
+  return 18;
 }
 
 export async function GET(req: NextRequest) {
@@ -63,12 +63,12 @@ export async function GET(req: NextRequest) {
               alignItems: 'center',
               justifyContent: 'center',
               backgroundColor: '#ffffff',
-              border: '6px solid #1E293B',
-              boxShadow: '12px 12px 0 0 #1E293B',
-              borderRadius: '28px',
-              padding: '60px 80px',
-              maxWidth: '900px',
-              width: '900px',
+              border: '4px solid #1E293B',
+              boxShadow: '8px 8px 0 0 #1E293B',
+              borderRadius: '20px',
+              padding: '40px 50px',
+              maxWidth: '640px',
+              width: '640px',
               textAlign: 'center',
               position: 'relative',
             }}
@@ -77,12 +77,12 @@ export async function GET(req: NextRequest) {
             <div
               style={{
                 display: 'flex',
-                fontSize: '48px',
+                fontSize: '32px',
                 color: '#6C5CE7',
                 fontWeight: 900,
                 letterSpacing: '-1px',
-                marginBottom: '20px',
-                textShadow: '3px 3px 0px rgba(108, 92, 231, 0.2)', // 폰트 효과
+                marginBottom: '16px',
+                textShadow: '2px 2px 0px rgba(108, 92, 231, 0.2)', // 폰트 효과
               }}
             >
               너잘알 👀
@@ -92,9 +92,9 @@ export async function GET(req: NextRequest) {
             <div
               style={{
                 display: 'flex',
-                fontSize: '32px',
+                fontSize: '22px',
                 color: '#64748B',
-                marginBottom: '24px',
+                marginBottom: '20px',
                 fontWeight: 900,
               }}
             >
@@ -108,9 +108,9 @@ export async function GET(req: NextRequest) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: '#F8F6FF',
-                border: '4px solid #6C5CE7',
-                borderRadius: '20px',
-                padding: '40px 48px',
+                border: '3px solid #6C5CE7',
+                borderRadius: '16px',
+                padding: '24px 32px',
                 fontSize: `${questionFontSize}px`,
                 color: '#1E293B',
                 fontWeight: 900,
@@ -127,8 +127,8 @@ export async function GET(req: NextRequest) {
         </div>
       ),
       {
-        width: 1200,
-        height: 630,
+        width: 800,
+        height: 400,
         fonts: fontData
           ? [
               {
