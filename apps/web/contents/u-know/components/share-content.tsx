@@ -43,12 +43,19 @@ export default function ShareContent({ token, question: questionProp, myAnswer: 
     if (!window.Kakao.isInitialized()) {
       window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_API_KEY);
     }
-    const ogImageUrl = `${window.location.origin}/api/og/u-know/play?q=${encodeURIComponent(question || '내가 뭐라고 답할까?')}&t=${Date.now()}`;
+    
+    // 너무 긴 질문이나 답변으로 인한 카카오톡 링크 오류(2048자 제한) 방지
+    const truncate = (str: string, max: number) => str.length > max ? str.slice(0, max) + '...' : str;
+    const safeQ = truncate(question || '내가 뭐라고 답할까?', 40);
+    const ogQ = truncate(question || '내가 뭐라고 답할까?', 30);
+    
+    const ogImageUrl = `${window.location.origin}/api/og/u-know/play?q=${encodeURIComponent(ogQ)}&t=${Date.now()}`;
+    
     window.Kakao.Share.sendDefault({
       objectType: 'feed',
       content: {
         title: '질문지가 도착했어요!',
-        description: `"${question}"\n내가 뭐라고 답할지 맞춰봐! 😆`,
+        description: `"${safeQ}"\n내가 뭐라고 답할지 맞춰봐! 😆`,
         imageUrl: ogImageUrl,
         imageWidth: 800,
         imageHeight: 400,

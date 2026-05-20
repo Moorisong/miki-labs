@@ -34,16 +34,37 @@ export default function ResultContent({ token }: ResultContentProps) {
     if (!window.Kakao.isInitialized()) {
       window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_API_KEY);
     }
-    const shareUrl = window.location.href;
+    
+    // 카카오톡 URL 길이 제한(2048자) 및 OG 이미지 URL 길이 제한 방지
+    const truncate = (str: string, max: number) => str.length > max ? str.slice(0, max) + '...' : str;
+    
+    // 공유 링크용 파라미터 (적당히 길이를 줄임)
+    const safeQ = truncate(question, 40);
+    const safeP = truncate(prediction, 40);
+    const safeFa = truncate(friendAnswer, 40);
+    const safeName = truncate(friendName, 20);
+
+    const safeParams = new URLSearchParams();
+    safeParams.set('q', safeQ);
+    safeParams.set('p', safeP);
+    safeParams.set('fa', safeFa);
+    safeParams.set('name', safeName);
+    
+    const shareUrl = `${window.location.origin}${window.location.pathname}?${safeParams.toString()}`;
+
     const resultDescriptions = [
-      `${friendName} 답변 실화..? 아무도 예상 못한 결과 나옴 ㄷㄷ`,
-      `출제자 예상 vs ${friendName} 실제 답변, 텔레파시 터졌을까? 👀`,
-      `${friendName}의 답변에 다들 빵 터짐 ㅋㅋㅋ 직접 확인해봐`,
-      `이 조합 레전드임... ${friendName} 답변 꼭 봐야 함`,
-      `${friendName} 속마음 들킨 거 실화? 결과 보면 소름 돋음`,
+      `${safeName} 답변 실화..? 아무도 예상 못한 결과 나옴 ㄷㄷ`,
+      `출제자 예상 vs ${safeName} 실제 답변, 텔레파시 터졌을까? 👀`,
+      `${safeName}의 답변에 다들 빵 터짐 ㅋㅋㅋ 직접 확인해봐`,
+      `이 조합 레전드임... ${safeName} 답변 꼭 봐야 함`,
+      `${safeName} 속마음 들킨 거 실화? 결과 보면 소름 돋음`,
     ];
     const resultDesc = resultDescriptions[Math.floor(Math.random() * resultDescriptions.length)];
-    const ogImageUrl = `${window.location.origin}/api/og/u-know/result?q=${encodeURIComponent(question)}&name=${encodeURIComponent(friendName)}&t=${Date.now()}`;
+    
+    // OG 썸네일용 파라미터 (더 짧게 잘라서 에러 방지)
+    const ogQ = truncate(question, 30);
+    const ogImageUrl = `${window.location.origin}/api/og/u-know/result?q=${encodeURIComponent(ogQ)}&name=${encodeURIComponent(safeName)}&t=${Date.now()}`;
+    
     window.Kakao.Share.sendDefault({
       objectType: 'feed',
       content: {
