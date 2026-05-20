@@ -49,7 +49,7 @@ export default function ShareContent({ token, question: questionProp, myAnswer: 
     window.Kakao.Share.sendDefault({
       objectType: 'feed',
       content: {
-        title: '너잘알👀 질문지가 도착했어요!',
+        title: '질문지가 도착했어요!',
         description: `"${question}"\n내가 뭐라고 답할지 맞춰봐! 😆`,
         imageUrl: ogImageUrl,
         imageWidth: 800,
