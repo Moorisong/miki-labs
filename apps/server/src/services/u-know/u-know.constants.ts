@@ -13,7 +13,7 @@ export const MIN_QUESTIONS = 1;
 /** 입력 길이 제한 */
 export const MAX_QUESTION_LENGTH = 200;
 export const MAX_ANSWER_LENGTH = 200;
-export const MAX_NAME_LENGTH = 20;
+export const MAX_NAME_LENGTH = 10;
 
 /** nanoid 토큰 길이 */
 export const TOKEN_LENGTH = 12;
