@@ -85,16 +85,29 @@ export default function PlayContent({ token }: PlayContentProps) {
           <label className="uknow-label" htmlFor="name-input">
             이름 ✍️
           </label>
-          <input
-            id="name-input"
-            className="uknow-input"
-            type="text"
-            value={responderName}
-            onChange={(e) => setResponderName(e.target.value)}
-            placeholder="이름 입력"
-            maxLength={UKNOW_LIMITS.MAX_NAME_LENGTH}
-            style={{ marginBottom: '16px' }}
-          />
+          <div style={{ position: 'relative', marginBottom: '16px' }}>
+            <input
+              id="name-input"
+              className="uknow-input"
+              type="text"
+              value={responderName}
+              onChange={(e) => setResponderName(e.target.value)}
+              placeholder="이름 입력"
+              maxLength={UKNOW_LIMITS.MAX_NAME_LENGTH}
+              style={{ paddingRight: '60px' }}
+            />
+            <span style={{
+              position: 'absolute',
+              right: '16px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              fontSize: '12px',
+              fontWeight: 700,
+              color: 'var(--color-text-muted, #999)'
+            }}>
+              {responderName.length}/{UKNOW_LIMITS.MAX_NAME_LENGTH}
+            </span>
+          </div>
 
           <label className="uknow-label" htmlFor="friend-answer-input">
             네 답변은? 💬
