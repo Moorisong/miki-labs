@@ -1,7 +1,5 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 
 async function getFont(text: string) {
   try {
@@ -25,11 +23,14 @@ export async function GET(req: NextRequest) {
     const question = searchParams.get('q') || '질문';
     const name = searchParams.get('name') || '친구';
 
-    const bgPath = path.join(process.cwd(), 'public', 'images', 'u-know', 'og-result-bg.png');
-    const bgData = fs.readFileSync(bgPath).toString('base64');
-    const bgSrc = `data:image/png;base64,${bgData}`;
+    // 질문이 너무 길면 잘라서 '...' 처리
+    const maxLen = 100;
+    const displayQuestion = question.length > maxLen ? question.slice(0, maxLen) + '...' : question;
 
-    const textToLoad = `Q.${question}과연의대답은?!😲결과확인하기${name}`;
+    // 길이에 따라 폰트 크기 조절
+    const qFontSize = displayQuestion.length <= 20 ? 46 : displayQuestion.length <= 40 ? 38 : 32;
+
+    const textToLoad = `너잘알Q.${displayQuestion}의대답보러가자!😲${name}👀`;
     const fontData = await getFont(textToLoad);
 
     return new ImageResponse(
@@ -39,53 +40,78 @@ export async function GET(req: NextRequest) {
             height: '100%',
             width: '100%',
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
+            backgroundColor: '#ffffff',
+            padding: '32px 60px',
             position: 'relative',
           }}
         >
-          <img
-            src={bgSrc}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '1200px',
-              height: '630px',
-              objectFit: 'cover',
-            }}
-          />
+          {/* 너잘알 타이틀 (배경 없이 폰트 강조) */}
           <div
             style={{
               display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: '#FFFBEB',
-              border: '8px solid #3C1E1E',
-              boxShadow: '16px 16px 0 0 #3C1E1E',
-              borderRadius: '32px',
-              padding: '60px 80px',
-              maxWidth: '900px',
-              textAlign: 'center',
-              position: 'relative',
+              fontSize: '56px',
+              color: '#6C5CE7',
+              fontWeight: 900,
+              letterSpacing: '-1px',
+              marginBottom: '16px',
+              textShadow: '3px 3px 0px rgba(108, 92, 231, 0.2)',
             }}
           >
-            <div style={{ display: 'flex', fontSize: '32px', color: '#64748B', marginBottom: '16px' }}>
-              Q. {question}
+            너잘알 👀
+          </div>
+
+          {/* 결과 텍스트 박스 - 질문만 */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#F8F6FF',
+              border: '4px solid #6C5CE7',
+              borderRadius: '20px',
+              padding: '36px 48px',
+              width: '100%',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                fontSize: `${qFontSize}px`,
+                color: '#1E293B',
+                fontWeight: 900,
+                textAlign: 'center',
+                wordBreak: 'keep-all',
+                lineHeight: 1.3,
+                whiteSpace: 'pre-wrap',
+                justifyContent: 'center',
+              }}
+            >
+              {displayQuestion}
             </div>
-            <div style={{ display: 'flex', fontSize: '64px', color: '#1E293B', marginBottom: '32px' }}>
-              과연 {name}의 대답은?! 😲
-            </div>
-            <div style={{ display: 'flex', fontSize: '40px', color: '#F59E0B', backgroundColor: '#FEF3C7', padding: '16px 32px', borderRadius: '999px', border: '4px solid #F59E0B' }}>
-              결과 확인하기
-            </div>
+          </div>
+
+          {/* 이름 텍스트 - 박스 밖 */}
+          <div
+            style={{
+              display: 'flex',
+              fontSize: '38px',
+              color: '#1E293B',
+              fontWeight: 900,
+              marginTop: '16px',
+              textAlign: 'center',
+              wordBreak: 'keep-all',
+            }}
+          >
+            {name}의 대답은 과연?! 😲
           </div>
         </div>
       ),
       {
-        width: 1200,
-        height: 630,
+        width: 800,
+        height: 400,
         fonts: fontData
           ? [
               {

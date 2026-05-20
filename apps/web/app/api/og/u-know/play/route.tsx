@@ -34,12 +34,16 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const question = searchParams.get('q') || '친구가 보낸 질문이 있어!';
 
+    // 질문이 너무 길면 잘라서 '...' 처리
+    const maxLen = 100;
+    const displayQuestion = question.length > maxLen ? question.slice(0, maxLen) + '...' : question;
+
     const bgPath = path.join(process.cwd(), 'public', 'images', 'u-know', 'og-play-bg.png');
     const bgData = fs.readFileSync(bgPath).toString('base64');
     const bgSrc = `data:image/png;base64,${bgData}`;
 
-    const questionFontSize = getQuestionFontSize(question);
-    const textToLoad = `너잘알${question}친구가너한테질문을던졌어나도답변하러가기`;
+    const questionFontSize = getQuestionFontSize(displayQuestion);
+    const textToLoad = `너잘알${displayQuestion}친구가너한테질문을던졌어나도답변하러가기`;
     const fontData = await getFont(textToLoad);
 
     return new ImageResponse(
@@ -93,7 +97,7 @@ export async function GET(req: NextRequest) {
               wordBreak: 'keep-all',
             }}
           >
-            {question}
+            {displayQuestion}
           </div>
         </div>
       ),

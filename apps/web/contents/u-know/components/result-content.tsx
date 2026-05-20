@@ -19,7 +19,12 @@ export default function ResultContent({ token }: ResultContentProps) {
   const friendAnswer = searchParams.get('fa') || '친구 답변을 불러올 수 없어요';
   const friendName = searchParams.get('name') || '친구';
 
+  const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
 
+  const handleOgPreview = () => {
+    const ogUrl = `/api/og/u-know/result?q=${encodeURIComponent(question)}&name=${encodeURIComponent(friendName)}`;
+    window.open(ogUrl, '_blank');
+  };
   const reaction = useMemo(
     () => RESULT_REACTIONS[Math.floor(Math.random() * RESULT_REACTIONS.length)],
     []
@@ -36,13 +41,15 @@ export default function ResultContent({ token }: ResultContentProps) {
       window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_API_KEY);
     }
     const shareUrl = window.location.href;
-    const ogImageUrl = `${window.location.origin}/api/og/u-know/result?q=${encodeURIComponent(question)}&name=${encodeURIComponent(friendName)}`;
+    const ogImageUrl = `${window.location.origin}/api/og/u-know/result?q=${encodeURIComponent(question)}&name=${encodeURIComponent(friendName)}&t=${Date.now()}`;
     window.Kakao.Share.sendDefault({
       objectType: 'feed',
       content: {
         title: '우리의 텔레파시 결과는?! 🔮',
         description: `"${question}"\n출제자의 예상과 ${friendName}의 실제 답변 결과를 확인해보세요!`,
         imageUrl: ogImageUrl,
+        imageWidth: 800,
+        imageHeight: 400,
         link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
       },
       buttons: [
@@ -143,12 +150,40 @@ export default function ResultContent({ token }: ResultContentProps) {
           >
             나도 만들기
           </button>
-          <button
-            className="uknow-btn uknow-btn--kakao uknow-card--tilted-right"
-            onClick={handleShareKakao}
-          >
-            결과 공유하기
-          </button>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
+            <button
+              className="uknow-btn uknow-btn--kakao uknow-card--tilted-right"
+              onClick={handleShareKakao}
+              style={{ flex: 1 }}
+            >
+              결과 공유하기
+            </button>
+            {isDev && (
+              <button
+                onClick={handleOgPreview}
+                title="OG 이미지 미리보기"
+                style={{
+                  flexShrink: 0,
+                  padding: '0 14px',
+                  borderRadius: '12px',
+                  border: '2px solid #1E293B',
+                  background: '#F1F5F9',
+                  color: '#1E293B',
+                  fontWeight: 900,
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                  boxShadow: '3px 3px 0 0 #1E293B',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transform: 'rotate(1deg)',
+                  transition: 'all 0.15s',
+                }}
+              >
+                🖼️
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </main>
