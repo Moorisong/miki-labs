@@ -45,7 +45,7 @@ export default function ShareContent({ token, question: questionProp, myAnswer: 
     if (!window.Kakao.isInitialized()) {
       window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_API_KEY);
     }
-    const ogImageUrl = `${window.location.origin}/api/og/u-know/play?q=${encodeURIComponent(question || '내가 뭐라고 답할까?')}`;
+    const ogImageUrl = `${window.location.origin}/api/og/u-know/play?q=${encodeURIComponent(question || '내가 뭐라고 답할까?')}&t=${Date.now()}`;
     window.Kakao.Share.sendDefault({
       objectType: 'feed',
       content: {
