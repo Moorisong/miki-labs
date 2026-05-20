@@ -52,6 +52,8 @@ export default function ShareContent({ token, question: questionProp, myAnswer: 
         title: '너잘알👀 질문지가 도착했어요!',
         description: `"${question}"\n내가 뭐라고 답할지 맞춰봐! 😆`,
         imageUrl: ogImageUrl,
+        imageWidth: 800,
+        imageHeight: 400,
         link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
       },
       buttons: [
