@@ -42,7 +42,7 @@ export default function PlayContent({ token }: PlayContentProps) {
     <div className="uknow-form-page">
       <header style={{ textAlign: 'center', marginBottom: '32px' }}>
         <h1 className="uknow-title" style={{ fontSize: 'var(--font-size-2xl)' }}>
-          친구가 보낸<br />질문이야 🎯
+          친구가 보낸<br />질문이야
         </h1>
         <span className="uknow-badge uknow-badge--accent" style={{ marginTop: '12px' }}>
           네 답을 어떻게 예상했을까? 👀
