@@ -123,14 +123,24 @@ export default function ResultContent({ token }: ResultContentProps) {
 
           {/* 가운데 공개 버튼 */}
           {!revealed && (
-            <div className="uknow-compare-divider">
+            <div className="uknow-compare-divider" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <button
                 className="uknow-reveal-btn"
-                onClick={handleReveal}
-                aria-label="친구 답변 공개하기"
+                onClick={() => {
+                  handleShareKakao();
+                  // 카카오톡 팝업이 뜨는 시간을 고려하여 약간의 지연 후 결과 공개
+                  setTimeout(() => {
+                    handleReveal();
+                  }, 500);
+                }}
+                aria-label="카톡 공유하고 결과 공개하기"
+                style={{ background: '#FEE500', color: '#000000', border: '1px solid rgba(0,0,0,0.1)' }}
               >
-                <span className="uknow-reveal-btn__text">👇 터치해서 공개</span>
+                <span className="uknow-reveal-btn__text">💬 카톡 공유하고 결과 보기</span>
               </button>
+              <p style={{ fontSize: '12px', color: 'var(--color-text-secondary, #666)', marginTop: '8px', textAlign: 'center', lineHeight: '1.4' }}>
+                창을 닫으면 결과를 다시 볼 수 없어요!<br/>'나에게 쓰기'나 친구에게 공유해서 저장해보세요.
+              </p>
             </div>
           )}
 
@@ -150,7 +160,7 @@ export default function ResultContent({ token }: ResultContentProps) {
             ) : (
               <div className="uknow-compare-hidden">
                 <span>???</span>
-                <p className="uknow-compare-hidden-hint">위 버튼을 눌러서 확인해봐</p>
+                <p className="uknow-compare-hidden-hint">카톡으로 공유해야 결과를 볼 수 있어요 🔒</p>
               </div>
             )}
           </div>
@@ -177,15 +187,17 @@ export default function ResultContent({ token }: ResultContentProps) {
           >
             나도 만들기
           </button>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
-            <button
-              className="uknow-btn uknow-btn--kakao uknow-card--tilted-right"
-              onClick={handleShareKakao}
-              style={{ flex: 1 }}
-            >
-              결과 공유하기
-            </button>
-          </div>
+          {revealed && (
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
+              <button
+                className="uknow-btn uknow-btn--kakao uknow-card--tilted-right"
+                onClick={handleShareKakao}
+                style={{ flex: 1 }}
+              >
+                결과 공유하기
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </main>
