@@ -31,7 +31,27 @@ export default function ResultContent({ token }: ResultContentProps) {
   };
 
   const handleShareKakao = () => {
-    alert('카카오톡 공유 기능!');
+    if (typeof window === 'undefined' || !window.Kakao) return;
+    if (!window.Kakao.isInitialized()) {
+      window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_API_KEY);
+    }
+    const shareUrl = window.location.href;
+    const ogImageUrl = `${window.location.origin}/api/og/u-know/result?q=${encodeURIComponent(question)}&name=${encodeURIComponent(friendName)}`;
+    window.Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: '우리의 텔레파시 결과는?! 🔮',
+        description: `"${question}"\n출제자의 예상과 ${friendName}의 실제 답변 결과를 확인해보세요!`,
+        imageUrl: ogImageUrl,
+        link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
+      },
+      buttons: [
+        {
+          title: '결과 구경하기',
+          link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
+        },
+      ],
+    });
   };
 
   return (
@@ -85,7 +105,10 @@ export default function ResultContent({ token }: ResultContentProps) {
           )}
 
           {/* 친구 실제 답변 */}
-          <div className={`uknow-compare-card uknow-compare-card--friend ${revealed ? 'uknow-compare-card--revealed' : ''}`}>
+          <div className={`uknow-compare-card uknow-compare-card--friend ${revealed ? 'uknow-compare-card--revealed' : ''}`} style={{ position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '-16px', right: '-12px', fontSize: '32px', transform: 'rotate(15deg)', filter: 'drop-shadow(2px 4px 6px rgba(0,0,0,0.15))', zIndex: 10 }}>
+              ✨
+            </div>
             <div className="uknow-compare-header">
               <span className="uknow-compare-emoji">💬</span>
               <span className="uknow-compare-who">{friendName}의 실제 답변</span>
@@ -105,8 +128,8 @@ export default function ResultContent({ token }: ResultContentProps) {
 
         {/* 리액션 */}
         {revealed && (
-          <div className="uknow-reaction-card" style={{ transform: 'rotate(2deg)' }}>
-            <p style={{ fontSize: 'var(--font-size-xl)', fontWeight: 900 }}>
+          <div className="uknow-reaction-card" style={{ transform: 'rotate(2deg)', padding: '12px 20px', marginTop: '16px' }}>
+            <p style={{ fontSize: 'var(--font-size-md)', fontWeight: 800 }}>
               {reaction}
             </p>
           </div>
@@ -118,13 +141,13 @@ export default function ResultContent({ token }: ResultContentProps) {
             className="uknow-btn uknow-btn--primary uknow-card--tilted-left"
             onClick={() => router.push(UKNOW_ROUTES.CREATE)}
           >
-            🔄 나도 만들기
+            나도 만들기
           </button>
           <button
             className="uknow-btn uknow-btn--kakao uknow-card--tilted-right"
             onClick={handleShareKakao}
           >
-            📤 결과 공유하기
+            결과 공유하기
           </button>
         </div>
       </div>

@@ -38,7 +38,26 @@ export default function ShareContent({ token, question: questionProp, myAnswer: 
   };
 
   const handleKakaoShare = () => {
-    alert('카카오톡 공유 기능은 실제 앱에서 구현됩니다!');
+    if (typeof window === 'undefined' || !window.Kakao) return;
+    if (!window.Kakao.isInitialized()) {
+      window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_API_KEY);
+    }
+    const ogImageUrl = `${window.location.origin}/api/og/u-know/play?q=${encodeURIComponent(question || '내가 뭐라고 답할까?')}`;
+    window.Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: '나를 얼마나 잘 알까? 👀',
+        description: `"${question}"\n내가 뭐라고 답할지 맞춰봐! 😆`,
+        imageUrl: ogImageUrl,
+        link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
+      },
+      buttons: [
+        {
+          title: '질문 확인하고 답하기',
+          link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
+        },
+      ],
+    });
   };
 
   return (
