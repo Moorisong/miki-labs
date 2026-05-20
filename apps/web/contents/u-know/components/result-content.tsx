@@ -12,7 +12,7 @@ interface ResultContentProps {
 export default function ResultContent({ token }: ResultContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [revealed, setRevealed] = useState(false);
+  const [revealed, setRevealed] = useState(searchParams.get('shared') === 'true');
 
   // query params에서 실제 데이터 읽기
   const question = searchParams.get('q') || '질문을 불러올 수 없어요';
@@ -49,6 +49,7 @@ export default function ResultContent({ token }: ResultContentProps) {
     safeParams.set('p', safeP);
     safeParams.set('fa', safeFa);
     safeParams.set('name', safeName);
+    safeParams.set('shared', 'true'); // 공유된 링크로 들어온 사람은 바로 볼 수 있도록 처리
     
     const shareUrl = `${window.location.origin}${window.location.pathname}?${safeParams.toString()}`;
 
