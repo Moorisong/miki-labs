@@ -22,11 +22,11 @@ async function getFont(text: string) {
 // 질문 길이에 따라 동적으로 폰트 크기 결정
 function getQuestionFontSize(text: string): number {
   const len = text.length;
-  if (len <= 15) return 48;
-  if (len <= 25) return 40;
-  if (len <= 40) return 34;
-  if (len <= 55) return 28;
-  return 24;
+  if (len <= 15) return 56;
+  if (len <= 25) return 46;
+  if (len <= 40) return 38;
+  if (len <= 55) return 32;
+  return 28;
 }
 
 export async function GET(req: NextRequest) {
@@ -54,7 +54,6 @@ export async function GET(req: NextRequest) {
             justifyContent: 'center',
             backgroundColor: '#ffffff',
             padding: '40px 60px',
-            border: '12px solid #1E293B', // 꽉 차는 카드 느낌의 굵은 테두리
             position: 'relative',
           }}
         >
@@ -62,7 +61,7 @@ export async function GET(req: NextRequest) {
           <div
             style={{
               display: 'flex',
-              fontSize: '42px',
+              fontSize: '48px',
               color: '#6C5CE7',
               fontWeight: 900,
               letterSpacing: '-1px',
@@ -73,18 +72,6 @@ export async function GET(req: NextRequest) {
             너잘알 👀
           </div>
 
-          {/* 서브 타이틀 */}
-          <div
-            style={{
-              display: 'flex',
-              fontSize: '28px',
-              color: '#64748B',
-              marginBottom: '24px',
-              fontWeight: 900,
-            }}
-          >
-            친구가 너한테 질문을 던졌어!
-          </div>
 
           {/* 질문 텍스트 박스 */}
           <div
