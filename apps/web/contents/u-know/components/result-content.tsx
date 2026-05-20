@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { UKNOW_ROUTES, RESULT_REACTIONS } from '../constants';
+import KakaoAdfit, { ADFIT_SIZES, ADFIT_UNITS } from '@/components/ads/kakao-adfit';
 
 interface ResultContentProps {
   token: string;
@@ -18,13 +19,6 @@ export default function ResultContent({ token }: ResultContentProps) {
   const prediction = searchParams.get('p') || '예상 답변을 불러올 수 없어요';
   const friendAnswer = searchParams.get('fa') || '친구 답변을 불러올 수 없어요';
   const friendName = searchParams.get('name') || '친구';
-
-  const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-
-  const handleOgPreview = () => {
-    const ogUrl = `/api/og/u-know/result?q=${encodeURIComponent(question)}&name=${encodeURIComponent(friendName)}`;
-    window.open(ogUrl, '_blank');
-  };
   const reaction = useMemo(
     () => RESULT_REACTIONS[Math.floor(Math.random() * RESULT_REACTIONS.length)],
     []
@@ -150,6 +144,10 @@ export default function ResultContent({ token }: ResultContentProps) {
           </div>
         )}
 
+        <div style={{ margin: '8px 0', display: 'flex', justifyContent: 'center' }}>
+          <KakaoAdfit unit={ADFIT_UNITS.MAIN_BANNER} {...ADFIT_SIZES.BANNER_320x100} />
+        </div>
+
         {/* 하단 버튼 */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '16px' }}>
           <button
@@ -166,31 +164,6 @@ export default function ResultContent({ token }: ResultContentProps) {
             >
               결과 공유하기
             </button>
-            {isDev && (
-              <button
-                onClick={handleOgPreview}
-                title="OG 이미지 미리보기"
-                style={{
-                  flexShrink: 0,
-                  padding: '0 14px',
-                  borderRadius: '12px',
-                  border: '2px solid #1E293B',
-                  background: '#F1F5F9',
-                  color: '#1E293B',
-                  fontWeight: 900,
-                  fontSize: '20px',
-                  cursor: 'pointer',
-                  boxShadow: '3px 3px 0 0 #1E293B',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transform: 'rotate(1deg)',
-                  transition: 'all 0.15s',
-                }}
-              >
-                🖼️
-              </button>
-            )}
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { UKNOW_ROUTES } from '../constants';
+import KakaoAdfit, { ADFIT_SIZES, ADFIT_UNITS } from '@/components/ads/kakao-adfit';
 
 interface ShareContentProps {
   token: string;
@@ -14,9 +15,6 @@ export default function ShareContent({ token, question: questionProp, myAnswer: 
   const router = useRouter();
   const searchParams = useSearchParams();
   const [copied, setCopied] = useState(false);
-
-  // 로컬 개발 환경 여부
-  const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
 
   // props로 안 넘어온 경우 query string에서 읽기
   const question = questionProp ?? searchParams.get('q') ?? undefined;
@@ -65,11 +63,6 @@ export default function ShareContent({ token, question: questionProp, myAnswer: 
     });
   };
 
-  const handleOgPreview = () => {
-    const ogUrl = `/api/og/u-know/play?q=${encodeURIComponent(question || '내가 뭐라고 답할까?')}`;
-    window.open(ogUrl, '_blank');
-  };
-
   return (
     <main className="uknow-page">
       <div style={{ maxWidth: '400px', width: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -103,6 +96,10 @@ export default function ShareContent({ token, question: questionProp, myAnswer: 
           )}
         </div>
 
+        <div style={{ margin: '8px 0', display: 'flex', justifyContent: 'center' }}>
+          <KakaoAdfit unit={ADFIT_UNITS.MAIN_BANNER} {...ADFIT_SIZES.BANNER_320x100} />
+        </div>
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {/* 카카오 공유 + 로컬 OG 미리보기 버튼 (row) */}
           <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
@@ -113,32 +110,6 @@ export default function ShareContent({ token, question: questionProp, myAnswer: 
             >
               💬 카톡 단톡방에 투척
             </button>
-
-            {isDev && (
-              <button
-                onClick={handleOgPreview}
-                title="OG 이미지 미리보기"
-                style={{
-                  flexShrink: 0,
-                  padding: '0 14px',
-                  borderRadius: '12px',
-                  border: '2px solid #1E293B',
-                  background: '#F1F5F9',
-                  color: '#1E293B',
-                  fontWeight: 900,
-                  fontSize: '20px',
-                  cursor: 'pointer',
-                  boxShadow: '3px 3px 0 0 #1E293B',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transform: 'rotate(1deg)',
-                  transition: 'all 0.15s',
-                }}
-              >
-                🖼️
-              </button>
-            )}
           </div>
 
           <button

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { UKNOW_ROUTES, UKNOW_LIMITS } from '../constants';
 import ReactionOverlay from './reaction-overlay';
+import KakaoAdfit, { ADFIT_SIZES, ADFIT_UNITS } from '@/components/ads/kakao-adfit';
 
 interface PlayContentProps {
   token: string;
@@ -98,6 +99,10 @@ export default function PlayContent({ token }: PlayContentProps) {
         >
           답변 제출!
         </button>
+
+        <div style={{ margin: '8px 0', display: 'flex', justifyContent: 'center' }}>
+          <KakaoAdfit unit={ADFIT_UNITS.MAIN_BANNER} {...ADFIT_SIZES.BANNER_320x100} />
+        </div>
 
         <div className="uknow-hint-box">
           💡 친구가 내 답변 예상했을까?<br />

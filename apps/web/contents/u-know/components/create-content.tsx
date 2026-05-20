@@ -9,6 +9,7 @@ import {
   TTL_NOTICE,
 } from '../constants';
 import ReactionOverlay from './reaction-overlay';
+import KakaoAdfit, { ADFIT_SIZES, ADFIT_UNITS } from '@/components/ads/kakao-adfit';
 
 const BADGE_TEXTS = [
   '나 너 꿰뚫고 있음 (진심) 🫵',
@@ -224,11 +225,15 @@ export default function CreateContent() {
           카톡으로 던지기
         </button>
 
+        <div style={{ margin: '8px 0', display: 'flex', justifyContent: 'center' }}>
+          <KakaoAdfit unit={ADFIT_UNITS.MAIN_BANNER} {...ADFIT_SIZES.BANNER_320x100} />
+        </div>
+
         <p className="uknow-ttl-notice">{TTL_NOTICE}</p>
       </div>
 
       {showReaction && (
-        <ReactionOverlay text={'ㅋㅋㅋㅋㅋ\n개웃기겠다'} />
+        <ReactionOverlay text={'ㅋㅋㅋㅋㅋ\n질문지 생성 중'} />
       )}
       </div>
     </main>
