@@ -15,6 +15,9 @@ export default function ShareContent({ token, question: questionProp, myAnswer: 
   const searchParams = useSearchParams();
   const [copied, setCopied] = useState(false);
 
+  // 로컬 개발 환경 여부
+  const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+
   // props로 안 넘어온 경우 query string에서 읽기
   const question = questionProp ?? searchParams.get('q') ?? undefined;
   const myAnswer = myAnswerProp ?? searchParams.get('a') ?? undefined;
@@ -46,7 +49,7 @@ export default function ShareContent({ token, question: questionProp, myAnswer: 
     window.Kakao.Share.sendDefault({
       objectType: 'feed',
       content: {
-        title: '나를 얼마나 잘 알까? 👀',
+        title: '너잘알👀 질문지가 도착했어요!',
         description: `"${question}"\n내가 뭐라고 답할지 맞춰봐! 😆`,
         imageUrl: ogImageUrl,
         link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
@@ -58,6 +61,11 @@ export default function ShareContent({ token, question: questionProp, myAnswer: 
         },
       ],
     });
+  };
+
+  const handleOgPreview = () => {
+    const ogUrl = `/api/og/u-know/play?q=${encodeURIComponent(question || '내가 뭐라고 답할까?')}`;
+    window.open(ogUrl, '_blank');
   };
 
   return (
@@ -94,12 +102,42 @@ export default function ShareContent({ token, question: questionProp, myAnswer: 
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <button
-            className="uknow-btn uknow-btn--kakao uknow-card--tilted-left"
-            onClick={handleKakaoShare}
-          >
-            💬 카톡 단톡방에 투척
-          </button>
+          {/* 카카오 공유 + 로컬 OG 미리보기 버튼 (row) */}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
+            <button
+              className="uknow-btn uknow-btn--kakao uknow-card--tilted-left"
+              onClick={handleKakaoShare}
+              style={{ flex: 1 }}
+            >
+              💬 카톡 단톡방에 투척
+            </button>
+
+            {isDev && (
+              <button
+                onClick={handleOgPreview}
+                title="OG 이미지 미리보기"
+                style={{
+                  flexShrink: 0,
+                  padding: '0 14px',
+                  borderRadius: '12px',
+                  border: '2px solid #1E293B',
+                  background: '#F1F5F9',
+                  color: '#1E293B',
+                  fontWeight: 900,
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                  boxShadow: '3px 3px 0 0 #1E293B',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transform: 'rotate(1deg)',
+                  transition: 'all 0.15s',
+                }}
+              >
+                🖼️
+              </button>
+            )}
+          </div>
 
           <button
             className="uknow-btn uknow-btn--outline uknow-card--tilted-right"
@@ -114,3 +152,5 @@ export default function ShareContent({ token, question: questionProp, myAnswer: 
     </main>
   );
 }
+
+
