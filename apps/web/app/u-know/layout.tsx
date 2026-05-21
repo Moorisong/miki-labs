@@ -8,7 +8,22 @@ export const metadata: Metadata = {
   openGraph: {
     title: '너잘알 | 친구 반응 예상 놀이',
     description: '친구가 뭐라고 답할지 맞혀봐 ㅋㅋ',
+    url: 'https://box.haroo.site/u-know',
     type: 'website',
+    images: [
+      {
+        url: '/u-know-logo-v2.png',
+        width: 800,
+        height: 800,
+        alt: '너잘알 - 친구 반응 예상 놀이',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: '너잘알 | 친구 반응 예상 놀이',
+    description: '친구가 뭐라고 답할지 맞혀봐 ㅋㅋ',
+    images: ['/u-know-logo-v2.png'],
   },
 };
 
