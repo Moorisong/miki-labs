@@ -11,6 +11,7 @@ export const ROUTES = {
     HTSM: '/htsm',
     U_KNOW: '/u-know',
     TOBY: '/toby',
+    PUZZLE: '/puzzle',
     TERMS: '/terms',
     PRIVACY: '/privacy',
 } as const;
