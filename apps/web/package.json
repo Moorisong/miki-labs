@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "concurrently -n \"WEB,TOBY\" -c \"cyan,magenta\" \"npm:dev:web\" \"npm:dev:toby\"",
-    "dev:web": "next dev -p 3001",
+    "dev:web": "next dev -p 3001 --no-turbopack",
     "dev:toby": "npm run dev --prefix ../toby",
     "build": "next build",
     "start": "next start",
