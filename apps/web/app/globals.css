@@ -1,10 +1,8 @@
-@import "tailwindcss";
-@import '../styles/variables.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@source "../components/**/*.{js,ts,jsx,tsx}";
-@source "../app/**/*.{js,ts,jsx,tsx}";
-@source "../contents/**/*.{js,ts,jsx,tsx}";
-@source "../lib/**/*.{js,ts,jsx,tsx}";
+@import '../styles/variables.css';
 
 * {
   box-sizing: border-box;
