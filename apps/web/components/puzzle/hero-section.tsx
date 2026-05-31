@@ -97,20 +97,22 @@ export default function HeroSection({
                   퍼즐 시작하기
                 </button>
               ) : (
-                <div className="flex gap-2 w-full sm:w-auto">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                   <button
                     onClick={() => onStart('beginner')}
                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl text-white font-bold text-sm transition-transform hover:scale-[1.02]"
                     style={{ backgroundColor: '#22C55E' }}
                   >
-                    Beginner (100조각 · 🏆 랭킹반영)
+                    <span className="hidden sm:inline">Beginner (100조각 · 🏆 랭킹반영)</span>
+                    <span className="sm:hidden">🏆 Beginner</span>
                   </button>
                   <button
                     onClick={() => onStart('expert')}
                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl text-white font-bold text-sm transition-transform hover:scale-[1.02]"
                     style={{ backgroundColor: 'var(--puzzle-primary)' }}
                   >
-                    Expert (256조각 · 🧘 힐링)
+                    <span className="hidden sm:inline">Expert (256조각 · 🧘 힐링)</span>
+                    <span className="sm:hidden">🧘 Expert</span>
                   </button>
                 </div>
               )}
@@ -143,7 +145,7 @@ export default function HeroSection({
                 src={puzzle.imageUrl}
                 alt={puzzle.title}
                 className="w-full object-cover"
-                style={{ height: 'clamp(260px, 40vw, 420px)' }}
+                style={{ height: 'clamp(200px, 45vw, 420px)' }}
               />
               {/* Progress overlay bar if game was started */}
               {progress > 0 && (
@@ -165,9 +167,9 @@ export default function HeroSection({
               )}
             </div>
 
-            {/* Floating stats card */}
+            {/* Floating stats card — 모바일에서 숨김 (overflow 방지) */}
             <div 
-              className="absolute -top-3 -right-3 px-4 py-3 rounded-xl border border-border"
+              className="absolute -top-3 -right-3 px-4 py-3 rounded-xl border border-border hidden sm:block"
               style={{
                 backgroundColor: 'var(--puzzle-glass-bg)',
                 backdropFilter: 'var(--puzzle-glass-blur)',

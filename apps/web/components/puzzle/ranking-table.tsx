@@ -45,15 +45,17 @@ export default function RankingTable({
         boxShadow: 'var(--puzzle-shadow-sm)',
       }}
     >
-      {/* Table Header */}
       <div
-        className="grid grid-cols-12 gap-2 px-5 py-3 border-b"
-        style={{ backgroundColor: 'var(--puzzle-muted)', borderColor: 'var(--puzzle-border)' }}
+        className="flex items-center gap-3 px-5 py-3 border-b"
+        style={{ 
+          backgroundColor: 'var(--puzzle-muted)', 
+          borderColor: 'var(--puzzle-border)',
+        }}
       >
-        <span className="text-xs col-span-2 font-bold" style={{ color: 'var(--puzzle-muted-foreground)' }}>순위</span>
-        <span className="text-xs col-span-5 font-bold" style={{ color: 'var(--puzzle-muted-foreground)' }}>닉네임</span>
-        <span className="text-xs col-span-3 font-bold" style={{ color: 'var(--puzzle-muted-foreground)' }}>기록</span>
-        <span className="text-xs col-span-2 font-bold" style={{ color: 'var(--puzzle-muted-foreground)' }}>저장일</span>
+        <span className="w-8 flex-shrink-0 text-xs font-bold" style={{ color: 'var(--puzzle-muted-foreground)' }}>순위</span>
+        <span className="flex-1 text-xs font-bold" style={{ color: 'var(--puzzle-muted-foreground)' }}>닉네임</span>
+        <span className="flex-shrink-0 text-xs font-bold" style={{ color: 'var(--puzzle-muted-foreground)' }}>기록</span>
+        <span className="flex-shrink-0 w-10 text-right text-xs font-bold hidden sm:block" style={{ color: 'var(--puzzle-muted-foreground)' }}>날짜</span>
       </div>
 
       {/* Rows */}
@@ -81,7 +83,7 @@ export default function RankingTable({
           return (
             <div
               key={idx}
-              className="grid grid-cols-12 gap-2 items-center px-5 py-4 border-b last:border-0 transition-colors"
+              className="flex items-center gap-3 px-5 py-4 border-b last:border-0 transition-colors"
               style={{
                 borderColor: 'var(--puzzle-border)',
                 backgroundColor: isMe ? 'var(--puzzle-secondary)' : 'transparent',
@@ -94,7 +96,7 @@ export default function RankingTable({
               }}
             >
               {/* Rank */}
-              <div className="col-span-2 flex items-center">
+              <div className="w-8 flex-shrink-0 flex items-center">
                 {medal ? (
                   <span style={{ fontSize: '18px' }}>{medal}</span>
                 ) : (
@@ -105,15 +107,15 @@ export default function RankingTable({
               </div>
 
               {/* Nickname */}
-              <div className="col-span-5 flex items-center gap-2.5">
+              <div className="flex flex-1 items-center gap-2.5 min-w-0">
                 <div
-                  className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
+                  className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold"
                   style={{
                     backgroundColor: avatarColor,
                     color: textColor,
                   }}
                 >
-                  {item.nickname[0].toUpperCase()}
+                  {item.nickname?.charAt(0)?.toUpperCase() ?? '?'}
                 </div>
                 <span
                   className="text-sm font-semibold truncate"
@@ -124,7 +126,7 @@ export default function RankingTable({
               </div>
 
               {/* Time */}
-              <div className="col-span-3">
+              <div className="flex-shrink-0">
                 <span
                   className="tabular-nums text-sm font-bold"
                   style={{ color: item.rank === 1 ? 'var(--puzzle-primary)' : 'var(--puzzle-foreground)' }}
@@ -133,8 +135,8 @@ export default function RankingTable({
                 </span>
               </div>
 
-              {/* Date */}
-              <div className="col-span-2">
+              {/* Date — 모바일에서 숨김 */}
+              <div className="flex-shrink-0 hidden sm:block w-10 text-right">
                 <span className="text-xs font-medium" style={{ color: 'var(--puzzle-muted-foreground)' }}>
                   {formatDate(item.savedAt)}
                 </span>

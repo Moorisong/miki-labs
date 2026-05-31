@@ -104,7 +104,7 @@ export default function PuzzlePage() {
       </div>
 
       {/* Main Bottom Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-8 mt-6 md:mt-10">
         {/* Top 5 Rankings */}
         <div className="md:col-span-2">
           <RankingPreview rankings={rankings} isLoading={isRankingLoading} />

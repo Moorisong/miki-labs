@@ -104,7 +104,7 @@ export default function MyPage() {
   return (
     <div className={`${styles.container} puzzle-animate-fade-in-up`}>
       {/* Page Header Title */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl md:text-3xl font-extrabold mb-1.5" style={{ color: 'var(--puzzle-card-foreground)' }}>
             마이페이지
@@ -127,7 +127,7 @@ export default function MyPage() {
       </div>
 
       {/* Main Spacing Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-8">
         {/* Left: User Profile & setting dials */}
         <div className="flex flex-col gap-4">
           {profile && statistics && (

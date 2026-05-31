@@ -76,3 +76,39 @@
   gap: 1.5rem;
   min-height: calc(100vh - 120px);
 }
+
+/* ====== 모바일 반응형 ====== */
+@media (max-width: 768px) {
+  .container {
+    padding: 1.25rem 1rem 4rem;
+  }
+
+  .headerSpacing {
+    margin-bottom: 1.25rem;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .pageTitle {
+    font-size: 1.4rem;
+  }
+
+  .pageSubtitle {
+    font-size: 0.875rem;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .glassPanel {
+    padding: 1.25rem;
+  }
+}

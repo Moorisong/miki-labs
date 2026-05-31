@@ -111,7 +111,7 @@ export default function RankingPage() {
         <div className="lg:col-span-2 flex flex-col gap-5">
           {/* Puzzle Info Preview Banner */}
           <div
-            className="flex items-center gap-4 p-4 rounded-2xl border overflow-hidden"
+            className="flex flex-wrap sm:flex-nowrap items-center gap-3 p-4 rounded-2xl border overflow-hidden"
             style={{ 
               backgroundColor: 'var(--puzzle-glass-bg)', 
               backdropFilter: 'var(--puzzle-glass-blur)',
@@ -122,7 +122,7 @@ export default function RankingPage() {
             <img
               src={currentPuzzle.imageUrl}
               alt={currentPuzzle.title}
-              className="w-20 h-14 object-cover rounded-xl flex-shrink-0 border"
+              className="w-16 h-12 sm:w-20 sm:h-14 object-cover rounded-xl flex-shrink-0 border"
               style={{ borderColor: 'var(--puzzle-border)' }}
             />
             <div className="flex-1 min-w-0">
@@ -132,14 +132,14 @@ export default function RankingPage() {
               >
                 {currentPuzzle.title}
               </p>
-              <div className="flex flex-wrap gap-x-4 gap-y-1">
+              <div className="flex flex-wrap gap-x-3 gap-y-1">
                 <span className="flex items-center gap-1 text-[11px] font-bold" style={{ color: 'var(--puzzle-muted-foreground)' }}>
                   <Users size={11} /> {currentPuzzle.participantCount.toLocaleString()}명 완주
                 </span>
                 <span className="flex items-center gap-1 text-[11px] font-bold" style={{ color: 'var(--puzzle-muted-foreground)' }}>
                   <Clock size={11} /> {getDaysLeft(currentPuzzle.endDate)}
                 </span>
-                <span className="flex items-center gap-1 text-[11px] font-bold" style={{ color: 'var(--puzzle-muted-foreground)' }}>
+                <span className="flex items-center gap-1 text-[11px] font-bold hidden sm:flex" style={{ color: 'var(--puzzle-muted-foreground)' }}>
                   <Trophy size={11} /> Beginner 난이도
                 </span>
               </div>

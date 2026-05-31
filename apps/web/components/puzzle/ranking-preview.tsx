@@ -107,7 +107,7 @@ export default function RankingPreview({ rankings, isLoading }: RankingPreviewPr
                     color: textColor,
                   }}
                 >
-                  {item.nickname[0].toUpperCase()}
+                  {item.nickname?.[0]?.toUpperCase() ?? '?'}
                 </div>
 
                 {/* Nickname */}
