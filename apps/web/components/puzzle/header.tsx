@@ -118,9 +118,7 @@ export default function Header() {
         <div
           className="md:hidden absolute top-16 left-0 right-0 border-b border-border shadow-lg"
           style={{ 
-            backgroundColor: 'var(--puzzle-glass-bg)',
-            backdropFilter: 'var(--puzzle-glass-blur)',
-            WebkitBackdropFilter: 'var(--puzzle-glass-blur)',
+            backgroundColor: 'var(--puzzle-background)',
             borderBottom: '1px solid var(--puzzle-border)'
           }}
         >
