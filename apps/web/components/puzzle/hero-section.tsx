@@ -86,12 +86,11 @@ export default function HeroSection({
               {!showDiffSelect ? (
                 <button
                   onClick={() => setShowDiffSelect(true)}
-                  className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-95 text-white"
+                  className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-95 text-white puzzle-animate-pulse-glow"
                   style={{
                     backgroundColor: 'var(--puzzle-primary)',
                     fontSize: '15px',
                     fontWeight: 700,
-                    boxShadow: 'var(--puzzle-animate-pulse-glow)',
                   }}
                 >
                   <Play size={16} strokeWidth={2.5} />
