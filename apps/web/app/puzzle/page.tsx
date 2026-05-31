@@ -1,0 +1,146 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useRankingStore } from '@/lib/stores/ranking-store';
+import { fetchCurrentPuzzle, fetchArchivePuzzles } from '@/lib/puzzle-api';
+import { loadPuzzleState } from '@/lib/puzzle-db';
+import { Puzzle } from '@/types/puzzle';
+import HeroSection from '@/components/puzzle/hero-section';
+import RankingPreview from '@/components/puzzle/ranking-preview';
+import ShareCard from '@/components/puzzle/share-card';
+import StatsCard from '@/components/puzzle/stats-card';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
+import styles from './puzzle-layout.module.css';
+
+export default function PuzzlePage() {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const { rankings, isLoading: isRankingLoading, fetchRankings } = useRankingStore();
+  
+  const [currentPuzzle, setCurrentPuzzle] = useState<Puzzle | null>(null);
+  const [totalPuzzles, setTotalPuzzles] = useState(0);
+  const [hasSavedGame, setHasSavedGame] = useState(false);
+  const [savedProgress, setSavedProgress] = useState(0);
+  const [isPuzzleLoading, setIsPuzzleLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        // 1. 현재 주간 퍼즐 조회
+        const res = await fetchCurrentPuzzle();
+        if (res.success && res.data) {
+          setCurrentPuzzle(res.data);
+          
+          // 랭킹 목록 조회
+          fetchRankings(res.data._id);
+
+          // 2. 로컬 저장된 상태 확인 (이어하기 여부)
+          const savedState = await loadPuzzleState(res.data._id);
+          if (savedState && !savedState.completed) {
+            setHasSavedGame(true);
+            setSavedProgress(savedState.progress);
+          }
+        }
+
+        // 3. 아카이브 개수를 위한 전체 목록 조회
+        const archiveRes = await fetchArchivePuzzles();
+        if (archiveRes.success && archiveRes.data) {
+          setTotalPuzzles(archiveRes.data.length);
+        }
+      } catch (e) {
+        console.error('Failed to load puzzle data:', e);
+      } finally {
+        setIsPuzzleLoading(false);
+      }
+    }
+
+    loadData();
+  }, [fetchRankings]);
+
+  const handleStart = (difficulty: 'beginner' | 'expert') => {
+    if (!currentPuzzle) return;
+    // 난이도를 쿼리스트링에 실어 플레이 페이지로 이동
+    router.push(`/puzzle/play/${currentPuzzle._id}?diff=${difficulty}`);
+  };
+
+  const handleResume = () => {
+    if (!currentPuzzle) return;
+    router.push(`/puzzle/play/${currentPuzzle._id}?resume=true`);
+  };
+
+  if (isPuzzleLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[70vh] flex-col gap-3 font-semibold">
+        <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--puzzle-primary) var(--puzzle-primary) var(--puzzle-primary) transparent' }} />
+        <span style={{ color: 'var(--puzzle-muted-foreground)' }}>아름다운 퍼즐 조각을 불러오는 중...</span>
+      </div>
+    );
+  }
+
+  if (!currentPuzzle) {
+    return (
+      <div className="flex items-center justify-center min-h-[70vh] flex-col gap-2 select-none">
+        <span className="text-3xl">🧘</span>
+        <p className="text-sm font-bold" style={{ color: 'var(--puzzle-muted-foreground)' }}>이번 주 출제된 퍼즐이 없습니다.</p>
+        <Link href="/puzzle/archive" className="mt-4 px-5 py-2 bg-blue-500 text-white rounded-lg text-xs font-bold shadow hover:bg-blue-600 transition-all">아카이브로 이동</Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${styles.container} puzzle-animate-fade-in-up`}>
+      {/* Hero Section */}
+      <div className="mb-10">
+        <HeroSection
+          puzzle={currentPuzzle}
+          onStart={handleStart}
+          onResume={handleResume}
+          hasSavedGame={hasSavedGame}
+          progress={savedProgress}
+        />
+      </div>
+
+      {/* Main Bottom Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+        {/* Top 5 Rankings */}
+        <div className="md:col-span-2">
+          <RankingPreview rankings={rankings} isLoading={isRankingLoading} />
+        </div>
+
+        {/* Share & Stats Cards */}
+        <div className="flex flex-col gap-4">
+          <ShareCard puzzle={currentPuzzle} />
+          
+          <StatsCard participantCount={currentPuzzle.participantCount} totalPuzzles={totalPuzzles} />
+
+          {/* Archive teaser */}
+          <Link
+            href="/puzzle/archive"
+            className="flex items-center justify-between px-5 py-4 rounded-2xl border transition-all duration-200 group"
+            style={{
+              backgroundColor: 'var(--puzzle-glass-bg)',
+              backdropFilter: 'var(--puzzle-glass-blur)',
+              borderColor: 'var(--puzzle-border)',
+              boxShadow: 'var(--puzzle-shadow-sm)',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--puzzle-primary)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--puzzle-border)'; }}
+          >
+            <div>
+              <p className="text-sm font-extrabold" style={{ color: 'var(--puzzle-card-foreground)' }}>
+                지난 아카이브 퍼즐 보기
+              </p>
+              <p className="text-[10px] font-bold" style={{ color: 'var(--puzzle-muted-foreground)' }}>
+                이전 주차 힐링 플레이 목록
+              </p>
+            </div>
+            <ArrowRight size={18} strokeWidth={2.5} style={{ color: 'var(--puzzle-primary)' }} />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
