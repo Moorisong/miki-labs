@@ -55,11 +55,13 @@ export default function PieceTray({
               <div
                 key={selectedPieceId}
                 onClick={() => onPieceClick(selectedPieceId)}
-                className="relative cursor-pointer transition-all duration-200 flex-shrink-0"
+                className="relative cursor-pointer transition-all duration-200 flex-shrink-0 outline-none select-none"
                 style={{
                   transform: 'scale(1.08) translateY(-4px)',
                   boxShadow: '0 0 0 3px var(--puzzle-primary), 0 8px 16px rgba(79, 142, 247, 0.3)',
                   borderRadius: '6px',
+                  outline: 'none',
+                  WebkitTapHighlightColor: 'transparent',
                 }}
               >
                 <PieceCell
@@ -83,11 +85,13 @@ export default function PieceTray({
                 <div
                   key={pieceId}
                   onClick={() => onPieceClick(pieceId)}
-                  className="relative cursor-pointer transition-all duration-200 flex-shrink-0"
+                  className="relative cursor-pointer transition-all duration-200 flex-shrink-0 outline-none select-none"
                   style={{
                     transform: isSelected ? 'scale(1.08) translateY(-4px)' : 'scale(1)',
                     boxShadow: isSelected ? '0 0 0 3px var(--puzzle-primary), 0 8px 16px rgba(79, 142, 247, 0.3)' : 'none',
                     borderRadius: '6px',
+                    outline: 'none',
+                    WebkitTapHighlightColor: 'transparent',
                   }}
                 >
                   <PieceCell

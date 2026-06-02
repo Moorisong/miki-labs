@@ -53,14 +53,14 @@ export default function MyPage() {
   const handleClearData = async () => {
     if (window.confirm('진행 중인 모든 퍼즐을 완전히 초기화하고 처음부터 다시 시작하시겠습니까?\n\n이 작업 진행 시 기존의 조각 맞춤 진척도와 이어서 하기 데이터가 전부 삭제되며, 새로 진입 시 0% 상태로 새롭게 시작하게 됩니다. (되돌릴 수 없음)')) {
       await clearAllPuzzleState();
-      alert('진행 중인 모든 퍼즐 플레이 상태가 성공적으로 초기화되었습니다! 처음부터 다시 즐겁게 도전해보세요. 🧼');
+      alert('진행 중인 모든 퍼즐 플레이 상태가 성공적으로 초기화되었습니다! 처음부터 다시 즐겁게 도전해보세요.');
       router.refresh();
     }
   };
 
   const handleDeleteAccount = async () => {
     if (!token) return;
-    if (window.confirm('🚨 정말로 회원 탈퇴를 진행하시겠습니까?\n\n이 작업 진행 시 사용자의 카카오 로그인 프로필 연동이 끊어지며, 저장된 모든 완료 랭킹 기록, 실시간 퍼즐 진행 상황 및 토큰 로그가 데이터베이스에서 CASCADE 영구 일괄 삭제됩니다. 이 작업은 절대 복구할 수 없습니다.')) {
+    if (window.confirm('정말로 회원 탈퇴를 진행하시겠습니까?\n\n이 작업 진행 시 사용자의 카카오 로그인 프로필 연동이 끊어지며, 저장된 모든 완료 랭킹 기록, 실시간 퍼즐 진행 상황 및 토큰 로그가 데이터베이스에서 CASCADE 영구 일괄 삭제됩니다. 이 작업은 절대 복구할 수 없습니다.')) {
       try {
         const res = await deleteMyAccount(token);
         if (res.success) {
@@ -174,7 +174,7 @@ export default function MyPage() {
               )}
               {history.length === 0 && (
                 <span className="text-xs font-semibold" style={{ color: 'var(--puzzle-muted-foreground)' }}>
-                  아직 획득한 훈장이 없습니다. 퍼즐을 풀고 첫 훈장을 획득하세요! 🏅
+                  아직 획득한 훈장이 없습니다. 퍼즐을 풀고 첫 훈장을 획득하세요!
                 </span>
               )}
             </div>

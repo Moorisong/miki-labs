@@ -14,6 +14,7 @@ interface CompletionModalProps {
   isLoggedIn: boolean;
   isSaving: boolean;
   isSaved: boolean;
+  mode?: 'ranked' | 'solo';
 }
 
 const CONFETTI_COLORS = ['#4F8EF7', '#22C55E', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
@@ -53,6 +54,7 @@ export default function CompletionModal({
   isLoggedIn,
   isSaving,
   isSaved,
+  mode = 'solo',
 }: CompletionModalProps) {
   const [visible, setVisible] = useState(false);
 
@@ -135,6 +137,12 @@ export default function CompletionModal({
           </p>
         </div>
 
+        {mode === 'solo' && (
+          <p className="text-[11px] font-bold mb-6 -mt-2 leading-relaxed" style={{ color: 'var(--puzzle-muted-foreground)' }}>
+            ※ 힐링 플레이 모드는 랭킹 등록 및 순위 경쟁에서 제외됩니다.
+          </p>
+        )}
+
         {/* 랭킹 반영 수치 표시 (기록이 저장되었거나 로그인된 상태에서 랭킹 모드일 시) */}
         {myRanking && myRanking.myRank !== null && (
           <div
@@ -168,7 +176,13 @@ export default function CompletionModal({
                 style={{ backgroundColor: isSaved ? '#22C55E' : 'var(--puzzle-primary)' }}
               >
                 <Save size={16} strokeWidth={2.5} />
-                <span>{isSaved ? '기록 저장 완료! 🏆' : isSaving ? '기록을 업로드하는 중...' : '공식 랭킹에 기록 등록하기'}</span>
+                <span>
+                  {isSaved 
+                    ? (mode === 'solo' ? '기록 저장 완료! 💾' : '기록 저장 완료! 🏆') 
+                    : isSaving 
+                      ? '기록을 업로드하는 중...' 
+                      : (mode === 'solo' ? '내 기록실에 저장하기' : '공식 랭킹에 기록 등록하기')}
+                </span>
               </button>
             )
           ) : (
@@ -178,7 +192,7 @@ export default function CompletionModal({
               style={{ backgroundColor: '#EF4444' }}
             >
               <LogIn size={16} strokeWidth={2.5} />
-              <span>로그인하고 랭킹 등록하기 🏆</span>
+              <span>{mode === 'solo' ? '로그인하고 기록 저장하기 💾' : '로그인하고 랭킹 등록하기 🏆'}</span>
             </button>
           )}
 

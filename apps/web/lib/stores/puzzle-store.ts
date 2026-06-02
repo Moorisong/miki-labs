@@ -22,7 +22,7 @@ export interface PuzzleState {
   challengeToken: string | null;
 
   // 액션
-  initializePuzzle: (puzzleId: string, imgUrl: string, diff: 'beginner' | 'expert', mode: 'ranked' | 'solo') => void;
+  initializePuzzle: (puzzleId: string, imgUrl: string, diff: 'beginner' | 'expert', mode: 'ranked' | 'solo', customStartedAt?: string) => void;
   resumePuzzle: (state: {
     difficulty: 'beginner' | 'expert';
     mode: 'ranked' | 'solo';
@@ -72,10 +72,13 @@ export const usePuzzleStore = create<PuzzleState>((set, get) => ({
   startedAt: null,
   challengeToken: null,
 
-  initializePuzzle: (puzzleId, imgUrl, diff, mode) => {
+  initializePuzzle: (puzzleId, imgUrl, diff, mode, customStartedAt) => {
     const total = diff === 'beginner' ? 100 : 256;
     const pieces = Array.from({ length: total }, (_, i) => i);
     const shuffledTray = shuffle(pieces);
+
+    const startedTime = customStartedAt ? new Date(customStartedAt).getTime() : Date.now();
+    const elapsedSeconds = Math.max(0, Math.floor((Date.now() - startedTime) / 1000));
 
     set({
       activePuzzleId: puzzleId,
@@ -86,10 +89,10 @@ export const usePuzzleStore = create<PuzzleState>((set, get) => ({
       board: Array(total).fill(null),
       trayPieces: shuffledTray,
       selectedTrayPiece: null,
-      timerSeconds: 0,
+      timerSeconds: elapsedSeconds,
       isTimerRunning: true, // 초기화 후 바로 타이머 가동
       isCompleted: false,
-      startedAt: new Date().toISOString(),
+      startedAt: customStartedAt || new Date().toISOString(),
       challengeToken: null,
     });
   },

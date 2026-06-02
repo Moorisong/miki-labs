@@ -46,32 +46,41 @@ const debounceTimers = new Map<string, NodeJS.Timeout>();
 
 export async function savePuzzleState(
   puzzleId: string,
-  state: Omit<LocalPuzzleState, 'puzzleId' | 'updatedAt'>
+  state: Omit<LocalPuzzleState, 'puzzleId' | 'updatedAt'>,
+  immediate = false
 ): Promise<void> {
   // 기존 타이머 클리어
   if (debounceTimers.has(puzzleId)) {
     clearTimeout(debounceTimers.get(puzzleId)!);
+    debounceTimers.delete(puzzleId);
+  }
+
+  const saveFn = async () => {
+    try {
+      const db = await getDB();
+      const transaction = db.transaction(STORE_NAME, 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+
+      const data: LocalPuzzleState = {
+        puzzleId,
+        ...state,
+        updatedAt: new Date().toISOString(),
+      };
+
+      store.put(data);
+    } catch (error) {
+      console.error('IndexedDB save failed:', error);
+    }
+  };
+
+  if (immediate) {
+    return saveFn();
   }
 
   return new Promise((resolve) => {
     const timer = setTimeout(async () => {
-      try {
-        const db = await getDB();
-        const transaction = db.transaction(STORE_NAME, 'readwrite');
-        const store = transaction.objectStore(STORE_NAME);
-
-        const data: LocalPuzzleState = {
-          puzzleId,
-          ...state,
-          updatedAt: new Date().toISOString(),
-        };
-
-        store.put(data);
-        resolve();
-      } catch (error) {
-        console.error('IndexedDB save failed:', error);
-        resolve();
-      }
+      await saveFn();
+      resolve();
     }, 2000); // 2초 디바운스
 
     debounceTimers.set(puzzleId, timer);

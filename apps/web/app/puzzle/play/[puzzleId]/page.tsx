@@ -20,6 +20,8 @@ import FloatingToolbar from '@/components/puzzle/floating-toolbar';
 import CompletionModal from '@/components/puzzle/completion-modal';
 import CursorFollower from '@/components/puzzle/cursor-follower';
 import { MyRanking, Puzzle } from '@/types/puzzle';
+import { useToast } from '@/lib/hooks/use-toast';
+import Toast from '@/components/ui/toast';
 
 // Next.js 16 App Router Dynamic Route Params 대응
 interface PlayPageProps {
@@ -70,9 +72,12 @@ export default function PlayPage({ params }: PlayPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [myRanking, setMyRanking] = useState<MyRanking | null>(null);
+  const { toast: toastState, showToast, hideToast } = useToast();
 
   // 1. 초기 마운트 시 퍼즐 메타데이터 로드 및 게임 시작/이어하기 분기
   useEffect(() => {
+    const pageEnterTime = new Date().toISOString();
+
     async function setupGame() {
       try {
         const res = await fetchPuzzleById(puzzleId);
@@ -102,11 +107,11 @@ export default function PlayPage({ params }: PlayPageProps) {
               completed: saved.completed,
             });
           } else {
-            initializePuzzle(puzzleId, res.data.imageUrl, diffParam, modeParam);
+            initializePuzzle(puzzleId, res.data.imageUrl, diffParam, modeParam, pageEnterTime);
           }
         } else {
           // 새로하기
-          initializePuzzle(puzzleId, res.data.imageUrl, diffParam, modeParam);
+          initializePuzzle(puzzleId, res.data.imageUrl, diffParam, modeParam, pageEnterTime);
         }
 
         // 로그인된 상태이고 이번주 퍼즐을 랭킹 모드로 플레이 시 보안 챌린지 시작 (랭킹 모드)
@@ -156,8 +161,7 @@ export default function PlayPage({ params }: PlayPageProps) {
       locked: pieceId === idx,
     }));
 
-    // IndexedDB 로컬 자동 저장
-    savePuzzleState(puzzleId, {
+    const saveStateData = {
       difficulty,
       mode,
       timerSeconds,
@@ -167,12 +171,22 @@ export default function PlayPage({ params }: PlayPageProps) {
       progress,
       completed: isCompleted,
       startedAt: startedAt || new Date().toISOString(),
-    });
+    };
+
+    // IndexedDB 로컬 자동 저장
+    savePuzzleState(puzzleId, saveStateData);
 
     // 로그인된 상태 시 서버 진행률 자동 업로드
     if (token) {
       saveProgressApi(puzzleId, progress, token).catch(console.error);
     }
+
+    // Cleanup: 언마운트 시 최종 진행 상황을 디바운스 없이 로컬에 즉시 저장 (마지막 타이머/조각 배치 데이터 유실 및 레이스 컨디션 방지)
+    return () => {
+      if (puzzleId && board.length > 0 && !isCompleted) {
+        savePuzzleState(puzzleId, saveStateData, true);
+      }
+    };
   }, [board, timerSeconds, puzzleId, totalPieces, difficulty, mode, isCompleted, startedAt, isPageLoading, token]);
 
   // 4. 모드 판정
@@ -212,14 +226,14 @@ export default function PlayPage({ params }: PlayPageProps) {
   };
 
   const handleShuffle = () => {
-    if (window.confirm('정말로 판을 엎고 처음부터 다시 시작하시겠습니까? 🧘')) {
+    if (window.confirm('정말로 판을 엎고 처음부터 다시 시작하시겠습니까?')) {
       shufflePieces();
     }
   };
 
   const handleSaveManual = async () => {
     // 수동 저장 트리거 시 알림
-    alert('게임 진행상황이 로컬 디스크 및 클라우드 서버에 안전하게 자동 저장되었습니다. 💾');
+    alert('게임 진행상황이 로컬 디스크 및 클라우드 서버에 안전하게 자동 저장되었습니다.');
   };
 
   // 5. 완료 시 기록 제출 처리
@@ -303,7 +317,7 @@ export default function PlayPage({ params }: PlayPageProps) {
         }
       }
       navigator.clipboard.writeText(window.location.origin + '/puzzle');
-      alert('공유용 하루퍼즐 링크가 성공적으로 클립보드에 복사되었습니다! 💙');
+      showToast('공유용 하루퍼즐 링크가 성공적으로 클립보드에 복사되었습니다!', 'success');
     }
   };
 
@@ -362,6 +376,20 @@ export default function PlayPage({ params }: PlayPageProps) {
           </div>
         </div>
       </div>
+
+      {/* Solo mode info banner */}
+      {mode === 'solo' && (
+        <div 
+          className="text-center py-1.5 px-4 text-[10px] sm:text-xs font-bold select-none border-b flex items-center justify-center gap-1.5 animate-fade-in"
+          style={{ 
+            backgroundColor: 'var(--puzzle-secondary)', 
+            color: 'var(--puzzle-primary)',
+            borderColor: 'var(--puzzle-border)'
+          }}
+        >
+          <span>이 퍼즐은 랭킹 등록 및 기록 경쟁에서 제외됩니다.</span>
+        </div>
+      )}
 
       {/* Play Canvas / Board Area */}
       <div className="flex-1 min-h-0 flex flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -424,6 +452,7 @@ export default function PlayPage({ params }: PlayPageProps) {
           isLoggedIn={!!token}
           isSaving={isSubmitting}
           isSaved={isSaved}
+          mode={mode}
         />
       )}
 
@@ -433,6 +462,9 @@ export default function PlayPage({ params }: PlayPageProps) {
         image={puzzle.imageUrl}
         gridSize={gridSize}
       />
+
+      {/* Toast Notification */}
+      <Toast toast={toastState} onHide={hideToast} />
     </div>
   );
 }

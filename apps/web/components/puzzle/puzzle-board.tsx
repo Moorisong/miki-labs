@@ -42,12 +42,14 @@ export default function PuzzleBoard({
             <div
               key={slotIdx}
               onClick={() => onCellClick(slotIdx)}
-              className="relative flex items-center justify-center cursor-pointer transition-all duration-150 group"
+              className="relative flex items-center justify-center cursor-pointer transition-all duration-150 group outline-none select-none"
               style={{
                 width: cellSize,
                 height: cellSize,
-                border: '1px dashed var(--puzzle-border)',
+                border: isPlaced ? '1px solid transparent' : '1px dashed var(--puzzle-border)',
                 backgroundColor: isPlaced ? 'transparent' : 'rgba(255, 255, 255, 0.03)',
+                outline: 'none',
+                WebkitTapHighlightColor: 'transparent',
               }}
               onMouseEnter={(e) => {
                 if (!isPlaced) {

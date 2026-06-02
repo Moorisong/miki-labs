@@ -2,12 +2,16 @@
 
 import { Share2, Link2 } from 'lucide-react';
 import { Puzzle } from '@/types/puzzle';
+import { useToast } from '@/lib/hooks/use-toast';
+import Toast from '@/components/ui/toast';
 
 interface ShareCardProps {
   puzzle: Puzzle;
 }
 
 export default function ShareCard({ puzzle }: ShareCardProps) {
+  const { toast, showToast, hideToast } = useToast();
+
   const getAbsoluteImageUrl = (url: string) => {
     if (!url) return '';
     if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -61,14 +65,14 @@ export default function ShareCard({ puzzle }: ShareCardProps) {
       }
       
       // Kakao SDK 로드 또는 실행 실패 시 안내
-      alert('카카오톡 공유 기능을 불러오지 못했습니다. 아래 링크 복사 버튼을 이용해 주세요! 💙');
+      alert('카카오톡 공유 기능을 불러오지 못했습니다. 아래 링크 복사 버튼을 이용해 주세요!');
     }
   };
 
   const handleCopyLink = () => {
     if (typeof window !== 'undefined') {
       navigator.clipboard.writeText(window.location.origin + '/puzzle');
-      alert('하루퍼즐 공유 링크가 클립보드에 복사되었습니다! 친구들에게 보내보세요. 💙');
+      showToast('하루퍼즐 공유 링크가 클립보드에 복사되었습니다! 친구들에게 보내보세요.', 'success');
     }
   };
 
@@ -130,6 +134,9 @@ export default function ShareCard({ puzzle }: ShareCardProps) {
           공유 링크 복사하기
         </button>
       </div>
+
+      {/* Toast Notification */}
+      <Toast toast={toast} onHide={hideToast} />
     </div>
   );
 }

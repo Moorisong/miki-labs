@@ -42,6 +42,10 @@ export default function HeroSection({
   }, [puzzle.endDate]);
 
   const handleLaunchGame = () => {
+    if (hasSavedGame) {
+      const confirmRestart = window.confirm('이미 진행 중인 퍼즐이 있습니다. 처음부터 다시 시작하시겠습니까? (기존 진행 데이터는 삭제됩니다.)');
+      if (!confirmRestart) return;
+    }
     onStart(tempDiff, tempMode);
     setShowDiffSelect(false);
   };
@@ -100,32 +104,47 @@ export default function HeroSection({
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 relative">
-              <button
-                onClick={() => setShowDiffSelect(true)}
-                className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-95 text-white puzzle-animate-pulse-glow"
-                style={{
-                  backgroundColor: 'var(--puzzle-primary)',
-                  fontSize: '15px',
-                  fontWeight: 700,
-                }}
-              >
-                <Play size={16} strokeWidth={2.5} />
-                퍼즐 시작하기
-              </button>
+              {hasSavedGame && onResume ? (
+                <>
+                  <button
+                    onClick={onResume}
+                    className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-95 text-white puzzle-animate-pulse-glow"
+                    style={{
+                      backgroundColor: 'var(--puzzle-primary)',
+                      fontSize: '15px',
+                      fontWeight: 700,
+                    }}
+                  >
+                    <Play size={16} strokeWidth={2.5} />
+                    이어하기 ({progress}%)
+                  </button>
 
-              {hasSavedGame && onResume && (
+                  <button
+                    onClick={() => setShowDiffSelect(true)}
+                    className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                    style={{
+                      backgroundColor: 'var(--puzzle-glass-bg)',
+                      color: 'var(--puzzle-foreground)',
+                      borderColor: 'var(--puzzle-border)',
+                      fontSize: '15px',
+                      fontWeight: 650,
+                    }}
+                  >
+                    새로 시작하기
+                  </button>
+                </>
+              ) : (
                 <button
-                  onClick={onResume}
-                  className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                  onClick={() => setShowDiffSelect(true)}
+                  className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-95 text-white puzzle-animate-pulse-glow"
                   style={{
-                    backgroundColor: 'var(--puzzle-glass-bg)',
-                    color: 'var(--puzzle-foreground)',
-                    borderColor: 'var(--puzzle-border)',
+                    backgroundColor: 'var(--puzzle-primary)',
                     fontSize: '15px',
-                    fontWeight: 650,
+                    fontWeight: 700,
                   }}
                 >
-                  이어하기 ({progress}%)
+                  <Play size={16} strokeWidth={2.5} />
+                  퍼즐 시작하기
                 </button>
               )}
             </div>
