@@ -14,7 +14,7 @@ export default function StatsCard({
   completionRate 
 }: StatsCardProps) {
   const stats = [
-    { label: '주간 퍼즐 참여', value: `${participantCount.toLocaleString()}명` },
+    { label: '주간 퍼즐 완성', value: `${participantCount.toLocaleString()}명` },
     { label: '누적 플레이 수', value: `${totalPlayCount.toLocaleString()}회` },
     { label: '아카이브 퍼즐', value: `${totalPuzzles}개` },
     { label: '평균 퍼즐 완성률', value: completionRate },
