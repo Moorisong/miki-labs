@@ -2,14 +2,17 @@
 
 interface StatsCardProps {
   participantCount: number;
+  totalPlayCount: number;
   totalPuzzles: number;
+  completionRate: string;
 }
 
-export default function StatsCard({ participantCount, totalPuzzles }: StatsCardProps) {
-  // 실제 participantCount 기반으로 스케일링된 가상의 총 참가 횟수 및 완성률 계산
-  const totalPlayCount = participantCount * 12 + 1284;
-  const completionRate = '78%';
-
+export default function StatsCard({ 
+  participantCount, 
+  totalPlayCount, 
+  totalPuzzles, 
+  completionRate 
+}: StatsCardProps) {
   const stats = [
     { label: '주간 퍼즐 참여', value: `${participantCount.toLocaleString()}명` },
     { label: '누적 플레이 수', value: `${totalPlayCount.toLocaleString()}회` },

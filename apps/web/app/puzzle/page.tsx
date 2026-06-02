@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useRankingStore } from '@/lib/stores/ranking-store';
-import { fetchCurrentPuzzle, fetchArchivePuzzles } from '@/lib/puzzle-api';
+import { fetchCurrentPuzzle, fetchArchivePuzzles, fetchServiceStats } from '@/lib/puzzle-api';
 import { loadPuzzleState } from '@/lib/puzzle-db';
 import { Puzzle } from '@/types/puzzle';
 import HeroSection from '@/components/puzzle/hero-section';
@@ -28,6 +28,7 @@ export default function PuzzlePage() {
   const [savedDifficulty, setSavedDifficulty] = useState<'beginner' | 'expert' | null>(null);
   const [previewDiff, setPreviewDiff] = useState<'beginner' | 'expert'>('beginner');
   const [isPuzzleLoading, setIsPuzzleLoading] = useState(true);
+  const [serviceStats, setServiceStats] = useState<{ totalPlayCount: number; completionRate: string } | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -50,6 +51,12 @@ export default function PuzzlePage() {
         const archiveRes = await fetchArchivePuzzles();
         if (archiveRes.success && archiveRes.data) {
           setTotalPuzzles(archiveRes.data.length);
+        }
+
+        // 4. 서비스 전체 통계 조회
+        const statsRes = await fetchServiceStats();
+        if (statsRes.success && statsRes.data) {
+          setServiceStats(statsRes.data);
         }
       } catch (e) {
         console.error('Failed to load puzzle data:', e);
@@ -128,7 +135,12 @@ export default function PuzzlePage() {
         <div className="flex flex-col gap-4">
           <ShareCard puzzle={currentPuzzle} />
           
-          <StatsCard participantCount={currentPuzzle.participantCount} totalPuzzles={totalPuzzles} />
+          <StatsCard 
+            participantCount={currentPuzzle.participantCount} 
+            totalPlayCount={serviceStats?.totalPlayCount ?? 0}
+            totalPuzzles={totalPuzzles} 
+            completionRate={serviceStats?.completionRate ?? '0%'} 
+          />
 
           {/* Archive teaser */}
           <Link

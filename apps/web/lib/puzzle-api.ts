@@ -32,6 +32,16 @@ export async function fetchArchivePuzzles(): Promise<ApiResponse<Puzzle[]>> {
   }
 }
 
+export async function fetchServiceStats(): Promise<ApiResponse<{ totalPlayCount: number; completionRate: string }>> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/puzzle/stats`);
+    return await res.json();
+  } catch (error) {
+    console.error('fetchServiceStats error:', error);
+    return { success: false, error: '네트워크 오류가 발생했습니다.' };
+  }
+}
+
 export async function fetchPuzzleById(id: string): Promise<ApiResponse<Puzzle>> {
   try {
     const res = await fetch(`${API_BASE_URL}/api${API_PUZZLE.DETAILS(id)}`);
