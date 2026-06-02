@@ -265,29 +265,34 @@ export default function PlayPage({ params }: PlayPageProps) {
   const handleShare = () => {
     if (typeof window !== 'undefined') {
       const Kakao = (window as any).Kakao;
-      if (Kakao && Kakao.isInitialized && Kakao.isInitialized() && puzzle) {
-        Kakao.Share.sendDefault({
-          objectType: 'feed',
-          content: {
-            title: `🧩 하루퍼즐 완주 성공! - ${puzzle.title}`,
-            description: `와우! 제가 ${formatTime(timerSeconds)}만에 퍼즐을 완주했어요! 랭킹에 도전해 보세요!`,
-            imageUrl: puzzle.imageUrl,
-            link: {
-              mobileWebUrl: window.location.origin + '/puzzle',
-              webUrl: window.location.origin + '/puzzle',
-            },
-          },
-          buttons: [
-            {
-              title: '나도 도전하기',
+      if (Kakao) {
+        if (Kakao.isInitialized && !Kakao.isInitialized()) {
+          Kakao.init(process.env.NEXT_PUBLIC_KAKAO_API_KEY);
+        }
+        if (Kakao.isInitialized && Kakao.isInitialized() && puzzle) {
+          Kakao.Share.sendDefault({
+            objectType: 'feed',
+            content: {
+              title: `🧩 하루퍼즐 완주 성공! - ${puzzle.title}`,
+              description: `와우! 제가 ${formatTime(timerSeconds)}만에 퍼즐을 완주했어요! 랭킹에 도전해 보세요!`,
+              imageUrl: puzzle.imageUrl,
               link: {
                 mobileWebUrl: window.location.origin + '/puzzle',
                 webUrl: window.location.origin + '/puzzle',
               },
             },
-          ],
-        });
-        return;
+            buttons: [
+              {
+                title: '나도 도전하기',
+                link: {
+                  mobileWebUrl: window.location.origin + '/puzzle',
+                  webUrl: window.location.origin + '/puzzle',
+                },
+              },
+            ],
+          });
+          return;
+        }
       }
       navigator.clipboard.writeText(window.location.origin + '/puzzle');
       alert('공유용 하루퍼즐 링크가 성공적으로 클립보드에 복사되었습니다! 💙');
