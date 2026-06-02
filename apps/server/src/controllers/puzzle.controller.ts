@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { getPuzzleModel } from '../models/puzzle.model';
+import { getPuzzleResultModel } from '../models/puzzle-result.model';
+import { getPuzzleProgressModel } from '../models/puzzle-progress.model';
 
 /**
  * GET /api/puzzle/current
@@ -85,6 +87,42 @@ export const getPuzzleById = async (req: Request, res: Response, next: NextFunct
     res.json({
       success: true,
       data: puzzle,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/puzzle/stats
+ * 서비스 전체 통계 (누적 플레이 수 및 평균 완성률) 조회
+ */
+export const getServiceStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const PuzzleResult = getPuzzleResultModel();
+    const PuzzleProgress = getPuzzleProgressModel();
+
+    // 1. 완주된 기록 개수
+    const completedCount = await PuzzleResult.countDocuments({ completed: true });
+
+    // 2. 진행 중인 기록 개수
+    const ongoingCount = await PuzzleProgress.countDocuments();
+
+    // 3. 누적 플레이 수 = 완주 수 + 진행 중 수
+    const totalPlayCount = completedCount + ongoingCount;
+
+    // 4. 평균 완성률 = 완주 수 / 누적 플레이 수
+    let completionRate = 0;
+    if (totalPlayCount > 0) {
+      completionRate = Math.round((completedCount / totalPlayCount) * 100);
+    }
+
+    res.json({
+      success: true,
+      data: {
+        totalPlayCount,
+        completionRate: `${completionRate}%`
+      }
     });
   } catch (error) {
     next(error);

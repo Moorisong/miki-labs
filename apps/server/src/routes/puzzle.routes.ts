@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { puzzleAuth } from '../middlewares/puzzle-auth';
 import { verifyChallenge } from '../middlewares/verify-challenge';
-import { getCurrentPuzzle, getArchivePuzzles, getPuzzleById } from '../controllers/puzzle.controller';
+import { getCurrentPuzzle, getArchivePuzzles, getPuzzleById, getServiceStats } from '../controllers/puzzle.controller';
 import { getCurrentRankings, getMyRanking, submitResult, startChallenge } from '../controllers/ranking.controller';
 import { saveProgress, getMyProgress, clearProgress } from '../controllers/puzzle-progress.controller';
 import { getMyProfile, deleteUserAccount } from '../controllers/user.controller';
@@ -11,6 +11,7 @@ const router = Router();
 // 1. 퍼즐 관련 API (공개) - 정적 경로 먼저
 router.get('/current', getCurrentPuzzle);
 router.get('/archive', getArchivePuzzles);
+router.get('/stats', getServiceStats);
 
 // 2. 랭킹 관련 API (공개 / 인증)
 router.get('/rankings/current', getCurrentRankings);
