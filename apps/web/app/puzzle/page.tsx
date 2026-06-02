@@ -24,6 +24,7 @@ export default function PuzzlePage() {
   const [totalPuzzles, setTotalPuzzles] = useState(0);
   const [hasSavedGame, setHasSavedGame] = useState(false);
   const [savedProgress, setSavedProgress] = useState(0);
+  const [savedDifficulty, setSavedDifficulty] = useState<'beginner' | 'expert' | null>(null);
   const [isPuzzleLoading, setIsPuzzleLoading] = useState(true);
 
   useEffect(() => {
@@ -42,6 +43,7 @@ export default function PuzzlePage() {
           if (savedState && !savedState.completed) {
             setHasSavedGame(true);
             setSavedProgress(savedState.progress);
+            setSavedDifficulty(savedState.difficulty);
           }
         }
 
@@ -100,6 +102,7 @@ export default function PuzzlePage() {
           onResume={handleResume}
           hasSavedGame={hasSavedGame}
           progress={savedProgress}
+          savedDifficulty={savedDifficulty}
         />
       </div>
 

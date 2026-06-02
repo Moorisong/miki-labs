@@ -10,6 +10,7 @@ interface HeroSectionProps {
   onResume?: () => void;
   hasSavedGame: boolean;
   progress: number;
+  savedDifficulty?: 'beginner' | 'expert' | null;
 }
 
 export default function HeroSection({
@@ -18,8 +19,13 @@ export default function HeroSection({
   onResume,
   hasSavedGame,
   progress,
+  savedDifficulty,
 }: HeroSectionProps) {
   const [showDiffSelect, setShowDiffSelect] = useState(false);
+
+  // 진행률 기반 맞춘 조각수 계산
+  const totalPieces = savedDifficulty === 'expert' ? 256 : 100;
+  const matchedPieces = Math.round((progress / 100) * totalPieces);
 
   // 남은 날짜 계산
   const getDaysLeft = () => {
@@ -177,13 +183,27 @@ export default function HeroSection({
                 boxShadow: 'var(--puzzle-shadow-md)',
               }}
             >
-              <div className="flex items-center gap-1 text-xs font-bold" style={{ color: 'var(--puzzle-primary)' }}>
-                <Layers size={13} />
-                <span>Beginner / Expert</span>
-              </div>
-              <p className="mt-0.5 text-sm font-extrabold" style={{ color: 'var(--puzzle-card-foreground)' }}>
-                100조각 / 256조각
-              </p>
+              {hasSavedGame && savedDifficulty ? (
+                <>
+                  <div className="flex items-center gap-1 text-xs font-bold" style={{ color: 'var(--puzzle-primary)' }}>
+                    <Layers size={13} />
+                    <span>진행 중 ({savedDifficulty === 'expert' ? 'Expert' : 'Beginner'})</span>
+                  </div>
+                  <p className="mt-0.5 text-sm font-extrabold" style={{ color: 'var(--puzzle-card-foreground)' }}>
+                    {matchedPieces} / {totalPieces} 조각
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-1 text-xs font-bold" style={{ color: 'var(--puzzle-primary)' }}>
+                    <Trophy size={13} />
+                    <span>실시간 랭킹 도전</span>
+                  </div>
+                  <p className="mt-0.5 text-sm font-extrabold" style={{ color: 'var(--puzzle-card-foreground)' }}>
+                    망설임은 순위만 늦출 뿐! ⚡
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
