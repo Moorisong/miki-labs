@@ -19,6 +19,7 @@ const createTenMinuteLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { keyGeneratorIpFallback: false },
 });
 
 /** 생성 API: IP당 20회/시간 */
@@ -33,6 +34,7 @@ const createHourLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { keyGeneratorIpFallback: false },
 });
 
 /** 답변 API: IP당 15회/분 */
@@ -47,6 +49,7 @@ const submitMinuteLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { keyGeneratorIpFallback: false },
 });
 
 /** 결과 조회: IP당 60회/분 */
@@ -61,6 +64,7 @@ const viewLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { keyGeneratorIpFallback: false },
 });
 
 // --- Routes ---

@@ -56,7 +56,7 @@ export default function FloatingToolbar({
           style={{ color: 'var(--puzzle-muted-foreground)' }}
         >
           <Shuffle size={15} />
-          <span>조각 섞기</span>
+          <span>판 엎기</span>
         </button>
 
         <div className="w-px h-5" style={{ backgroundColor: 'var(--puzzle-border)' }} />

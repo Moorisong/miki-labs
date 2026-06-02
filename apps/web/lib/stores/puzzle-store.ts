@@ -33,6 +33,8 @@ export interface PuzzleState {
   selectTrayPiece: (pieceId: number | null) => void;
   placePiece: (slotIndex: number, pieceId: number) => void;
   removePiece: (slotIndex: number) => void;
+  swapPieces: (slotIndex: number, pieceId: number) => void;
+  pickUpPiece: (slotIndex: number) => void;
   shufflePieces: () => void;
   startTimer: () => void;
   stopTimer: () => void;
@@ -104,9 +106,22 @@ export const usePuzzleStore = create<PuzzleState>((set, get) => ({
   },
 
   selectTrayPiece: (pieceId) => {
-    set((state) => ({
-      selectedTrayPiece: state.selectedTrayPiece === pieceId ? null : pieceId,
-    }));
+    set((state) => {
+      const currentSelected = state.selectedTrayPiece;
+      let nextTray = [...state.trayPieces];
+
+      // 만약 현재 들고 있던 조각이 있고, 그 조각이 트레이에 없는 상태라면 (보드에서 가져온 경우)
+      // 새로운 조각을 선택하거나 해제할 때 기존 조각을 트레이로 돌려보냄
+      if (currentSelected !== null && !state.trayPieces.includes(currentSelected)) {
+        nextTray.push(currentSelected);
+      }
+
+      const isDeselect = currentSelected === pieceId;
+      return {
+        trayPieces: nextTray,
+        selectedTrayPiece: isDeselect ? null : pieceId,
+      };
+    });
   },
 
   placePiece: (slotIndex, pieceId) => {
@@ -151,6 +166,46 @@ export const usePuzzleStore = create<PuzzleState>((set, get) => ({
         board: nextBoard,
         trayPieces: nextTray,
         selectedTrayPiece: null,
+      };
+    });
+  },
+
+  swapPieces: (slotIndex, pieceId) => {
+    set((state) => {
+      const nextBoard = [...state.board];
+      const prevPieceInSlot = nextBoard[slotIndex];
+
+      // 만약 들고 있던 조각이 트레이에 있었다면 트레이에서 제거
+      const nextTray = state.trayPieces.filter((id) => id !== pieceId);
+
+      // 새 조각을 보드에 배치
+      nextBoard[slotIndex] = pieceId;
+
+      // 전체 완료 여부 검증
+      const isComplete = nextBoard.every((val, idx) => val === idx);
+
+      return {
+        board: nextBoard,
+        trayPieces: nextTray,
+        selectedTrayPiece: prevPieceInSlot, // 원래 있던 조각을 이제 들게 됨
+        isCompleted: isComplete,
+        isTimerRunning: isComplete ? false : state.isTimerRunning,
+      };
+    });
+  },
+
+  pickUpPiece: (slotIndex) => {
+    set((state) => {
+      const nextBoard = [...state.board];
+      const pieceId = nextBoard[slotIndex];
+
+      if (pieceId === null) return {};
+
+      nextBoard[slotIndex] = null;
+
+      return {
+        board: nextBoard,
+        selectedTrayPiece: pieceId,
       };
     });
   },

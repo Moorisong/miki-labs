@@ -38,35 +38,63 @@ export default function PieceTray({
         className="flex gap-3 overflow-x-auto py-2 px-1 scrollbar-hide"
         style={{ scrollBehavior: 'smooth' }}
       >
-        {trayPieces.length === 0 ? (
+        {trayPieces.length === 0 && selectedPieceId === null ? (
           <div className="w-full text-center py-4 text-sm font-semibold" style={{ color: 'var(--puzzle-primary)' }}>
             🎉 모든 조각이 보드에 배치되었습니다! 완성 여부를 확인하세요.
           </div>
         ) : (
-          trayPieces.map((pieceId) => {
-            const isSelected = selectedPieceId === pieceId;
-
-            return (
+          <>
+            {/* 보드에서 뗀 조각을 들고 있어 트레이 목록에 없는 경우 맨 앞에 특별 표시 */}
+            {selectedPieceId !== null && !trayPieces.includes(selectedPieceId) && (
               <div
-                key={pieceId}
-                onClick={() => onPieceClick(pieceId)}
-                className="relative cursor-pointer transition-all duration-200"
+                key={selectedPieceId}
+                onClick={() => onPieceClick(selectedPieceId)}
+                className="relative cursor-pointer transition-all duration-200 flex-shrink-0"
                 style={{
-                  transform: isSelected ? 'scale(1.08) translateY(-4px)' : 'scale(1)',
-                  boxShadow: isSelected ? '0 0 0 3px var(--puzzle-primary), 0 8px 16px rgba(79, 142, 247, 0.3)' : 'none',
+                  transform: 'scale(1.08) translateY(-4px)',
+                  boxShadow: '0 0 0 3px var(--puzzle-primary), 0 8px 16px rgba(79, 142, 247, 0.3)',
                   borderRadius: '6px',
                 }}
               >
                 <PieceCell
-                  pieceIdx={pieceId}
+                  pieceIdx={selectedPieceId}
                   image={image}
                   size={cellSize}
                   gridSize={gridSize}
                   small
                 />
+                <span className="absolute -top-2.5 -right-2 px-1 py-0.5 bg-blue-500 text-white rounded text-[8px] font-black select-none pointer-events-none shadow-md">
+                  HOLD
+                </span>
               </div>
-            );
-          })
+            )}
+
+            {/* 기존 트레이 조각들 */}
+            {trayPieces.map((pieceId) => {
+              const isSelected = selectedPieceId === pieceId;
+
+              return (
+                <div
+                  key={pieceId}
+                  onClick={() => onPieceClick(pieceId)}
+                  className="relative cursor-pointer transition-all duration-200 flex-shrink-0"
+                  style={{
+                    transform: isSelected ? 'scale(1.08) translateY(-4px)' : 'scale(1)',
+                    boxShadow: isSelected ? '0 0 0 3px var(--puzzle-primary), 0 8px 16px rgba(79, 142, 247, 0.3)' : 'none',
+                    borderRadius: '6px',
+                  }}
+                >
+                  <PieceCell
+                    pieceIdx={pieceId}
+                    image={image}
+                    size={cellSize}
+                    gridSize={gridSize}
+                    small
+                  />
+                </div>
+              );
+            })}
+          </>
         )}
       </div>
     </div>

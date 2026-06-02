@@ -18,6 +18,7 @@ import PuzzleBoard from '@/components/puzzle/puzzle-board';
 import PieceTray from '@/components/puzzle/piece-tray';
 import FloatingToolbar from '@/components/puzzle/floating-toolbar';
 import CompletionModal from '@/components/puzzle/completion-modal';
+import CursorFollower from '@/components/puzzle/cursor-follower';
 import { MyRanking, Puzzle } from '@/types/puzzle';
 
 // Next.js 16 App Router Dynamic Route Params 대응
@@ -51,6 +52,8 @@ export default function PlayPage({ params }: PlayPageProps) {
     selectTrayPiece,
     placePiece,
     removePiece,
+    swapPieces,
+    pickUpPiece,
     shufflePieces,
     startTimer,
     stopTimer,
@@ -184,10 +187,17 @@ export default function PlayPage({ params }: PlayPageProps) {
 
     const cellVal = board[slotIdx];
     if (cellVal !== null) {
-      // 슬롯 클릭 시 이미 조각이 배치되어 있으면 빼내기
-      removePiece(slotIdx);
+      if (selectedTrayPiece !== null) {
+        // 이미 조각 A를 든 상태에서 조각 B가 있는 슬롯을 클릭한 경우:
+        // 조각 A를 배치하고, 원래 슬롯에 있던 조각 B를 들기 (스왑)
+        swapPieces(slotIdx, selectedTrayPiece);
+      } else {
+        // 들고 있는 조각이 없는 상태에서 이미 배치된 조각을 클릭한 경우:
+        // 조각을 보드에서 떼어내고 "들기" (밑으로 내려보내지 않음)
+        pickUpPiece(slotIdx);
+      }
     } else if (selectedTrayPiece !== null) {
-      // 선택한 트레이 조각을 클릭한 슬롯에 배치
+      // 선택한 조각을 빈 슬롯에 배치
       placePiece(slotIdx, selectedTrayPiece);
     }
   };
@@ -197,7 +207,7 @@ export default function PlayPage({ params }: PlayPageProps) {
   };
 
   const handleShuffle = () => {
-    if (window.confirm('정말로 판을 엎고 처음부터 조각을 다시 섞으시겠습니까? 🧘')) {
+    if (window.confirm('정말로 판을 엎고 처음부터 다시 시작하시겠습니까? 🧘')) {
       shufflePieces();
     }
   };
@@ -404,6 +414,13 @@ export default function PlayPage({ params }: PlayPageProps) {
           isSaved={isSaved}
         />
       )}
+
+      {/* 커서 조각 추적기 */}
+      <CursorFollower
+        selectedPieceId={selectedTrayPiece}
+        image={puzzle.imageUrl}
+        gridSize={gridSize}
+      />
     </div>
   );
 }

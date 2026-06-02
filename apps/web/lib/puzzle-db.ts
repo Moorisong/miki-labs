@@ -15,7 +15,7 @@ export interface LocalPuzzleState {
 
 const DB_NAME = 'haruPuzzleDB';
 const STORE_NAME = 'puzzleState';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbInstance: IDBDatabase | null = null;
 
