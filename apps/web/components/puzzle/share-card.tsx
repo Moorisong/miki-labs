@@ -8,6 +8,15 @@ interface ShareCardProps {
 }
 
 export default function ShareCard({ puzzle }: ShareCardProps) {
+  const getAbsoluteImageUrl = (url: string) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // 상대 경로 이미지인 경우 도메인을 붙여 절대 경로로 변환 (카카오 연동 필수 조건)
+    return window.location.origin + url;
+  };
+
   const handleShare = () => {
     if (typeof window !== 'undefined') {
       const Kakao = (window as any).Kakao;
@@ -22,12 +31,13 @@ export default function ShareCard({ puzzle }: ShareCardProps) {
         // 초기화 성공 시 공유 실행
         if (Kakao.isInitialized && Kakao.isInitialized()) {
           try {
+            const absImgUrl = getAbsoluteImageUrl(puzzle.imageUrl);
             Kakao.Share.sendDefault({
               objectType: 'feed',
               content: {
-                title: `🧩 하루퍼즐 - ${puzzle.title}`,
-                description: `이번 주 퍼즐 ${puzzle.week}주차에 참여하여 친구들과 랭킹을 겨뤄보세요!`,
-                imageUrl: puzzle.imageUrl,
+                title: `🧩 [하루퍼즐] 이번 주 퍼즐 폼 미쳤다;;`,
+                description: `뇌 비우고 갓생 살기 프로젝트 ㄱㄱ? 🧠 ${puzzle.title} 맞추고 내 뇌지컬 랭킹 폼 확인해봐!`,
+                imageUrl: absImgUrl,
                 link: {
                   mobileWebUrl: window.location.origin + '/puzzle',
                   webUrl: window.location.origin + '/puzzle',
@@ -35,7 +45,7 @@ export default function ShareCard({ puzzle }: ShareCardProps) {
               },
               buttons: [
                 {
-                  title: '퍼즐 맞추러 가기',
+                  title: '나보다 빨리 맞추기 ㄱㄱ',
                   link: {
                     mobileWebUrl: window.location.origin + '/puzzle',
                     webUrl: window.location.origin + '/puzzle',
@@ -75,10 +85,10 @@ export default function ShareCard({ puzzle }: ShareCardProps) {
     >
       <div>
         <p className="text-sm font-extrabold" style={{ color: 'var(--puzzle-card-foreground)' }}>
-          친구에게 공유하기
+          친구에게 자랑하기
         </p>
         <p className="mt-1 text-xs font-semibold leading-relaxed" style={{ color: 'var(--puzzle-muted-foreground)' }}>
-          매주 제공되는 새로운 퍼즐을 친구들과 나누며 힐링과 주간 랭킹을 경쟁해보세요!
+          매주 갱신되는 갓생 맞춤형 감성 힐링 퍼즐! 🧠 내 뇌지컬 순위 폼을 친구들한테 당당하게 인증해 보세요.
         </p>
       </div>
 

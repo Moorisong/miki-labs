@@ -270,12 +270,15 @@ export default function PlayPage({ params }: PlayPageProps) {
           Kakao.init(process.env.NEXT_PUBLIC_KAKAO_API_KEY);
         }
         if (Kakao.isInitialized && Kakao.isInitialized() && puzzle) {
+          const absImgUrl = puzzle.imageUrl.startsWith('http') 
+            ? puzzle.imageUrl 
+            : window.location.origin + puzzle.imageUrl;
           Kakao.Share.sendDefault({
             objectType: 'feed',
             content: {
-              title: `🧩 하루퍼즐 완주 성공! - ${puzzle.title}`,
-              description: `와우! 제가 ${formatTime(timerSeconds)}만에 퍼즐을 완주했어요! 랭킹에 도전해 보세요!`,
-              imageUrl: puzzle.imageUrl,
+              title: `🧩 [오퍼완] 하루퍼즐 완주! 기록 폼 미쳤다;;`,
+              description: `단 ${formatTime(timerSeconds)}만에 갓벽하게 조각 맞춰버림 😎 뇌지컬 디톡스 완. 내 기록 이길 수 있으면 드루와! 👊`,
+              imageUrl: absImgUrl,
               link: {
                 mobileWebUrl: window.location.origin + '/puzzle',
                 webUrl: window.location.origin + '/puzzle',
@@ -283,7 +286,7 @@ export default function PlayPage({ params }: PlayPageProps) {
             },
             buttons: [
               {
-                title: '나도 도전하기',
+                title: '나보다 빨리 맞추기 ㄱㄱ',
                 link: {
                   mobileWebUrl: window.location.origin + '/puzzle',
                   webUrl: window.location.origin + '/puzzle',
