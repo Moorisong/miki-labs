@@ -88,7 +88,7 @@ export default function ShareCard({ puzzle }: ShareCardProps) {
           친구에게 자랑하기
         </p>
         <p className="mt-1 text-xs font-semibold leading-relaxed" style={{ color: 'var(--puzzle-muted-foreground)' }}>
-          매주 갱신되는 갓생 맞춤형 감성 힐링 퍼즐! 🧠 내 뇌지컬 순위 폼을 친구들한테 당당하게 인증해 보세요.
+          매주 갱신되는 갓생 맞춤형 감성 힐링 퍼즐! 내 뇌지컬 순위 폼을 친구들한테 당당하게 인증해 보세요.
         </p>
       </div>
 

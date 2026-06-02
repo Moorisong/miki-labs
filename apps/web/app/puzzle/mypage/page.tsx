@@ -51,9 +51,9 @@ export default function MyPage() {
   }, [token, status]);
 
   const handleClearData = async () => {
-    if (window.confirm('로컬 IndexedDB에 저장된 모든 진행 상태 및 이어하기 데이터를 완전히 초기화하시겠습니까? (이 작업은 되돌릴 수 없습니다)')) {
+    if (window.confirm('진행 중인 모든 퍼즐을 완전히 초기화하고 처음부터 다시 시작하시겠습니까?\n\n이 작업 진행 시 기존의 조각 맞춤 진척도와 이어서 하기 데이터가 전부 삭제되며, 새로 진입 시 0% 상태로 새롭게 시작하게 됩니다. (되돌릴 수 없음)')) {
       await clearAllPuzzleState();
-      alert('로컬에 저장된 모든 퍼즐 플레이 조각 상태가 성공적으로 초기화되었습니다! 🧼');
+      alert('진행 중인 모든 퍼즐 플레이 상태가 성공적으로 초기화되었습니다! 처음부터 다시 즐겁게 도전해보세요. 🧼');
       router.refresh();
     }
   };

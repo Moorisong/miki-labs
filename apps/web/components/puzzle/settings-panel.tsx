@@ -22,7 +22,7 @@ export default function SettingsPanel({ onClearData, onDeleteAccount }: Settings
     },
     { 
       icon: Trash2, 
-      label: '로컬 진행상태 초기화', 
+      label: '퍼즐 진행률 초기화 (처음부터 다시)', 
       color: '#F59E0B', 
       onClick: onClearData 
     },
