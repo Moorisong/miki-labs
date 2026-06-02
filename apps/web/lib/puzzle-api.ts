@@ -42,9 +42,12 @@ export async function fetchPuzzleById(id: string): Promise<ApiResponse<Puzzle>> 
   }
 }
 
-export async function fetchCurrentRankings(puzzleId: string): Promise<ApiResponse<RankingEntry[]>> {
+export async function fetchCurrentRankings(puzzleId: string, difficulty?: 'beginner' | 'expert'): Promise<ApiResponse<RankingEntry[]>> {
   try {
-    const res = await fetch(`${API_BASE_URL}/api${API_PUZZLE.RANKINGS_CURRENT}?puzzleId=${puzzleId}`);
+    const url = difficulty
+      ? `${API_BASE_URL}/api${API_PUZZLE.RANKINGS_CURRENT}?puzzleId=${puzzleId}&difficulty=${difficulty}`
+      : `${API_BASE_URL}/api${API_PUZZLE.RANKINGS_CURRENT}?puzzleId=${puzzleId}`;
+    const res = await fetch(url);
     return await res.json();
   } catch (error) {
     console.error('fetchCurrentRankings error:', error);
@@ -52,9 +55,12 @@ export async function fetchCurrentRankings(puzzleId: string): Promise<ApiRespons
   }
 }
 
-export async function fetchMyRanking(puzzleId: string, token: string): Promise<ApiResponse<MyRanking>> {
+export async function fetchMyRanking(puzzleId: string, token: string, difficulty?: 'beginner' | 'expert'): Promise<ApiResponse<MyRanking>> {
   try {
-    const res = await fetch(`${API_BASE_URL}/api${API_PUZZLE.RANKINGS_ME}?puzzleId=${puzzleId}`, {
+    const url = difficulty
+      ? `${API_BASE_URL}/api${API_PUZZLE.RANKINGS_ME}?puzzleId=${puzzleId}&difficulty=${difficulty}`
+      : `${API_BASE_URL}/api${API_PUZZLE.RANKINGS_ME}?puzzleId=${puzzleId}`;
+    const res = await fetch(url, {
       headers: getHeaders(token),
     });
     return await res.json();

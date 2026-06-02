@@ -7,9 +7,11 @@ import { RankingEntry } from '@/types/puzzle';
 interface RankingPreviewProps {
   rankings: RankingEntry[];
   isLoading: boolean;
+  difficulty: 'beginner' | 'expert';
+  onDifficultyChange: (diff: 'beginner' | 'expert') => void;
 }
 
-export default function RankingPreview({ rankings, isLoading }: RankingPreviewProps) {
+export default function RankingPreview({ rankings, isLoading, difficulty, onDifficultyChange }: RankingPreviewProps) {
   const getMedal = (rank: number) => {
     if (rank === 1) return '🥇';
     if (rank === 2) return '🥈';
@@ -28,11 +30,37 @@ export default function RankingPreview({ rankings, isLoading }: RankingPreviewPr
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: 'var(--puzzle-card-foreground)' }}>
-          <Trophy size={18} style={{ color: 'var(--puzzle-primary)' }} />
-          이번 주 랭킹 TOP 5
-        </h2>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+        <div className="flex items-center gap-4">
+          <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: 'var(--puzzle-card-foreground)' }}>
+            <Trophy size={18} style={{ color: 'var(--puzzle-primary)' }} />
+            이번 주 랭킹 TOP 5
+          </h2>
+          
+          {/* Difficulty pills */}
+          <div className="flex items-center gap-1 bg-zinc-100 p-0.5 rounded-lg border" style={{ borderColor: 'var(--puzzle-border)' }}>
+            <button
+              onClick={() => onDifficultyChange('beginner')}
+              className="px-2.5 py-1 text-[10px] font-black rounded-md transition-colors"
+              style={{
+                backgroundColor: difficulty === 'beginner' ? 'var(--puzzle-primary)' : 'transparent',
+                color: difficulty === 'beginner' ? '#fff' : 'var(--puzzle-muted-foreground)',
+              }}
+            >
+              Beginner
+            </button>
+            <button
+              onClick={() => onDifficultyChange('expert')}
+              className="px-2.5 py-1 text-[10px] font-black rounded-md transition-colors"
+              style={{
+                backgroundColor: difficulty === 'expert' ? 'var(--puzzle-primary)' : 'transparent',
+                color: difficulty === 'expert' ? '#fff' : 'var(--puzzle-muted-foreground)',
+              }}
+            >
+              Expert
+            </button>
+          </div>
+        </div>
         <Link 
           href="/puzzle/ranking"
           className="flex items-center gap-0.5 text-sm font-bold transition-all duration-200"

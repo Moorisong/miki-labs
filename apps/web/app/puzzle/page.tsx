@@ -18,6 +18,7 @@ import styles from './puzzle-layout.module.css';
 export default function PuzzlePage() {
   const router = useRouter();
   const { data: session } = useSession();
+  const token = session?.user?.kakaoId;
   const { rankings, isLoading: isRankingLoading, fetchRankings } = useRankingStore();
   
   const [currentPuzzle, setCurrentPuzzle] = useState<Puzzle | null>(null);
@@ -25,6 +26,7 @@ export default function PuzzlePage() {
   const [hasSavedGame, setHasSavedGame] = useState(false);
   const [savedProgress, setSavedProgress] = useState(0);
   const [savedDifficulty, setSavedDifficulty] = useState<'beginner' | 'expert' | null>(null);
+  const [previewDiff, setPreviewDiff] = useState<'beginner' | 'expert'>('beginner');
   const [isPuzzleLoading, setIsPuzzleLoading] = useState(true);
 
   useEffect(() => {
@@ -34,9 +36,6 @@ export default function PuzzlePage() {
         const res = await fetchCurrentPuzzle();
         if (res.success && res.data) {
           setCurrentPuzzle(res.data);
-          
-          // 랭킹 목록 조회
-          fetchRankings(res.data._id);
 
           // 2. 로컬 저장된 상태 확인 (이어하기 여부)
           const savedState = await loadPuzzleState(res.data._id);
@@ -60,12 +59,18 @@ export default function PuzzlePage() {
     }
 
     loadData();
-  }, [fetchRankings]);
+  }, []);
 
-  const handleStart = (difficulty: 'beginner' | 'expert') => {
+  useEffect(() => {
+    if (currentPuzzle) {
+      fetchRankings(currentPuzzle._id, previewDiff);
+    }
+  }, [currentPuzzle, previewDiff, fetchRankings]);
+
+  const handleStart = (difficulty: 'beginner' | 'expert', mode: 'ranked' | 'solo') => {
     if (!currentPuzzle) return;
-    // 난이도를 쿼리스트링에 실어 플레이 페이지로 이동
-    router.push(`/puzzle/play/${currentPuzzle._id}?diff=${difficulty}`);
+    // 난이도와 모드를 쿼리스트링에 실어 플레이 페이지로 이동
+    router.push(`/puzzle/play/${currentPuzzle._id}?diff=${difficulty}&mode=${mode}`);
   };
 
   const handleResume = () => {
@@ -103,6 +108,7 @@ export default function PuzzlePage() {
           hasSavedGame={hasSavedGame}
           progress={savedProgress}
           savedDifficulty={savedDifficulty}
+          isLoggedIn={!!token}
         />
       </div>
 
@@ -110,7 +116,12 @@ export default function PuzzlePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-8 mt-6 md:mt-10">
         {/* Top 5 Rankings */}
         <div className="md:col-span-2">
-          <RankingPreview rankings={rankings} isLoading={isRankingLoading} />
+          <RankingPreview 
+            rankings={rankings} 
+            isLoading={isRankingLoading} 
+            difficulty={previewDiff}
+            onDifficultyChange={setPreviewDiff}
+          />
         </div>
 
         {/* Share & Stats Cards */}

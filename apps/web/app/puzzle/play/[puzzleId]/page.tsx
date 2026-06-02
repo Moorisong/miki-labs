@@ -38,6 +38,7 @@ export default function PlayPage({ params }: PlayPageProps) {
     activePuzzleId,
     activePuzzleImage,
     difficulty,
+    mode,
     totalPieces,
     board,
     trayPieces,
@@ -84,14 +85,16 @@ export default function PlayPage({ params }: PlayPageProps) {
 
         const isResume = searchParams.get('resume') === 'true';
         const diffParam = (searchParams.get('diff') as 'beginner' | 'expert') || 'beginner';
+        const modeParam = (searchParams.get('mode') as 'ranked' | 'solo') || 'solo';
 
         if (isResume) {
           // 이어하기 시 로컬 IndexedDB에서 상태 복원
           const saved = await loadPuzzleState(puzzleId);
           if (saved) {
-            initializePuzzle(puzzleId, res.data.imageUrl, saved.difficulty);
+            initializePuzzle(puzzleId, res.data.imageUrl, saved.difficulty, saved.mode || 'solo');
             resumePuzzle({
               difficulty: saved.difficulty,
+              mode: saved.mode || 'solo',
               timerSeconds: saved.timerSeconds,
               board: saved.board || Array(totalPieces).fill(null),
               trayPieces: saved.trayPieces || saved.pieces.map((p: any) => p.id),
@@ -99,16 +102,17 @@ export default function PlayPage({ params }: PlayPageProps) {
               completed: saved.completed,
             });
           } else {
-            initializePuzzle(puzzleId, res.data.imageUrl, diffParam);
+            initializePuzzle(puzzleId, res.data.imageUrl, diffParam, modeParam);
           }
         } else {
           // 새로하기
-          initializePuzzle(puzzleId, res.data.imageUrl, diffParam);
+          initializePuzzle(puzzleId, res.data.imageUrl, diffParam, modeParam);
         }
 
-        // 로그인된 상태이고 이번주 퍼즐을 Beginner 난이도로 플레이 시 보안 챌린지 시작 (랭킹 모드)
+        // 로그인된 상태이고 이번주 퍼즐을 랭킹 모드로 플레이 시 보안 챌린지 시작 (랭킹 모드)
         const isCurrentPuzzle = !res.data.archived;
-        if (token && diffParam === 'beginner' && isCurrentPuzzle) {
+        const currentMode = isResume ? (await loadPuzzleState(puzzleId))?.mode || 'solo' : modeParam;
+        if (token && currentMode === 'ranked' && isCurrentPuzzle) {
           const challengeRes = await startChallenge(puzzleId, token);
           if (challengeRes.success && challengeRes.data?.challengeToken) {
             setChallengeToken(challengeRes.data.challengeToken);
@@ -155,6 +159,7 @@ export default function PlayPage({ params }: PlayPageProps) {
     // IndexedDB 로컬 자동 저장
     savePuzzleState(puzzleId, {
       difficulty,
+      mode,
       timerSeconds,
       pieces: piecesData as any,
       board,
@@ -168,7 +173,7 @@ export default function PlayPage({ params }: PlayPageProps) {
     if (token) {
       saveProgressApi(puzzleId, progress, token).catch(console.error);
     }
-  }, [board, timerSeconds, puzzleId, totalPieces, difficulty, isCompleted, startedAt, isPageLoading, token]);
+  }, [board, timerSeconds, puzzleId, totalPieces, difficulty, mode, isCompleted, startedAt, isPageLoading, token]);
 
   // 4. 모드 판정
   const gridSize = difficulty === 'beginner' ? 10 : 16;
@@ -230,11 +235,11 @@ export default function PlayPage({ params }: PlayPageProps) {
 
     setIsSubmitting(true);
     try {
-      const mode = !puzzle.archived && difficulty === 'beginner' ? 'ranked' : 'solo';
+      const submitMode = !puzzle.archived ? mode : 'solo';
       
       const res = await submitResult({
         puzzleId,
-        mode,
+        mode: submitMode,
         difficulty,
         challengeToken: challengeToken || 'no-challenge-token',
         startedAt: startedAt || new Date().toISOString(),
@@ -245,7 +250,7 @@ export default function PlayPage({ params }: PlayPageProps) {
       if (res.success) {
         setIsSaved(true);
         // 저장 성공 시 내 등수 즉시 업데이트
-        const rankingRes = await fetchMyRanking(puzzleId, token);
+        const rankingRes = await fetchMyRanking(puzzleId, token, difficulty);
         if (rankingRes.success && rankingRes.data) {
           setMyRanking(rankingRes.data);
         }
@@ -342,7 +347,7 @@ export default function PlayPage({ params }: PlayPageProps) {
             {puzzle.title}
           </span>
           <span className="text-[10px] font-bold" style={{ color: 'var(--puzzle-primary)' }}>
-            {difficulty === 'beginner' ? 'Beginner (100조각 · 🏆)' : 'Expert (256조각 · 🧘)'}
+            {difficulty === 'beginner' ? 'Beginner (100조각)' : 'Expert (256조각)'} · {mode === 'ranked' ? '🏆 랭킹 도전' : '🧘 힐링 플레이'}
           </span>
         </div>
 

@@ -18,10 +18,12 @@ export default function RankingPage() {
   const [currentPuzzle, setCurrentPuzzle] = useState<Puzzle | null>(null);
   const [rankings, setRankings] = useState<RankingEntry[]>([]);
   const [myRanking, setMyRanking] = useState<MyRanking | null>(null);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<'beginner' | 'expert'>('beginner');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadRankings() {
+      setIsLoading(true);
       try {
         // 1. 현재 활성 퍼즐 조회
         const res = await fetchCurrentPuzzle();
@@ -29,18 +31,24 @@ export default function RankingPage() {
           setCurrentPuzzle(res.data);
           const pId = res.data._id;
 
-          // 2. 전체 랭킹 조회
-          const rankRes = await fetchCurrentRankings(pId);
+          // 2. 전체 랭킹 조회 (난이도에 맞춤)
+          const rankRes = await fetchCurrentRankings(pId, selectedDifficulty);
           if (rankRes.success && rankRes.data) {
             setRankings(rankRes.data);
+          } else {
+            setRankings([]);
           }
 
-          // 3. 내 랭킹 조회 (로그인 시)
+          // 3. 내 랭킹 조회 (로그인 시, 난이도에 맞춤)
           if (token) {
-            const myRankRes = await fetchMyRanking(pId, token);
+            const myRankRes = await fetchMyRanking(pId, token, selectedDifficulty);
             if (myRankRes.success && myRankRes.data) {
               setMyRanking(myRankRes.data);
+            } else {
+              setMyRanking(null);
             }
+          } else {
+            setMyRanking(null);
           }
         }
       } catch (e) {
@@ -51,7 +59,7 @@ export default function RankingPage() {
     }
 
     loadRankings();
-  }, [token]);
+  }, [token, selectedDifficulty]);
 
   const getDaysLeft = (endDateStr: string) => {
     try {
@@ -95,14 +103,42 @@ export default function RankingPage() {
   return (
     <div className={`${styles.container} puzzle-animate-fade-in-up`}>
       {/* Page Title Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-extrabold flex items-center gap-2 mb-1.5" style={{ color: 'var(--puzzle-card-foreground)' }}>
-          <Trophy size={28} style={{ color: '#F59E0B' }} />
-          주간 랭킹 경쟁
-        </h1>
-        <p className="text-sm font-semibold" style={{ color: 'var(--puzzle-muted-foreground)' }}>
-          {getFormatDate(currentPuzzle.startDate)} · {currentPuzzle.title}
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-extrabold flex items-center gap-2 mb-1.5" style={{ color: 'var(--puzzle-card-foreground)' }}>
+            <Trophy size={28} style={{ color: '#F59E0B' }} />
+            주간 랭킹 경쟁
+          </h1>
+          <p className="text-sm font-semibold" style={{ color: 'var(--puzzle-muted-foreground)' }}>
+            {getFormatDate(currentPuzzle.startDate)} · {currentPuzzle.title}
+          </p>
+        </div>
+
+        {/* Premium difficulty pills */}
+        <div className="flex items-center gap-1.5 bg-zinc-100 p-1 rounded-2xl border self-start md:self-auto" style={{ borderColor: 'var(--puzzle-border)' }}>
+          <button
+            onClick={() => setSelectedDifficulty('beginner')}
+            className="px-4 py-2 text-xs font-black rounded-xl transition-all duration-200"
+            style={{
+              backgroundColor: selectedDifficulty === 'beginner' ? 'var(--puzzle-primary)' : 'transparent',
+              color: selectedDifficulty === 'beginner' ? '#fff' : 'var(--puzzle-muted-foreground)',
+              boxShadow: selectedDifficulty === 'beginner' ? 'var(--puzzle-shadow-sm)' : 'none',
+            }}
+          >
+            Beginner (100조각)
+          </button>
+          <button
+            onClick={() => setSelectedDifficulty('expert')}
+            className="px-4 py-2 text-xs font-black rounded-xl transition-all duration-200"
+            style={{
+              backgroundColor: selectedDifficulty === 'expert' ? 'var(--puzzle-primary)' : 'transparent',
+              color: selectedDifficulty === 'expert' ? '#fff' : 'var(--puzzle-muted-foreground)',
+              boxShadow: selectedDifficulty === 'expert' ? 'var(--puzzle-shadow-sm)' : 'none',
+            }}
+          >
+            Expert (256조각)
+          </button>
+        </div>
       </div>
 
       {/* Main Grid */}
@@ -140,7 +176,7 @@ export default function RankingPage() {
                   <Clock size={11} /> {getDaysLeft(currentPuzzle.endDate)}
                 </span>
                 <span className="flex items-center gap-1 text-[11px] font-bold hidden sm:flex" style={{ color: 'var(--puzzle-muted-foreground)' }}>
-                  <Trophy size={11} /> Beginner 난이도
+                  <Trophy size={11} /> {selectedDifficulty === 'beginner' ? 'Beginner 난이도 (100조각)' : 'Expert 난이도 (256조각)'}
                 </span>
               </div>
             </div>

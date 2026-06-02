@@ -10,6 +10,7 @@ export interface PuzzleState {
   activePuzzleId: string | null;
   activePuzzleImage: string | null;
   difficulty: 'beginner' | 'expert';
+  mode: 'ranked' | 'solo';
   totalPieces: number;
   board: (number | null)[];
   trayPieces: number[];
@@ -21,9 +22,10 @@ export interface PuzzleState {
   challengeToken: string | null;
 
   // 액션
-  initializePuzzle: (puzzleId: string, imgUrl: string, diff: 'beginner' | 'expert') => void;
+  initializePuzzle: (puzzleId: string, imgUrl: string, diff: 'beginner' | 'expert', mode: 'ranked' | 'solo') => void;
   resumePuzzle: (state: {
     difficulty: 'beginner' | 'expert';
+    mode: 'ranked' | 'solo';
     timerSeconds: number;
     board: (number | null)[];
     trayPieces: number[];
@@ -59,6 +61,7 @@ export const usePuzzleStore = create<PuzzleState>((set, get) => ({
   activePuzzleId: null,
   activePuzzleImage: null,
   difficulty: 'beginner',
+  mode: 'solo',
   totalPieces: 100,
   board: [],
   trayPieces: [],
@@ -69,7 +72,7 @@ export const usePuzzleStore = create<PuzzleState>((set, get) => ({
   startedAt: null,
   challengeToken: null,
 
-  initializePuzzle: (puzzleId, imgUrl, diff) => {
+  initializePuzzle: (puzzleId, imgUrl, diff, mode) => {
     const total = diff === 'beginner' ? 100 : 256;
     const pieces = Array.from({ length: total }, (_, i) => i);
     const shuffledTray = shuffle(pieces);
@@ -78,6 +81,7 @@ export const usePuzzleStore = create<PuzzleState>((set, get) => ({
       activePuzzleId: puzzleId,
       activePuzzleImage: imgUrl,
       difficulty: diff,
+      mode: mode,
       totalPieces: total,
       board: Array(total).fill(null),
       trayPieces: shuffledTray,
@@ -94,6 +98,7 @@ export const usePuzzleStore = create<PuzzleState>((set, get) => ({
     const total = savedState.difficulty === 'beginner' ? 100 : 256;
     set({
       difficulty: savedState.difficulty,
+      mode: savedState.mode,
       totalPieces: total,
       timerSeconds: savedState.timerSeconds,
       board: savedState.board,
@@ -108,7 +113,7 @@ export const usePuzzleStore = create<PuzzleState>((set, get) => ({
   selectTrayPiece: (pieceId) => {
     set((state) => {
       const currentSelected = state.selectedTrayPiece;
-      let nextTray = [...state.trayPieces];
+      const nextTray = [...state.trayPieces];
 
       // 만약 현재 들고 있던 조각이 있고, 그 조각이 트레이에 없는 상태라면 (보드에서 가져온 경우)
       // 새로운 조각을 선택하거나 해제할 때 기존 조각을 트레이로 돌려보냄
@@ -237,6 +242,8 @@ export const usePuzzleStore = create<PuzzleState>((set, get) => ({
   resetPuzzle: () => set({
     activePuzzleId: null,
     activePuzzleImage: null,
+    difficulty: 'beginner',
+    mode: 'solo',
     board: [],
     trayPieces: [],
     selectedTrayPiece: null,

@@ -82,8 +82,8 @@ export const verifyChallenge = async (req: Request, res: Response, next: NextFun
     const isActive = now >= new Date(puzzle.startDate) && now <= new Date(puzzle.endDate);
 
     if (mode === 'ranked') {
-      if (difficulty !== 'beginner') {
-        res.status(400).json({ success: false, error: '공식 랭킹 경쟁은 오직 Beginner(100조각) 난이도만 지원합니다.' });
+      if (difficulty !== 'beginner' && difficulty !== 'expert') {
+        res.status(400).json({ success: false, error: '공식 랭킹 경쟁은 Beginner(100조각) 또는 Expert(256조각) 난이도만 지원합니다.' });
         return;
       }
       if (!isActive || puzzle.archived) {

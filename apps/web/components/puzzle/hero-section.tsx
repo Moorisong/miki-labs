@@ -1,16 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import { Clock, Users, Trophy, Play, Layers } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Clock, Users, Trophy, Play, Layers, X, HelpCircle, Check, Flame } from 'lucide-react';
 import { Puzzle } from '@/types/puzzle';
 
 interface HeroSectionProps {
   puzzle: Puzzle;
-  onStart: (difficulty: 'beginner' | 'expert') => void;
+  onStart: (difficulty: 'beginner' | 'expert', mode: 'ranked' | 'solo') => void;
   onResume?: () => void;
   hasSavedGame: boolean;
   progress: number;
   savedDifficulty?: 'beginner' | 'expert' | null;
+  isLoggedIn?: boolean;
 }
 
 export default function HeroSection({
@@ -20,19 +21,29 @@ export default function HeroSection({
   hasSavedGame,
   progress,
   savedDifficulty,
+  isLoggedIn = false,
 }: HeroSectionProps) {
   const [showDiffSelect, setShowDiffSelect] = useState(false);
+  const [tempDiff, setTempDiff] = useState<'beginner' | 'expert'>('beginner');
+  const [tempMode, setTempMode] = useState<'ranked' | 'solo'>('ranked');
 
   // 진행률 기반 맞춘 조각수 계산
   const totalPieces = savedDifficulty === 'expert' ? 256 : 100;
   const matchedPieces = Math.round((progress / 100) * totalPieces);
 
+  const [daysLeft, setDaysLeft] = useState<string>('');
+
   // 남은 날짜 계산
-  const getDaysLeft = () => {
+  useEffect(() => {
     const end = new Date(puzzle.endDate).getTime();
     const diff = end - Date.now();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    return days > 0 ? `${days}일` : '마감 임박';
+    setDaysLeft(days > 0 ? `${days}일` : '마감 임박');
+  }, [puzzle.endDate]);
+
+  const handleLaunchGame = () => {
+    onStart(tempDiff, tempMode);
+    setShowDiffSelect(false);
   };
 
   return (
@@ -68,7 +79,7 @@ export default function HeroSection({
               style={{ color: 'var(--puzzle-muted-foreground)' }}
             >
               매주 찾아오는 고유한 힐링 콘텐츠. 잔잔한 아침 공기가 가득 담긴 감성 일러스트를 퍼즐로 맞추어 보세요.
-              로그인 시 공식 랭킹 및 이력 관리가 가능하며, 비로그인 시에도 즉시 플레이와 이어서 그리드가 가능합니다.
+              원하는 난이도와 모드(실시간 랭킹 경쟁 vs 편안한 힐링)를 직접 선택하여 나만의 스타일로 플레이할 수 있습니다.
             </p>
 
             {/* Stats row */}
@@ -76,7 +87,7 @@ export default function HeroSection({
               <div className="flex items-center gap-2">
                 <Clock size={16} style={{ color: 'var(--puzzle-primary)' }} />
                 <span className="text-sm font-semibold" style={{ color: 'var(--puzzle-muted-foreground)' }}>
-                  <span style={{ color: 'var(--puzzle-card-foreground)', fontWeight: 750 }}>{getDaysLeft()}</span> 남음
+                  <span style={{ color: 'var(--puzzle-card-foreground)', fontWeight: 750 }}>{daysLeft}</span> 남음
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -89,39 +100,18 @@ export default function HeroSection({
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 relative">
-              {!showDiffSelect ? (
-                <button
-                  onClick={() => setShowDiffSelect(true)}
-                  className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-95 text-white puzzle-animate-pulse-glow"
-                  style={{
-                    backgroundColor: 'var(--puzzle-primary)',
-                    fontSize: '15px',
-                    fontWeight: 700,
-                  }}
-                >
-                  <Play size={16} strokeWidth={2.5} />
-                  퍼즐 시작하기
-                </button>
-              ) : (
-              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                  <button
-                    onClick={() => onStart('beginner')}
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl text-white font-bold text-sm transition-transform hover:scale-[1.02]"
-                    style={{ backgroundColor: '#22C55E' }}
-                  >
-                    <span className="hidden sm:inline">Beginner (100조각 · 🏆 랭킹반영)</span>
-                    <span className="sm:hidden">🏆 Beginner</span>
-                  </button>
-                  <button
-                    onClick={() => onStart('expert')}
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl text-white font-bold text-sm transition-transform hover:scale-[1.02]"
-                    style={{ backgroundColor: 'var(--puzzle-primary)' }}
-                  >
-                    <span className="hidden sm:inline">Expert (256조각 · 🧘 힐링)</span>
-                    <span className="sm:hidden">🧘 Expert</span>
-                  </button>
-                </div>
-              )}
+              <button
+                onClick={() => setShowDiffSelect(true)}
+                className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-95 text-white puzzle-animate-pulse-glow"
+                style={{
+                  backgroundColor: 'var(--puzzle-primary)',
+                  fontSize: '15px',
+                  fontWeight: 700,
+                }}
+              >
+                <Play size={16} strokeWidth={2.5} />
+                퍼즐 시작하기
+              </button>
 
               {hasSavedGame && onResume && (
                 <button
@@ -208,6 +198,205 @@ export default function HeroSection({
           </div>
         </div>
       </div>
+
+      {/* Mode / Difficulty Selection Premium Modal */}
+      {showDiffSelect && (
+        <div 
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 animate-fade-in"
+          style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}
+        >
+          <div 
+            className="relative w-full max-w-lg rounded-t-3xl sm:rounded-3xl border p-6 md:p-8 overflow-y-auto max-h-[90vh] sm:max-h-[85vh]"
+            style={{
+              backgroundColor: 'var(--puzzle-background)',
+              borderColor: 'var(--puzzle-border)',
+              boxShadow: 'var(--puzzle-shadow-lg)',
+              animation: 'puzzle-modal-slide-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both',
+            }}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-2xl font-black flex items-center gap-2" style={{ color: 'var(--puzzle-card-foreground)' }}>
+                  <Play size={22} className="text-emerald-500 fill-emerald-500/20" />
+                  플레이 옵션 설정
+                </h3>
+                <p className="text-sm font-semibold mt-1.5" style={{ color: 'var(--puzzle-muted-foreground)' }}>
+                  난이도와 플레이 모드를 선택해주세요.
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowDiffSelect(false)}
+                className="p-2 rounded-xl transition-colors hover:bg-zinc-100"
+                style={{ color: 'var(--puzzle-muted-foreground)' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Difficulty Selector */}
+            <div className="mb-6">
+              <h4 className="text-sm font-extrabold uppercase tracking-wider mb-3 flex items-center gap-1.5" style={{ color: 'var(--puzzle-muted-foreground)' }}>
+                <Layers size={14} style={{ color: 'var(--puzzle-primary)' }} />
+                1. 난이도 선택
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                {/* Beginner Card */}
+                <button
+                  onClick={() => setTempDiff('beginner')}
+                  className="flex flex-col text-left p-4 rounded-2xl border transition-all duration-200 hover:scale-[1.01] active:scale-95"
+                  style={{
+                    backgroundColor: tempDiff === 'beginner' ? 'var(--puzzle-secondary)' : 'var(--puzzle-glass-bg)',
+                    borderColor: tempDiff === 'beginner' ? 'var(--puzzle-primary)' : 'var(--puzzle-border)',
+                  }}
+                >
+                  <div className="flex items-center justify-between w-full mb-1">
+                    <span className="text-base font-black" style={{ color: tempDiff === 'beginner' ? 'var(--puzzle-primary)' : 'var(--puzzle-card-foreground)' }}>
+                      Beginner
+                    </span>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">
+                      100조각
+                    </span>
+                  </div>
+                  <p className="text-xs font-medium leading-relaxed mt-1 whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: 'var(--puzzle-muted-foreground)' }}>
+                    편안하게 완성하기
+                  </p>
+                </button>
+
+                {/* Expert Card */}
+                <button
+                  onClick={() => setTempDiff('expert')}
+                  className="flex flex-col text-left p-4 rounded-2xl border transition-all duration-200 hover:scale-[1.01] active:scale-95"
+                  style={{
+                    backgroundColor: tempDiff === 'expert' ? 'var(--puzzle-secondary)' : 'var(--puzzle-glass-bg)',
+                    borderColor: tempDiff === 'expert' ? 'var(--puzzle-primary)' : 'var(--puzzle-border)',
+                  }}
+                >
+                  <div className="flex items-center justify-between w-full mb-1">
+                    <span className="text-base font-black" style={{ color: tempDiff === 'expert' ? 'var(--puzzle-primary)' : 'var(--puzzle-card-foreground)' }}>
+                      Expert
+                    </span>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600">
+                      256조각
+                    </span>
+                  </div>
+                  <p className="text-xs font-medium leading-relaxed mt-1 whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: 'var(--puzzle-muted-foreground)' }}>
+                    고도의 집중과 몰입
+                  </p>
+                </button>
+              </div>
+            </div>
+
+            {/* Play Mode Selector */}
+            <div className="mb-6">
+              <h4 className="text-sm font-extrabold uppercase tracking-wider mb-3 flex items-center gap-1.5" style={{ color: 'var(--puzzle-muted-foreground)' }}>
+                <Trophy size={14} style={{ color: 'var(--puzzle-primary)' }} />
+                2. 플레이 모드 선택
+              </h4>
+              <div className="flex flex-col gap-3">
+                {/* Ranked Mode Button */}
+                <button
+                  onClick={() => setTempMode('ranked')}
+                  className="flex items-start gap-3.5 text-left p-4 rounded-2xl border transition-all duration-200 hover:scale-[1.005] active:scale-95"
+                  style={{
+                    backgroundColor: tempMode === 'ranked' ? 'var(--puzzle-secondary)' : 'var(--puzzle-glass-bg)',
+                    borderColor: tempMode === 'ranked' ? 'var(--puzzle-primary)' : 'var(--puzzle-border)',
+                  }}
+                >
+                  <div 
+                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+                    style={{ backgroundColor: tempMode === 'ranked' ? 'var(--puzzle-primary)' : 'var(--puzzle-muted)', color: tempMode === 'ranked' ? '#fff' : 'var(--puzzle-muted-foreground)' }}
+                  >
+                    <Trophy size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base font-black" style={{ color: 'var(--puzzle-card-foreground)' }}>
+                        🏆 랭킹 도전 모드
+                      </span>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-600">
+                        기록 측정
+                      </span>
+                    </div>
+                    <p className="text-xs font-medium mt-1 leading-relaxed whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: 'var(--puzzle-muted-foreground)' }}>
+                      완성 기록으로 주간 랭킹 도전
+                    </p>
+                  </div>
+                </button>
+
+                {/* Healing (Solo) Mode Button */}
+                <button
+                  onClick={() => setTempMode('solo')}
+                  className="flex items-start gap-3.5 text-left p-4 rounded-2xl border transition-all duration-200 hover:scale-[1.005] active:scale-95"
+                  style={{
+                    backgroundColor: tempMode === 'solo' ? 'var(--puzzle-secondary)' : 'var(--puzzle-glass-bg)',
+                    borderColor: tempMode === 'solo' ? 'var(--puzzle-primary)' : 'var(--puzzle-border)',
+                  }}
+                >
+                  <div 
+                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+                    style={{ backgroundColor: tempMode === 'solo' ? 'var(--puzzle-primary)' : 'var(--puzzle-muted)', color: tempMode === 'solo' ? '#fff' : 'var(--puzzle-muted-foreground)' }}
+                  >
+                    <Clock size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base font-black" style={{ color: 'var(--puzzle-card-foreground)' }}>
+                        🧘 힐링 플레이 모드
+                      </span>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-600">
+                        연습 & 힐링
+                      </span>
+                    </div>
+                    <p className="text-xs font-medium mt-1 leading-relaxed whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: 'var(--puzzle-muted-foreground)' }}>
+                      경쟁 없이 음악과 함께 힐링
+                    </p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Warning for unauthenticated user choosing Ranked */}
+            {!isLoggedIn && tempMode === 'ranked' && (
+              <div 
+                className="mb-6 px-4 py-3 rounded-2xl text-xs font-bold leading-relaxed border flex items-start gap-2"
+                style={{ backgroundColor: 'var(--puzzle-destructive-bg, #FEF2F2)', borderColor: 'var(--puzzle-destructive, #FEE2E2)', color: '#DC2626' }}
+              >
+                <Flame size={16} className="flex-shrink-0 mt-0.5" />
+                <span>
+                  로그인 후 완료하셔야 공식 랭킹에 등록됩니다.
+                </span>
+              </div>
+            )}
+
+            {/* Submit Actions */}
+            <div className="flex flex-col-reverse sm:flex-row gap-3">
+              <button
+                onClick={() => setShowDiffSelect(false)}
+                className="w-full sm:flex-1 py-3.5 rounded-xl border font-bold text-sm transition-colors hover:bg-zinc-50 active:bg-zinc-100"
+                style={{
+                  backgroundColor: 'transparent',
+                  color: 'var(--puzzle-foreground)',
+                  borderColor: 'var(--puzzle-border)',
+                }}
+              >
+                취소
+              </button>
+              <button
+                onClick={handleLaunchGame}
+                className="w-full sm:flex-1 py-3.5 rounded-xl text-white font-black text-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.98]"
+                style={{
+                  backgroundColor: 'var(--puzzle-primary)',
+                  boxShadow: 'var(--puzzle-shadow-md)',
+                }}
+              >
+                도전 시작하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
+

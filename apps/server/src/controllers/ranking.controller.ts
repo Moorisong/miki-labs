@@ -12,7 +12,7 @@ import crypto from 'crypto';
  */
 export const getCurrentRankings = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { puzzleId } = req.query;
+    const { puzzleId, difficulty = 'beginner' } = req.query;
 
     if (!puzzleId) {
       res.status(400).json({ success: false, error: 'puzzleId가 필요합니다.' });
@@ -28,7 +28,7 @@ export const getCurrentRankings = async (req: Request, res: Response, next: Next
         $match: { 
           puzzleId: new Types.ObjectId(puzzleId as string), 
           mode: 'ranked',
-          difficulty: 'beginner'
+          difficulty
         } 
       },
       {
@@ -73,7 +73,7 @@ export const getCurrentRankings = async (req: Request, res: Response, next: Next
  */
 export const getMyRanking = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { puzzleId } = req.query;
+    const { puzzleId, difficulty = 'beginner' } = req.query;
     const user = req.user;
 
     if (!user) {
@@ -94,7 +94,7 @@ export const getMyRanking = async (req: Request, res: Response, next: NextFuncti
         $match: { 
           puzzleId: new Types.ObjectId(puzzleId as string), 
           mode: 'ranked',
-          difficulty: 'beginner'
+          difficulty
         } 
       },
       {

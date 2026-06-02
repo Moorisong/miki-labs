@@ -7,8 +7,8 @@ export interface RankingState {
   myRanking: MyRanking | null;
   isLoading: boolean;
 
-  fetchRankings: (puzzleId: string) => Promise<void>;
-  fetchMyRanking: (puzzleId: string, token: string) => Promise<void>;
+  fetchRankings: (puzzleId: string, difficulty?: 'beginner' | 'expert') => Promise<void>;
+  fetchMyRanking: (puzzleId: string, token: string, difficulty?: 'beginner' | 'expert') => Promise<void>;
   resetRankings: () => void;
 }
 
@@ -17,10 +17,10 @@ export const useRankingStore = create<RankingState>((set) => ({
   myRanking: null,
   isLoading: false,
 
-  fetchRankings: async (puzzleId) => {
+  fetchRankings: async (puzzleId, difficulty) => {
     set({ isLoading: true });
     try {
-      const res = await fetchCurrentRankings(puzzleId);
+      const res = await fetchCurrentRankings(puzzleId, difficulty);
       if (res.success && res.data) {
         set({ rankings: res.data });
       } else {
@@ -34,9 +34,9 @@ export const useRankingStore = create<RankingState>((set) => ({
     }
   },
 
-  fetchMyRanking: async (puzzleId, token) => {
+  fetchMyRanking: async (puzzleId, token, difficulty) => {
     try {
-      const res = await fetchMyRanking(puzzleId, token);
+      const res = await fetchMyRanking(puzzleId, token, difficulty);
       if (res.success && res.data) {
         set({ myRanking: res.data });
       } else {
