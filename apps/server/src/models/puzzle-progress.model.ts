@@ -6,6 +6,7 @@ export interface IPuzzleProgress extends Document {
   puzzleId: Types.ObjectId;
   progress: number;
   lastPlayedAt: Date;
+  detailState?: any;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,6 +17,7 @@ const puzzleProgressSchema = new Schema<IPuzzleProgress>(
     puzzleId: { type: Schema.Types.ObjectId, ref: 'Puzzle', required: true },
     progress: { type: Number, required: true, min: 0, max: 100 },
     lastPlayedAt: { type: Date, default: Date.now },
+    detailState: { type: Schema.Types.Mixed, required: false },
   },
   {
     timestamps: true,

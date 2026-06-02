@@ -7,7 +7,7 @@ import { getPuzzleProgressModel } from '../models/puzzle-progress.model';
  */
 export const saveProgress = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { puzzleId, progress } = req.body;
+    const { puzzleId, progress, detailState } = req.body;
     const user = req.user;
 
     if (!user) {
@@ -22,13 +22,19 @@ export const saveProgress = async (req: Request, res: Response, next: NextFuncti
 
     const PuzzleProgress = getPuzzleProgressModel();
 
+    const updateData: any = {
+      progress,
+      lastPlayedAt: new Date()
+    };
+
+    if (detailState !== undefined) {
+      updateData.detailState = detailState;
+    }
+
     // upsert: { userId, puzzleId } 기준으로 진행 상황 저장/업데이트
     await PuzzleProgress.findOneAndUpdate(
       { userId: user._id, puzzleId },
-      { 
-        progress,
-        lastPlayedAt: new Date()
-      },
+      updateData,
       { upsert: true, new: true }
     );
 
@@ -65,7 +71,34 @@ export const getMyProgress = async (req: Request, res: Response, next: NextFunct
 
     res.json({
       success: true,
-      data: progressRecord ? { progress: progressRecord.progress } : null
+      data: progressRecord 
+        ? { progress: progressRecord.progress, detailState: progressRecord.detailState } 
+        : null
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * DELETE /api/puzzle/progress
+ * 내 모든 퍼즐 진행 상태 초기화
+ */
+export const clearProgress = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      res.status(401).json({ success: false, error: '인증이 필요합니다.' });
+      return;
+    }
+
+    const PuzzleProgress = getPuzzleProgressModel();
+    await PuzzleProgress.deleteMany({ userId: user._id });
+
+    res.json({
+      success: true,
+      message: '성공적으로 모든 퍼즐 진행 상태가 초기화되었습니다.'
     });
   } catch (error) {
     next(error);
