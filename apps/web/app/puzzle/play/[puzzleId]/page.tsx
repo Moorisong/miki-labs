@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { ArrowLeft, Timer, Percent, Eye, HelpCircle } from 'lucide-react';
+import { ArrowLeft, Timer, Eye, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import { usePuzzleStore } from '@/lib/stores/puzzle-store';
 import { savePuzzleState, loadPuzzleState, deletePuzzleState } from '@/lib/puzzle-db';
@@ -345,7 +345,6 @@ export default function PlayPage({ params }: PlayPageProps) {
             <span className="tabular-nums">{formatTime(timerSeconds)}</span>
           </div>
           <div className="flex items-center gap-1 text-sm font-bold" style={{ color: 'var(--puzzle-primary)' }}>
-            <Percent size={14} />
             <span className="tabular-nums">{progressPercent}%</span>
           </div>
         </div>
