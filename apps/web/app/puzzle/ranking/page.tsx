@@ -152,106 +152,104 @@ export default function RankingPage() {
             style={{
               backgroundColor: selectedDifficulty === 'expert' ? 'var(--puzzle-primary)' : 'transparent',
               color: selectedDifficulty === 'expert' ? '#fff' : 'var(--puzzle-muted-foreground)',
-              boxShadow: selectedDifficulty === 'expert' ? 'var(--puzzle-shadow-sm)' : 'none',
-            }}
-          >
-            Expert (256조각)
-          </button>
-        </div>
-      </div>
-
-      {/* Main Grid */}
+                {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        {/* Puzzle Info Preview Banner */}
-        <div className="lg:col-span-2 lg:row-start-1 lg:col-start-1 order-1 lg:order-none">
-          <Link
-            href="/puzzle"
-            className="flex flex-wrap sm:flex-nowrap items-center gap-3 p-4 rounded-2xl border overflow-hidden transition-all duration-200 group"
-            style={{ 
-              backgroundColor: 'var(--puzzle-glass-bg)', 
-              backdropFilter: 'var(--puzzle-glass-blur)',
-              borderColor: 'var(--puzzle-border)',
-              boxShadow: 'var(--puzzle-shadow-sm)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'var(--puzzle-primary)';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'var(--puzzle-border)';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-          >
-            <img
-              src={currentPuzzle.imageUrl}
-              alt={currentPuzzle.title}
-              className="w-16 h-12 sm:w-20 sm:h-14 object-cover rounded-xl flex-shrink-0 border transition-transform duration-300 group-hover:scale-[1.02]"
-              style={{ borderColor: 'var(--puzzle-border)' }}
-            />
-            <div className="flex-1 min-w-0">
-              <p
-                className="truncate mb-1 text-sm font-extrabold transition-colors duration-200 group-hover:text-[var(--puzzle-primary)]"
-                style={{ color: 'var(--puzzle-card-foreground)' }}
-              >
-                {currentPuzzle.title}
-              </p>
-              <div className="flex flex-wrap gap-x-3 gap-y-1">
-                <span className="flex items-center gap-1 text-[11px] font-bold" style={{ color: 'var(--puzzle-muted-foreground)' }}>
-                  <Users size={11} /> {currentPuzzle.participantCount.toLocaleString()}명 완주
-                </span>
-                <span className="flex items-center gap-1 text-[11px] font-bold" style={{ color: 'var(--puzzle-muted-foreground)' }}>
-                  <Clock size={11} /> {getDaysLeft(currentPuzzle.endDate)}
-                </span>
-                <span className="flex items-center gap-1 text-[11px] font-bold hidden sm:flex" style={{ color: 'var(--puzzle-muted-foreground)' }}>
-                  <Trophy size={11} /> {selectedDifficulty === 'beginner' ? 'Beginner 난이도 (100조각)' : 'Expert 난이도 (256조각)'}
-                </span>
-              </div>
-            </div>
-          </Link>
-        </div>
-
-        {/* 1. 내 최고 기록 (MyRankingCard) */}
-        <div className="lg:col-span-1 lg:row-start-1 lg:col-start-3 order-2 lg:order-none">
-          <MyRankingCard
-            myRanking={myRanking}
-            isLoggedIn={!!token}
-            onRankClick={handleScrollToMyRank}
-          />
-        </div>
-
-        {/* 2. 랭킹 (Leaderboard: RankingTable + 더보기) */}
-        <div className="lg:col-span-2 lg:row-start-2 lg:col-start-1 order-3 lg:order-none flex flex-col gap-5">
-          <RankingTable
-            rankings={rankings.slice(0, visibleCount)}
-            myNickname={session?.user?.nickname || session?.user?.name || undefined}
-            totalParticipants={rankings.length}
-          />
-
-          {rankings.length > visibleCount && (
-            <button
-              onClick={() => setVisibleCount((prev) => prev + 20)}
-              className="w-full py-3.5 rounded-2xl border font-bold text-xs transition-all active:scale-[0.98] flex items-center justify-center gap-1.5"
-              style={{
-                backgroundColor: 'var(--puzzle-glass-bg)',
-                color: 'var(--puzzle-foreground)',
+        {/* Left Column (Preview Banner + Leaderboard) */}
+        <div className="lg:col-span-2 contents lg:flex lg:flex-col lg:gap-5">
+          {/* Puzzle Info Preview Banner */}
+          <div className="order-2 lg:order-none">
+            <Link
+              href="/puzzle"
+              className="flex flex-wrap sm:flex-nowrap items-center gap-3 p-4 rounded-2xl border overflow-hidden transition-all duration-200 group"
+              style={{ 
+                backgroundColor: 'var(--puzzle-glass-bg)', 
+                backdropFilter: 'var(--puzzle-glass-blur)',
                 borderColor: 'var(--puzzle-border)',
                 boxShadow: 'var(--puzzle-shadow-sm)',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--puzzle-muted)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--puzzle-glass-bg)'; }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'var(--puzzle-primary)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--puzzle-border)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
             >
-              더보기 ({visibleCount}/{rankings.length})
-            </button>
-          )}
+              <img
+                src={currentPuzzle.imageUrl}
+                alt={currentPuzzle.title}
+                className="w-16 h-12 sm:w-20 sm:h-14 object-cover rounded-xl flex-shrink-0 border transition-transform duration-300 group-hover:scale-[1.02]"
+                style={{ borderColor: 'var(--puzzle-border)' }}
+              />
+              <div className="flex-1 min-w-0">
+                <p
+                  className="truncate mb-1 text-sm font-extrabold transition-colors duration-200 group-hover:text-[var(--puzzle-primary)]"
+                  style={{ color: 'var(--puzzle-card-foreground)' }}
+                >
+                  {currentPuzzle.title}
+                </p>
+                <div className="flex flex-wrap gap-x-3 gap-y-1">
+                  <span className="flex items-center gap-1 text-[11px] font-bold" style={{ color: 'var(--puzzle-muted-foreground)' }}>
+                    <Users size={11} /> {currentPuzzle.participantCount.toLocaleString()}명 완주
+                  </span>
+                  <span className="flex items-center gap-1 text-[11px] font-bold" style={{ color: 'var(--puzzle-muted-foreground)' }}>
+                    <Clock size={11} /> {getDaysLeft(currentPuzzle.endDate)}
+                  </span>
+                  <span className="flex items-center gap-1 text-[11px] font-bold hidden sm:flex" style={{ color: 'var(--puzzle-muted-foreground)' }}>
+                    <Trophy size={11} /> {selectedDifficulty === 'beginner' ? 'Beginner 난이도 (100조각)' : 'Expert 난이도 (256조각)'}
+                  </span>
+                </div>
+              </div>
+            </Link>
+          </div>
+
+          {/* Leaderboard Table + 더보기 */}
+          <div className="order-3 lg:order-none flex flex-col gap-5">
+            <RankingTable
+              rankings={rankings.slice(0, visibleCount)}
+              myNickname={session?.user?.nickname || session?.user?.name || undefined}
+              totalParticipants={rankings.length}
+            />
+
+            {rankings.length > visibleCount && (
+              <button
+                onClick={() => setVisibleCount((prev) => prev + 20)}
+                className="w-full py-3.5 rounded-2xl border font-bold text-xs transition-all active:scale-[0.98] flex items-center justify-center gap-1.5"
+                style={{
+                  backgroundColor: 'var(--puzzle-glass-bg)',
+                  color: 'var(--puzzle-foreground)',
+                  borderColor: 'var(--puzzle-border)',
+                  boxShadow: 'var(--puzzle-shadow-sm)',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--puzzle-muted)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--puzzle-glass-bg)'; }}
+              >
+                더보기 ({visibleCount}/{rankings.length})
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* 3. 성적 분포 분석 (PercentileChart) */}
-        <div className="lg:col-span-1 lg:row-start-2 lg:col-start-3 order-4 lg:order-none">
-          <PercentileChart
-            topPercent={myRanking ? myRanking.topPercent : null}
-            totalParticipants={myRanking ? myRanking.totalParticipants : 0}
-            myRank={myRanking ? myRanking.myRank : null}
-          />
+        {/* Right Column (My Ranking + Percentile Chart) */}
+        <div className="lg:col-span-1 contents lg:flex lg:flex-col lg:gap-4">
+          {/* 1. 내 최고 기록 (MyRankingCard) */}
+          <div className="order-1 lg:order-none">
+            <MyRankingCard
+              myRanking={myRanking}
+              isLoggedIn={!!token}
+              onRankClick={handleScrollToMyRank}
+            />
+          </div>
+
+          {/* 3. 성적 분포 분석 (PercentileChart) */}
+          <div className="order-4 lg:order-none">
+            <PercentileChart
+              topPercent={myRanking ? myRanking.topPercent : null}
+              totalParticipants={myRanking ? myRanking.totalParticipants : 0}
+              myRank={myRanking ? myRanking.myRank : null}
+            />
+          </div>
         </div>
       </div>
     </div>
