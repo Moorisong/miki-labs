@@ -146,24 +146,33 @@ export default function RankingPage() {
         {/* Left: Table and Preview banner */}
         <div className="lg:col-span-2 flex flex-col gap-5">
           {/* Puzzle Info Preview Banner */}
-          <div
-            className="flex flex-wrap sm:flex-nowrap items-center gap-3 p-4 rounded-2xl border overflow-hidden"
+          <Link
+            href="/puzzle"
+            className="flex flex-wrap sm:flex-nowrap items-center gap-3 p-4 rounded-2xl border overflow-hidden transition-all duration-200 group"
             style={{ 
               backgroundColor: 'var(--puzzle-glass-bg)', 
               backdropFilter: 'var(--puzzle-glass-blur)',
               borderColor: 'var(--puzzle-border)',
-              boxShadow: 'var(--puzzle-shadow-sm)'
+              boxShadow: 'var(--puzzle-shadow-sm)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'var(--puzzle-primary)';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--puzzle-border)';
+              e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
             <img
               src={currentPuzzle.imageUrl}
               alt={currentPuzzle.title}
-              className="w-16 h-12 sm:w-20 sm:h-14 object-cover rounded-xl flex-shrink-0 border"
+              className="w-16 h-12 sm:w-20 sm:h-14 object-cover rounded-xl flex-shrink-0 border transition-transform duration-300 group-hover:scale-[1.02]"
               style={{ borderColor: 'var(--puzzle-border)' }}
             />
             <div className="flex-1 min-w-0">
               <p
-                className="truncate mb-1 text-sm font-extrabold"
+                className="truncate mb-1 text-sm font-extrabold transition-colors duration-200 group-hover:text-[var(--puzzle-primary)]"
                 style={{ color: 'var(--puzzle-card-foreground)' }}
               >
                 {currentPuzzle.title}
@@ -180,7 +189,7 @@ export default function RankingPage() {
                 </span>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* Leaderboard Board */}
           <RankingTable
