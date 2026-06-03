@@ -23,12 +23,19 @@ export const getMyProfile = async (req: Request, res: Response, next: NextFuncti
     // 1. 완주한 퍼즐 기록들 조회
     const rawResults = await PuzzleResult.find({ userId: user._id, completed: true }).sort({ savedAt: -1 });
 
-    // 각 완주 퍼즐의 메타데이터 조회
-    const puzzleIds = rawResults.map(r => r.puzzleId);
-    const puzzles = await Puzzle.find({ _id: { $in: puzzleIds } });
+    // 2. 진행 중인 퍼즐 기록들 조회
+    const PuzzleProgress = getPuzzleProgressModel();
+    const rawProgresses = await PuzzleProgress.find({ userId: user._id });
+
+    // 각 퍼즐의 메타데이터 조회
+    const completedPuzzleIds = rawResults.map(r => r.puzzleId.toString());
+    const progressPuzzleIds = rawProgresses.map(p => p.puzzleId.toString());
+    const allPuzzleIds = Array.from(new Set([...completedPuzzleIds, ...progressPuzzleIds]));
+    
+    const puzzles = await Puzzle.find({ _id: { $in: allPuzzleIds } });
     const puzzleMap = new Map(puzzles.map(p => [p._id.toString(), p]));
 
-    // 2. 완주 히스토리 맵핑 및 각 기록의 동적 등수 계산
+    // 3. 완주 히스토리 맵핑 및 각 기록의 동적 등수 계산
     const history = [];
     let bestRank: number | null = null;
 
@@ -61,6 +68,27 @@ export const getMyProfile = async (req: Request, res: Response, next: NextFuncti
         savedAt: result.savedAt,
         completed: result.completed,
         myRank
+      });
+    }
+
+    // 4. 진행 중(미완주)인 퍼즐 히스토리 추가
+    for (const prog of rawProgresses) {
+      const pIdStr = prog.puzzleId.toString();
+      if (completedPuzzleIds.includes(pIdStr)) continue;
+      if (prog.progress <= 0) continue;
+
+      const p = puzzleMap.get(pIdStr);
+      if (!p) continue;
+
+      history.push({
+        puzzleId: prog.puzzleId,
+        title: p.title,
+        imageUrl: p.imageUrl,
+        difficulty: 'beginner',
+        completionTime: 0,
+        savedAt: prog.updatedAt || prog.lastPlayedAt,
+        completed: false,
+        progress: prog.progress
       });
     }
 

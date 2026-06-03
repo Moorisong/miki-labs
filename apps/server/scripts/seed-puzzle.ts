@@ -54,17 +54,26 @@ async function main() {
       week: 1,
       title: "아름다운 보라색 꽃밭",
       imageUrl: "/images/puzzle/purple_flower_field.png",
-      startDate: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),  // 3 days ago
-      endDate: new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000),   // 4 days from now
+      startDate: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),  // 1 week ago
+      endDate: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),   // 3 days ago
       participantCount: 12,
-      archived: false,
+      archived: true,
     },
     {
       week: 2,
+      title: "신비로운 네온 홀로그램",
+      imageUrl: "/images/puzzle/hologram.png",
+      startDate: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),  // 3 days ago
+      endDate: new Date(now.getTime() - 1 * 60 * 60 * 1000),         // 1 hour ago (ended)
+      participantCount: 0,
+      archived: true,
+    },
+    {
+      week: 3,
       title: "푸른 바다와 등대",
       imageUrl: "/images/puzzle/lighthouse.png",
-      startDate: new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000),  // 4 days from now
-      endDate: new Date(now.getTime() + 11 * 24 * 60 * 60 * 1000),  // 11 days from now
+      startDate: new Date(now.getTime() - 1 * 60 * 60 * 1000),       // 1 hour ago (active)
+      endDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),    // 7 days from now
       participantCount: 0,
       archived: false,
     }

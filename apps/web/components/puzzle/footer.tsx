@@ -5,7 +5,6 @@ import Link from 'next/link';
 
 export default function Footer() {
   const links = [
-    { label: '서비스 소개', href: '/puzzle' },
     { label: '이용약관', href: '/terms' },
     { label: '개인정보처리방침', href: '/privacy' },
   ];

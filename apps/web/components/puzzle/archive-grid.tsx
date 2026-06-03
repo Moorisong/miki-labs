@@ -11,9 +11,10 @@ interface ArchiveGridProps {
     myRank?: number;
     completed: boolean;
   }[];
+  isHistoryLoaded?: boolean;
 }
 
-export default function ArchiveGrid({ puzzles, myHistory }: ArchiveGridProps) {
+export default function ArchiveGrid({ puzzles, myHistory, isHistoryLoaded }: ArchiveGridProps) {
   // 내 히스토리 맵 구성 (퍼즐 ID별 데이터 맵핑)
   const historyMap = new Map(myHistory.map((h) => [h.puzzleId, h]));
 
@@ -30,7 +31,7 @@ export default function ArchiveGrid({ puzzles, myHistory }: ArchiveGridProps) {
         
         let status: 'current' | 'completed' | 'missed' = 'missed';
         if (history) {
-          status = history.completed ? 'completed' : 'missed';
+          status = history.completed ? 'completed' : 'current';
         } else if (!puzzle.archived) {
           status = 'current';
         }
@@ -45,6 +46,7 @@ export default function ArchiveGrid({ puzzles, myHistory }: ArchiveGridProps) {
             status={status}
             myTime={myTime}
             myRank={myRank}
+            isHistoryLoaded={isHistoryLoaded}
           />
         );
       })}

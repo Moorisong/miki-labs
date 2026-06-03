@@ -9,6 +9,7 @@ interface ArchivePuzzleCardProps {
   status: 'current' | 'completed' | 'missed';
   myTime: string | null;
   myRank: number | null;
+  isHistoryLoaded?: boolean;
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
@@ -22,6 +23,7 @@ export default function ArchivePuzzleCard({
   status,
   myTime,
   myRank,
+  isHistoryLoaded = false,
 }: ArchivePuzzleCardProps) {
   const currentStatus = STATUS_LABELS[status] || STATUS_LABELS.missed;
 
@@ -63,15 +65,17 @@ export default function ArchivePuzzleCard({
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         />
         {/* Status Badge */}
-        <span
-          className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold shadow-sm"
-          style={{
-            backgroundColor: currentStatus.bg,
-            color: currentStatus.color,
-          }}
-        >
-          {currentStatus.label}
-        </span>
+        {isHistoryLoaded && (
+          <span
+            className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold shadow-sm"
+            style={{
+              backgroundColor: currentStatus.bg,
+              color: currentStatus.color,
+            }}
+          >
+            {currentStatus.label}
+          </span>
+        )}
       </div>
 
       {/* Content */}
