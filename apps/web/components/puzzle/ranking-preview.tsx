@@ -140,7 +140,7 @@ export default function RankingPreview({ rankings, isLoading, difficulty, onDiff
 
                 {/* Nickname */}
                 <span
-                  className="flex-1 text-sm font-semibold"
+                  className="flex-1 text-sm font-semibold truncate min-w-0"
                   style={{ color: 'var(--puzzle-card-foreground)' }}
                 >
                   {item.nickname}
