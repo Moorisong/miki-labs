@@ -73,12 +73,14 @@ export default function PuzzlePage() {
   // 서버로부터 진행 상황 동기화 및 완료 기록 조회
   useEffect(() => {
     if (!currentPuzzle || !token) return;
+    const puzzleId = currentPuzzle._id;
+    const userToken = token;
 
     async function syncUserStatus() {
       try {
         // 1. 진행 중인 게임이 없을 때만 서버 진행 상황 조회
         if (!hasSavedGame) {
-          const serverProgressRes = await fetchMyProgress(currentPuzzle._id, token);
+          const serverProgressRes = await fetchMyProgress(puzzleId, userToken);
           if (serverProgressRes.success && serverProgressRes.data) {
             const p = serverProgressRes.data.progress;
             const diff = serverProgressRes.data.detailState?.difficulty || 'beginner';
@@ -91,10 +93,10 @@ export default function PuzzlePage() {
         }
 
         // 2. 완주한 이력이 있는지 조회
-        const profileRes = await fetchMyProfile(token);
+        const profileRes = await fetchMyProfile(userToken);
         if (profileRes.success && profileRes.data) {
           const currentHistory = profileRes.data.history.find(
-            (h: any) => h.puzzleId === currentPuzzle._id && h.completed
+            (h: any) => h.puzzleId === puzzleId && h.completed
           );
           if (currentHistory) {
             setHasCompleted(true);

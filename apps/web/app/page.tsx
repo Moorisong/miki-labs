@@ -45,6 +45,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
     const contents = [
+        /*
         {
             id: 'puzzle',
             title: '하루퍼즐',
@@ -55,6 +56,7 @@ export default function Home() {
             badgeType: styles.badgeNew,
             active: true,
         },
+        */
         {
             id: 'u-know',
             title: '너잘알',
