@@ -52,7 +52,7 @@ export const getCurrentRankings = async (req: Request, res: Response, next: Next
       const u = userMap.get(item._id.toString());
       return {
         rank: index + 1,
-        nickname: u?.nickname || '익명 사용자',
+        nickname: u?.nickname || u?.name || '익명 사용자',
         profileImage: u?.profileImage || '',
         completionTime: item.bestTime,
         savedAt: item.savedAt
@@ -125,7 +125,7 @@ export const getMyRanking = async (req: Request, res: Response, next: NextFuncti
         success: true,
         data: {
           myRank: null,
-          nickname: user.nickname,
+          nickname: user.nickname || user.name || '익명 사용자',
           completionTime: null,
           totalParticipants,
           topPercent: null
@@ -141,7 +141,7 @@ export const getMyRanking = async (req: Request, res: Response, next: NextFuncti
       success: true,
       data: {
         myRank,
-        nickname: user.nickname,
+        nickname: user.nickname || user.name || '익명 사용자',
         completionTime: allRankings[myIndex].bestTime,
         totalParticipants,
         topPercent
@@ -243,7 +243,9 @@ export const startChallenge = async (req: Request, res: Response, next: NextFunc
 
     res.status(201).json({
       success: true,
-      challengeToken: token
+      data: {
+        challengeToken: token
+      }
     });
   } catch (error) {
     next(error);

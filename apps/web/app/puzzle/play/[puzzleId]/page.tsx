@@ -144,7 +144,7 @@ export default function PlayPage({ params }: PlayPageProps) {
               timerSeconds: savedState.timerSeconds,
               board: savedState.board || Array(totalPieces).fill(null),
               trayPieces: savedState.trayPieces || savedState.pieces.map((p: any) => p.id),
-              startedAt: savedState.startedAt,
+              startedAt: new Date(Date.now() - savedState.timerSeconds * 1000).toISOString(),
               completed: savedState.completed,
             });
           } else {
@@ -356,11 +356,22 @@ export default function PlayPage({ params }: PlayPageProps) {
     try {
       const submitMode = !puzzle.archived ? mode : 'solo';
       
+      // 랭킹 모드인데 챌린지 토큰이 아직 미발급 상태라면 최대 3초 대기
+      if (submitMode === 'ranked' && !challengeToken) {
+        let waitCount = 0;
+        while (!usePuzzleStore.getState().challengeToken && waitCount < 30) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          waitCount++;
+        }
+      }
+
+      const activeToken = usePuzzleStore.getState().challengeToken || challengeToken || 'no-challenge-token';
+      
       const res = await submitResult({
         puzzleId,
         mode: submitMode,
         difficulty,
-        challengeToken: challengeToken || 'no-challenge-token',
+        challengeToken: activeToken,
         startedAt: startedAt || new Date().toISOString(),
         completedAt: new Date().toISOString(),
         completionTime: timerSeconds,

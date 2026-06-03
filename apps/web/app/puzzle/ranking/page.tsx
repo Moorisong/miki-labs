@@ -194,7 +194,7 @@ export default function RankingPage() {
           {/* Leaderboard Board */}
           <RankingTable
             rankings={rankings}
-            myNickname={session?.user?.nickname || undefined}
+            myNickname={session?.user?.nickname || session?.user?.name || undefined}
             totalParticipants={rankings.length}
           />
         </div>

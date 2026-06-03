@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Clock, Users, Trophy, Play, Layers, X, HelpCircle, Check, Flame } from 'lucide-react';
 import { Puzzle } from '@/types/puzzle';
+import Link from 'next/link';
 
 interface HeroSectionProps {
   puzzle: Puzzle;
@@ -12,6 +13,8 @@ interface HeroSectionProps {
   progress: number;
   savedDifficulty?: 'beginner' | 'expert' | null;
   isLoggedIn?: boolean;
+  hasCompleted?: boolean;
+  completedDifficulty?: 'beginner' | 'expert' | null;
 }
 
 export default function HeroSection({
@@ -22,6 +25,8 @@ export default function HeroSection({
   progress,
   savedDifficulty,
   isLoggedIn = false,
+  hasCompleted = false,
+  completedDifficulty = null,
 }: HeroSectionProps) {
   const [showDiffSelect, setShowDiffSelect] = useState(false);
   const [tempDiff, setTempDiff] = useState<'beginner' | 'expert'>('beginner');
@@ -63,12 +68,22 @@ export default function HeroSection({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           {/* Info */}
           <div>
-            <div 
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold mb-5"
-              style={{ backgroundColor: 'var(--puzzle-secondary)', color: 'var(--puzzle-primary)' }}
-            >
-              <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: 'var(--puzzle-primary)' }} />
-              이번 주 퍼즐 · {puzzle.week}주차
+            <div className="flex flex-wrap items-center gap-2 mb-5">
+              <div 
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold"
+                style={{ backgroundColor: 'var(--puzzle-secondary)', color: 'var(--puzzle-primary)' }}
+              >
+                <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: 'var(--puzzle-primary)' }} />
+                이번 주 퍼즐 · {puzzle.week}주차
+              </div>
+              {hasCompleted && (
+                <div 
+                  className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200"
+                >
+                  <Check size={13} strokeWidth={3} />
+                  완료함 {completedDifficulty && `(${completedDifficulty === 'expert' ? 'Expert' : 'Beginner'})`}
+                </div>
+              )}
             </div>
 
             <h1 
@@ -125,12 +140,41 @@ export default function HeroSection({
                     style={{
                       backgroundColor: 'var(--puzzle-glass-bg)',
                       color: 'var(--puzzle-foreground)',
-                      borderColor: 'var(--puzzle-border)',
+                      border: '1px solid var(--puzzle-border)',
                       fontSize: '15px',
                       fontWeight: 650,
                     }}
                   >
                     새로 시작하기
+                  </button>
+                </>
+              ) : hasCompleted ? (
+                <>
+                  <Link
+                    href="/puzzle/ranking"
+                    className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-95 text-white puzzle-animate-pulse-glow"
+                    style={{
+                      backgroundColor: 'var(--puzzle-primary)',
+                      fontSize: '15px',
+                      fontWeight: 700,
+                    }}
+                  >
+                    <Trophy size={16} strokeWidth={2.5} />
+                    결과 및 랭킹 보기
+                  </Link>
+
+                  <button
+                    onClick={() => setShowDiffSelect(true)}
+                    className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                    style={{
+                      backgroundColor: 'var(--puzzle-glass-bg)',
+                      color: 'var(--puzzle-foreground)',
+                      border: '1px solid var(--puzzle-border)',
+                      fontSize: '15px',
+                      fontWeight: 650,
+                    }}
+                  >
+                    다시 도전하기
                   </button>
                 </>
               ) : (
@@ -192,7 +236,17 @@ export default function HeroSection({
                 boxShadow: 'var(--puzzle-shadow-md)',
               }}
             >
-              {hasSavedGame && savedDifficulty ? (
+              {hasCompleted ? (
+                <>
+                  <div className="flex items-center gap-1 text-xs font-bold text-emerald-600">
+                    <Check size={13} strokeWidth={3} />
+                    <span>완료됨 ({completedDifficulty === 'expert' ? 'Expert' : 'Beginner'})</span>
+                  </div>
+                  <p className="mt-0.5 text-sm font-extrabold text-emerald-700">
+                    명예의 전당 등록 완료! 🏅
+                  </p>
+                </>
+              ) : hasSavedGame && savedDifficulty ? (
                 <>
                   <div className="flex items-center gap-1 text-xs font-bold" style={{ color: 'var(--puzzle-primary)' }}>
                     <Layers size={13} />

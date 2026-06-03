@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useRankingStore } from '@/lib/stores/ranking-store';
-import { fetchCurrentPuzzle, fetchArchivePuzzles, fetchServiceStats, fetchMyProgress } from '@/lib/puzzle-api';
+import { fetchCurrentPuzzle, fetchArchivePuzzles, fetchServiceStats, fetchMyProgress, fetchMyProfile } from '@/lib/puzzle-api';
 import { loadPuzzleState } from '@/lib/puzzle-db';
 import { Puzzle } from '@/types/puzzle';
 import HeroSection from '@/components/puzzle/hero-section';
@@ -26,6 +26,8 @@ export default function PuzzlePage() {
   const [hasSavedGame, setHasSavedGame] = useState(false);
   const [savedProgress, setSavedProgress] = useState(0);
   const [savedDifficulty, setSavedDifficulty] = useState<'beginner' | 'expert' | null>(null);
+  const [hasCompleted, setHasCompleted] = useState(false);
+  const [completedDifficulty, setCompletedDifficulty] = useState<'beginner' | 'expert' | null>(null);
   const [previewDiff, setPreviewDiff] = useState<'beginner' | 'expert'>('beginner');
   const [isPuzzleLoading, setIsPuzzleLoading] = useState(true);
   const [serviceStats, setServiceStats] = useState<{ totalPlayCount: number; completionRate: string } | null>(null);
@@ -68,28 +70,43 @@ export default function PuzzlePage() {
     loadData();
   }, []);
 
-  // 서버로부터 진행 중인 기록 동기화 (로컬 IndexedDB에 없는 경우)
+  // 서버로부터 진행 상황 동기화 및 완료 기록 조회
   useEffect(() => {
-    if (!currentPuzzle || !token || hasSavedGame) return;
+    if (!currentPuzzle || !token) return;
 
-    async function syncServerProgress() {
+    async function syncUserStatus() {
       try {
-        const serverProgressRes = await fetchMyProgress(currentPuzzle._id, token);
-        if (serverProgressRes.success && serverProgressRes.data) {
-          const p = serverProgressRes.data.progress;
-          const diff = serverProgressRes.data.detailState?.difficulty || 'beginner';
-          if (p > 0 && p < 100) {
-            setHasSavedGame(true);
-            setSavedProgress(p);
-            setSavedDifficulty(diff);
+        // 1. 진행 중인 게임이 없을 때만 서버 진행 상황 조회
+        if (!hasSavedGame) {
+          const serverProgressRes = await fetchMyProgress(currentPuzzle._id, token);
+          if (serverProgressRes.success && serverProgressRes.data) {
+            const p = serverProgressRes.data.progress;
+            const diff = serverProgressRes.data.detailState?.difficulty || 'beginner';
+            if (p > 0 && p < 100) {
+              setHasSavedGame(true);
+              setSavedProgress(p);
+              setSavedDifficulty(diff);
+            }
+          }
+        }
+
+        // 2. 완주한 이력이 있는지 조회
+        const profileRes = await fetchMyProfile(token);
+        if (profileRes.success && profileRes.data) {
+          const currentHistory = profileRes.data.history.find(
+            (h: any) => h.puzzleId === currentPuzzle._id && h.completed
+          );
+          if (currentHistory) {
+            setHasCompleted(true);
+            setCompletedDifficulty(currentHistory.difficulty);
           }
         }
       } catch (e) {
-        console.error('Failed to sync server progress:', e);
+        console.error('Failed to sync user puzzle status:', e);
       }
     }
 
-    syncServerProgress();
+    syncUserStatus();
   }, [currentPuzzle, token, hasSavedGame]);
 
   useEffect(() => {
@@ -140,6 +157,8 @@ export default function PuzzlePage() {
           progress={savedProgress}
           savedDifficulty={savedDifficulty}
           isLoggedIn={!!token}
+          hasCompleted={hasCompleted}
+          completedDifficulty={completedDifficulty}
         />
       </div>
 
@@ -184,7 +203,7 @@ export default function PuzzlePage() {
                 지난 아카이브 퍼즐 보기
               </p>
               <p className="text-[10px] font-bold" style={{ color: 'var(--puzzle-muted-foreground)' }}>
-                이전 주차 힐링 플레이 목록
+                이전 주차 퍼즐 플레이 목록
               </p>
             </div>
             <ArrowRight size={18} strokeWidth={2.5} style={{ color: 'var(--puzzle-primary)' }} />
