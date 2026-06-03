@@ -41,20 +41,15 @@ async function getDB(): Promise<IDBDatabase> {
   });
 }
 
-// 2초 디바운스를 위한 타이머 맵
+// 쓰기 속도 제한(Throttling)을 위한 시간 기록 및 타이머 맵
 const debounceTimers = new Map<string, NodeJS.Timeout>();
+const lastSaveTimes = new Map<string, number>();
 
 export async function savePuzzleState(
   puzzleId: string,
   state: Omit<LocalPuzzleState, 'puzzleId' | 'updatedAt'>,
   immediate = false
 ): Promise<void> {
-  // 기존 타이머 클리어
-  if (debounceTimers.has(puzzleId)) {
-    clearTimeout(debounceTimers.get(puzzleId)!);
-    debounceTimers.delete(puzzleId);
-  }
-
   const saveFn = async () => {
     try {
       const db = await getDB();
@@ -68,20 +63,46 @@ export async function savePuzzleState(
       };
 
       store.put(data);
+      lastSaveTimes.set(puzzleId, Date.now());
     } catch (error) {
       console.error('IndexedDB save failed:', error);
     }
   };
 
   if (immediate) {
+    if (debounceTimers.has(puzzleId)) {
+      clearTimeout(debounceTimers.get(puzzleId)!);
+      debounceTimers.delete(puzzleId);
+    }
     return saveFn();
   }
 
+  const lastSave = lastSaveTimes.get(puzzleId) || 0;
+  const now = Date.now();
+  const THROTTLE_INTERVAL = 5000; // 5초 간격으로 최소 1회 쓰기 보장
+
+  //마지막 저장으로부터 5초 이상 지났으면 즉시 저장
+  if (now - lastSave >= THROTTLE_INTERVAL) {
+    if (debounceTimers.has(puzzleId)) {
+      clearTimeout(debounceTimers.get(puzzleId)!);
+      debounceTimers.delete(puzzleId);
+    }
+    return saveFn();
+  }
+
+  // 이미 예약된 저장이 있다면 기존 예약을 유지 (매초 리셋하여 저장을 지연시키는 데브 바운스 버그 방지)
+  if (debounceTimers.has(puzzleId)) {
+    return;
+  }
+
+  // 남은 시간만큼 대기 후 저장 예약
   return new Promise((resolve) => {
+    const delay = THROTTLE_INTERVAL - (now - lastSave);
     const timer = setTimeout(async () => {
+      debounceTimers.delete(puzzleId);
       await saveFn();
       resolve();
-    }, 2000); // 2초 디바운스
+    }, delay);
 
     debounceTimers.set(puzzleId, timer);
   });
