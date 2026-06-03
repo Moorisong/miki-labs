@@ -72,7 +72,7 @@ export default function RankingPreview({ rankings, isLoading, difficulty, onDiff
       </div>
 
       <div 
-        className="rounded-2xl overflow-hidden flex-1 flex flex-col justify-center"
+        className="rounded-2xl overflow-hidden flex-1 flex flex-col justify-start"
         style={{ 
           backgroundColor: 'var(--puzzle-glass-bg)',
           border: '1px solid var(--puzzle-border)',
