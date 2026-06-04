@@ -28,6 +28,7 @@ export default function PuzzlePageClient() {
   const [savedDifficulty, setSavedDifficulty] = useState<'novice' | 'beginner' | 'expert' | null>(null);
   const [hasCompleted, setHasCompleted] = useState(false);
   const [completedDifficulty, setCompletedDifficulty] = useState<'novice' | 'beginner' | 'expert' | null>(null);
+  const [completedDifficulties, setCompletedDifficulties] = useState<('novice' | 'beginner' | 'expert')[]>([]);
   const [previewDiff, setPreviewDiff] = useState<'novice' | 'beginner' | 'expert'>('novice');
   const [isPuzzleLoading, setIsPuzzleLoading] = useState(true);
   const [serviceStats, setServiceStats] = useState<{ totalPlayCount: number; completionRate: string } | null>(null);
@@ -116,23 +117,30 @@ export default function PuzzlePageClient() {
         // 2. 완주한 이력이 있는지 조회
         const profileRes = await fetchMyProfile(userToken);
         if (profileRes.success && profileRes.data) {
-          const currentHistory = profileRes.data.history.find(
+          const completedHistories = profileRes.data.history.filter(
             (h: any) => h.puzzleId === puzzleId && h.completed
           );
-          if (currentHistory) {
+          
+          if (completedHistories.length > 0) {
             setHasCompleted(true);
-            setCompletedDifficulty(currentHistory.difficulty);
+            
+            // 모든 완료된 난이도 추출
+            const diffs = completedHistories.map((h: any) => h.difficulty);
+            setCompletedDifficulties(diffs);
+            
+            // 대표 완료 난이도 설정 (마지막 완료 난이도 우선)
+            setCompletedDifficulty(completedHistories[completedHistories.length - 1].difficulty);
             
             // 완주 확인 시 로컬 저장 데이터를 비교하여 정리
             try {
               const savedState = await loadPuzzleState(puzzleId);
               if (savedState) {
                 const savedTime = savedState.updatedAt ? new Date(savedState.updatedAt).getTime() : 0;
-                const completedTime = new Date(currentHistory.savedAt || 0).getTime();
+                // 가장 최근 완료 시간 찾기
+                const lastCompletedTime = Math.max(...completedHistories.map((h: any) => new Date(h.savedAt || 0).getTime()));
                 
                 // 로컬 저장 상태의 최종 변경 시간이 완주 시간보다 이전인 경우만 삭제 (기존 진행분 찌꺼기)
-                // 만약 완주 시간보다 이후라면, 완주 후 '다시 도전하기'로 새로 진행 중인 세션이므로 삭제하지 않음
-                if (savedTime <= completedTime) {
+                if (savedTime <= lastCompletedTime) {
                   const { deletePuzzleState } = await import('@/lib/puzzle-db');
                   await deletePuzzleState(puzzleId);
                   setHasSavedGame(false);
@@ -201,6 +209,7 @@ export default function PuzzlePageClient() {
           isLoggedIn={!!token}
           hasCompleted={hasCompleted}
           completedDifficulty={completedDifficulty}
+          completedDifficulties={completedDifficulties}
         />
       </div>
 
