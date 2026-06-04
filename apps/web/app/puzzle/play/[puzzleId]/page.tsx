@@ -520,14 +520,24 @@ export default function PlayPage({ params }: PlayPageProps) {
       )}
 
       {/* Play Canvas / Board Area */}
-      <div className="w-full flex-1 min-h-0 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      <div 
+        className="w-full flex-1 min-h-0 flex flex-col items-center justify-center p-4 relative overflow-hidden"
+        onClick={() => {
+          if (selectedTrayPiece !== null) {
+            selectTrayPiece(null);
+          }
+        }}
+      >
         {/* Original guide overlay */}
         {showOriginal && (
           <div 
             className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-sm p-8"
-            onClick={() => setShowOriginal(false)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowOriginal(false);
+            }}
           >
-            <div className="relative max-w-lg rounded-2xl overflow-hidden shadow-2xl">
+            <div className="relative max-w-lg rounded-2xl overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
               <img src={puzzle.imageUrl} alt="Original Guide" className="w-full h-auto object-contain max-h-[70vh]" />
               <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/60 text-white font-bold text-xs flex items-center gap-1">
                 <Eye size={12} />
@@ -567,6 +577,7 @@ export default function PlayPage({ params }: PlayPageProps) {
           gridSize={gridSize}
           selectedPieceId={selectedTrayPiece}
           onPieceClick={handlePieceSelect}
+          onTrayClick={() => selectTrayPiece(null)}
         />
       </div>
 

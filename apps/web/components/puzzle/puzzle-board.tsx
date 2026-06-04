@@ -41,7 +41,10 @@ export default function PuzzleBoard({
           return (
             <div
               key={slotIdx}
-              onClick={() => onCellClick(slotIdx)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onCellClick(slotIdx);
+              }}
               className="relative flex items-center justify-center cursor-pointer transition-all duration-150 group outline-none select-none"
               style={{
                 width: cellSize,

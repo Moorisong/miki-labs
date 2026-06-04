@@ -8,6 +8,7 @@ interface PieceTrayProps {
   gridSize: number;
   selectedPieceId: number | null;
   onPieceClick: (pieceId: number) => void;
+  onTrayClick?: () => void;
 }
 
 export default function PieceTray({
@@ -16,6 +17,7 @@ export default function PieceTray({
   gridSize,
   selectedPieceId,
   onPieceClick,
+  onTrayClick,
 }: PieceTrayProps) {
   const cellSize = 60; // 트레이 조각은 고정 사이즈로 작게 표시해 일목요연하게 노출
 
@@ -27,6 +29,12 @@ export default function PieceTray({
         backdropFilter: 'var(--puzzle-glass-blur)',
         borderColor: 'var(--puzzle-border)',
         width: '100%',
+        cursor: selectedPieceId !== null ? 'pointer' : 'default',
+      }}
+      onClick={() => {
+        if (selectedPieceId !== null) {
+          onTrayClick?.();
+        }
       }}
     >
       <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:items-baseline mb-2 select-none">
@@ -54,7 +62,10 @@ export default function PieceTray({
             {selectedPieceId !== null && !trayPieces.includes(selectedPieceId) && (
               <div
                 key={selectedPieceId}
-                onClick={() => onPieceClick(selectedPieceId)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPieceClick(selectedPieceId);
+                }}
                 className="relative cursor-pointer transition-all duration-200 flex-shrink-0 outline-none select-none"
                 style={{
                   transform: 'scale(1.08) translateY(-4px)',
@@ -84,7 +95,10 @@ export default function PieceTray({
               return (
                 <div
                   key={pieceId}
-                  onClick={() => onPieceClick(pieceId)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onPieceClick(pieceId);
+                  }}
                   className="relative cursor-pointer transition-all duration-200 flex-shrink-0 outline-none select-none"
                   style={{
                     transform: isSelected ? 'scale(1.08) translateY(-4px)' : 'scale(1)',
