@@ -64,7 +64,7 @@ export default function Footer() {
             © {new Date().getFullYear()} 하루퍼즐. All rights reserved.
           </p>
           <p className="text-xs font-semibold" style={{ color: 'var(--puzzle-primary)' }}>
-            🧘 매주 새로운 퍼즐로 힐링과 도전을 만나보세요.
+            🧘 당신의 고요한 일상을 지켜드립니다.
           </p>
         </div>
       </div>
