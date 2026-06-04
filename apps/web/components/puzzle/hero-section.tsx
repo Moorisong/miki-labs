@@ -389,7 +389,7 @@ export default function HeroSection({
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-base font-black" style={{ color: 'var(--puzzle-card-foreground)' }}>
-                        🏆 <span className="hidden sm:inline">랭킹 도전 모드</span>
+                        <span className="hidden sm:inline">랭킹 도전 모드</span>
                         <span className="inline sm:hidden">랭킹 도전</span>
                       </span>
                       {hasCompleted ? (
@@ -402,7 +402,7 @@ export default function HeroSection({
                       )}
                     </div>
                     <p className="text-xs font-medium mt-1 leading-relaxed whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: 'var(--puzzle-muted-foreground)' }}>
-                      {hasCompleted ? '이미 랭킹에 최고 기록이 등록되어 있습니다' : '완성 기록으로 주간 랭킹 도전'}
+                      {hasCompleted ? '이미 랭킹에 기록이 등록되어 있습니다' : '기록 제출하고 주간 랭킹 도전'}
                     </p>
                   </div>
                 </button>
@@ -425,7 +425,7 @@ export default function HeroSection({
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-base font-black" style={{ color: 'var(--puzzle-card-foreground)' }}>
-                        🧘 <span className="hidden sm:inline">힐링 플레이 모드</span>
+                        <span className="hidden sm:inline">힐링 플레이 모드</span>
                         <span className="inline sm:hidden">힐링 플레이</span>
                       </span>
                       <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-600">
@@ -434,7 +434,7 @@ export default function HeroSection({
                       </span>
                     </div>
                     <p className="text-xs font-medium mt-1 leading-relaxed whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: 'var(--puzzle-muted-foreground)' }}>
-                      경쟁 없이 음악과 함께 힐링
+                      경쟁 없이 함께 힐링
                     </p>
                   </div>
                 </button>

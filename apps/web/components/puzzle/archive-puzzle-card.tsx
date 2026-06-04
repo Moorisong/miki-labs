@@ -222,9 +222,6 @@ export default function ArchivePuzzleCard({
                   <Play size={22} className="text-emerald-500 fill-emerald-500/20" />
                   플레이 옵션 설정
                 </h3>
-                <p className="text-sm font-semibold mt-1.5 text-left" style={{ color: 'var(--puzzle-muted-foreground)' }}>
-                  플레이하실 난이도를 선택해주세요.
-                </p>
               </div>
               <button 
                 onClick={() => setShowDiffSelect(false)}
@@ -304,7 +301,7 @@ export default function ArchivePuzzleCard({
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-sm sm:text-base font-black" style={{ color: selectedMode === 'ranked' ? 'var(--puzzle-primary)' : 'var(--puzzle-card-foreground)' }}>
-                        🏆 랭킹 도전
+                        랭킹 도전
                       </span>
                       {isCompletedActive && (
                         <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600">등록 완료</span>
@@ -325,7 +322,7 @@ export default function ArchivePuzzleCard({
                     }}
                   >
                     <span className="text-sm sm:text-base font-black" style={{ color: selectedMode === 'solo' ? 'var(--puzzle-primary)' : 'var(--puzzle-card-foreground)' }}>
-                      🧘 힐링 플레이
+                      힐링 플레이
                     </span>
                     <p className="text-xs font-medium leading-relaxed mt-1" style={{ color: 'var(--puzzle-muted-foreground)' }}>
                       기록 경쟁 없이 편안하게
@@ -340,7 +337,7 @@ export default function ArchivePuzzleCard({
                     style={{ backgroundColor: '#F0F9FF', borderColor: '#BAE6FD', color: '#0369A1' }}
                   >
                     <span>
-                      ℹ️ 이미 랭킹 기록이 등록된 퍼즐이에요. 재도전은 힐링 모드로만 가능하며, 기존 랭킹에는 영향 없습니다.
+                      이미 랭킹 기록이 등록된 퍼즐이에요. 재도전은 힐링 모드로만 가능하며, 기존 랭킹에는 영향 없습니다.
                     </span>
                   </div>
                 )}
