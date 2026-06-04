@@ -14,7 +14,7 @@ export interface PuzzleResult {
   userId: string;
   puzzleId: string;
   mode: 'solo' | 'ranked';
-  difficulty: 'beginner' | 'expert';
+  difficulty: 'novice' | 'beginner' | 'expert';
   completionTime: number;
   challengeToken: string;
   startedAt: string;

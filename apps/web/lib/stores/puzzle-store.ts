@@ -9,7 +9,7 @@ export interface PuzzleState {
   // 상태
   activePuzzleId: string | null;
   activePuzzleImage: string | null;
-  difficulty: 'beginner' | 'expert';
+  difficulty: 'novice' | 'beginner' | 'expert';
   mode: 'ranked' | 'solo';
   totalPieces: number;
   board: (number | null)[];
@@ -22,9 +22,9 @@ export interface PuzzleState {
   challengeToken: string | null;
 
   // 액션
-  initializePuzzle: (puzzleId: string, imgUrl: string, diff: 'beginner' | 'expert', mode: 'ranked' | 'solo', customStartedAt?: string) => void;
+  initializePuzzle: (puzzleId: string, imgUrl: string, diff: 'novice' | 'beginner' | 'expert', mode: 'ranked' | 'solo', customStartedAt?: string) => void;
   resumePuzzle: (state: {
-    difficulty: 'beginner' | 'expert';
+    difficulty: 'novice' | 'beginner' | 'expert';
     mode: 'ranked' | 'solo';
     timerSeconds: number;
     board: (number | null)[];
@@ -73,7 +73,7 @@ export const usePuzzleStore = create<PuzzleState>((set, get) => ({
   challengeToken: null,
 
   initializePuzzle: (puzzleId, imgUrl, diff, mode, customStartedAt) => {
-    const total = diff === 'beginner' ? 100 : 256;
+    const total = diff === 'novice' ? 36 : diff === 'beginner' ? 100 : 256;
     const pieces = Array.from({ length: total }, (_, i) => i);
     const shuffledTray = shuffle(pieces);
 
@@ -98,7 +98,7 @@ export const usePuzzleStore = create<PuzzleState>((set, get) => ({
   },
 
   resumePuzzle: (savedState) => {
-    const total = savedState.difficulty === 'beginner' ? 100 : 256;
+    const total = savedState.difficulty === 'novice' ? 36 : savedState.difficulty === 'beginner' ? 100 : 256;
     set({
       difficulty: savedState.difficulty,
       mode: savedState.mode,

@@ -2,7 +2,7 @@ import { PuzzlePiece } from './stores/puzzle-store';
 
 export interface LocalPuzzleState {
   puzzleId: string;
-  difficulty: 'beginner' | 'expert';
+  difficulty: 'novice' | 'beginner' | 'expert';
   mode: 'ranked' | 'solo';
   timerSeconds: number;
   pieces: PuzzlePiece[];

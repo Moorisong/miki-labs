@@ -52,7 +52,7 @@ export async function fetchPuzzleById(id: string): Promise<ApiResponse<Puzzle>> 
   }
 }
 
-export async function fetchCurrentRankings(puzzleId: string, difficulty?: 'beginner' | 'expert'): Promise<ApiResponse<RankingEntry[]>> {
+export async function fetchCurrentRankings(puzzleId: string, difficulty?: 'novice' | 'beginner' | 'expert'): Promise<ApiResponse<RankingEntry[]>> {
   try {
     const url = difficulty
       ? `${API_BASE_URL}/api${API_PUZZLE.RANKINGS_CURRENT}?puzzleId=${puzzleId}&difficulty=${difficulty}`
@@ -65,7 +65,7 @@ export async function fetchCurrentRankings(puzzleId: string, difficulty?: 'begin
   }
 }
 
-export async function fetchMyRanking(puzzleId: string, token: string, difficulty?: 'beginner' | 'expert'): Promise<ApiResponse<MyRanking>> {
+export async function fetchMyRanking(puzzleId: string, token: string, difficulty?: 'novice' | 'beginner' | 'expert'): Promise<ApiResponse<MyRanking>> {
   try {
     const url = difficulty
       ? `${API_BASE_URL}/api${API_PUZZLE.RANKINGS_ME}?puzzleId=${puzzleId}&difficulty=${difficulty}`
@@ -98,7 +98,7 @@ export async function submitResult(
   data: {
     puzzleId: string;
     mode: 'solo' | 'ranked';
-    difficulty: 'beginner' | 'expert';
+    difficulty: 'novice' | 'beginner' | 'expert';
     challengeToken: string;
     startedAt: string;
     completedAt: string;
@@ -158,7 +158,7 @@ export async function fetchMyProfile(
 ): Promise<ApiResponse<{
   profile: { nickname: string; profileImage?: string; createdAt: string };
   statistics: { totalCompleted: number; bestTimeBeginner: number | null; bestRank: number | null };
-  history: { puzzleId: string; title: string; imageUrl: string; difficulty: 'beginner' | 'expert'; completionTime: number; savedAt: string; completed: boolean; myRank?: number }[];
+  history: { puzzleId: string; title: string; imageUrl: string; difficulty: 'novice' | 'beginner' | 'expert'; completionTime: number; savedAt: string; completed: boolean; myRank?: number }[];
 }>> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/puzzle/users/me`, {

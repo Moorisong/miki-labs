@@ -7,8 +7,8 @@ export interface RankingState {
   myRanking: MyRanking | null;
   isLoading: boolean;
 
-  fetchRankings: (puzzleId: string, difficulty?: 'beginner' | 'expert') => Promise<void>;
-  fetchMyRanking: (puzzleId: string, token: string, difficulty?: 'beginner' | 'expert') => Promise<void>;
+  fetchRankings: (puzzleId: string, difficulty?: 'novice' | 'beginner' | 'expert') => Promise<void>;
+  fetchMyRanking: (puzzleId: string, token: string, difficulty?: 'novice' | 'beginner' | 'expert') => Promise<void>;
   resetRankings: () => void;
 }
 
