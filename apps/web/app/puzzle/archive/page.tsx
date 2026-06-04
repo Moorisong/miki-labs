@@ -38,13 +38,8 @@ export default function ArchivePage() {
             const historyList = profileRes.data.history || [];
             setMyHistory(historyList);
             
-            // 현재 아카이브 목록에 존재하는 퍼즐 중에서 완주한 개수만 필터링하여 계산
-            const archiveIds = new Set(archivePuzzles.map((p) => p._id));
-            const completedInArchive = historyList.filter(
-              (h: any) => h.completed && archiveIds.has(h.puzzleId)
-            ).length;
-            
-            setTotalCompleted(completedInArchive);
+            // 서버에서 퍼즐ID 기준 중복 제거된 완주 수를 그대로 사용 (마이페이지 통계와 통일)
+            setTotalCompleted(profileRes.data.statistics.totalCompleted);
             setBestRank(profileRes.data.statistics.bestRank);
           }
           setIsHistoryLoaded(true);

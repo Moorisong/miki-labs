@@ -51,26 +51,15 @@ export const getArchivePuzzles = async (req: Request, res: Response, next: NextF
   try {
     const Puzzle = getPuzzleModel();
     
-    // archived가 true이거나 현재 활성 기간이 지난 퍼즐들을 주차 역순으로 조회
-    // 단, 대안 A에 따라 올해(현재 연도)의 아카이브 데이터만 조회하도록 쿼리 수정
+    // 현재 진행 중인 퍼즐(대회 퍼즐) 및 지난 주차 아카이브 퍼즐 목록 조회
+    // 단, 올해(현재 연도)의 데이터만 조회하도록 필터링
     const now = new Date();
     const currentYear = now.getFullYear();
     const startOfYear = new Date(Date.UTC(currentYear, 0, 1, 0, 0, 0, 0));
-    const endOfYear = new Date(Date.UTC(currentYear, 11, 31, 23, 59, 59, 999));
 
     const puzzles = await Puzzle.find({
-      $and: [
-        {
-          $or: [
-            { archived: true },
-            { endDate: { $lt: now } }
-          ]
-        },
-        {
-          startDate: { $gte: startOfYear, $lte: endOfYear }
-        }
-      ]
-    }).sort({ week: -1 });
+      startDate: { $gte: startOfYear, $lte: now }
+    }).sort({ startDate: -1 });
 
     res.json({
       success: true,
