@@ -32,8 +32,6 @@ export default function ArchiveGrid({ puzzles, myHistory, isHistoryLoaded }: Arc
         let status: 'current' | 'completed' | 'missed' = 'missed';
         if (history) {
           status = history.completed ? 'completed' : 'current';
-        } else if (!puzzle.archived) {
-          status = 'current';
         }
 
         const myTime = history && history.completed ? formatDuration(history.completionTime) : null;
