@@ -150,6 +150,7 @@ export default function PlayPage({ params }: PlayPageProps) {
               completed: savedState.completed,
             });
           } else {
+            await deletePuzzleState(puzzleId);
             initializePuzzle(puzzleId, res.data.imageUrl, diffParam, modeParam, pageEnterTime);
             if (token) {
               clearMyProgress(token, puzzleId).catch(console.error);
@@ -157,6 +158,7 @@ export default function PlayPage({ params }: PlayPageProps) {
           }
         } else {
           // 새로하기
+          await deletePuzzleState(puzzleId);
           initializePuzzle(puzzleId, res.data.imageUrl, diffParam, modeParam, pageEnterTime);
           if (token) {
             clearMyProgress(token, puzzleId).catch(console.error);
@@ -348,8 +350,40 @@ export default function PlayPage({ params }: PlayPageProps) {
     if (!puzzle || isSaved || isSubmitting || submittingRef.current) return;
 
     if (!token) {
-      // 비로그인 시 로그인 가이드 유도
-      const callback = encodeURIComponent(window.location.pathname + window.location.search);
+      // 비로그인 시 로그인 가이드 유도 (로그인 후 돌아왔을 때 이어하기를 통해 완료 상태 복구)
+      // 현재 완료 상태를 IndexedDB에 즉시 저장하여 세션 유지
+      const correctCount = board.filter((cell, idx) => cell === idx).length;
+      const progress = Math.round((correctCount / totalPieces) * 100);
+      const piecesData = board.map((pieceId, idx) => ({
+        id: pieceId !== null ? pieceId : idx,
+        correctX: 0,
+        correctY: 0,
+        currentX: 0,
+        currentY: 0,
+        width: 0,
+        height: 0,
+        locked: pieceId === idx,
+      }));
+      
+      try {
+        await savePuzzleState(puzzleId, {
+          difficulty,
+          mode,
+          timerSeconds,
+          pieces: piecesData as any,
+          board,
+          trayPieces,
+          progress,
+          completed: true,
+          startedAt: startedAt || new Date().toISOString(),
+        }, true);
+      } catch (err) {
+        console.error('Failed to save state before login redirect:', err);
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      params.set('resume', 'true');
+      const callback = encodeURIComponent(`${window.location.pathname}?${params.toString()}`);
       router.push(`/login?callbackUrl=${callback}`);
       return;
     }
@@ -537,7 +571,7 @@ export default function PlayPage({ params }: PlayPageProps) {
               setShowOriginal(false);
             }}
           >
-            <div className="relative max-w-lg rounded-2xl overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="relative max-w-lg rounded-2xl overflow-hidden shadow-2xl">
               <img src={puzzle.imageUrl} alt="Original Guide" className="w-full h-auto object-contain max-h-[70vh]" />
               <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/60 text-white font-bold text-xs flex items-center gap-1">
                 <Eye size={12} />

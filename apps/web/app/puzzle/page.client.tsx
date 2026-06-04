@@ -78,16 +78,37 @@ export default function PuzzlePageClient() {
 
     async function syncUserStatus() {
       try {
-        // 1. 진행 중인 게임이 없을 때만 서버 진행 상황 조회
-        if (!hasSavedGame) {
-          const serverProgressRes = await fetchMyProgress(puzzleId, userToken);
-          if (serverProgressRes.success && serverProgressRes.data) {
-            const p = serverProgressRes.data.progress;
-            const diff = serverProgressRes.data.detailState?.difficulty || 'beginner';
-            if (p > 0 && p < 100) {
-              setHasSavedGame(true);
-              setSavedProgress(p);
-              setSavedDifficulty(diff);
+        // 1. 서버의 진행 상황 조회 및 로컬 IndexedDB 싱크 맞춤
+        const serverProgressRes = await fetchMyProgress(puzzleId, userToken);
+        if (serverProgressRes.success && serverProgressRes.data) {
+          const serverProgress = serverProgressRes.data.progress;
+          const diff = serverProgressRes.data.detailState?.difficulty || 'beginner';
+          
+          // 로컬 진행상황 불러오기
+          const localState = await loadPuzzleState(puzzleId);
+          const localProgress = localState ? localState.progress : 0;
+          
+          // 서버 진행도가 로컬 진행도보다 더 크거나 같거나, 로컬 저장 기록이 없다면 서버 기준으로 동기화
+          if (serverProgress > 0 && serverProgress < 100 && (serverProgress >= localProgress || !localState)) {
+            setHasSavedGame(true);
+            setSavedProgress(serverProgress);
+            setSavedDifficulty(diff);
+            
+            // 로컬 IndexedDB도 서버에서 받아온 상세 상태로 덮어써서 싱크를 맞춥니다.
+            if (serverProgressRes.data.detailState) {
+              const s = serverProgressRes.data.detailState;
+              const { savePuzzleState } = await import('@/lib/puzzle-db');
+              await savePuzzleState(puzzleId, {
+                difficulty: s.difficulty,
+                mode: s.mode || 'solo',
+                timerSeconds: s.timerSeconds || 0,
+                pieces: s.pieces || [],
+                board: s.board,
+                trayPieces: s.trayPieces,
+                progress: serverProgress,
+                completed: false,
+                startedAt: s.startedAt || new Date().toISOString(),
+              }, true);
             }
           }
         }
@@ -101,6 +122,25 @@ export default function PuzzlePageClient() {
           if (currentHistory) {
             setHasCompleted(true);
             setCompletedDifficulty(currentHistory.difficulty);
+            
+            // 완주 확인 시 로컬 저장 데이터를 비교하여 정리
+            try {
+              const savedState = await loadPuzzleState(puzzleId);
+              if (savedState) {
+                const savedTime = savedState.updatedAt ? new Date(savedState.updatedAt).getTime() : 0;
+                const completedTime = new Date(currentHistory.savedAt || 0).getTime();
+                
+                // 로컬 저장 상태의 최종 변경 시간이 완주 시간보다 이전인 경우만 삭제 (기존 진행분 찌꺼기)
+                // 만약 완주 시간보다 이후라면, 완주 후 '다시 도전하기'로 새로 진행 중인 세션이므로 삭제하지 않음
+                if (savedTime <= completedTime) {
+                  const { deletePuzzleState } = await import('@/lib/puzzle-db');
+                  await deletePuzzleState(puzzleId);
+                  setHasSavedGame(false);
+                }
+              }
+            } catch (err) {
+              console.error('Failed to clear local puzzle state after sync:', err);
+            }
           }
         }
       } catch (e) {

@@ -137,36 +137,39 @@ export default function RankingPage() {
         <div className="flex items-center gap-1.5 bg-zinc-100 p-1 rounded-2xl border self-start md:self-auto" style={{ borderColor: 'var(--puzzle-border)' }}>
           <button
             onClick={() => setSelectedDifficulty('novice')}
-            className="px-4 py-2 text-xs font-black rounded-xl transition-all duration-200"
+            className="px-3 sm:px-4 py-2 text-xs font-black rounded-xl transition-all duration-200 text-center"
             style={{
               backgroundColor: selectedDifficulty === 'novice' ? 'var(--puzzle-primary)' : 'transparent',
               color: selectedDifficulty === 'novice' ? '#fff' : 'var(--puzzle-muted-foreground)',
               boxShadow: selectedDifficulty === 'novice' ? 'var(--puzzle-shadow-sm)' : 'none',
             }}
           >
-            초보 (36조각)
+            초보
+            <span className="block sm:inline sm:ml-1 text-[10px] sm:text-xs opacity-80">(36조각)</span>
           </button>
           <button
             onClick={() => setSelectedDifficulty('beginner')}
-            className="px-4 py-2 text-xs font-black rounded-xl transition-all duration-200"
+            className="px-3 sm:px-4 py-2 text-xs font-black rounded-xl transition-all duration-200 text-center"
             style={{
               backgroundColor: selectedDifficulty === 'beginner' ? 'var(--puzzle-primary)' : 'transparent',
               color: selectedDifficulty === 'beginner' ? '#fff' : 'var(--puzzle-muted-foreground)',
               boxShadow: selectedDifficulty === 'beginner' ? 'var(--puzzle-shadow-sm)' : 'none',
             }}
           >
-            일반 (100조각)
+            일반
+            <span className="block sm:inline sm:ml-1 text-[10px] sm:text-xs opacity-80">(100조각)</span>
           </button>
           <button
             onClick={() => setSelectedDifficulty('expert')}
-            className="px-4 py-2 text-xs font-black rounded-xl transition-all duration-200"
+            className="px-3 sm:px-4 py-2 text-xs font-black rounded-xl transition-all duration-200 text-center"
             style={{
               backgroundColor: selectedDifficulty === 'expert' ? 'var(--puzzle-primary)' : 'transparent',
               color: selectedDifficulty === 'expert' ? '#fff' : 'var(--puzzle-muted-foreground)',
               boxShadow: selectedDifficulty === 'expert' ? 'var(--puzzle-shadow-sm)' : 'none',
             }}
           >
-            고수 (256조각)
+            고수
+            <span className="block sm:inline sm:ml-1 text-[10px] sm:text-xs opacity-80">(256조각)</span>
           </button>
         </div>
       </div>

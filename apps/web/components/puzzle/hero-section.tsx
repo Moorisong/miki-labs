@@ -129,7 +129,7 @@ export default function HeroSection({
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 relative">
-              {hasSavedGame && onResume ? (
+              {hasCompleted && hasSavedGame && onResume ? (
                 <>
                   <button
                     onClick={onResume}
@@ -144,9 +144,9 @@ export default function HeroSection({
                     이어하기 ({progress}%)
                   </button>
 
-                  <button
-                    onClick={handleOpenModal}
-                    className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                  <Link
+                    href="/puzzle/ranking"
+                    className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border transition-all duration-200 hover:scale-[1.02] active:scale-95 text-center flex-shrink-0"
                     style={{
                       backgroundColor: 'var(--puzzle-glass-bg)',
                       color: 'var(--puzzle-foreground)',
@@ -155,8 +155,9 @@ export default function HeroSection({
                       fontWeight: 650,
                     }}
                   >
-                    새로 시작하기
-                  </button>
+                    <Trophy size={16} className="inline mr-1" strokeWidth={2.5} />
+                    결과 및 랭킹 보기
+                  </Link>
                 </>
               ) : hasCompleted ? (
                 <>
@@ -185,6 +186,35 @@ export default function HeroSection({
                     }}
                   >
                     다시 도전하기
+                  </button>
+                </>
+              ) : hasSavedGame && onResume ? (
+                <>
+                  <button
+                    onClick={onResume}
+                    className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-95 text-white puzzle-animate-pulse-glow"
+                    style={{
+                      backgroundColor: 'var(--puzzle-primary)',
+                      fontSize: '15px',
+                      fontWeight: 700,
+                    }}
+                  >
+                    <Play size={16} strokeWidth={2.5} />
+                    이어하기 ({progress}%)
+                  </button>
+
+                  <button
+                    onClick={handleOpenModal}
+                    className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                    style={{
+                      backgroundColor: 'var(--puzzle-glass-bg)',
+                      color: 'var(--puzzle-foreground)',
+                      border: '1px solid var(--puzzle-border)',
+                      fontSize: '15px',
+                      fontWeight: 650,
+                    }}
+                  >
+                    새로 시작하기
                   </button>
                 </>
               ) : (

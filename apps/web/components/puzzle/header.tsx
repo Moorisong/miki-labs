@@ -17,7 +17,13 @@ export default function Header() {
     { label: '마이페이지', href: '/puzzle/mypage', icon: User },
   ];
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    try {
+      const { clearAllPuzzleState } = await import('@/lib/puzzle-db');
+      await clearAllPuzzleState();
+    } catch (e) {
+      console.error('Failed to clear puzzle state on signout:', e);
+    }
     signOut({ callbackUrl: '/puzzle' });
   };
 

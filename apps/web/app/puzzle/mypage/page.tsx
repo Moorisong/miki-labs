@@ -86,6 +86,7 @@ export default function MyPage() {
       try {
         const res = await deleteMyAccount(token);
         if (res.success) {
+          await clearAllPuzzleState();
           alert('회원 탈퇴 및 모든 정보 삭제가 성공적으로 완료되었습니다. 그동안 하루퍼즐을 이용해 주셔서 진심으로 감사드립니다.');
           signOut({ callbackUrl: '/puzzle' });
         } else {

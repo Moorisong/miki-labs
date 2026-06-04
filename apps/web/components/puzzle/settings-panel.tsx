@@ -9,7 +9,13 @@ interface SettingsPanelProps {
 }
 
 export default function SettingsPanel({ onClearData, onDeleteAccount }: SettingsPanelProps) {
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    try {
+      const { clearAllPuzzleState } = await import('@/lib/puzzle-db');
+      await clearAllPuzzleState();
+    } catch (e) {
+      console.error('Failed to clear puzzle state on signout:', e);
+    }
     signOut({ callbackUrl: '/puzzle' });
   };
 
