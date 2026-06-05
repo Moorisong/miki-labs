@@ -729,6 +729,9 @@ export default function PieceTray({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      if (selectedPieceId !== null) {
+                        onTrayClick?.();
+                      }
                       onGuideClick();
                     }}
                     className="p-1.5 rounded-lg text-xs font-black transition-colors"

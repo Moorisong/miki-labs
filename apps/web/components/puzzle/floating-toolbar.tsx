@@ -57,6 +57,7 @@ export default function FloatingToolbar({
     <div className="flex justify-center w-full px-4 select-none">
       <div
         className="flex items-center gap-2 p-3 rounded-2xl border shadow-xl transition-all duration-200"
+        onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: 'var(--puzzle-glass-bg)',
           backdropFilter: 'var(--puzzle-glass-blur)',

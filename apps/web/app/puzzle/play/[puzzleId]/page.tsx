@@ -620,7 +620,15 @@ export default function PlayPage({ params }: PlayPageProps) {
   }
 
   return (
-    <div className="flex flex-col h-screen h-[100dvh] overflow-hidden select-none" style={{ backgroundColor: 'var(--puzzle-background)' }}>
+    <div
+      className="flex flex-col h-screen h-[100dvh] overflow-hidden select-none"
+      style={{ backgroundColor: 'var(--puzzle-background)' }}
+      onClick={() => {
+        if (selectedTrayPiece !== null) {
+          selectTrayPiece(null);
+        }
+      }}
+    >
       {/* Play GNB Header */}
       <div 
         className="flex items-center justify-between px-4 py-3 border-b"
