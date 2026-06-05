@@ -9,7 +9,7 @@ import ProfileCard from '@/components/puzzle/profile-card';
 import HistoryList from '@/components/puzzle/history-list';
 import SettingsPanel from '@/components/puzzle/settings-panel';
 import Link from 'next/link';
-import { TrendingUp, Award, ArrowLeft } from 'lucide-react';
+import { TrendingUp, Award, ArrowLeft, Lock } from 'lucide-react';
 import styles from '../puzzle-layout.module.css';
 import { useToast } from '@/lib/hooks/use-toast';
 import Toast from '@/components/ui/toast';
@@ -124,16 +124,53 @@ export default function MyPage() {
 
   if (status === 'unauthenticated' || !token) {
     return (
-      <div className="flex items-center justify-center min-h-[70vh] flex-col gap-3 select-none">
-        <span className="text-4xl">🔒</span>
-        <p className="text-sm font-bold" style={{ color: 'var(--puzzle-card-foreground)' }}>로그인이 필요한 페이지입니다.</p>
-        <p className="text-xs" style={{ color: 'var(--puzzle-muted-foreground)' }}>마이페이지에서 나만의 통계와 기록 히스토리를 확인하고 관리해 보세요.</p>
-        <Link
-          href={`/login?callbackUrl=${encodeURIComponent('/puzzle/mypage')}`}
-          className="mt-4 px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-extrabold shadow-md hover:scale-[1.02] transition-all"
+      <div className="flex items-center justify-center min-h-[70vh] px-4 select-none">
+        <div 
+          className="w-full max-w-md p-8 md:p-10 rounded-3xl border text-center flex flex-col items-center shadow-2xl transition-all"
+          style={{
+            backgroundColor: 'var(--puzzle-glass-bg)',
+            backdropFilter: 'var(--puzzle-glass-blur)',
+            borderColor: 'var(--puzzle-border)',
+            boxShadow: 'var(--puzzle-shadow-lg)',
+          }}
         >
-          로그인하러 가기 🚀
-        </Link>
+          {/* Lock Icon Container */}
+          <div 
+            className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6"
+            style={{ 
+              backgroundColor: 'var(--puzzle-secondary)', 
+              color: 'var(--puzzle-primary)',
+              border: '1px solid var(--puzzle-border)'
+            }}
+          >
+            <Lock size={28} strokeWidth={2.5} />
+          </div>
+
+          <h2 
+            className="text-xl font-black mb-3" 
+            style={{ color: 'var(--puzzle-card-foreground)', letterSpacing: '-0.02em' }}
+          >
+            로그인이 필요한 서비스입니다
+          </h2>
+          
+          <p 
+            className="text-xs font-medium leading-relaxed mb-8 max-w-[280px]" 
+            style={{ color: 'var(--puzzle-muted-foreground)' }}
+          >
+            마이페이지에서는 나만의 완성 통계와 상세한 퍼즐 플레이 기록 히스토리를 확인하고 관리할 수 있습니다.
+          </p>
+
+          <Link
+            href={`/login?callbackUrl=${encodeURIComponent('/puzzle/mypage')}`}
+            className="w-full py-3.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm font-extrabold shadow-md hover:scale-[1.01] active:scale-95 transition-all duration-150"
+            style={{
+              backgroundColor: 'var(--puzzle-primary)',
+              boxShadow: '0 4px 14px rgba(79, 142, 247, 0.4)'
+            }}
+          >
+            로그인하기
+          </Link>
+        </div>
       </div>
     );
   }

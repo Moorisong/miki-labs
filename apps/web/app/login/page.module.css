@@ -3,38 +3,49 @@
   align-items: center;
   justify-content: center;
   min-height: calc(100vh - 64px);
-  padding: var(--space-md);
-  background: var(--gradient-dark);
+  padding: var(--space-xl);
+  background: var(--puzzle-background, #0f172a);
 }
 
 .card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-xl);
-  padding: var(--space-2xl);
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(162, 155, 254, 0.1);
+  gap: var(--space-2xl, 24px);
+  padding: var(--space-3xl, 40px) var(--space-2xl, 24px);
+  background: var(--puzzle-glass-bg, rgba(31, 41, 55, 0.45));
+  backdrop-filter: var(--puzzle-glass-blur, blur(16px));
+  border-radius: 24px;
+  border: 1px solid var(--puzzle-border, rgba(255, 255, 255, 0.08));
   width: 100%;
-  max-width: 400px;
-  box-shadow: var(--shadow-lg);
+  max-width: 420px;
+  box-shadow: var(--puzzle-shadow-lg, 0 10px 30px rgba(0, 0, 0, 0.25));
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
 }
 
 .header {
   text-align: center;
+  width: 100%;
 }
 
 .title {
-  font-size: var(--font-size-2xl);
-  font-weight: 700;
-  color: var(--color-text);
-  margin-bottom: var(--space-sm);
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: var(--puzzle-card-foreground, #f8fafc);
+  margin-bottom: var(--space-sm, 8px);
+  letter-spacing: -0.03em;
 }
 
 .subtitle {
-  font-size: var(--font-size-md);
-  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--puzzle-muted-foreground, #94a3b8);
+  line-height: 1.5;
 }
 
 .buttons {
@@ -42,49 +53,58 @@
   flex-direction: column;
   gap: var(--space-md);
   width: 100%;
+  margin-top: 10px;
 }
 
 .kakaoButton {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-sm);
+  gap: 12px;
   width: 100%;
-  padding: var(--space-md) var(--space-lg);
+  padding: 14px 24px;
   background: #FEE500;
-  color: #000000;
-  font-size: var(--font-size-md);
-  font-weight: 600;
+  color: #1e1e1e;
+  font-size: 0.95rem;
+  font-weight: 800;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: 16px;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  box-shadow: 0 4px 12px rgba(254, 229, 0, 0.2);
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .kakaoButton:hover {
-  background: #E6CF00;
-  transform: translateY(-2px);
+  background: #fada0a;
+  transform: scale(1.01);
+  box-shadow: 0 6px 16px rgba(254, 229, 0, 0.3);
+}
+
+.kakaoButton:active {
+  transform: scale(0.99);
 }
 
 .kakaoIcon {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
 }
 
 .notice {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--puzzle-muted-foreground, #64748b);
   text-align: center;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .noticeLink {
-  color: var(--color-secondary);
+  color: var(--puzzle-primary, #3b82f6);
+  font-weight: 700;
   text-decoration: underline;
-  text-underline-offset: 2px;
-  transition: color var(--transition-fast);
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
 }
 
 .noticeLink:hover {
-  color: var(--color-primary);
+  color: var(--puzzle-primary-hover, #60a5fa);
 }
