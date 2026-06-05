@@ -111,7 +111,7 @@ export default function Home() {
                             className={styles.card}
                             {...((content as any).newTab || content.link.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                         >
-                            <div className={styles.cardImageWrapper}>
+                            <div className={styles.cardImageWrapper} style={content.id === 'puzzle' ? { background: '#ffffff' } : undefined}>
                                 {content.badge && (
                                     <div className={styles.badgeGroup}>
                                         <span className={`${styles.badge} ${content.badgeType || ''}`}>{content.badge}</span>
