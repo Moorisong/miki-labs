@@ -115,7 +115,7 @@ export default function MyPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[70vh] flex-col gap-3 font-semibold select-none">
+      <div className={`${styles.container} flex items-center justify-center min-h-[60vh] flex-col gap-3 font-semibold select-none`}>
         <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--puzzle-primary) var(--puzzle-primary) var(--puzzle-primary) transparent' }} />
         <span style={{ color: 'var(--puzzle-muted-foreground)' }}>내 프로필 카드를 정리하는 중...</span>
       </div>
@@ -124,7 +124,7 @@ export default function MyPage() {
 
   if (status === 'unauthenticated' || !token) {
     return (
-      <div className="flex items-center justify-center min-h-[70vh] px-4 select-none">
+      <div className={`${styles.container} flex items-center justify-center min-h-[60vh] px-4 select-none`}>
         <div 
           className="w-full max-w-md p-8 md:p-10 rounded-3xl border text-center flex flex-col items-center shadow-2xl transition-all"
           style={{
