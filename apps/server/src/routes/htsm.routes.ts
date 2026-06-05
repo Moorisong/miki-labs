@@ -62,6 +62,7 @@ const answerShareIdLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { keyGeneratorIpFallback: false },
 });
 
 /** 결과 조회: IP당 60회/분 */

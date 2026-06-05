@@ -46,6 +46,17 @@ export const metadata: Metadata = {
 export default function Home() {
     const contents = [
         {
+            id: 'puzzle',
+            title: '하루퍼즐',
+            description: '매주 찾아오는 고요하고 평화로운 직소퍼즐.\n나만의 기록으로 주간 랭킹 도전!',
+            image: '/puzzle-logo.png',
+            link: ROUTES.PUZZLE,
+            badge: 'New',
+            badgeType: styles.badgeNew,
+            newTab: true,
+            active: true,
+        },
+        {
             id: 'u-know',
             title: '너잘알',
             description: '친구 반응 예상하고 실제 답변과 비교!\n단톡방 투척용 병맛 관계 놀이 ㅋㅋ',
@@ -113,6 +124,7 @@ export default function Home() {
                                     width={140}
                                     height={140}
                                     className={styles.cardImage}
+                                    style={content.id === 'puzzle' ? { mixBlendMode: 'multiply' } : undefined}
                                     priority
                                 />
                             </div>

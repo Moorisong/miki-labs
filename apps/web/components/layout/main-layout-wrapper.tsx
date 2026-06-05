@@ -9,11 +9,12 @@ export default function MainLayoutWrapper({
 }) {
     const pathname = usePathname();
     const isToby = pathname.startsWith('/toby');
+    const isPuzzle = pathname.startsWith('/puzzle');
 
     return (
         <main
             className="main-content"
-            style={isToby ? { paddingTop: 0 } : undefined}
+            style={isToby || isPuzzle ? { paddingTop: 0 } : undefined}
         >
             {children}
         </main>

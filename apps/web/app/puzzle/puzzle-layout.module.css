@@ -1,0 +1,114 @@
+/* 🧩 하루퍼즐 전용 레이아웃 스페이싱 및 반응형 그리드 모듈 */
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 6rem;
+  width: 100%;
+}
+
+.headerSpacing {
+  margin-bottom: 2rem;
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+@media (max-width: 1024px) {
+  .heroGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.glassPanel {
+  padding: 2rem;
+  border-radius: var(--puzzle-radius);
+  background: var(--puzzle-glass-bg);
+  backdrop-filter: var(--puzzle-glass-blur);
+  -webkit-backdrop-filter: var(--puzzle-glass-blur);
+  border: 1px solid var(--puzzle-glass-border);
+  box-shadow: var(--puzzle-shadow-md);
+}
+
+.flexCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2.5rem;
+  border-bottom: 1px solid var(--puzzle-border);
+  padding-bottom: 1rem;
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--puzzle-card-foreground);
+  margin: 0;
+  letter-spacing: -0.03em;
+}
+
+.pageSubtitle {
+  font-size: 1rem;
+  color: var(--puzzle-muted-foreground);
+  margin-top: 0.5rem;
+}
+
+.playArea {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: calc(100vh - 120px);
+}
+
+/* ====== 모바일 반응형 ====== */
+@media (max-width: 768px) {
+  .container {
+    padding: 1.25rem 1rem 4rem;
+  }
+
+  .headerSpacing {
+    margin-bottom: 1.25rem;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .pageTitle {
+    font-size: 1.4rem;
+  }
+
+  .pageSubtitle {
+    font-size: 0.875rem;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .glassPanel {
+    padding: 1.25rem;
+  }
+}

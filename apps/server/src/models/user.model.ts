@@ -2,7 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IUser extends Document {
   providerId: string;
-  provider: 'kakao' | 'google' | 'guest';
+  provider: 'kakao' | 'google' | 'guest' | 'test';
   name?: string;
   nickname?: string;
   nicknameUpdatedAt?: Date;
@@ -22,7 +22,7 @@ const userSchema = new Schema<IUser>(
     provider: {
       type: String,
       required: true,
-      enum: ['kakao', 'google', 'guest']
+      enum: ['kakao', 'google', 'guest', 'test']
     },
     name: {
       type: String,

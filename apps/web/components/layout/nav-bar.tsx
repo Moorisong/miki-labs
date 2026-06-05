@@ -26,15 +26,21 @@ export default function NavBar() {
     setIsMenuOpen(false);
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     closeMenu();
+    try {
+      const { clearAllPuzzleState } = await import('@/lib/puzzle-db');
+      await clearAllPuzzleState();
+    } catch (e) {
+      console.error('Failed to clear puzzle state on signout:', e);
+    }
     // 자아탐험 관련 페이지에서 로그아웃 시 자아탐험 랜딩 페이지로 이동
     const redirectUrl = pathname.startsWith('/htsm') ? '/htsm' : pathname;
     signOut({ callbackUrl: redirectUrl });
   };
 
-  // Toby 서비스에서는 헤더를 보이지 않게 처리
-  if (pathname.startsWith('/toby')) {
+  // Toby 및 puzzle 서비스에서는 헤더를 보이지 않게 처리
+  if (pathname.startsWith('/toby') || pathname.startsWith('/puzzle')) {
     return null;
   }
 

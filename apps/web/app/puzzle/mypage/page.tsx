@@ -1,0 +1,315 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
+import { fetchMyProfile, deleteMyAccount, clearMyProgress } from '@/lib/puzzle-api';
+import { clearAllPuzzleState } from '@/lib/puzzle-db';
+import ProfileCard from '@/components/puzzle/profile-card';
+import HistoryList from '@/components/puzzle/history-list';
+import SettingsPanel from '@/components/puzzle/settings-panel';
+import Link from 'next/link';
+import { TrendingUp, Award, ArrowLeft, Lock } from 'lucide-react';
+import styles from '../puzzle-layout.module.css';
+import { useToast } from '@/lib/hooks/use-toast';
+import Toast from '@/components/ui/toast';
+import KakaoAdfit, { ADFIT_SIZES, ADFIT_UNITS } from '@/components/ads/kakao-adfit';
+
+export default function MyPage() {
+  const router = useRouter();
+  const { data: session, status } = useSession();
+  const token = session?.user?.kakaoId;
+  const { toast, showToast, hideToast } = useToast();
+
+  const [profile, setProfile] = useState<any>(null);
+  const [statistics, setStatistics] = useState<any>(null);
+  const [history, setHistory] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(5);
+  
+  const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      setIsLoading(false);
+      return;
+    }
+
+    async function loadProfile() {
+      if (!token) return;
+      try {
+        const res = await fetchMyProfile(token);
+        if (res.success && res.data) {
+          setProfile(res.data.profile);
+          setStatistics(res.data.statistics);
+          setHistory(res.data.history || []);
+        }
+      } catch (e) {
+        console.error('Failed to fetch myprofile:', e);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    if (token) {
+      loadProfile();
+    }
+  }, [token, status]);
+
+  const handleClearData = async () => {
+    if (window.confirm('모든 퍼즐 진행도와 완주 기록을 초기화하시겠습니까?\n(이 작업은 되돌릴 수 없습니다.)')) {
+      try {
+        // 1. 로그인 상태 시 서버 데이터베이스 진행 상황 및 완주 기록 삭제
+        if (token) {
+          await clearMyProgress(token);
+        }
+        // 2. 로컬 IndexedDB 플레이어 캐시 삭제
+        await clearAllPuzzleState();
+
+        // 3. 클라이언트 상태 즉시 초기화
+        setHistory([]);
+        setStatistics({
+          totalCompleted: 0,
+          bestTimeBeginner: null,
+          bestRank: null
+        });
+
+        showToast('모든 퍼즐 데이터가 초기화되었습니다.', 'success');
+        router.refresh();
+      } catch (e) {
+        console.error('Failed to clear puzzle data:', e);
+        alert('데이터 초기화 중 문제가 발생했습니다.');
+      }
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!token) return;
+    if (window.confirm('정말로 회원 탈퇴를 진행하시겠습니까?\n\n이 작업 진행 시 사용자의 카카오 로그인 프로필 연동이 끊어지며, 저장된 모든 완료 랭킹 기록, 실시간 퍼즐 진행 상황 및 토큰 로그가 데이터베이스에서 CASCADE 영구 일괄 삭제됩니다. 이 작업은 절대 복구할 수 없습니다.')) {
+      try {
+        const res = await deleteMyAccount(token);
+        if (res.success) {
+          await clearAllPuzzleState();
+          alert('회원 탈퇴 및 모든 정보 삭제가 성공적으로 완료되었습니다. 그동안 하루퍼즐을 이용해 주셔서 진심으로 감사드립니다.');
+          signOut({ callbackUrl: '/puzzle' });
+        } else {
+          alert(res.error || '회원 탈퇴 처리 중 문제가 발생했습니다.');
+        }
+      } catch (e) {
+        console.error(e);
+        alert('회원 탈퇴 중 알 수 없는 에러가 발생했습니다.');
+      }
+    }
+  };
+
+  if (status === 'loading' || isLoading) {
+    return (
+      <div className={`${styles.container} flex items-center justify-center min-h-[60vh] flex-col gap-3 font-semibold select-none`}>
+        <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--puzzle-primary) var(--puzzle-primary) var(--puzzle-primary) transparent' }} />
+        <span style={{ color: 'var(--puzzle-muted-foreground)' }}>내 프로필 카드를 정리하는 중...</span>
+      </div>
+    );
+  }
+
+  if (status === 'unauthenticated' || !token) {
+    return (
+      <div className={`${styles.container} flex items-center justify-center min-h-[60vh] px-4 select-none`}>
+        <div 
+          className="w-full max-w-md p-8 md:p-10 rounded-3xl border text-center flex flex-col items-center shadow-2xl transition-all"
+          style={{
+            backgroundColor: 'var(--puzzle-glass-bg)',
+            backdropFilter: 'var(--puzzle-glass-blur)',
+            borderColor: 'var(--puzzle-border)',
+            boxShadow: 'var(--puzzle-shadow-lg)',
+          }}
+        >
+          {/* Lock Icon Container */}
+          <div 
+            className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6"
+            style={{ 
+              backgroundColor: 'var(--puzzle-secondary)', 
+              color: 'var(--puzzle-primary)',
+              border: '1px solid var(--puzzle-border)'
+            }}
+          >
+            <Lock size={28} strokeWidth={2.5} />
+          </div>
+
+          <h2 
+            className="text-xl font-black mb-3" 
+            style={{ color: 'var(--puzzle-card-foreground)', letterSpacing: '-0.02em' }}
+          >
+            로그인이 필요한 서비스입니다
+          </h2>
+          
+          <p 
+            className="text-xs font-medium leading-relaxed mb-8 max-w-[280px]" 
+            style={{ color: 'var(--puzzle-muted-foreground)' }}
+          >
+            마이페이지에서는 나만의 완성 통계와 상세한 퍼즐 플레이 기록 히스토리를 확인하고 관리할 수 있습니다.
+          </p>
+
+          <Link
+            href={`/login?callbackUrl=${encodeURIComponent('/puzzle/mypage')}`}
+            className="w-full py-3.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm font-extrabold shadow-md hover:scale-[1.01] active:scale-95 transition-all duration-150"
+            style={{
+              backgroundColor: 'var(--puzzle-primary)',
+              boxShadow: '0 4px 14px rgba(79, 142, 247, 0.4)'
+            }}
+          >
+            로그인하기
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const completedHistory = history.filter((item) => item.completed);
+  const slicedHistory = completedHistory.slice(0, visibleCount);
+
+  return (
+    <div className={`${styles.container} puzzle-animate-fade-in-up`}>
+      {/* Page Header Title */}
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-extrabold mb-1.5" style={{ color: 'var(--puzzle-card-foreground)' }}>
+            마이페이지
+          </h1>
+          <p className="text-sm font-semibold" style={{ color: 'var(--puzzle-muted-foreground)' }}>
+            내 개인 통계 정보와 아카이브 완주 기록을 한눈에 관리해 보세요.
+          </p>
+        </div>
+      </div>
+
+      {/* Main Spacing Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-8">
+        {/* Left: User Profile & setting dials */}
+        <div className="flex flex-col gap-4">
+          {profile && statistics && (
+            <ProfileCard
+              profile={profile}
+              statistics={statistics}
+            />
+          )}
+
+          {/* Achievement teaser badges */}
+          <div
+            className="rounded-2xl border p-5"
+            style={{
+              backgroundColor: 'var(--puzzle-glass-bg)',
+              backdropFilter: 'var(--puzzle-glass-blur)',
+              borderColor: 'var(--puzzle-border)',
+              boxShadow: 'var(--puzzle-shadow-sm)',
+            }}
+          >
+            <p className="text-xs font-bold mb-3 flex items-center gap-1.5" style={{ color: 'var(--puzzle-card-foreground)' }}>
+              <Award size={15} style={{ color: 'var(--puzzle-primary)' }} />
+              달성 업적 배지
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {statistics?.totalCompleted >= 1 && (
+                <span className="px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold" style={{ backgroundColor: 'var(--puzzle-secondary)', color: 'var(--puzzle-primary)' }}>
+                  🏆 첫 완주 달성
+                </span>
+              )}
+              {statistics?.bestTimeBeginner && statistics.bestTimeBeginner < 600 && (
+                <span className="px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold" style={{ backgroundColor: 'var(--puzzle-secondary)', color: 'var(--puzzle-primary)' }}>
+                  ⚡ 스피드 챌린저
+                </span>
+              )}
+              {statistics?.totalCompleted >= 5 && (
+                <span className="px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold" style={{ backgroundColor: 'var(--puzzle-secondary)', color: 'var(--puzzle-primary)' }}>
+                  🌟 연속 퍼즐러
+                </span>
+              )}
+              {statistics?.bestRank && statistics.bestRank <= 10 && (
+                <span className="px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold" style={{ backgroundColor: 'var(--puzzle-secondary)', color: 'var(--puzzle-primary)' }}>
+                  💎 TOP 10 랭커
+                </span>
+              )}
+              {completedHistory.length === 0 && (
+                <span className="text-xs font-semibold" style={{ color: 'var(--puzzle-muted-foreground)' }}>
+                  아직 획득한 훈장이 없습니다. 퍼즐을 풀고 첫 훈장을 획득하세요!
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Adfit AD Banner & SettingsPanel for PC (Placed below profile info/badges card on desktop) */}
+          {(!mounted || !isMobile) && (
+            <div className="hidden md:flex md:flex-col md:gap-4">
+              <div className="flex justify-center">
+                <KakaoAdfit unit={ADFIT_UNITS.MAIN_BANNER} {...ADFIT_SIZES.BANNER_320x100} />
+              </div>
+              <SettingsPanel
+                onClearData={handleClearData}
+                onDeleteAccount={handleDeleteAccount}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Right side: completed history details & chart analytics */}
+        <div className="md:col-span-2 flex flex-col gap-4">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-lg font-extrabold flex items-center gap-2" style={{ color: 'var(--puzzle-card-foreground)' }}>
+              완주 기록 히스토리
+            </h2>
+            <div
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold"
+              style={{ backgroundColor: 'var(--puzzle-muted)', color: 'var(--puzzle-muted-foreground)' }}
+            >
+              <TrendingUp size={12} />
+              <span>{completedHistory.length}개 완주</span>
+            </div>
+          </div>
+
+          {/* History List */}
+          <HistoryList history={slicedHistory} />
+
+          {/* Load More Button */}
+          {completedHistory.length > visibleCount && (
+            <button
+              onClick={() => setVisibleCount((prev) => prev + 5)}
+              className="w-full py-3.5 mt-2 rounded-2xl border text-xs font-extrabold transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:border-[var(--puzzle-primary)] hover:text-[var(--puzzle-primary)] select-none"
+              style={{
+                backgroundColor: 'var(--puzzle-glass-bg)',
+                backdropFilter: 'var(--puzzle-glass-blur)',
+                borderColor: 'var(--puzzle-border)',
+                color: 'var(--puzzle-muted-foreground)',
+                boxShadow: 'var(--puzzle-shadow-sm)',
+              }}
+            >
+              더보기 ⬇️
+            </button>
+          )}
+
+          {/* Adfit AD Banner & SettingsPanel for Mobile (Placed below History list on mobile) */}
+          {(mounted && isMobile) && (
+            <div className="flex flex-col gap-4 mt-6 md:hidden">
+              <div className="flex justify-center">
+                <KakaoAdfit unit={ADFIT_UNITS.MAIN_BANNER} {...ADFIT_SIZES.BANNER_320x100} />
+              </div>
+              <SettingsPanel
+                onClearData={handleClearData}
+                onDeleteAccount={handleDeleteAccount}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+      <Toast toast={toast} onHide={hideToast} />
+    </div>
+  );
+}

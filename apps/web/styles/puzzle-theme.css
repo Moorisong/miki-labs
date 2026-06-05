@@ -1,0 +1,230 @@
+/* 🧩 하루퍼즐 전용 CSS 변수 및 프리미엄 테마 시스템 */
+
+.puzzle-page {
+  /* HSL Tailored Hues */
+  --puzzle-font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  --puzzle-background: #F8F9FD;
+  --puzzle-foreground: #1E293B;
+  --puzzle-card: rgba(255, 255, 255, 0.7);
+  --puzzle-card-hover: rgba(255, 255, 255, 0.9);
+  --puzzle-card-foreground: #0F172A;
+  
+  --puzzle-primary: #4F8EF7;
+  --puzzle-primary-hover: #3B82F6;
+  --puzzle-primary-foreground: #FFFFFF;
+  
+  --puzzle-secondary: #D9E7FF;
+  --puzzle-secondary-foreground: #1D4ED8;
+  
+  --puzzle-muted: #F1F5F9;
+  --puzzle-muted-foreground: #64748B;
+  
+  --puzzle-accent: #EEF2F6;
+  --puzzle-accent-foreground: #3B82F6;
+  
+  --puzzle-border: rgba(226, 232, 240, 0.8);
+  --puzzle-border-glow: rgba(79, 142, 247, 0.2);
+  --puzzle-ring: rgba(79, 142, 247, 0.4);
+  
+  --puzzle-radius: 1rem;
+  --puzzle-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --puzzle-shadow-md: 0 8px 24px rgba(149, 157, 165, 0.1);
+  --puzzle-shadow-lg: 0 16px 36px rgba(149, 157, 165, 0.15);
+  
+  /* Glassmorphism Details */
+  --puzzle-glass-bg: rgba(255, 255, 255, 0.45);
+  --puzzle-glass-border: rgba(255, 255, 255, 0.6);
+  --puzzle-glass-blur: blur(16px);
+  
+  font-family: var(--puzzle-font-sans);
+  background-color: var(--puzzle-background);
+  color: var(--puzzle-foreground);
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 다크 모드 (로컬 클래스 대응) */
+.dark .puzzle-page,
+.puzzle-page.dark {
+  --puzzle-background: #0B0F19;
+  --puzzle-foreground: #E2E8F0;
+  --puzzle-card: rgba(23, 37, 84, 0.45);
+  --puzzle-card-hover: rgba(30, 41, 59, 0.8);
+  --puzzle-card-foreground: #F8FAFC;
+  
+  --puzzle-primary: #3B82F6;
+  --puzzle-primary-hover: #60A5FA;
+  --puzzle-primary-foreground: #FFFFFF;
+  
+  --puzzle-secondary: #1E293B;
+  --puzzle-secondary-foreground: #93C5FD;
+  
+  --puzzle-muted: #1E293B;
+  --puzzle-muted-foreground: #94A3B8;
+  
+  --puzzle-accent: #0F172A;
+  --puzzle-accent-foreground: #60A5FA;
+  
+  --puzzle-border: rgba(51, 65, 85, 0.5);
+  --puzzle-border-glow: rgba(59, 130, 246, 0.3);
+  --puzzle-ring: rgba(59, 130, 246, 0.5);
+  
+  --puzzle-glass-bg: rgba(15, 23, 42, 0.6);
+  --puzzle-glass-border: rgba(255, 255, 255, 0.08);
+  
+  --puzzle-shadow-md: 0 10px 30px rgba(0, 0, 0, 0.3);
+  --puzzle-shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* 프리미엄 애니메이션 키프레임 */
+@keyframes puzzle-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes puzzle-slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.puzzle-animate-slide-up {
+  animation: puzzle-slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes puzzle-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes puzzle-confetti-fall {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(105vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes puzzle-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes puzzle-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(79, 142, 247, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(79, 142, 247, 0);
+  }
+}
+
+/* 애니메이션 헬퍼 클래스 */
+.puzzle-animate-fade-in-up {
+  animation: puzzle-fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.puzzle-animate-scale-in {
+  animation: puzzle-scale-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.puzzle-animate-shimmer {
+  background: linear-gradient(90deg, var(--puzzle-muted) 25%, var(--puzzle-border) 50%, var(--puzzle-muted) 75%);
+  background-size: 200% 100%;
+  animation: puzzle-shimmer 1.5s infinite linear;
+}
+
+.puzzle-animate-pulse-glow {
+  animation: puzzle-pulse-glow 2s infinite ease-in-out;
+}
+
+/* 프리미엄 카드 기본 클래스 (글래스모피즘) */
+.puzzle-glass-card {
+  background: var(--puzzle-glass-bg);
+  backdrop-filter: var(--puzzle-glass-blur);
+  -webkit-backdrop-filter: var(--puzzle-glass-blur);
+  border: 1px solid var(--puzzle-glass-border);
+  border-radius: var(--puzzle-radius);
+  box-shadow: var(--puzzle-shadow-md);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.puzzle-glass-card:hover {
+  background: var(--puzzle-card-hover);
+  border-color: var(--puzzle-primary);
+  box-shadow: var(--puzzle-shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* 💎 프리미엄 미세 스크롤바 디자인 (기본 브라우저 스크롤바보다 얇고 세련됨) */
+.puzzle-page ::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.puzzle-page ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.puzzle-page ::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 9999px;
+}
+.puzzle-page ::-webkit-scrollbar-thumb:hover {
+  background: rgba(79, 142, 247, 0.5);
+}
+
+/* 🙈 특정 컴포넌트 스크롤바 숨김 유틸리티 */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none !important;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
+}
+
+/* 🎯 고수 모드 정답 배치 리플 애니메이션 */
+@keyframes puzzle-correct-ripple {
+  0% {
+    box-shadow: 0 0 0 0 rgba(79, 142, 247, 0.8);
+    transform: scale(1.06);
+    z-index: 20;
+  }
+  50% {
+    box-shadow: 0 0 0 15px rgba(79, 142, 247, 0.3);
+    transform: scale(1.03);
+    z-index: 20;
+  }
+  100% {
+    box-shadow: 0 0 0 25px rgba(79, 142, 247, 0);
+    transform: scale(1);
+    z-index: auto;
+  }
+}
+
+.puzzle-correct-ripple {
+  animation: puzzle-correct-ripple 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+
