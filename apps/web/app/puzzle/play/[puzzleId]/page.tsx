@@ -688,7 +688,7 @@ export default function PlayPage({ params }: PlayPageProps) {
         {/* Original guide overlay */}
         {showOriginal && (
           <div 
-            className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-sm p-8"
+            className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-8"
             onClick={(e) => {
               e.stopPropagation();
               setShowOriginal(false);
@@ -740,6 +740,7 @@ export default function PlayPage({ params }: PlayPageProps) {
           selectedPieceId={selectedTrayPiece}
           onPieceClick={handlePieceSelect}
           onTrayClick={() => selectTrayPiece(null)}
+          onGuideClick={() => setShowOriginal(true)}
         />
       </div>
 
