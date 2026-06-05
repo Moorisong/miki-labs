@@ -162,7 +162,7 @@ export default function HeroSection({
 
                   <Link
                     href="/puzzle/ranking"
-                    className="w-full sm:flex-1 flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl border transition-all duration-200 hover:scale-[1.02] active:scale-95 text-center"
+                    className="w-full sm:flex-1 flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl border transition-all duration-200 hover:scale-[1.02] active:scale-95 text-center hover:!text-[var(--puzzle-foreground)]"
                     style={{
                       backgroundColor: 'var(--puzzle-glass-bg)',
                       color: 'var(--puzzle-foreground)',
@@ -195,7 +195,7 @@ export default function HeroSection({
                 <>
                   <Link
                     href="/puzzle/ranking"
-                    className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-95 text-white puzzle-animate-pulse-glow"
+                    className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-95 text-white hover:!text-white puzzle-animate-pulse-glow"
                     style={{
                       backgroundColor: 'var(--puzzle-primary)',
                       fontSize: '15px',
