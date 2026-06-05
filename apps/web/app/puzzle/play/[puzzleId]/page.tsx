@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { ArrowLeft, Timer, Eye, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import { usePuzzleStore } from '@/lib/stores/puzzle-store';
@@ -390,6 +390,42 @@ export default function PlayPage({ params }: PlayPageProps) {
   const handleSaveManual = async () => {
     if (manualSaveStatus !== 'idle') return;
 
+    // 비로그인 상태: 현재 진행 상태를 로컬에 저장 후 로그인 페이지로 유도
+    if (!token) {
+      try {
+        const correctCount = board.filter((cell, idx) => cell === idx).length;
+        const progress = Math.round((correctCount / totalPieces) * 100);
+        const piecesData = board.map((pieceId, idx) => ({
+          id: pieceId !== null ? pieceId : idx,
+          correctX: 0,
+          correctY: 0,
+          currentX: 0,
+          currentY: 0,
+          width: 0,
+          height: 0,
+          locked: pieceId === idx,
+        }));
+        await savePuzzleState(puzzleId, {
+          difficulty,
+          mode,
+          timerSeconds,
+          pieces: piecesData as any,
+          board,
+          trayPieces,
+          progress,
+          completed: isCompleted,
+          startedAt: startedAt || new Date().toISOString(),
+        }, true);
+      } catch (err) {
+        console.error('Failed to save state before login redirect:', err);
+      }
+      const params = new URLSearchParams(window.location.search);
+      params.set('resume', 'true');
+      const callback = encodeURIComponent(`${window.location.pathname}?${params.toString()}`);
+      router.push(`/login?callbackUrl=${callback}`);
+      return;
+    }
+
     setManualSaveStatus('saving');
 
     try {
@@ -425,7 +461,7 @@ export default function PlayPage({ params }: PlayPageProps) {
 
       // 2. 로그인된 상태 시 서버 진행률 즉시 저장 (전체 세부 상태 함께 저장)
       if (token) {
-        await saveProgressApi(puzzleId, progress, token, {
+        const res = await saveProgressApi(puzzleId, progress, token, {
           difficulty,
           mode,
           timerSeconds,
@@ -433,6 +469,16 @@ export default function PlayPage({ params }: PlayPageProps) {
           trayPieces,
           startedAt: startedAt || new Date().toISOString(),
         });
+        
+        // DB에서 회원 데이터가 강제 삭제되는 등 세션이 만료/유효하지 않은 상태인 경우 (401 에러)
+        if (res.status === 401) {
+          await signOut({ redirect: false });
+          const params = new URLSearchParams(window.location.search);
+          params.set('resume', 'true');
+          const callback = encodeURIComponent(`${window.location.pathname}?${params.toString()}`);
+          router.push(`/login?callbackUrl=${callback}`);
+          return;
+        }
       }
 
       // UX 시각 효과를 위해 최소 600ms 대기
