@@ -124,14 +124,18 @@ export async function saveProgress(
   progress: number,
   token: string,
   detailState?: any
-): Promise<ApiResponse<void>> {
+): Promise<ApiResponse<void> & { status?: number }> {
   try {
     const res = await fetch(`${API_BASE_URL}/api${API_PUZZLE.PROGRESS}`, {
       method: 'POST',
       headers: getHeaders(token),
       body: JSON.stringify({ puzzleId, progress, detailState }),
     });
-    return await res.json();
+    const data = await res.json();
+    return {
+      ...data,
+      status: res.status
+    };
   } catch (error) {
     console.error('saveProgress error:', error);
     return { success: false, error: '네트워크 오류가 발생했습니다.' };
