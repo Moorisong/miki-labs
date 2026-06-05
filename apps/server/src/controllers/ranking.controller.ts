@@ -251,8 +251,8 @@ export const startChallenge = async (req: Request, res: Response, next: NextFunc
     const ChallengeToken = getChallengeTokenModel();
     const token = crypto.randomUUID(); // Node.js v19+ built-in or polyfill
 
-    // 24시간 만료 시간 설정
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    // 7일 만료 시간 설정
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
     await ChallengeToken.create({
       userId: user._id,
