@@ -38,9 +38,8 @@ function PuzzleBoardCell({
   const prevPieceId = useRef<number | null>(pieceId);
 
   useEffect(() => {
-    // 고수 모드('expert')이고, 이전 조각 상태와 다르고, 현재 조각이 제자리인 경우 리플 애니메이션 활성화
+    // 모든 난이도에서 이전 조각 상태와 다르고 현재 놓인 조각이 제자리(정답)인 경우 리플 활성화
     if (
-      difficulty === 'expert' &&
       pieceId !== prevPieceId.current &&
       pieceId === slotIdx
     ) {
@@ -49,26 +48,35 @@ function PuzzleBoardCell({
       return () => clearTimeout(timer);
     }
     prevPieceId.current = pieceId;
-  }, [pieceId, slotIdx, difficulty]);
+  }, [pieceId, slotIdx]);
 
   const isPlaced = pieceId !== null;
+  const isCorrect = isPlaced && pieceId === slotIdx; // 정답 자리 조각인지 확인
 
   return (
     <div
       onClick={(e) => {
         e.stopPropagation();
+        if (isCorrect) return; // 정답 위치 조각은 클릭 전파 및 동작 차단
         onCellClick(slotIdx);
       }}
-      className={`relative flex items-center justify-center cursor-pointer transition-all duration-150 group outline-none select-none ${
+      className={`relative flex items-center justify-center transition-all duration-150 group outline-none select-none ${
         showRipple ? 'puzzle-correct-ripple' : ''
       }`}
       style={{
         width: cellSize,
         height: cellSize,
-        border: isPlaced ? '1px solid transparent' : '1px dashed var(--puzzle-border)',
+        border: isCorrect 
+          ? '2px solid #3b82f6' // 정답 위치 조각은 푸른색(Blue) 테두리로 고정 표시
+          : isPlaced 
+          ? '1px solid transparent' 
+          : '1px dashed var(--puzzle-border)',
         backgroundColor: isPlaced ? 'transparent' : 'rgba(255, 255, 255, 0.03)',
+        boxShadow: isCorrect ? '0 0 12px rgba(59, 130, 246, 0.6)' : 'none',
         outline: 'none',
         WebkitTapHighlightColor: 'transparent',
+        cursor: isCorrect ? 'default' : 'pointer', // 고정 조각은 포인터 커서 제외
+        pointerEvents: isCorrect ? 'none' : 'auto', // 마우스 이벤트 차단으로 다시 선택 불가화
       }}
       onMouseEnter={(e) => {
         if (!isPlaced) {
@@ -116,7 +124,10 @@ export default function PuzzleBoard({
   const cellSize = Math.floor(baseSize * zoom);
 
   return (
-    <div className="w-full h-full flex p-4 overflow-auto scrollbar-hide select-none">
+    <div 
+      className="w-full h-full flex p-4 overflow-auto scrollbar-hide select-none"
+      style={{ touchAction: 'none' }} // 퍼즐판 내 어떤 요소에서도 브라우저 스크롤 이벤트가 부모로 발화되지 못하도록 방지
+    >
       <div
         className="grid border rounded-xl overflow-hidden shadow-2xl transition-all duration-200 flex-shrink-0 m-auto"
         style={{
@@ -125,6 +136,7 @@ export default function PuzzleBoard({
           borderColor: 'var(--puzzle-border)',
           backgroundColor: 'rgba(255, 255, 255, 0.05)',
           boxShadow: 'var(--puzzle-shadow-lg)',
+          touchAction: 'none', // 내부 그리드도 명시적 차단
         }}
       >
         {board.map((pieceId, slotIdx) => (

@@ -23,6 +23,9 @@ import CompletionModal from '@/components/puzzle/completion-modal';
 import CursorFollower from '@/components/puzzle/cursor-follower';
 import { MyRanking, Puzzle } from '@/types/puzzle';
 import KakaoAdfit, { ADFIT_SIZES, ADFIT_UNITS } from '@/components/ads/kakao-adfit';
+// ── 가로모드 전용 ──
+import { useOrientation } from '@/lib/hooks/use-orientation';
+import LandscapePuzzleLayout from '@/components/puzzle/landscape/landscape-puzzle-layout';
 
 // Next.js 16 App Router Dynamic Route Params 대응
 interface PlayPageProps {
@@ -361,6 +364,12 @@ export default function PlayPage({ params }: PlayPageProps) {
     if (isCompleted) return;
 
     const cellVal = board[slotIdx];
+    
+    // 만약 이미 배치된 조각이 제자리(정답 위치)에 맞추어진 조각이라면 클릭 상호작용 자체를 막아서 잠금(고정) 처리
+    if (cellVal !== null && cellVal === slotIdx) {
+      return;
+    }
+
     if (cellVal !== null) {
       if (selectedTrayPiece !== null) {
         // 이미 조각 A를 든 상태에서 조각 B가 있는 슬롯을 클릭한 경우:
@@ -656,6 +665,10 @@ export default function PlayPage({ params }: PlayPageProps) {
     router.push('/puzzle');
   };
 
+  // ── Orientation 감지 ──
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { isLandscape, isLargeScreen } = useOrientation();
+
   if (isPageLoading || !puzzle) {
     return (
       <div className="flex items-center justify-center min-h-screen flex-col gap-3 font-semibold select-none">
@@ -665,6 +678,44 @@ export default function PlayPage({ params }: PlayPageProps) {
     );
   }
 
+  // ── 가로모드 분기 렌더링 ──
+  if (isLandscape) {
+    return (
+      <LandscapePuzzleLayout
+        puzzle={puzzle}
+        puzzleId={puzzleId}
+        difficulty={difficulty}
+        board={board}
+        trayPieces={trayPieces}
+        selectedTrayPiece={selectedTrayPiece}
+        timerSeconds={timerSeconds}
+        isCompleted={isCompleted}
+        progressPercent={progressPercent}
+        myRanking={myRanking}
+        isLoggedIn={!!token}
+        isSubmitting={isSubmitting}
+        isSaved={isSaved}
+        submitError={submitError}
+        manualSaveStatus={manualSaveStatus}
+        zoom={zoom}
+        isLarge={isLargeScreen}
+        formatTime={formatTime}
+        onCellClick={handleCellClick}
+        onPieceSelect={handlePieceSelect}
+        onTrayClick={() => selectTrayPiece(null)}
+        onShuffle={handleShuffle}
+        onSaveManual={handleSaveManual}
+        onSaveRecord={handleSaveRecord}
+        onShare={handleShare}
+        onGoHome={handleGoHome}
+        onZoomIn={() => setZoom((z) => Math.min(2.2, z + 0.2))}
+        onZoomOut={() => setZoom((z) => Math.max(0.6, z - 0.2))}
+        selectTrayPiece={selectTrayPiece}
+      />
+    );
+  }
+
+  // ── 세로모드 (기존 코드 그대로) ──
   return (
     <div
       className="flex flex-col h-screen h-[100dvh] overflow-hidden select-none"

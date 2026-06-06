@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import styles from './puzzle-layout.module.css';
 import KakaoAdfit, { ADFIT_SIZES, ADFIT_UNITS } from '@/components/ads/kakao-adfit';
+import OrientationSuggestion from '@/components/puzzle/orientation-suggestion';
 
 export default function PuzzlePageClient() {
   const router = useRouter();
@@ -203,6 +204,7 @@ export default function PuzzlePageClient() {
 
   return (
     <div className={`${styles.container} puzzle-animate-fade-in-up`}>
+      <OrientationSuggestion />
       {/* Hero Section */}
       <div className="mb-10">
         <HeroSection
