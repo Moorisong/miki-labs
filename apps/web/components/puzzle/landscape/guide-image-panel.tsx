@@ -136,6 +136,7 @@ export default function GuideImagePanel({
         userSelect: 'none',
         zIndex: 10,
         transition: dragging.current || resizing.current ? 'none' : 'transform 0.15s ease-out',
+        touchAction: 'none', // 터치 드래그 시 뷰포트 바운스/스크롤 방지
       }}
       onPointerDown={handlePanelPointerDown}
       onPointerMove={handlePanelPointerMove}

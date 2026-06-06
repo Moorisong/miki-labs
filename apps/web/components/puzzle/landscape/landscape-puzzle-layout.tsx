@@ -154,13 +154,19 @@ export default function LandscapePuzzleLayout({
       // 초기 배치: Guide와 Puzzle을 나란히 배치 (크기 일치 & 세로 정렬)
       const trayWidth = isLarge ? 280 : 160;
       const availableWidth = canvasSize.width - trayWidth;
-      const panelGap = 160; // 간격을 넓혀 퍼즐판을 오른쪽으로 조금 더 유격
+      const panelGap = 32; // 가로 간격
       
-      // 나란히 놓을 때 둘 다 정확히 같은 크기로 디폴트 할당
-      const defaultPanelSize = Math.max(200, Math.min(450, Math.floor((availableWidth - panelGap * 3) / 2)));
+      // 세로 높이 한계치 측정 (헤더 여백 제외, 최소 48px 이상의 안전 상하 마진 확보)
+      const maxAllowedHeight = Math.max(160, canvasSize.height - 80);
 
-      // 세로 중앙 정렬
-      const topY = Math.max(32, Math.floor((canvasSize.height - defaultPanelSize) / 2));
+      // 1. 가로폭 기준 크기 (가로 가용 영역의 절반)
+      const widthBasedSize = Math.floor((availableWidth - panelGap * 3) / 2);
+
+      // 2. 가로/세로 중 제약을 더 강하게 받는 쪽에 맞춰 동일 크기(1:1 비율) 배정
+      const defaultPanelSize = Math.max(160, Math.min(400, widthBasedSize, maxAllowedHeight));
+
+      // 세로 중앙 정렬을 위한 Y 좌표 구하기 (패널 크기에 맞춰 안전하게 계산)
+      const topY = Math.max(20, Math.floor((canvasSize.height - defaultPanelSize) / 2));
 
       // 가이드 이미지 X 좌표 계산 (충분한 간격을 두어 나란히)
       const guideX = Math.floor((availableWidth - (defaultPanelSize * 2 + panelGap)) / 2) - 16;
@@ -288,7 +294,8 @@ export default function LandscapePuzzleLayout({
         {/* 왼쪽 + 가운데: 자유 캔버스 영역 (Guide + Puzzle이 자유롭게 위치) */}
         <div
           ref={canvasAreaRef}
-          className="relative flex-1 min-w-0 overflow-hidden"
+          className="relative flex-1 min-w-0 overflow-hidden select-none"
+          style={{ touchAction: 'none' }} // 모바일/태블릿 터치 시 브라우저 스크롤 제스처 차단
           onClick={(e) => {
             if (selectedTrayPiece !== null && interactionMode === 'play') {
               selectTrayPiece(null);

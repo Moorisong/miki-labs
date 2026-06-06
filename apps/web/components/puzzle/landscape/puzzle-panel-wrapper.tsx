@@ -125,6 +125,7 @@ export default function PuzzlePanelWrapper({
         userSelect: 'none',
         zIndex: 5,
         transition: dragging.current || resizing.current ? 'none' : 'transform 0.15s ease-out',
+        touchAction: 'none', // 모바일/태블릿 터치 이동 시 브라우저 스크롤 바운스 방지
       }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
