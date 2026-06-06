@@ -124,7 +124,10 @@ export default function PuzzleBoard({
   const cellSize = Math.floor(baseSize * zoom);
 
   return (
-    <div className="w-full h-full flex p-4 overflow-auto scrollbar-hide select-none">
+    <div 
+      className="w-full h-full flex p-4 overflow-auto scrollbar-hide select-none"
+      style={{ touchAction: 'none' }} // 퍼즐판 내 어떤 요소에서도 브라우저 스크롤 이벤트가 부모로 발화되지 못하도록 방지
+    >
       <div
         className="grid border rounded-xl overflow-hidden shadow-2xl transition-all duration-200 flex-shrink-0 m-auto"
         style={{
@@ -133,6 +136,7 @@ export default function PuzzleBoard({
           borderColor: 'var(--puzzle-border)',
           backgroundColor: 'rgba(255, 255, 255, 0.05)',
           boxShadow: 'var(--puzzle-shadow-lg)',
+          touchAction: 'none', // 내부 그리드도 명시적 차단
         }}
       >
         {board.map((pieceId, slotIdx) => (

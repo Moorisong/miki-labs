@@ -127,7 +127,8 @@ export default function LandscapeTrayPanel({
 
   // 드래그 시작
   const startDrag = (e: React.PointerEvent, pieceId: number) => {
-    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    // 마우스 클릭(좌클릭) 또는 터치 드래그 모두 허용
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
     const clientX = e.clientX;
     const clientY = e.clientY;
     const pointerId = e.pointerId;
@@ -139,7 +140,6 @@ export default function LandscapeTrayPanel({
     try { target.setPointerCapture(pointerId); } catch (err) {}
 
     const onMove = (ev: PointerEvent) => {
-      if (ev.pointerType !== 'mouse') return;
       if (!startCoords.current) return;
       const dx = ev.clientX - startCoords.current.x;
       const dy = ev.clientY - startCoords.current.y;
@@ -189,10 +189,10 @@ export default function LandscapeTrayPanel({
     globalUpRef.current = onUp;
   };
 
-  // 터치 탭
+  // 터치 탭 (드래그하지 않고 가볍게 두드릴 때만 탭 동작을 하도록 처리)
   const handleTouchEnd = (e: React.TouchEvent, pieceId: number) => {
+    // PointerEvent의 startDrag에서 드래그/클릭 판정을 처리하므로 터치중복 탭 방지를 위해 여기서는 아무것도 하지 않고 이벤트 버블링만 제어
     e.stopPropagation();
-    onPieceClick(pieceId);
   };
 
   const activeBasketPieces = baskets[activeBasket] || [];
@@ -204,9 +204,9 @@ export default function LandscapeTrayPanel({
       style={{
         backgroundColor: '#ffffff',
         borderColor: 'rgba(0, 0, 0, 0.08)',
-        minWidth: isLarge ? '240px' : '140px',
-        maxWidth: isLarge ? '320px' : '180px',
-        width: isLarge ? '20%' : '20%',
+        minWidth: isLarge ? '320px' : '220px', // 가로 폭 최솟값 대폭 확장 (기존 240px/140px에서 업그레이드)
+        maxWidth: isLarge ? '400px' : '300px', // 가로 폭 최댓값 확장
+        width: isLarge ? '25%' : '28%', // 가로 가용 영역 점유 비율 상향
         flexShrink: 0,
       }}
       onClick={(e) => {
@@ -220,14 +220,14 @@ export default function LandscapeTrayPanel({
         style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}
       >
         <div className="flex items-center gap-1.5">
-          <Folder size={13} className="text-blue-500 flex-shrink-0" />
-          <span className="text-xs font-bold text-gray-800">보관함</span>
+          <Folder size={14} className="text-blue-500 flex-shrink-0" />
+          <span className="text-sm font-bold text-gray-800">보관함</span>
         </div>
-        <span className="text-[10px] font-medium text-gray-500">
+        <span className="text-xs font-medium text-gray-500">
           대기 조각: <span className="text-gray-800 font-mono font-semibold">{trayPieces.length}</span>
         </span>
         {selectedPieceId !== null && (
-          <span className="text-[9px] font-medium text-blue-600 animate-pulse mt-0.5">
+          <span className="text-[10px] font-medium text-blue-600 animate-pulse mt-0.5">
             ● 보드를 선택하여 조각 배치
           </span>
         )}
@@ -269,7 +269,7 @@ export default function LandscapeTrayPanel({
                 style={{ backgroundColor: meta.color }}
               />
               <span
-                className="text-[9px] font-semibold leading-none font-mono"
+                className="text-[11px] font-semibold leading-none font-mono"
                 style={{ color: isActive || isHovered ? '#1f2937' : 'rgba(0, 0, 0, 0.4)' }}
               >
                 {count}
@@ -282,8 +282,8 @@ export default function LandscapeTrayPanel({
       {/* 도움말 */}
       {isLarge && (
         <div className="px-4 py-1.5 border-b flex-shrink-0" style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
-          <p className="text-[9px] font-medium text-gray-400 flex items-center gap-1">
-            <HelpCircle size={11} className="text-gray-300 flex-shrink-0" />
+          <p className="text-[10px] font-medium text-gray-500 flex items-center gap-1">
+            <HelpCircle size={12} className="text-gray-400 flex-shrink-0" />
             <span>드래그로 분류 가능</span>
           </p>
         </div>

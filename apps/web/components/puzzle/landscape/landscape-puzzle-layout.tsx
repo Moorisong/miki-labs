@@ -152,7 +152,7 @@ export default function LandscapePuzzleLayout({
       if (saved.interactionMode) setInteractionMode(saved.interactionMode);
     } else {
       // 초기 배치: Guide와 Puzzle을 나란히 배치 (크기 일치 & 세로 정렬)
-      const trayWidth = isLarge ? 280 : 160;
+      const trayWidth = isLarge ? 360 : 250; // 확장된 보관함 폭에 맞게 차감 크기 상향 조정
       const availableWidth = canvasSize.width - trayWidth;
       const panelGap = 32; // 가로 간격
       
@@ -332,9 +332,13 @@ export default function LandscapePuzzleLayout({
                       ? '0 0 0 1px #4f8ef7, 0 8px 30px rgba(0,0,0,0.15)'
                       : '0 4px 24px rgba(0, 0, 0, 0.06)',
                     pointerEvents: interactionMode === 'move' ? 'none' : 'auto',
+                    touchAction: 'none', // 모바일/태블릿 터치 이동 시 브라우저 스크롤 제스처 완전 차단
                   }}
                 >
-                  <div className="w-full h-full overflow-auto flex items-center justify-center p-2 scrollbar-hide">
+                  <div 
+                    className="w-full h-full overflow-auto flex items-center justify-center p-2 scrollbar-hide"
+                    style={{ touchAction: 'none' }}
+                  >
                     <PuzzleBoard
                       board={board}
                       image={puzzle.imageUrl}

@@ -152,6 +152,7 @@ export default function GuideImagePanel({
           boxShadow: isDraggable
             ? '0 0 0 1px #4f8ef7, 0 8px 30px rgba(0,0,0,0.15)'
             : '0 4px 24px rgba(0, 0, 0, 0.06)',
+          touchAction: 'none', // 터치 액션 상속 보장
         }}
       >
         {/* 가이드 이미지 */}
