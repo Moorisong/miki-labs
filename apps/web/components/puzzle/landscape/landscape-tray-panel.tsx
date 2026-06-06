@@ -200,7 +200,7 @@ export default function LandscapeTrayPanel({
   return (
     <div
       id="landscape-tray-panel"
-      className="flex flex-col h-full border-l"
+      className="flex flex-col h-full min-h-0 border-l"
       style={{
         backgroundColor: '#ffffff',
         borderColor: 'rgba(0, 0, 0, 0.08)',
@@ -208,6 +208,7 @@ export default function LandscapeTrayPanel({
         maxWidth: isLarge ? '400px' : '300px', // 가로 폭 최댓값 확장
         width: isLarge ? '25%' : '28%', // 가로 가용 영역 점유 비율 상향
         flexShrink: 0,
+        overscrollBehavior: 'none',
       }}
       onClick={(e) => {
         e.stopPropagation();
@@ -290,7 +291,10 @@ export default function LandscapeTrayPanel({
       )}
 
       {/* 조각 목록 - 세로 스크롤 */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 scrollbar-hide">
+      <div 
+        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2 scrollbar-hide"
+        style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
+      >
         {trayPieces.length === 0 && selectedPieceId === null ? (
           <div className="flex flex-col items-center justify-center h-32 text-center text-slate-400">
             <span className="text-sm font-black mb-1">🎉</span>

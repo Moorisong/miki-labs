@@ -139,6 +139,65 @@ export default function LandscapePuzzleLayout({
     return () => observer.disconnect();
   }, []);
 
+  // ── 태블릿/모바일 상하 바운스 및 스크롤 차단 ──
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    const originalOverscroll = document.body.style.overscrollBehavior;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    const originalHtmlOverscroll = document.documentElement.style.overscrollBehavior;
+    
+    document.body.style.overflow = 'hidden';
+    document.body.style.overscrollBehavior = 'none';
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.overscrollBehavior = 'none';
+
+    let touchStartY = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const preventTouchMove = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      // 보관함 내부 스크롤 영역 찾기
+      const scrollableDiv = target.closest('#landscape-tray-panel div.overflow-y-auto');
+      
+      if (scrollableDiv) {
+        const el = scrollableDiv as HTMLElement;
+        const scrollTop = el.scrollTop;
+        const scrollHeight = el.scrollHeight;
+        const clientHeight = el.clientHeight;
+        const currentY = e.touches[0].clientY;
+        const isScrollingUp = currentY > touchStartY; // 손가락을 아래로 쓸어내림 (스크롤 위로)
+        const isScrollingDown = currentY < touchStartY; // 손가락을 위로 쓸어올림 (스크롤 아래로)
+
+        // 최상단 도달 후 위로 스크롤 시도할 때 차단
+        if (scrollTop <= 0 && isScrollingUp) {
+          if (e.cancelable) e.preventDefault();
+        }
+        // 최하단 도달 후 아래로 스크롤 시도할 때 차단
+        else if (scrollTop + clientHeight >= scrollHeight && isScrollingDown) {
+          if (e.cancelable) e.preventDefault();
+        }
+      } else {
+        // 보관함 외부 영역(보드, 툴바 등) 터치 드래그 스크롤 전면 차단
+        if (e.cancelable) e.preventDefault();
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchmove', preventTouchMove, { passive: false });
+    
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.overscrollBehavior = originalOverscroll;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+      document.documentElement.style.overscrollBehavior = originalHtmlOverscroll;
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', preventTouchMove);
+    };
+  }, []);
+
   // ── LocalStorage에서 이전 landscapeState 복원 ──
   useEffect(() => {
     if (initializedRef.current || canvasSize.width === 0) return;
@@ -240,7 +299,7 @@ export default function LandscapePuzzleLayout({
   return (
     <div
       className="flex flex-col h-screen h-[100dvh] overflow-hidden select-none"
-      style={{ backgroundColor: '#f3f4f6' }}
+      style={{ backgroundColor: '#f3f4f6', overscrollBehavior: 'none' }}
       onClick={() => {
         if (selectedTrayPiece !== null && interactionMode === 'play') {
           selectTrayPiece(null);
