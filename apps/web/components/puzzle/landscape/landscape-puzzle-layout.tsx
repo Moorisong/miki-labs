@@ -68,7 +68,7 @@ function loadLandscapeState(puzzleId: string): Partial<LandscapeState> | null {
   try {
     const raw = localStorage.getItem(LANDSCAPE_STATE_KEY + puzzleId);
     if (raw) return JSON.parse(raw);
-  } catch (e) {}
+  } catch (e) { }
   return null;
 }
 
@@ -76,7 +76,7 @@ function saveLandscapeState(puzzleId: string, state: LandscapeState) {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(LANDSCAPE_STATE_KEY + puzzleId, JSON.stringify(state));
-  } catch (e) {}
+  } catch (e) { }
 }
 
 export default function LandscapePuzzleLayout({
@@ -139,61 +139,22 @@ export default function LandscapePuzzleLayout({
     return () => observer.disconnect();
   }, []);
 
-  // ── 태블릿/모바일 상하 바운스 및 스크롤 차단 ──
+
+  // ── 태블릿/모바일 상하 바운스 및 스크롤 차단 (다만, 화면이 잘릴 때를 대비해 Y축 스크롤은 브라우저 기본 허용하고, 보관함 내부 스크롤만 격리) ──
   useEffect(() => {
-    const originalOverflow = document.body.style.overflow;
-    const originalOverscroll = document.body.style.overscrollBehavior;
-    const originalHtmlOverflow = document.documentElement.style.overflow;
-    const originalHtmlOverscroll = document.documentElement.style.overscrollBehavior;
-    
-    document.body.style.overflow = 'hidden';
-    document.body.style.overscrollBehavior = 'none';
-    document.documentElement.style.overflow = 'hidden';
-    document.documentElement.style.overscrollBehavior = 'none';
-
-    let touchStartY = 0;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      touchStartY = e.touches[0].clientY;
-    };
-
+    // 보관함 내부 스크롤 동작 시 body 스크롤 체이닝 방지
     const preventTouchMove = (e: TouchEvent) => {
       const target = e.target as HTMLElement;
-      // 보관함 내부 스크롤 영역 찾기
       const scrollableDiv = target.closest('#landscape-tray-panel div.overflow-y-auto');
-      
       if (scrollableDiv) {
-        const el = scrollableDiv as HTMLElement;
-        const scrollTop = el.scrollTop;
-        const scrollHeight = el.scrollHeight;
-        const clientHeight = el.clientHeight;
-        const currentY = e.touches[0].clientY;
-        const isScrollingUp = currentY > touchStartY; // 손가락을 아래로 쓸어내림 (스크롤 위로)
-        const isScrollingDown = currentY < touchStartY; // 손가락을 위로 쓸어올림 (스크롤 아래로)
-
-        // 최상단 도달 후 위로 스크롤 시도할 때 차단
-        if (scrollTop <= 0 && isScrollingUp) {
-          if (e.cancelable) e.preventDefault();
-        }
-        // 최하단 도달 후 아래로 스크롤 시도할 때 차단
-        else if (scrollTop + clientHeight >= scrollHeight && isScrollingDown) {
-          if (e.cancelable) e.preventDefault();
-        }
-      } else {
-        // 보관함 외부 영역(보드, 툴바 등) 터치 드래그 스크롤 전면 차단
-        if (e.cancelable) e.preventDefault();
+        // 보관함 내부 스크롤 시 body로 touchmove가 흘러들어가 전체가 스크롤되는 것 방지
+        e.stopPropagation();
       }
     };
 
-    document.addEventListener('touchstart', handleTouchStart, { passive: true });
-    document.addEventListener('touchmove', preventTouchMove, { passive: false });
-    
+    document.addEventListener('touchmove', preventTouchMove, { passive: true });
+
     return () => {
-      document.body.style.overflow = originalOverflow;
-      document.body.style.overscrollBehavior = originalOverscroll;
-      document.documentElement.style.overflow = originalHtmlOverflow;
-      document.documentElement.style.overscrollBehavior = originalHtmlOverscroll;
-      document.removeEventListener('touchstart', handleTouchStart);
       document.removeEventListener('touchmove', preventTouchMove);
     };
   }, []);
@@ -214,7 +175,7 @@ export default function LandscapePuzzleLayout({
       const trayWidth = isLarge ? 360 : 250; // 확장된 보관함 폭에 맞게 차감 크기 상향 조정
       const availableWidth = canvasSize.width - trayWidth;
       const panelGap = 32; // 가로 간격
-      
+
       // 세로 높이 한계치 측정 (헤더 여백 제외, 최소 48px 이상의 안전 상하 마진 확보)
       const maxAllowedHeight = Math.max(160, canvasSize.height - 80);
 
@@ -262,31 +223,32 @@ export default function LandscapePuzzleLayout({
   // ── 보드 클릭 ──
   const handleCellClickGuarded = useCallback(
     (slotIdx: number) => {
+      if (interactionMode !== 'play') return;
       onCellClick(slotIdx);
     },
-    [onCellClick]
+    [onCellClick, interactionMode]
   );
 
   // ── 조각 선택 ──
   const handlePieceSelectGuarded = useCallback(
     (pieceId: number) => {
+      if (interactionMode !== 'play') return;
       onPieceSelect(pieceId);
     },
-    [onPieceSelect]
+    [onPieceSelect, interactionMode]
   );
 
   const difficultyLabel =
     difficulty === 'novice' ? '초보 (36조각)' : difficulty === 'beginner' ? '일반 (100조각)' : '고수 (256조각)';
   const gridSize = difficulty === 'novice' ? 6 : difficulty === 'beginner' ? 10 : 16;
 
-  // boardSize에 비례하는 PuzzleBoard용 동적 zoom 계산
-  const baseBoardInnerSize = gridSize * 40;
-  const calculatedZoom = boardSize / baseBoardInnerSize;
+  // 퍼즐 조각 크기는 고정(줌 상태값)되고 패널 크기만 넓어지도록 zoom prop을 직접 사용합니다.
+  const calculatedZoom = zoom;
 
   return (
     <div
-      className="flex flex-col h-screen h-[100dvh] overflow-hidden select-none"
-      style={{ backgroundColor: '#f3f4f6', overscrollBehavior: 'none' }}
+      className="flex flex-col min-h-screen min-h-[100dvh] overflow-y-auto w-full select-none"
+      style={{ backgroundColor: '#f3f4f6' }}
       onClick={() => {
         if (selectedTrayPiece !== null) {
           selectTrayPiece(null);
@@ -295,8 +257,8 @@ export default function LandscapePuzzleLayout({
     >
       {/* ── 상단 툴바 ── */}
       <LandscapeToolbar
-        interactionMode="play"
-        onModeChange={() => {}}
+        interactionMode={interactionMode}
+        onModeChange={setInteractionMode}
         zoom={calculatedZoom}
         onZoomIn={onZoomIn}
         onZoomOut={onZoomOut}
@@ -329,17 +291,17 @@ export default function LandscapePuzzleLayout({
         <span
           className="ml-3 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-gray-500/10 text-gray-600"
         >
-        드래그해서 원하는 위치로 이동시켜보세요.
+          드래그해서 원하는 위치로 이동시켜보세요.
         </span>
       </div>
 
       {/* ── 메인 영역: [Guide | Puzzle Canvas] + [Tray] ── */}
-      <div className="flex flex-1 min-h-0 overflow-hidden">
+      <div className="flex flex-1 min-h-0 relative z-10">
         {/* 왼쪽 + 가운데: 자유 캔버스 영역 (Guide + Puzzle이 자유롭게 위치) */}
         <div
           ref={canvasAreaRef}
-          className="relative flex-1 min-w-0 overflow-hidden select-none"
-          style={{ touchAction: 'none' }} // 모바일/태블릿 터치 시 브라우저 스크롤 제스처 차단
+          className="relative flex-1 min-w-0 select-none"
+          style={{ touchAction: 'pan-y' }} // 회색판(퍼즐판 바깥영역)에서 세로 스크롤 가능하게 허용
           onClick={(e) => {
             if (selectedTrayPiece !== null) {
               selectTrayPiece(null);
@@ -352,7 +314,7 @@ export default function LandscapePuzzleLayout({
               <GuideImagePanel
                 imageUrl={puzzle.imageUrl}
                 initialSize={boardSize}
-                isDraggable={true}
+                isDraggable={interactionMode === 'move'}
                 defaultPosition={guidePosition}
                 defaultSize={guideSize}
                 onPositionChange={setGuidePosition}
@@ -361,13 +323,13 @@ export default function LandscapePuzzleLayout({
 
               {/* Puzzle Panel Wrapper (기존 PuzzleBoard 래핑) */}
               <PuzzlePanelWrapper
-                isDraggable={true}
+                isDraggable={interactionMode === 'move'}
                 position={boardPosition}
                 onPositionChange={setBoardPosition}
                 size={boardSize}
                 onSizeChange={setBoardSize}
               >
-                <div 
+                <div
                   className="w-full h-full overflow-auto flex items-center justify-center p-2 scrollbar-hide"
                   style={{ touchAction: 'none' }}
                 >
@@ -379,6 +341,7 @@ export default function LandscapePuzzleLayout({
                     onCellClick={handleCellClickGuarded}
                     selectedPieceId={selectedTrayPiece}
                     difficulty={difficulty}
+                    isPlayMode={interactionMode === 'play'}
                   />
                 </div>
               </PuzzlePanelWrapper>
@@ -395,34 +358,39 @@ export default function LandscapePuzzleLayout({
           onPieceClick={handlePieceSelectGuarded}
           onTrayClick={onTrayClick}
           isLarge={isLarge}
+          isPlayMode={interactionMode === 'play'}
         />
       </div>
 
       {/* ── 완료 모달 ── */}
-      {isCompleted && (
-        <CompletionModal
-          onClose={onGoHome}
-          onGoHome={onGoHome}
-          onSaveRecord={onSaveRecord}
-          onShare={onShare}
-          completionTimeFormatted={formatTime(timerSeconds)}
-          myRanking={myRanking}
-          isLoggedIn={isLoggedIn}
-          isSaving={isSubmitting}
-          isSaved={isSaved}
-          errorMessage={submitError}
-        />
-      )}
+      {
+        isCompleted && (
+          <CompletionModal
+            onClose={onGoHome}
+            onGoHome={onGoHome}
+            onSaveRecord={onSaveRecord}
+            onShare={onShare}
+            completionTimeFormatted={formatTime(timerSeconds)}
+            myRanking={myRanking}
+            isLoggedIn={isLoggedIn}
+            isSaving={isSubmitting}
+            isSaved={isSaved}
+            errorMessage={submitError}
+          />
+        )
+      }
 
       {/* ── 커서 조각 추적기 (플레이 모드에서만) ── */}
-      {interactionMode === 'play' && (
-        <CursorFollower
-          selectedPieceId={selectedTrayPiece}
-          image={puzzle.imageUrl}
-          gridSize={gridSize}
-        />
-      )}
-    </div>
+      {
+        interactionMode === 'play' && (
+          <CursorFollower
+            selectedPieceId={selectedTrayPiece}
+            image={puzzle.imageUrl}
+            gridSize={gridSize}
+          />
+        )
+      }
+    </div >
   );
 }
 

@@ -11,6 +11,7 @@ interface PuzzleBoardProps {
   onCellClick: (slotIndex: number) => void;
   selectedPieceId: number | null;
   difficulty: 'novice' | 'beginner' | 'expert';
+  isPlayMode?: boolean;
 }
 
 interface PuzzleBoardCellProps {
@@ -22,6 +23,7 @@ interface PuzzleBoardCellProps {
   onCellClick: (slotIdx: number) => void;
   selectedPieceId: number | null;
   difficulty: 'novice' | 'beginner' | 'expert';
+  isPlayMode?: boolean;
 }
 
 function PuzzleBoardCell({
@@ -33,6 +35,7 @@ function PuzzleBoardCell({
   onCellClick,
   selectedPieceId,
   difficulty,
+  isPlayMode = true,
 }: PuzzleBoardCellProps) {
   const [showRipple, setShowRipple] = useState(false);
   const prevPieceId = useRef<number | null>(pieceId);
@@ -58,6 +61,7 @@ function PuzzleBoardCell({
       data-board-cell="true"
       onClick={(e) => {
         e.stopPropagation();
+        if (!isPlayMode) return; // 이동모드일 때는 클릭 무시
         if (isCorrect) return; // 정답 위치 조각은 클릭 전파 및 동작 차단
         onCellClick(slotIdx);
       }}
@@ -76,16 +80,18 @@ function PuzzleBoardCell({
         boxShadow: isCorrect ? '0 0 12px rgba(59, 130, 246, 0.6)' : 'none',
         outline: 'none',
         WebkitTapHighlightColor: 'transparent',
-        cursor: isCorrect ? 'default' : 'pointer', // 고정 조각은 포인터 커서 제외
-        pointerEvents: isCorrect ? 'none' : 'auto', // 마우스 이벤트 차단으로 다시 선택 불가화
+        cursor: !isPlayMode ? 'default' : isCorrect ? 'default' : 'pointer', // 고정 및 이동모드에서는 포인터 제외
+        pointerEvents: !isPlayMode ? 'auto' : isCorrect ? 'none' : 'auto', // 이동모드 시 드래그 버블링을 위해 auto 유지
       }}
       onMouseEnter={(e) => {
+        if (!isPlayMode) return; // 이동모드일 때는 호버 제외
         if (!isPlaced) {
           e.currentTarget.style.backgroundColor = 'rgba(79, 142, 247, 0.08)';
           e.currentTarget.style.borderColor = 'var(--puzzle-primary)';
         }
       }}
       onMouseLeave={(e) => {
+        if (!isPlayMode) return;
         if (!isPlaced) {
           e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
           e.currentTarget.style.borderColor = 'var(--puzzle-border)';
@@ -119,6 +125,7 @@ export default function PuzzleBoard({
   onCellClick,
   selectedPieceId,
   difficulty,
+  isPlayMode = true,
 }: PuzzleBoardProps) {
   // 화면 넓이와 줌 비율에 맞춰 셀 크기를 유연하게 계산 (기본 48px ~ 72px 범위)
   const baseSize = gridSize === 10 ? 46 : 30; // Beginner(10x10) vs Expert(16x16)
@@ -127,7 +134,7 @@ export default function PuzzleBoard({
   return (
     <div 
       className="w-full h-full flex p-4 overflow-auto scrollbar-hide select-none"
-      style={{ touchAction: 'none' }} // 퍼즐판 내 어떤 요소에서도 브라우저 스크롤 이벤트가 부모로 발화되지 못하도록 방지
+      style={{ touchAction: 'pan-x pan-y' }} // 가로/세로 방향의 스크롤 및 팬(pan) 이동을 허용
     >
       <div
         className="grid border rounded-xl overflow-hidden shadow-2xl transition-all duration-200 flex-shrink-0 m-auto"
@@ -137,7 +144,7 @@ export default function PuzzleBoard({
           borderColor: 'var(--puzzle-border)',
           backgroundColor: 'rgba(255, 255, 255, 0.05)',
           boxShadow: 'var(--puzzle-shadow-lg)',
-          touchAction: 'none', // 내부 그리드도 명시적 차단
+          touchAction: 'pan-x pan-y', // 내부 그리드도 스크롤 허용
         }}
       >
         {board.map((pieceId, slotIdx) => (
@@ -151,6 +158,7 @@ export default function PuzzleBoard({
             onCellClick={onCellClick}
             selectedPieceId={selectedPieceId}
             difficulty={difficulty}
+            isPlayMode={isPlayMode}
           />
         ))}
       </div>

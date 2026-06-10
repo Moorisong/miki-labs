@@ -39,12 +39,12 @@ export default function PuzzlePanelWrapper({
   const handlePointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       if ((e.target as HTMLElement).closest('[data-resize-handle]')) return;
-      if ((e.target as HTMLElement).closest('[data-board-cell]')) return;
       if (!isDraggable) return;
-      
+
       e.preventDefault();
-      e.currentTarget.setPointerCapture(e.pointerId);
+
       dragging.current = true;
+
       dragStart.current = {
         mouseX: e.clientX,
         mouseY: e.clientY,
@@ -55,32 +55,14 @@ export default function PuzzlePanelWrapper({
     [isDraggable, position]
   );
 
-  const handlePointerMove = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      if (!dragging.current || !dragStart.current) return;
-      const dx = e.clientX - dragStart.current.mouseX;
-      const dy = e.clientY - dragStart.current.mouseY;
-      onPositionChange({
-        x: dragStart.current.posX + dx,
-        y: dragStart.current.posY + dy,
-      });
-    },
-    [onPositionChange]
-  );
-
-  const handlePointerUp = useCallback(() => {
-    dragging.current = false;
-    dragStart.current = null;
-  }, []);
-
   // ────────────────────────────────────────────
   // 모서리 핸들 리사이즈 (delta 방식)
   // ────────────────────────────────────────────
   const handleResizePointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!isDraggable) return;
       e.stopPropagation();
       e.preventDefault();
-      e.currentTarget.setPointerCapture(e.pointerId);
       resizing.current = true;
       resizeStart.current = {
         mouseX: e.clientX,
@@ -88,29 +70,49 @@ export default function PuzzlePanelWrapper({
         startSize: size,
       };
     },
-    [size]
+    [isDraggable, size]
   );
 
-  const handleResizePointerMove = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      if (!resizing.current || !resizeStart.current) return;
-      e.stopPropagation();
+  // ── 글로벌 마우스/터치 리스너 ──
+  useEffect(() => {
+    const handleGlobalPointerMove = (e: PointerEvent) => {
+      if (resizing.current && resizeStart.current) {
+        const dx = e.clientX - resizeStart.current.mouseX;
+        const dy = e.clientY - resizeStart.current.mouseY;
+        const delta = (dx + dy) / 2;
+        const newSize = Math.max(160, Math.min(900, resizeStart.current.startSize + delta));
+        onSizeChange(Math.round(newSize));
+      } else if (dragging.current && dragStart.current) {
+        const dx = e.clientX - dragStart.current.mouseX;
+        const dy = e.clientY - dragStart.current.mouseY;
+        onPositionChange({
+          x: dragStart.current.posX + dx,
+          y: dragStart.current.posY + dy,
+        });
+      }
+    };
 
-      const dx = e.clientX - resizeStart.current.mouseX;
-      const dy = e.clientY - resizeStart.current.mouseY;
-      
-      const delta = (dx + dy) / 2;
-      const newSize = Math.max(160, Math.min(900, resizeStart.current.startSize + delta));
-      onSizeChange(Math.round(newSize));
-    },
-    [onSizeChange]
-  );
+    const handleGlobalPointerUp = () => {
+      if (resizing.current) {
+        resizing.current = false;
+        resizeStart.current = null;
+      }
+      if (dragging.current) {
+        dragging.current = false;
+        dragStart.current = null;
+      }
+    };
 
-  const handleResizePointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-    resizing.current = false;
-    resizeStart.current = null;
-  }, []);
+    window.addEventListener('pointermove', handleGlobalPointerMove);
+    window.addEventListener('pointerup', handleGlobalPointerUp);
+    window.addEventListener('pointercancel', handleGlobalPointerUp);
+
+    return () => {
+      window.removeEventListener('pointermove', handleGlobalPointerMove);
+      window.removeEventListener('pointerup', handleGlobalPointerUp);
+      window.removeEventListener('pointercancel', handleGlobalPointerUp);
+    };
+  }, [onSizeChange, onPositionChange]);
 
   return (
     <div
@@ -124,14 +126,11 @@ export default function PuzzlePanelWrapper({
         height: size,
         cursor: isDraggable ? (dragging.current ? 'grabbing' : 'grab') : 'default',
         userSelect: 'none',
-        zIndex: 5,
+        zIndex: 30,
         transition: dragging.current || resizing.current ? 'none' : 'transform 0.15s ease-out',
         touchAction: 'none', // 모바일/태블릿 터치 이동 시 브라우저 스크롤 바운스 방지
       }}
       onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
     >
       <div
         className="w-full h-full border rounded-xl overflow-hidden transition-all duration-300"
@@ -147,30 +146,40 @@ export default function PuzzlePanelWrapper({
         {children}
       </div>
 
-      {/* 우하단 리사이즈 핸들 */}
-      <div
-        data-resize-handle="br"
-        onPointerDown={handleResizePointerDown}
-        onPointerMove={handleResizePointerMove}
-        onPointerUp={handleResizePointerUp}
-        onPointerCancel={handleResizePointerUp}
-        className="absolute bottom-0 right-0 w-6 h-6 z-20 flex items-center justify-end p-1 cursor-se-resize"
-        title="크기 조절 (드래그)"
-      >
-        <div 
-          className="w-2.5 h-2.5 rounded-tl-[2px] transition-colors"
-          style={{
-            borderRight: '2px solid rgba(0, 0, 0, 0.3)',
-            borderBottom: '2px solid rgba(0, 0, 0, 0.3)',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = '#4f8ef7';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.3)';
-          }}
-        />
-      </div>
+      {/* 우하단 리사이즈 핸들 (이동 모드일 때만 렌더링) */}
+      {isDraggable && (
+        <div
+          data-resize-handle="br"
+          onPointerDown={handleResizePointerDown}
+          className="absolute bottom-1 right-1 w-9 h-9 z-[99] flex items-center justify-center cursor-se-resize rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg border border-white transition-all scale-100 hover:scale-105"
+          title="크기 조절 (드래그)"
+        >
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="15 3 21 3 21 9" />
+            <polyline points="9 21 3 21 3 15" />
+            <line x1="21" y1="3" x2="14" y2="10" />
+            <line x1="3" y1="21" x2="10" y2="14" />
+          </svg>
+
+          {/* 눈에 띄는 크기 조절 팁 */}
+          <div 
+            className="absolute bottom-11 right-0 bg-blue-600/95 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg pointer-events-none whitespace-nowrap animate-bounce"
+            style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.15))' }}
+          >
+            ↔ 크기 조절
+            <div className="absolute top-full right-4 w-1.5 h-1.5 bg-blue-600/95 rotate-45 transform -translate-y-0.5" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

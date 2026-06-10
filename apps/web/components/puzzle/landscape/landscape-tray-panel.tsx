@@ -13,6 +13,7 @@ interface LandscapeTrayPanelProps {
   onTrayClick?: () => void;
   /** Large Landscape 여부 (true=Large, false=Compact) */
   isLarge: boolean;
+  isPlayMode?: boolean;
 }
 
 const basketMetadata: Record<string, { label: string; color: string }> = {
@@ -38,6 +39,7 @@ export default function LandscapeTrayPanel({
   onPieceClick,
   onTrayClick,
   isLarge,
+  isPlayMode = true,
 }: LandscapeTrayPanelProps) {
   const cellSize = isLarge ? 46 : 34;
 
@@ -134,6 +136,7 @@ export default function LandscapeTrayPanel({
 
   // 드래그 시작
   const startDrag = (e: React.PointerEvent, pieceId: number) => {
+    if (!isPlayMode) return;
     // 마우스 클릭(좌클릭) 또는 터치 드래그 모두 허용
     if (e.button !== 0 && e.pointerType === 'mouse') return;
 
@@ -252,6 +255,7 @@ export default function LandscapeTrayPanel({
       }}
       onClick={(e) => {
         e.stopPropagation();
+        if (!isPlayMode) return;
         if (selectedPieceId !== null) onTrayClick?.();
       }}
     >
@@ -267,11 +271,6 @@ export default function LandscapeTrayPanel({
         <span className="text-xs font-medium text-gray-500">
           대기 조각: <span className="text-gray-800 font-mono font-semibold">{trayPieces.length}</span>
         </span>
-        {selectedPieceId !== null && (
-          <span className="text-[10px] font-medium text-blue-600 animate-pulse mt-0.5">
-            ● 보드를 선택하여 조각 배치
-          </span>
-        )}
       </div>
 
       {/* 바구니 탭 */}
@@ -289,7 +288,11 @@ export default function LandscapeTrayPanel({
             <div
               key={key}
               data-basket-id={key}
-              onClick={(e) => { e.stopPropagation(); setActiveBasket(key); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isPlayMode) return;
+                setActiveBasket(key);
+              }}
               className="flex flex-col items-center justify-center p-1.5 rounded-lg border transition-all cursor-pointer gap-1"
               style={{
                 borderColor: isHovered

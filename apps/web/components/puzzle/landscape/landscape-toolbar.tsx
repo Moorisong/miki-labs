@@ -63,6 +63,32 @@ export default function LandscapeToolbar({
 
       {/* 오른쪽: 확대/축소 + 판 엎기 + 저장 */}
       <div className="flex items-center gap-3">
+        {/* 모드 선택 (플레이 / 이동) */}
+        <div className="flex bg-gray-100 p-0.5 rounded-lg border border-gray-200/80 mr-1">
+          <button
+            onClick={() => onModeChange?.('play')}
+            className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
+              interactionMode === 'play'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            플레이 모드
+          </button>
+          <button
+            onClick={() => onModeChange?.('move')}
+            className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
+              interactionMode === 'move'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            이동 모드
+          </button>
+        </div>
+
+        <div className="w-px h-3 mr-1" style={{ backgroundColor: 'rgba(0, 0, 0, 0.08)' }} />
+
         {/* 확대/축소 (극도로 절제된 디자인) */}
         <div className="flex items-center gap-1">
           <button
