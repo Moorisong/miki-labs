@@ -32,9 +32,7 @@ export default function HeroSection({
 }: HeroSectionProps) {
   const [showDiffSelect, setShowDiffSelect] = useState(false);
   const [tempDiff, setTempDiff] = useState<'novice' | 'beginner' | 'expert'>('novice');
-
-
-
+  const [showConfirmRestart, setShowConfirmRestart] = useState(false);
 
   // 진행률 기반 맞춘 조각수 계산
   const totalPieces = savedDifficulty === 'novice' ? 36 : savedDifficulty === 'expert' ? 256 : 100;
@@ -50,18 +48,22 @@ export default function HeroSection({
     setDaysLeft(days > 0 ? `${days}일` : '마감 임박');
   }, [puzzle.endDate]);
 
-
-
   const handleOpenModal = () => {
     setShowDiffSelect(true);
   };
 
   const handleLaunchGame = () => {
     if (hasSavedGame) {
-      const confirmRestart = window.confirm('이미 진행 중인 퍼즐이 있습니다. 처음부터 다시 시작하시겠습니까? (기존 진행 데이터는 삭제됩니다.)');
-      if (!confirmRestart) return;
+      setShowConfirmRestart(true);
+    } else {
+      onStart(tempDiff);
+      setShowDiffSelect(false);
     }
+  };
+
+  const handleConfirmRestart = () => {
     onStart(tempDiff);
+    setShowConfirmRestart(false);
     setShowDiffSelect(false);
   };
 
@@ -347,6 +349,17 @@ export default function HeroSection({
                 padding: 1.25rem !important;
               }
             }
+            @media (hover: hover) {
+              .hover-scale-effect:hover {
+                transform: scale(1.01) !important;
+              }
+            }
+            .active-scale-effect-95:active {
+              transform: scale(0.95) !important;
+            }
+            .active-scale-effect-98:active {
+              transform: scale(0.98) !important;
+            }
           `}</style>
           <div 
             className="relative w-full max-w-lg rounded-3xl border p-6 md:p-8 overflow-y-auto max-h-[90vh] sm:max-h-[85vh] landscape-short-padding"
@@ -384,7 +397,7 @@ export default function HeroSection({
                 {/* Novice Card */}
                 <button
                   onClick={() => setTempDiff('novice')}
-                  className="flex flex-col items-center justify-center text-center p-2.5 sm:p-3.5 rounded-2xl border transition-all duration-200 hover:scale-[1.01] active:scale-95 min-w-0"
+                  className="flex flex-col items-center justify-center text-center p-2.5 sm:p-3.5 rounded-2xl border transition-all duration-200 hover-scale-effect active-scale-effect-95 min-w-0"
                   style={{
                     backgroundColor: tempDiff === 'novice' ? 'var(--puzzle-secondary)' : 'var(--puzzle-glass-bg)',
                     borderColor: tempDiff === 'novice' ? 'var(--puzzle-primary)' : 'var(--puzzle-border)',
@@ -403,7 +416,7 @@ export default function HeroSection({
                 {/* Beginner Card */}
                 <button
                   onClick={() => setTempDiff('beginner')}
-                  className="flex flex-col items-center justify-center text-center p-2.5 sm:p-3.5 rounded-2xl border transition-all duration-200 hover:scale-[1.01] active:scale-95 min-w-0"
+                  className="flex flex-col items-center justify-center text-center p-2.5 sm:p-3.5 rounded-2xl border transition-all duration-200 hover-scale-effect active-scale-effect-95 min-w-0"
                   style={{
                     backgroundColor: tempDiff === 'beginner' ? 'var(--puzzle-secondary)' : 'var(--puzzle-glass-bg)',
                     borderColor: tempDiff === 'beginner' ? 'var(--puzzle-primary)' : 'var(--puzzle-border)',
@@ -422,7 +435,7 @@ export default function HeroSection({
                 {/* Expert Card */}
                 <button
                   onClick={() => setTempDiff('expert')}
-                  className="flex flex-col items-center justify-center text-center p-2.5 sm:p-3.5 rounded-2xl border transition-all duration-200 hover:scale-[1.01] active:scale-95 min-w-0"
+                  className="flex flex-col items-center justify-center text-center p-2.5 sm:p-3.5 rounded-2xl border transition-all duration-200 hover-scale-effect active-scale-effect-95 min-w-0"
                   style={{
                     backgroundColor: tempDiff === 'expert' ? 'var(--puzzle-secondary)' : 'var(--puzzle-glass-bg)',
                     borderColor: tempDiff === 'expert' ? 'var(--puzzle-primary)' : 'var(--puzzle-border)',
@@ -503,13 +516,60 @@ export default function HeroSection({
               </button>
               <button
                 onClick={handleLaunchGame}
-                className="w-full sm:flex-1 py-3.5 rounded-xl text-white font-black text-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.98]"
+                className="w-full sm:flex-1 py-3.5 rounded-xl text-white font-black text-sm transition-all duration-200 hover-scale-effect active-scale-effect-98"
                 style={{
                   backgroundColor: 'var(--puzzle-primary)',
                   boxShadow: 'var(--puzzle-shadow-md)',
                 }}
               >
                 {completedDifficulties.includes(tempDiff) ? '다시 플레이하기' : '도전 시작하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Confirmation Modal for Restarting */}
+      {showConfirmRestart && (
+        <div 
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-fade-in"
+          style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}
+        >
+          <div 
+            className="relative w-full max-w-sm rounded-3xl border p-6 md:p-8"
+            style={{
+              backgroundColor: 'var(--puzzle-background)',
+              borderColor: 'var(--puzzle-border)',
+              boxShadow: 'var(--puzzle-shadow-lg)',
+              animation: 'puzzle-modal-slide-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both',
+            }}
+          >
+            <h3 className="text-xl font-black mb-3 text-red-500 flex items-center gap-2">
+              ⚠️ 새로 시작하시겠습니까?
+            </h3>
+            <p className="text-sm font-medium leading-relaxed mb-6" style={{ color: 'var(--puzzle-muted-foreground)' }}>
+              이미 진행 중인 퍼즐이 있습니다. 처음부터 다시 시작하시면 <strong className="text-red-500 font-bold">기존 진행 데이터는 삭제</strong>됩니다.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmRestart(false)}
+                className="flex-1 py-3 rounded-xl border font-bold text-sm transition-colors hover:bg-zinc-50 active:bg-zinc-100"
+                style={{
+                  backgroundColor: 'transparent',
+                  color: 'var(--puzzle-foreground)',
+                  borderColor: 'var(--puzzle-border)',
+                }}
+              >
+                취소
+              </button>
+              <button
+                onClick={handleConfirmRestart}
+                className="flex-1 py-3 rounded-xl text-white font-black text-sm bg-red-500 hover:bg-red-600 transition-colors"
+                style={{
+                  boxShadow: 'var(--puzzle-shadow-md)',
+                }}
+              >
+                새로 시작
               </button>
             </div>
           </div>
