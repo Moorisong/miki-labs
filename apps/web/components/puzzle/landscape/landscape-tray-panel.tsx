@@ -41,7 +41,7 @@ export default function LandscapeTrayPanel({
   isLarge,
   isPlayMode = true,
 }: LandscapeTrayPanelProps) {
-  const cellSize = isLarge ? 46 : 34;
+  const cellSize = isLarge ? 54 : 40;
 
   const [activeBasket, setActiveBasket] = useState<string>('basket1');
   const [hoveredBasket, setHoveredBasket] = useState<string | null>(null);
@@ -261,7 +261,7 @@ export default function LandscapeTrayPanel({
     >
       {/* 헤더 */}
       <div
-        className="flex flex-col gap-1 px-4 py-3 border-b flex-shrink-0"
+        className="flex items-center justify-between px-4 py-2.5 border-b flex-shrink-0"
         style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}
       >
         <div className="flex items-center gap-1.5">
@@ -275,7 +275,7 @@ export default function LandscapeTrayPanel({
 
       {/* 바구니 탭 */}
       <div
-        className="grid grid-cols-5 gap-1.5 p-3 border-b flex-shrink-0"
+        className="grid grid-cols-5 gap-1 p-2 border-b flex-shrink-0"
         style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}
       >
         {['basket1', 'basket2', 'basket3', 'basket4', 'basket5'].map((key) => {
@@ -293,7 +293,7 @@ export default function LandscapeTrayPanel({
                 if (!isPlayMode) return;
                 setActiveBasket(key);
               }}
-              className="flex flex-col items-center justify-center p-1.5 rounded-lg border transition-all cursor-pointer gap-1"
+              className="flex flex-row items-center justify-center p-1 rounded-lg border transition-all cursor-pointer gap-1.5"
               style={{
                 borderColor: isHovered
                   ? 'rgba(79, 142, 247, 0.5)'
@@ -305,7 +305,7 @@ export default function LandscapeTrayPanel({
                   : isActive
                   ? 'rgba(0, 0, 0, 0.04)'
                   : 'rgba(0, 0, 0, 0.01)',
-                transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+                transform: isHovered ? 'scale(1.03)' : 'scale(1)',
               }}
             >
               <span
@@ -313,7 +313,7 @@ export default function LandscapeTrayPanel({
                 style={{ backgroundColor: meta.color }}
               />
               <span
-                className="text-[11px] font-semibold leading-none font-mono"
+                className="text-xs font-semibold leading-none font-mono"
                 style={{ color: isActive || isHovered ? '#1f2937' : 'rgba(0, 0, 0, 0.4)' }}
               >
                 {count}
@@ -351,7 +351,7 @@ export default function LandscapeTrayPanel({
         ) : (
           <div
             className="grid gap-1.5 justify-items-center"
-            style={{ gridTemplateColumns: isLarge ? 'repeat(auto-fill, minmax(46px, 1fr))' : 'repeat(auto-fill, minmax(34px, 1fr))' }}
+            style={{ gridTemplateColumns: isLarge ? 'repeat(auto-fill, minmax(54px, 1fr))' : 'repeat(auto-fill, minmax(40px, 1fr))' }}
           >
             {displayPieces.map((pieceId) => {
               const isSelected = selectedPieceId === pieceId;
