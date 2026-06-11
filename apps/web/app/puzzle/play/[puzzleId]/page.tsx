@@ -23,6 +23,7 @@ import CompletionModal from '@/components/puzzle/completion-modal';
 import CursorFollower from '@/components/puzzle/cursor-follower';
 import { MyRanking, Puzzle } from '@/types/puzzle';
 import KakaoAdfit, { ADFIT_SIZES, ADFIT_UNITS } from '@/components/ads/kakao-adfit';
+import SyncChoiceModal from '@/components/puzzle/sync-choice-modal';
 // ── 가로모드 전용 ──
 import { useOrientation } from '@/lib/hooks/use-orientation';
 import LandscapePuzzleLayout from '@/components/puzzle/landscape/landscape-puzzle-layout';
@@ -80,6 +81,10 @@ export default function PlayPage({ params }: PlayPageProps) {
   const [manualSaveStatus, setManualSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [myRanking, setMyRanking] = useState<MyRanking | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [syncChoiceData, setSyncChoiceData] = useState<{
+    localState: any;
+    serverState: any;
+  } | null>(null);
 
   // 난이도나 퍼즐이 변경될 때(새로운 게임 시작 또는 복원) 줌 비율을 기본값(1.0)으로 초기화
   useEffect(() => {
@@ -110,6 +115,42 @@ export default function PlayPage({ params }: PlayPageProps) {
         if (isResume) {
           // 이어하기 시 로컬 IndexedDB에서 상태 복원
           savedState = await loadPuzzleState(puzzleId);
+
+          const pendingSync = sessionStorage.getItem(`pending_sync_${puzzleId}`) === 'true';
+
+          if (savedState && token && pendingSync) {
+            try {
+              const serverProgressRes = await fetchMyProgress(puzzleId, token);
+              if (serverProgressRes.success && serverProgressRes.data?.detailState) {
+                // 양쪽에 다 진행 정보가 존재하면 팝업 선택 모달을 띄우기 위해 셋업 중단
+                setSyncChoiceData({
+                  localState: savedState,
+                  serverState: {
+                    ...serverProgressRes.data.detailState,
+                    progress: serverProgressRes.data.progress,
+                  },
+                });
+                setIsPageLoading(false);
+                return;
+              } else {
+                // 서버에 기존 데이터가 없으면 비로그인 시 진행한 현재 데이터를 바로 업로드
+                const correctCount = savedState.board.filter((cell: any, idx: number) => cell === idx).length;
+                const total = savedState.difficulty === 'novice' ? 36 : savedState.difficulty === 'expert' ? 256 : 100;
+                const progress = Math.round((correctCount / total) * 100);
+                await saveProgressApi(puzzleId, progress, token, {
+                  difficulty: savedState.difficulty,
+                  mode: savedState.mode || 'ranked',
+                  timerSeconds: savedState.timerSeconds,
+                  board: savedState.board,
+                  trayPieces: savedState.trayPieces,
+                  startedAt: savedState.startedAt || new Date().toISOString(),
+                });
+                sessionStorage.removeItem(`pending_sync_${puzzleId}`);
+              }
+            } catch (err) {
+              console.error('Failed to query progress for sync selection:', err);
+            }
+          }
 
           if (!savedState && token) {
             // 로컬에 없는데 로그인된 상태면 서버에서 불러와 복구 시도
@@ -430,6 +471,7 @@ export default function PlayPage({ params }: PlayPageProps) {
           completed: isCompleted,
           startedAt: startedAt || new Date().toISOString(),
         }, true);
+        sessionStorage.setItem(`pending_sync_${puzzleId}`, 'true');
       } catch (err) {
         console.error('Failed to save state before login redirect:', err);
       }
@@ -670,15 +712,102 @@ export default function PlayPage({ params }: PlayPageProps) {
     router.push('/puzzle');
   };
 
+  const handleChooseKeepCurrent = async () => {
+    if (!syncChoiceData || !token) return;
+    const { localState } = syncChoiceData;
+    const total = localState.difficulty === 'novice' ? 36 : localState.difficulty === 'expert' ? 256 : 100;
+
+    initializePuzzle(puzzleId, puzzle!.imageUrl, localState.difficulty, localState.mode || 'ranked');
+    resumePuzzle({
+      difficulty: localState.difficulty,
+      mode: localState.mode || 'ranked',
+      timerSeconds: localState.timerSeconds,
+      board: localState.board || Array(total).fill(null),
+      trayPieces: localState.trayPieces || localState.pieces.map((p: any) => p.id),
+      startedAt: new Date(Date.now() - localState.timerSeconds * 1000).toISOString(),
+      completed: localState.completed,
+    });
+
+    const correctCount = localState.board.filter((cell: any, idx: number) => cell === idx).length;
+    const progress = Math.round((correctCount / total) * 100);
+    await saveProgressApi(puzzleId, progress, token, {
+      difficulty: localState.difficulty,
+      mode: localState.mode || 'ranked',
+      timerSeconds: localState.timerSeconds,
+      board: localState.board,
+      trayPieces: localState.trayPieces,
+      startedAt: localState.startedAt || new Date().toISOString(),
+    });
+
+    sessionStorage.removeItem(`pending_sync_${puzzleId}`);
+    setSyncChoiceData(null);
+  };
+
+  const handleChooseLoadServer = async () => {
+    if (!syncChoiceData || !token) return;
+    const { serverState } = syncChoiceData;
+    const total = serverState.difficulty === 'novice' ? 36 : serverState.difficulty === 'expert' ? 256 : 100;
+    const piecesData = serverState.board.map((pieceId: any, idx: number) => ({
+      id: pieceId !== null ? pieceId : idx,
+      correctX: 0,
+      correctY: 0,
+      currentX: 0,
+      currentY: 0,
+      width: 0,
+      height: 0,
+      locked: pieceId === idx,
+    }));
+
+    const newLocalState = {
+      difficulty: serverState.difficulty,
+      mode: serverState.mode || 'ranked',
+      timerSeconds: serverState.timerSeconds,
+      pieces: piecesData,
+      board: serverState.board,
+      trayPieces: serverState.trayPieces,
+      progress: serverState.progress,
+      completed: false,
+      startedAt: serverState.startedAt || new Date().toISOString(),
+    };
+
+    await savePuzzleState(puzzleId, newLocalState, true);
+
+    initializePuzzle(puzzleId, puzzle!.imageUrl, serverState.difficulty, serverState.mode || 'ranked');
+    resumePuzzle({
+      difficulty: serverState.difficulty,
+      mode: serverState.mode || 'ranked',
+      timerSeconds: serverState.timerSeconds,
+      board: serverState.board || Array(total).fill(null),
+      trayPieces: serverState.trayPieces || piecesData.map((p: any) => p.id),
+      startedAt: new Date(Date.now() - serverState.timerSeconds * 1000).toISOString(),
+      completed: false,
+    });
+
+    sessionStorage.removeItem(`pending_sync_${puzzleId}`);
+    setSyncChoiceData(null);
+  };
+
   // ── Orientation 감지 ──
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { isLandscape, isLargeScreen } = useOrientation();
 
-  if (isPageLoading || !puzzle) {
+  if (isPageLoading || !puzzle || activePuzzleId === null) {
     return (
       <div className="flex items-center justify-center min-h-screen flex-col gap-3 font-semibold select-none">
         <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--puzzle-primary) var(--puzzle-primary) var(--puzzle-primary) transparent' }} />
         <span style={{ color: 'var(--puzzle-muted-foreground)' }}>캔버스 조각판을 세팅하는 중...</span>
+
+        {/* 동기화 선택 모달 */}
+        {syncChoiceData && (
+          <SyncChoiceModal
+            localProgress={syncChoiceData.localState.progress}
+            localTimeFormatted={formatTime(syncChoiceData.localState.timerSeconds)}
+            serverProgress={syncChoiceData.serverState.progress}
+            serverTimeFormatted={formatTime(syncChoiceData.serverState.timerSeconds)}
+            onChooseKeepCurrent={handleChooseKeepCurrent}
+            onChooseLoadServer={handleChooseLoadServer}
+          />
+        )}
       </div>
     );
   }
@@ -864,6 +993,18 @@ export default function PlayPage({ params }: PlayPageProps) {
         image={puzzle.imageUrl}
         gridSize={gridSize}
       />
+
+      {/* 동기화 선택 모달 */}
+      {syncChoiceData && (
+        <SyncChoiceModal
+          localProgress={syncChoiceData.localState.progress}
+          localTimeFormatted={formatTime(syncChoiceData.localState.timerSeconds)}
+          serverProgress={syncChoiceData.serverState.progress}
+          serverTimeFormatted={formatTime(syncChoiceData.serverState.timerSeconds)}
+          onChooseKeepCurrent={handleChooseKeepCurrent}
+          onChooseLoadServer={handleChooseLoadServer}
+        />
+      )}
     </div>
   );
 }
