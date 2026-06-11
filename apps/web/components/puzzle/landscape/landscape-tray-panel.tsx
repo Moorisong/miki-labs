@@ -407,14 +407,18 @@ export default function LandscapeTrayPanel({
               e.stopPropagation();
               setIsOrganizeMode(!isOrganizeMode);
             }}
-            className="px-1.5 py-0.5 rounded text-[10px] font-bold transition-all border select-none"
-            style={{
-              backgroundColor: isOrganizeMode ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-              borderColor: isOrganizeMode ? '#3b82f6' : 'rgba(0, 0, 0, 0.1)',
-              color: isOrganizeMode ? '#2563eb' : '#6b7280',
-            }}
+            className={`flex items-center justify-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold transition-all border select-none cursor-pointer active:scale-95 shadow-sm ${
+              isOrganizeMode
+                ? 'bg-blue-600 border-blue-700 text-white shadow-md shadow-blue-600/10'
+                : 'bg-white border-gray-200 hover:bg-gray-50 text-gray-700 hover:text-gray-900'
+            }`}
           >
-            분류 {isOrganizeMode ? 'ON' : 'OFF'}
+            <span
+              className={`w-1.5 h-1.5 rounded-full transition-all ${
+                isOrganizeMode ? 'bg-white animate-pulse' : 'bg-gray-400'
+              }`}
+            />
+            <span>분류 {isOrganizeMode ? 'ON' : 'OFF'}</span>
           </button>
           <span className="text-[10px] font-medium text-gray-500">
             대기: <span className="text-gray-800 font-mono font-semibold">{trayPieces.length}</span>
