@@ -41,6 +41,18 @@ export default function PlayPage({ params }: PlayPageProps) {
   const token = session?.user?.kakaoId;
 
   const submittingRef = useRef(false);
+  const lastServerSaveTimeRef = useRef<number>(0);
+  const serverSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const latestSaveDataRef = useRef({
+    progress: 0,
+    difficulty: 'novice' as 'novice' | 'beginner' | 'expert',
+    mode: 'ranked' as 'solo' | 'ranked',
+    timerSeconds: 0,
+    board: [] as (number | null)[],
+    trayPieces: [] as number[],
+    startedAt: '',
+    isCompleted: false,
+  });
 
   // Zustand Store
   const {
@@ -144,6 +156,7 @@ export default function PlayPage({ params }: PlayPageProps) {
                   board: savedState.board,
                   trayPieces: savedState.trayPieces,
                   startedAt: savedState.startedAt || new Date().toISOString(),
+                  updatedAt: savedState.updatedAt || new Date().toISOString(),
                 });
                 sessionStorage.removeItem(`pending_sync_${puzzleId}`);
               }
@@ -160,10 +173,22 @@ export default function PlayPage({ params }: PlayPageProps) {
                 const s = serverProgressRes.data.detailState;
                 const serverProgress = serverProgressRes.data.progress;
 
-                // 로컬 데이터가 없거나, 진행 상황(진행도 또는 시간)이 다르면 서버 상태로 로컬 상태 덮어씌움
+                const serverLastPlayed = s?.updatedAt
+                  ? new Date(s.updatedAt).getTime()
+                  : 0;
+                const localUpdatedAt = savedState?.updatedAt
+                  ? new Date(savedState.updatedAt).getTime()
+                  : 0;
+
+                // 1. 로컬 데이터가 없거나
+                // 2. 서버 데이터(detailState)의 갱신 시간(updatedAt)이 로컬 데이터(updatedAt)보다 더 최신인 경우
+                // 3. 갱신 시간 정보가 없는 기존 데이터는 기존처럼 진행도나 시간이 다를 때만 덮어씀
                 const shouldOverwrite = !savedState ||
-                  savedState.progress !== serverProgress ||
-                  savedState.timerSeconds !== s.timerSeconds;
+                  (serverLastPlayed > 0 && serverLastPlayed > localUpdatedAt) ||
+                  (!s?.updatedAt && !serverProgressRes.data.lastPlayedAt && (
+                    savedState.progress !== serverProgress ||
+                    savedState.timerSeconds !== s.timerSeconds
+                  ));
 
                 if (shouldOverwrite) {
                   savedState = {
@@ -356,11 +381,77 @@ export default function PlayPage({ params }: PlayPageProps) {
     return () => clearInterval(interval);
   }, [isTimerRunning, tickTimer]);
 
-  // 3. 상태 변경 시마다 로컬 IndexedDB 및 서버 백업 자동 저장 (2초 디바운스는 IndexedDB 내부에서 처리)
+  // 3-1. 최신 데이터 Ref 업데이트
+  useEffect(() => {
+    if (isPageLoading || board.length === 0) return;
+    const correctCount = board.filter((cell, idx) => cell === idx).length;
+    const progress = Math.round((correctCount / totalPieces) * 100);
+    latestSaveDataRef.current = {
+      progress,
+      difficulty,
+      mode,
+      timerSeconds,
+      board,
+      trayPieces,
+      startedAt: startedAt || new Date().toISOString(),
+      isCompleted,
+    };
+  }, [board, timerSeconds, totalPieces, difficulty, mode, isCompleted, startedAt, isPageLoading]);
+
+  // 3-2. 언마운트(이탈) 시 즉시 저장 처리
+  useEffect(() => {
+    return () => {
+      // 타이머 클리어
+      if (serverSaveTimeoutRef.current) {
+        clearTimeout(serverSaveTimeoutRef.current);
+      }
+      
+      const data = latestSaveDataRef.current;
+      const pid = puzzleId;
+      if (pid && data.board.length > 0 && !data.isCompleted) {
+        // IndexedDB 로컬 수동 저장 (force = true로 즉시 플러시)
+        const piecesData = data.board.map((pieceId, idx) => ({
+          id: pieceId !== null ? pieceId : idx,
+          correctX: 0,
+          correctY: 0,
+          currentX: 0,
+          currentY: 0,
+          width: 0,
+          height: 0,
+          locked: pieceId === idx,
+        }));
+        savePuzzleState(pid, {
+          difficulty: data.difficulty,
+          mode: data.mode,
+          timerSeconds: data.timerSeconds,
+          pieces: piecesData as any,
+          board: data.board,
+          trayPieces: data.trayPieces,
+          progress: data.progress,
+          completed: data.isCompleted,
+          startedAt: data.startedAt,
+        }, true);
+
+        // 서버 진행률 즉시 저장
+        if (token) {
+          saveProgressApi(pid, data.progress, token, {
+            difficulty: data.difficulty,
+            mode: data.mode,
+            timerSeconds: data.timerSeconds,
+            board: data.board,
+            trayPieces: data.trayPieces,
+            startedAt: data.startedAt,
+            updatedAt: new Date().toISOString(),
+          }).catch(console.error);
+        }
+      }
+    };
+  }, [puzzleId, token]);
+
+  // 3-3. 상태 변경 시마다 로컬 IndexedDB 및 서버 백업 자동 저장
   useEffect(() => {
     if (isPageLoading || !puzzleId || board.length === 0) return;
 
-    // 올바르게 맞춘 조각(제자리) 개수 계산
     const correctCount = board.filter((cell, idx) => cell === idx).length;
     const progress = Math.round((correctCount / totalPieces) * 100);
 
@@ -390,17 +481,47 @@ export default function PlayPage({ params }: PlayPageProps) {
     // IndexedDB 로컬 자동 저장
     savePuzzleState(puzzleId, saveStateData);
 
-    // 로그인된 상태 시 서버 진행률 자동 업로드
+    // 로그인된 상태 시 서버 진행률 자동 업로드 (스로틀 적용 및 detailState 포함)
     if (token) {
-      saveProgressApi(puzzleId, progress, token).catch(console.error);
-    }
+      const saveToServer = async () => {
+        if (!token || !puzzleId) return;
+        const data = latestSaveDataRef.current;
+        try {
+          await saveProgressApi(puzzleId, data.progress, token, {
+            difficulty: data.difficulty,
+            mode: data.mode,
+            timerSeconds: data.timerSeconds,
+            board: data.board,
+            trayPieces: data.trayPieces,
+            startedAt: data.startedAt,
+            updatedAt: new Date().toISOString(),
+          });
+        } catch (err) {
+          console.error('Auto-save to server failed:', err);
+        }
+      };
 
-    // Cleanup: 언마운트 시 최종 진행 상황을 디바운스 없이 로컬에 즉시 저장 (마지막 타이머/조각 배치 데이터 유실 및 레이스 컨디션 방지)
-    return () => {
-      if (puzzleId && board.length > 0 && !isCompleted) {
-        savePuzzleState(puzzleId, saveStateData, true);
+      const THROTTLE_INTERVAL = 10000; // 10초 간격으로 서버 업로드 스로틀링
+      const now = Date.now();
+      const timeSinceLastSave = now - lastServerSaveTimeRef.current;
+
+      if (timeSinceLastSave >= THROTTLE_INTERVAL) {
+        if (serverSaveTimeoutRef.current) {
+          clearTimeout(serverSaveTimeoutRef.current);
+          serverSaveTimeoutRef.current = null;
+        }
+        lastServerSaveTimeRef.current = now;
+        saveToServer();
+      } else {
+        if (!serverSaveTimeoutRef.current) {
+          serverSaveTimeoutRef.current = setTimeout(() => {
+            serverSaveTimeoutRef.current = null;
+            lastServerSaveTimeRef.current = Date.now();
+            saveToServer();
+          }, THROTTLE_INTERVAL - timeSinceLastSave);
+        }
       }
-    };
+    }
   }, [board, timerSeconds, puzzleId, totalPieces, difficulty, mode, isCompleted, startedAt, isPageLoading, token]);
 
   // 4. 모드 판정
@@ -533,6 +654,7 @@ export default function PlayPage({ params }: PlayPageProps) {
           board,
           trayPieces,
           startedAt: startedAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         });
         
         // DB에서 회원 데이터가 강제 삭제되는 등 세션이 만료/유효하지 않은 상태인 경우 (401 에러)
@@ -746,6 +868,7 @@ export default function PlayPage({ params }: PlayPageProps) {
       board: localState.board,
       trayPieces: localState.trayPieces,
       startedAt: localState.startedAt || new Date().toISOString(),
+      updatedAt: localState.updatedAt || new Date().toISOString(),
     });
 
     sessionStorage.removeItem(`pending_sync_${puzzleId}`);
