@@ -11,7 +11,7 @@ export default function PuzzleLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isPlayPage = pathname.includes('/play/');
+  const isPlayPage = pathname?.includes('/play/') ?? false;
 
   if (isPlayPage) {
     return (
