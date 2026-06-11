@@ -446,7 +446,9 @@ export default function LandscapeTrayPanel({
                   setActiveBasket(key);
                 }
               }}
-              className="flex flex-row items-center justify-center p-1 rounded-lg border transition-all cursor-pointer gap-1.5"
+              className={`flex flex-row items-center justify-center rounded-lg border transition-all cursor-pointer gap-1.5 ${
+                isLarge ? 'py-2.5 px-1.5' : 'p-1'
+              }`}
               style={{
                 borderColor: isHovered
                   ? 'rgba(79, 142, 247, 0.5)'
@@ -462,11 +464,11 @@ export default function LandscapeTrayPanel({
               }}
             >
               <span
-                className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                className={`rounded-full flex-shrink-0 ${isLarge ? 'w-2 h-2' : 'w-1.5 h-1.5'}`}
                 style={{ backgroundColor: meta.color }}
               />
               <span
-                className="text-xs font-semibold leading-none font-mono"
+                className={`${isLarge ? 'text-sm' : 'text-xs'} font-semibold leading-none font-mono`}
                 style={{ color: isActive || isHovered ? '#1f2937' : 'rgba(0, 0, 0, 0.4)' }}
               >
                 {count}
