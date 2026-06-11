@@ -145,7 +145,7 @@ export async function saveProgress(
 export async function fetchMyProgress(
   puzzleId: string,
   token: string
-): Promise<ApiResponse<{ progress: number; detailState?: any } | null>> {
+): Promise<ApiResponse<{ progress: number; detailState?: any; lastPlayedAt?: string } | null>> {
   try {
     const res = await fetch(`${API_BASE_URL}/api${API_PUZZLE.PROGRESS}?puzzleId=${puzzleId}`, {
       headers: getHeaders(token),
