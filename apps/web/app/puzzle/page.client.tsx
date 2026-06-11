@@ -83,36 +83,45 @@ export default function PuzzlePageClient() {
       try {
         // 1. 서버의 진행 상황 조회 및 로컬 IndexedDB 싱크 맞춤
         const serverProgressRes = await fetchMyProgress(puzzleId, userToken);
-        if (serverProgressRes.success && serverProgressRes.data) {
-          const serverProgress = serverProgressRes.data.progress;
-          const diff = serverProgressRes.data.detailState?.difficulty || 'beginner';
+        if (serverProgressRes.success) {
+          const serverProgress = serverProgressRes.data?.progress || 0;
+          const diff = serverProgressRes.data?.detailState?.difficulty || 'beginner';
           
           // 로컬 진행상황 불러오기
           const localState = await loadPuzzleState(puzzleId);
           const localProgress = localState ? localState.progress : 0;
           
-          // 서버 진행도가 로컬 진행도보다 더 크거나 같거나, 로컬 저장 기록이 없다면 서버 기준으로 동기화
-          if (serverProgress > 0 && serverProgress < 100 && (serverProgress >= localProgress || !localState)) {
-            setHasSavedGame(true);
-            setSavedProgress(serverProgress);
-            setSavedDifficulty(diff);
-            
-            // 로컬 IndexedDB도 서버에서 받아온 상세 상태로 덮어써서 싱크를 맞춥니다.
-            if (serverProgressRes.data.detailState) {
-              const s = serverProgressRes.data.detailState;
-              const { savePuzzleState } = await import('@/lib/puzzle-db');
-              await savePuzzleState(puzzleId, {
-                difficulty: s.difficulty,
-                mode: s.mode || 'ranked',
-                timerSeconds: s.timerSeconds || 0,
-                pieces: s.pieces || [],
-                board: s.board,
-                trayPieces: s.trayPieces,
-                progress: serverProgress,
-                completed: false,
-                startedAt: s.startedAt || new Date().toISOString(),
-              }, true);
+          // 서버 진행도가 유효하고 로컬과 다르거나 로컬 저장 기록이 없다면 서버 기준으로 동기화
+          if (serverProgress > 0 && serverProgress < 100) {
+            if (serverProgress !== localProgress || !localState) {
+              setHasSavedGame(true);
+              setSavedProgress(serverProgress);
+              setSavedDifficulty(diff);
+              
+              // 로컬 IndexedDB도 서버에서 받아온 상세 상태로 덮어써서 싱크를 맞춥니다.
+              if (serverProgressRes.data?.detailState) {
+                const s = serverProgressRes.data.detailState;
+                const { savePuzzleState } = await import('@/lib/puzzle-db');
+                await savePuzzleState(puzzleId, {
+                  difficulty: s.difficulty,
+                  mode: s.mode || 'ranked',
+                  timerSeconds: s.timerSeconds || 0,
+                  pieces: s.pieces || [],
+                  board: s.board,
+                  trayPieces: s.trayPieces,
+                  progress: serverProgress,
+                  completed: false,
+                  startedAt: s.startedAt || new Date().toISOString(),
+                }, true);
+              }
             }
+          } else if (serverProgress === 0 && localState) {
+            // 서버에 진행 기록이 없는데 로컬에는 진행 기록이 남아있다면 다른 기기에서 초기화된 것이므로 로컬 상태 정리
+            const { deletePuzzleState } = await import('@/lib/puzzle-db');
+            await deletePuzzleState(puzzleId);
+            setHasSavedGame(false);
+            setSavedProgress(0);
+            setSavedDifficulty(null);
           }
         }
 
@@ -164,7 +173,7 @@ export default function PuzzlePageClient() {
     }
 
     syncUserStatus();
-  }, [currentPuzzle, token, hasSavedGame]);
+  }, [currentPuzzle, token]);
 
   useEffect(() => {
     if (currentPuzzle) {
