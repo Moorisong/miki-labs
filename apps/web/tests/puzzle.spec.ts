@@ -297,6 +297,78 @@ test.describe('하루퍼즐 (Haroo Puzzle) E2E 테스트', () => {
     // 바구니 숫자가 1 증가했는지 검증
     await expect(portraitBasket2Count).toHaveText(`(${beforeCountPortrait + 1}개)`);
 
+    // [추가 테스트] 세로 모드 터치 드래그 앤 드롭 검증 (180ms 롱프레스 터치 드래그)
+    const touchBeforeCountText = await portraitBasket2Count.innerText();
+    const touchBeforeCount = parseInt(touchBeforeCountText.replace(/[^0-9]/g, ''), 10) || 0;
+    
+    await page.evaluate(async () => {
+      const source = document.querySelector('.z-\\[9990\\] .overflow-y-auto .cursor-pointer');
+      const target = document.querySelector('.z-\\[9990\\] [data-basket-id="basket2"]');
+      if (!source || !target) return;
+
+      const rectSource = source.getBoundingClientRect();
+      const rectTarget = target.getBoundingClientRect();
+
+      const startX = rectSource.left + rectSource.width / 2;
+      const startY = rectSource.top + rectSource.height / 2;
+      const endX = rectTarget.left + rectTarget.width / 2;
+      const endY = rectTarget.top + rectTarget.height / 2;
+
+      // touchstart
+      const touch1 = new Touch({
+        identifier: Date.now(),
+        target: source,
+        clientX: startX,
+        clientY: startY,
+        screenX: startX,
+        screenY: startY,
+        pageX: startX,
+        pageY: startY,
+      });
+
+      source.dispatchEvent(new TouchEvent('touchstart', {
+        cancelable: true,
+        bubbles: true,
+        touches: [touch1],
+        targetTouches: [touch1],
+        changedTouches: [touch1],
+      }));
+
+      // 180ms 롱프레스 대기
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // touchmove
+      const touch2 = new Touch({
+        identifier: touch1.identifier,
+        target: source,
+        clientX: endX,
+        clientY: endY,
+        screenX: endX,
+        screenY: endY,
+        pageX: endX,
+        pageY: endY,
+      });
+
+      window.dispatchEvent(new TouchEvent('touchmove', {
+        cancelable: true,
+        bubbles: true,
+        touches: [touch2],
+        targetTouches: [touch2],
+        changedTouches: [touch2],
+      }));
+
+      // touchend
+      window.dispatchEvent(new TouchEvent('touchend', {
+        cancelable: true,
+        bubbles: true,
+        touches: [],
+        targetTouches: [],
+        changedTouches: [touch2],
+      }));
+    });
+
+    await expect(portraitBasket2Count).toHaveText(`(${touchBeforeCount + 1}개)`);
+
 
 
     // 셔플(다시 섞기) 컨펌 다이얼로그 모킹
@@ -409,6 +481,73 @@ test.describe('하루퍼즐 (Haroo Puzzle) E2E 테스트', () => {
 
     // 바구니 숫자가 1 증가했는지 검증
     await expect(basket2CountSpan).toHaveText((beforeCount + 1).toString());
+
+    // [추가 테스트] 가로 모드 터치 드래그 앤 드롭 검증 (180ms 롱프레스 터치 드래그)
+    const landscapeTouchBeforeCount = parseInt(await basket2CountSpan.innerText(), 10) || 0;
+    
+    await page.evaluate(async () => {
+      const source = document.querySelector('#landscape-tray-panel [data-tray-piece="true"]');
+      const target = document.querySelector('#landscape-tray-panel [data-basket-id="basket2"]');
+      if (!source || !target) return;
+
+      const rectSource = source.getBoundingClientRect();
+      const rectTarget = target.getBoundingClientRect();
+
+      const startX = rectSource.left + rectSource.width / 2;
+      const startY = rectSource.top + rectSource.height / 2;
+      const endX = rectTarget.left + rectTarget.width / 2;
+      const endY = rectTarget.top + rectTarget.height / 2;
+
+      const touch1 = new Touch({
+        identifier: Date.now(),
+        target: source,
+        clientX: startX,
+        clientY: startY,
+        screenX: startX,
+        screenY: startY,
+        pageX: startX,
+        pageY: startY,
+      });
+
+      source.dispatchEvent(new TouchEvent('touchstart', {
+        cancelable: true,
+        bubbles: true,
+        touches: [touch1],
+        targetTouches: [touch1],
+        changedTouches: [touch1],
+      }));
+
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      const touch2 = new Touch({
+        identifier: touch1.identifier,
+        target: source,
+        clientX: endX,
+        clientY: endY,
+        screenX: endX,
+        screenY: endY,
+        pageX: endX,
+        pageY: endY,
+      });
+
+      window.dispatchEvent(new TouchEvent('touchmove', {
+        cancelable: true,
+        bubbles: true,
+        touches: [touch2],
+        targetTouches: [touch2],
+        changedTouches: [touch2],
+      }));
+
+      window.dispatchEvent(new TouchEvent('touchend', {
+        cancelable: true,
+        bubbles: true,
+        touches: [],
+        targetTouches: [],
+        changedTouches: [touch2],
+      }));
+    });
+
+    await expect(basket2CountSpan).toHaveText((landscapeTouchBeforeCount + 1).toString());
   });
 
 

@@ -258,7 +258,7 @@ export default function LandscapePuzzleLayout({
 
   return (
     <div
-      className="flex flex-col min-h-screen min-h-[100dvh] overflow-y-auto w-full select-none"
+      className="flex flex-col min-h-screen min-h-[100dvh] overflow-hidden w-full select-none"
       style={{ backgroundColor: '#f3f4f6' }}
       onClick={() => {
         if (selectedTrayPiece !== null) {
