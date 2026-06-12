@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Folder, HelpCircle } from 'lucide-react';
+import { Folder, HelpCircle, Lock } from 'lucide-react';
 import PieceCell from '../piece-cell';
 
 interface LandscapeTrayPanelProps {
@@ -376,7 +376,7 @@ export default function LandscapeTrayPanel({
   return (
     <div
       id="landscape-tray-panel"
-      className="flex flex-col h-full min-h-0 border-l"
+      className="relative flex flex-col h-full min-h-0 border-l"
       style={{
         backgroundColor: '#ffffff',
         borderColor: 'rgba(0, 0, 0, 0.08)',
@@ -385,6 +385,7 @@ export default function LandscapeTrayPanel({
         width: isLarge ? '25%' : '28%', // 가로 가용 영역 점유 비율 상향
         flexShrink: 0,
         overscrollBehavior: 'none',
+        zIndex: 10,
       }}
       onClick={(e) => {
         e.stopPropagation();
@@ -402,22 +403,29 @@ export default function LandscapeTrayPanel({
           <span className="text-sm font-bold text-gray-800 truncate">보관함</span>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
-          {!isLarge && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsOrganizeMode(!isOrganizeMode);
-              }}
-              className="px-1.5 py-0.5 rounded text-[10px] font-bold transition-all border select-none"
-              style={{
-                backgroundColor: isOrganizeMode ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                borderColor: isOrganizeMode ? '#3b82f6' : 'rgba(0, 0, 0, 0.1)',
-                color: isOrganizeMode ? '#2563eb' : '#6b7280',
-              }}
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsOrganizeMode(!isOrganizeMode);
+            }}
+            className="flex items-center gap-1.5 cursor-pointer select-none group"
+            title="보관함 분류 모드"
+          >
+            <span className="text-[10px] font-bold text-gray-500 group-hover:text-gray-700 transition-colors">
+              분류
+            </span>
+            <div
+              className={`w-7 h-4 flex items-center rounded-full p-0.5 transition-colors duration-200 ${
+                isOrganizeMode ? 'bg-blue-500' : 'bg-gray-200'
+              }`}
             >
-              분류 {isOrganizeMode ? 'ON' : 'OFF'}
-            </button>
-          )}
+              <div
+                className={`bg-white w-3 h-3 rounded-full shadow transform transition-transform duration-200 ${
+                  isOrganizeMode ? 'translate-x-3' : 'translate-x-0'
+                }`}
+              />
+            </div>
+          </div>
           <span className="text-[10px] font-medium text-gray-500">
             대기: <span className="text-gray-800 font-mono font-semibold">{trayPieces.length}</span>
           </span>
@@ -448,28 +456,34 @@ export default function LandscapeTrayPanel({
                   setActiveBasket(key);
                 }
               }}
-              className="flex flex-row items-center justify-center p-1 rounded-lg border transition-all cursor-pointer gap-1.5"
+              className={`flex flex-row items-center justify-center rounded-lg border transition-all cursor-pointer gap-1.5 ${
+                isLarge ? 'py-2.5 px-1.5' : 'p-1'
+              } ${isOrganizeMode && selectedPieceId !== null ? 'animate-pulse' : ''}`}
               style={{
                 borderColor: isHovered
                   ? 'rgba(79, 142, 247, 0.5)'
                   : isActive
-                  ? 'rgba(0, 0, 0, 0.15)'
+                  ? 'rgba(0, 0, 0, 0.25)'
+                  : isOrganizeMode && selectedPieceId !== null
+                  ? 'rgba(59, 130, 246, 0.6)'
                   : 'rgba(0, 0, 0, 0.05)',
                 backgroundColor: isHovered
                   ? 'rgba(79, 142, 247, 0.08)'
                   : isActive
-                  ? 'rgba(0, 0, 0, 0.04)'
+                  ? 'rgba(0, 0, 0, 0.06)'
+                  : isOrganizeMode && selectedPieceId !== null
+                  ? 'rgba(59, 130, 246, 0.05)'
                   : 'rgba(0, 0, 0, 0.01)',
                 transform: isHovered ? 'scale(1.03)' : 'scale(1)',
               }}
             >
               <span
-                className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                className={`rounded-full flex-shrink-0 ${isLarge ? 'w-2 h-2' : 'w-1.5 h-1.5'}`}
                 style={{ backgroundColor: meta.color }}
               />
               <span
-                className="text-xs font-semibold leading-none font-mono"
-                style={{ color: isActive || isHovered ? '#1f2937' : 'rgba(0, 0, 0, 0.4)' }}
+                className={`${isLarge ? 'text-sm' : 'text-xs'} font-semibold leading-none font-mono`}
+                style={{ color: isActive || isHovered || (isOrganizeMode && selectedPieceId !== null) ? '#1f2937' : 'rgba(0, 0, 0, 0.4)' }}
               >
                 {count}
               </span>
@@ -478,14 +492,30 @@ export default function LandscapeTrayPanel({
         })}
       </div>
 
-      {/* 도움말 */}
-      {isLarge && (
-        <div className="px-4 py-1.5 border-b flex-shrink-0" style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
-          <p className="text-[10px] font-medium text-gray-500 flex items-center gap-1">
-            <HelpCircle size={12} className="text-gray-400 flex-shrink-0" />
-            <span>조각 목록 스크롤 가능</span>
+      {/* 도움말 / 분류 가이드 */}
+      {isOrganizeMode ? (
+        <div 
+          className="px-3 py-1.5 border-b flex-shrink-0 bg-blue-50/50"
+          style={{ borderColor: 'rgba(59, 130, 246, 0.15)' }}
+        >
+          <p className="text-[10px] font-bold text-blue-600 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping shrink-0" />
+            <span>
+              {selectedPieceId === null 
+                ? "① 아래 조각을 눌러 선택해주세요." 
+                : "② 위 바구니 탭을 눌러 조각을 옮기세요."}
+            </span>
           </p>
         </div>
+      ) : (
+        isLarge && (
+          <div className="px-4 py-1.5 border-b flex-shrink-0" style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}>
+            <p className="text-[10px] font-medium text-gray-500 flex items-center gap-1">
+              <HelpCircle size={12} className="text-gray-400 flex-shrink-0" />
+              <span>조각 목록 스크롤 가능</span>
+            </p>
+          </div>
+        )
       )}
 
       {/* 조각 목록 - 세로 스크롤 영역 (overflow-y-auto 필수) */}
@@ -594,6 +624,23 @@ export default function LandscapeTrayPanel({
           />
         </div>,
         document.body
+      )}
+
+      {/* 비활성화 오버레이 (이동 모드 시) */}
+      {!isPlayMode && (
+        <div className="absolute inset-0 bg-slate-50/70 backdrop-blur-[2px] z-30 flex flex-col items-center justify-center p-4 text-center transition-all duration-300 animate-in fade-in">
+          <div className="bg-white/95 p-5 rounded-2xl shadow-xl border border-slate-200/60 flex flex-col items-center gap-3 max-w-[85%]">
+            <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center">
+              <Lock size={18} className="text-slate-600" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <p className="text-xs font-bold text-slate-800">보관함 비활성화</p>
+              <p className="text-[10px] text-slate-500 leading-relaxed">
+                이동 모드 해제 후 사용 가능
+              </p>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

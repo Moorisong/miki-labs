@@ -298,11 +298,13 @@ export default function LandscapePuzzleLayout({
           <span>뒤로가기</span>
         </Link>
 
-        {/* 패널 이동 안내 배지 */}
+        {/* 패널 이동 및 플레이 안내 배지 */}
         <span
           className="ml-3 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-gray-500/10 text-gray-600"
         >
-          드래그해서 원하는 위치로 이동시켜보세요.
+          {interactionMode === 'play' 
+            ? "조각 클릭 후 퍼즐판의 빈 칸을 터치" 
+            : "퍼즐판이나 가이드를 드래그로 이동 / 우하단 핸들로 크기를 조절"}
         </span>
       </div>
 
@@ -312,7 +314,7 @@ export default function LandscapePuzzleLayout({
         <div
           ref={canvasAreaRef}
           className="relative flex-1 min-w-0 select-none"
-          style={{ touchAction: 'pan-y' }} // 회색판(퍼즐판 바깥영역)에서 세로 스크롤 가능하게 허용
+          style={{ touchAction: 'pan-y', zIndex: 30 }} // 회색판(퍼즐판 바깥영역)에서 세로 스크롤 가능하게 허용
           onClick={(e) => {
             if (selectedTrayPiece !== null) {
               selectTrayPiece(null);

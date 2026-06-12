@@ -1,12 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { useRankingStore } from '@/lib/stores/ranking-store';
-import { fetchCurrentPuzzle, fetchArchivePuzzles, fetchServiceStats, fetchMyProgress, fetchMyProfile } from '@/lib/puzzle-api';
-import { loadPuzzleState } from '@/lib/puzzle-db';
-import { Puzzle } from '@/types/puzzle';
 import HeroSection from '@/components/puzzle/hero-section';
 import RankingPreview from '@/components/puzzle/ranking-preview';
 import ShareCard from '@/components/puzzle/share-card';
@@ -16,165 +11,32 @@ import { ArrowRight } from 'lucide-react';
 import styles from './puzzle-layout.module.css';
 import KakaoAdfit, { ADFIT_SIZES, ADFIT_UNITS } from '@/components/ads/kakao-adfit';
 import OrientationSuggestion from '@/components/puzzle/orientation-suggestion';
+import { usePuzzleDashboard } from './hooks/use-puzzle-dashboard';
 
 export default function PuzzlePageClient() {
   const router = useRouter();
   const { data: session } = useSession();
   const token = session?.user?.kakaoId;
-  const { rankings, isLoading: isRankingLoading, fetchRankings } = useRankingStore();
-  
-  const [currentPuzzle, setCurrentPuzzle] = useState<Puzzle | null>(null);
-  const [totalPuzzles, setTotalPuzzles] = useState(0);
-  const [hasSavedGame, setHasSavedGame] = useState(false);
-  const [savedProgress, setSavedProgress] = useState(0);
-  const [savedDifficulty, setSavedDifficulty] = useState<'novice' | 'beginner' | 'expert' | null>(null);
-  const [hasCompleted, setHasCompleted] = useState(false);
-  const [completedDifficulty, setCompletedDifficulty] = useState<'novice' | 'beginner' | 'expert' | null>(null);
-  const [completedDifficulties, setCompletedDifficulties] = useState<('novice' | 'beginner' | 'expert')[]>([]);
-  const [previewDiff, setPreviewDiff] = useState<'novice' | 'beginner' | 'expert'>('novice');
-  const [isPuzzleLoading, setIsPuzzleLoading] = useState(true);
-  const [serviceStats, setServiceStats] = useState<{ totalPlayCount: number; completionRate: string } | null>(null);
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        // 1. 현재 주간 퍼즐 조회
-        const res = await fetchCurrentPuzzle();
-        if (res.success && res.data) {
-          setCurrentPuzzle(res.data);
-
-          // 2. 로컬 저장된 상태 확인 (이어하기 여부)
-          const savedState = await loadPuzzleState(res.data._id);
-          if (savedState && !savedState.completed) {
-            setHasSavedGame(true);
-            setSavedProgress(savedState.progress);
-            setSavedDifficulty(savedState.difficulty);
-          }
-        }
-
-        // 3. 아카이브 개수를 위한 전체 목록 조회
-        const archiveRes = await fetchArchivePuzzles();
-        if (archiveRes.success && archiveRes.data) {
-          setTotalPuzzles(archiveRes.data.length);
-        }
-
-        // 4. 서비스 전체 통계 조회
-        const statsRes = await fetchServiceStats();
-        if (statsRes.success && statsRes.data) {
-          setServiceStats(statsRes.data);
-        }
-      } catch (e) {
-        console.error('Failed to load puzzle data:', e);
-      } finally {
-        setIsPuzzleLoading(false);
-      }
-    }
-
-    loadData();
-  }, []);
-
-  // 서버로부터 진행 상황 동기화 및 완료 기록 조회
-  useEffect(() => {
-    if (!currentPuzzle || !token) return;
-    const puzzleId = currentPuzzle._id;
-    const userToken = token;
-
-    async function syncUserStatus() {
-      try {
-        // 1. 서버의 진행 상황 조회 및 로컬 IndexedDB 싱크 맞춤
-        const serverProgressRes = await fetchMyProgress(puzzleId, userToken);
-        if (serverProgressRes.success && serverProgressRes.data) {
-          const serverProgress = serverProgressRes.data.progress;
-          const diff = serverProgressRes.data.detailState?.difficulty || 'beginner';
-          
-          // 로컬 진행상황 불러오기
-          const localState = await loadPuzzleState(puzzleId);
-          const localProgress = localState ? localState.progress : 0;
-          
-          // 서버 진행도가 로컬 진행도보다 더 크거나 같거나, 로컬 저장 기록이 없다면 서버 기준으로 동기화
-          if (serverProgress > 0 && serverProgress < 100 && (serverProgress >= localProgress || !localState)) {
-            setHasSavedGame(true);
-            setSavedProgress(serverProgress);
-            setSavedDifficulty(diff);
-            
-            // 로컬 IndexedDB도 서버에서 받아온 상세 상태로 덮어써서 싱크를 맞춥니다.
-            if (serverProgressRes.data.detailState) {
-              const s = serverProgressRes.data.detailState;
-              const { savePuzzleState } = await import('@/lib/puzzle-db');
-              await savePuzzleState(puzzleId, {
-                difficulty: s.difficulty,
-                mode: s.mode || 'ranked',
-                timerSeconds: s.timerSeconds || 0,
-                pieces: s.pieces || [],
-                board: s.board,
-                trayPieces: s.trayPieces,
-                progress: serverProgress,
-                completed: false,
-                startedAt: s.startedAt || new Date().toISOString(),
-              }, true);
-            }
-          }
-        }
-
-        // 2. 완주한 이력이 있는지 조회
-        const profileRes = await fetchMyProfile(userToken);
-        if (profileRes.success && profileRes.data) {
-          const completedHistories = profileRes.data.history.filter(
-            (h: any) => h.puzzleId === puzzleId && h.completed
-          );
-          
-          if (completedHistories.length > 0) {
-            setHasCompleted(true);
-            
-            // 모든 완료된 난이도 추출
-            const diffs = completedHistories.map((h: any) => h.difficulty);
-            setCompletedDifficulties(diffs);
-            
-            // 대표 완료 난이도 설정 (마지막 완료 난이도 우선)
-            setCompletedDifficulty(completedHistories[completedHistories.length - 1].difficulty);
-            
-            // 완주 확인 시 로컬 저장 데이터를 비교하여 정리
-            try {
-              const savedState = await loadPuzzleState(puzzleId);
-              if (savedState) {
-                const savedTime = savedState.updatedAt ? new Date(savedState.updatedAt).getTime() : 0;
-                // 가장 최근 완료 시간 찾기
-                const lastCompletedTime = Math.max(...completedHistories.map((h: any) => new Date(h.savedAt || 0).getTime()));
-                
-                // 로컬 저장 상태의 최종 변경 시간이 완주 시간보다 이전인 경우만 삭제 (기존 진행분 찌꺼기)
-                if (savedTime <= lastCompletedTime) {
-                  const { deletePuzzleState } = await import('@/lib/puzzle-db');
-                  await deletePuzzleState(puzzleId);
-                  setHasSavedGame(false);
-                }
-              }
-            } catch (err) {
-              console.error('Failed to clear local puzzle state after sync:', err);
-            }
-          } else {
-            // 초기화 등으로 완주 이력이 없는 경우 상태 리셋
-            setHasCompleted(false);
-            setCompletedDifficulties([]);
-            setCompletedDifficulty(null);
-          }
-        }
-      } catch (e) {
-        console.error('Failed to sync user puzzle status:', e);
-      }
-    }
-
-    syncUserStatus();
-  }, [currentPuzzle, token, hasSavedGame]);
-
-  useEffect(() => {
-    if (currentPuzzle) {
-      fetchRankings(currentPuzzle._id, previewDiff);
-    }
-  }, [currentPuzzle, previewDiff, fetchRankings]);
+  const {
+    rankings,
+    isRankingLoading,
+    currentPuzzle,
+    totalPuzzles,
+    hasSavedGame,
+    savedProgress,
+    savedDifficulty,
+    hasCompleted,
+    completedDifficulty,
+    completedDifficulties,
+    previewDiff,
+    setPreviewDiff,
+    isPuzzleLoading,
+    serviceStats,
+  } = usePuzzleDashboard(token);
 
   const handleStart = (difficulty: 'novice' | 'beginner' | 'expert') => {
     if (!currentPuzzle) return;
-    // 난이도를 쿼리스트링에 실어 플레이 페이지로 이동 (모든 플레이는 랭킹 모드)
     router.push(`/puzzle/play/${currentPuzzle._id}?diff=${difficulty}&mode=ranked`);
   };
 

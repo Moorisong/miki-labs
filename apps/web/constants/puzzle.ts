@@ -26,3 +26,20 @@ export const PUZZLE_CONFIG = {
   },
   MIN_TIME_LIMIT_SEC: 30, // 최소 완성 소요 시간 (치팅 차단 임계값)
 } as const;
+
+export const PUZZLE_DIFFICULTY = {
+  NOVICE: 'novice',
+  BEGINNER: 'beginner',
+  EXPERT: 'expert',
+} as const;
+
+export const PUZZLE_MODE = {
+  RANKED: 'ranked',
+  SOLO: 'solo',
+} as const;
+
+export const PUZZLE_PIECE_COUNT = {
+  [PUZZLE_DIFFICULTY.NOVICE]: 36,
+  [PUZZLE_DIFFICULTY.BEGINNER]: 100,
+  [PUZZLE_DIFFICULTY.EXPERT]: 256,
+} as const;

@@ -81,7 +81,11 @@ export const getMyProgress = async (req: Request, res: Response, next: NextFunct
     res.json({
       success: true,
       data: progressRecord 
-        ? { progress: progressRecord.progress, detailState: progressRecord.detailState } 
+        ? { 
+            progress: progressRecord.progress, 
+            detailState: progressRecord.detailState,
+            lastPlayedAt: progressRecord.lastPlayedAt
+          } 
         : null
     });
   } catch (error) {

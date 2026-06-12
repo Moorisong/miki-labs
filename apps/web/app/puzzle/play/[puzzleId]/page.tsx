@@ -1,34 +1,25 @@
 'use client';
 
-import { useEffect, useState, use, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useSession, signOut } from 'next-auth/react';
-import { ArrowLeft, Timer, Eye, HelpCircle } from 'lucide-react';
+import { useEffect, useState, use } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { ArrowLeft, Timer, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { usePuzzleStore } from '@/lib/stores/puzzle-store';
-import { savePuzzleState, loadPuzzleState, deletePuzzleState } from '@/lib/puzzle-db';
-import { 
-  fetchPuzzleById, 
-  startChallenge, 
-  submitResult, 
-  saveProgress as saveProgressApi,
-  fetchMyRanking,
-  fetchMyProgress,
-  clearMyProgress
-} from '@/lib/puzzle-api';
 import PuzzleBoard from '@/components/puzzle/puzzle-board';
 import PieceTray from '@/components/puzzle/piece-tray';
 import FloatingToolbar from '@/components/puzzle/floating-toolbar';
 import CompletionModal from '@/components/puzzle/completion-modal';
 import CursorFollower from '@/components/puzzle/cursor-follower';
-import { MyRanking, Puzzle } from '@/types/puzzle';
 import KakaoAdfit, { ADFIT_SIZES, ADFIT_UNITS } from '@/components/ads/kakao-adfit';
 import SyncChoiceModal from '@/components/puzzle/sync-choice-modal';
-// ── 가로모드 전용 ──
 import { useOrientation } from '@/lib/hooks/use-orientation';
 import LandscapePuzzleLayout from '@/components/puzzle/landscape/landscape-puzzle-layout';
 
-// Next.js 16 App Router Dynamic Route Params 대응
+import { usePuzzleSetup } from '../../hooks/use-puzzle-setup';
+import { usePuzzleAutoSave } from '../../hooks/use-puzzle-autosave';
+import { usePuzzleSubmit } from '../../hooks/use-puzzle-submit';
+
 interface PlayPageProps {
   params: Promise<{ puzzleId: string }>;
 }
@@ -36,16 +27,11 @@ interface PlayPageProps {
 export default function PlayPage({ params }: PlayPageProps) {
   const { puzzleId } = use(params);
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { data: session, status } = useSession();
   const token = session?.user?.kakaoId;
 
-  const submittingRef = useRef(false);
-
-  // Zustand Store
   const {
     activePuzzleId,
-    activePuzzleImage,
     difficulty,
     mode,
     totalPieces,
@@ -56,298 +42,59 @@ export default function PlayPage({ params }: PlayPageProps) {
     isTimerRunning,
     isCompleted,
     startedAt,
-    challengeToken,
-    initializePuzzle,
-    resumePuzzle,
     selectTrayPiece,
     placePiece,
-    removePiece,
-    swapPieces,
     pickUpPiece,
+    swapPieces,
     shufflePieces,
-    startTimer,
-    stopTimer,
     tickTimer,
-    setCompleted,
-    setChallengeToken,
   } = usePuzzleStore();
 
-  const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [zoom, setZoom] = useState(1.0);
   const [showOriginal, setShowOriginal] = useState(false);
-  const [isPageLoading, setIsPageLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
-  const [manualSaveStatus, setManualSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const [myRanking, setMyRanking] = useState<MyRanking | null>(null);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [syncChoiceData, setSyncChoiceData] = useState<{
-    localState: any;
-    serverState: any;
-  } | null>(null);
 
-  // 난이도나 퍼즐이 변경될 때(새로운 게임 시작 또는 복원) 줌 비율을 기본값(1.0)으로 초기화
   useEffect(() => {
     setZoom(1.0);
   }, [difficulty, puzzleId]);
 
-  // 1. 초기 마운트 시 퍼즐 메타데이터 로드 및 게임 시작/이어하기 분기
-  useEffect(() => {
-    const pageEnterTime = new Date().toISOString();
+  const { puzzle, isPageLoading, syncChoiceData, setSyncChoiceData, initializePuzzle, resumePuzzle } = usePuzzleSetup(puzzleId, token, status);
 
-    async function setupGame() {
-      if (status === 'loading') return;
-      try {
-        const res = await fetchPuzzleById(puzzleId);
-        if (!res.success || !res.data) {
-          alert('퍼즐 데이터를 불러오지 못했습니다.');
-          router.push('/puzzle');
-          return;
-        }
-        setPuzzle(res.data);
+  usePuzzleAutoSave(
+    puzzleId,
+    token,
+    board,
+    trayPieces,
+    timerSeconds,
+    difficulty,
+    mode,
+    isCompleted,
+    startedAt,
+    isPageLoading,
+    totalPieces
+  );
 
-        const isResume = searchParams.get('resume') === 'true';
-        const diffParam = (searchParams.get('diff') as 'novice' | 'beginner' | 'expert') || 'novice';
-        const modeParam = 'ranked';
+  const {
+    isSubmitting,
+    isSaved,
+    manualSaveStatus,
+    submitError,
+    myRanking,
+    handleSaveManual,
+    handleSaveRecord,
+  } = usePuzzleSubmit(
+    puzzleId,
+    token,
+    board,
+    trayPieces,
+    timerSeconds,
+    difficulty,
+    mode,
+    isCompleted,
+    startedAt,
+    totalPieces,
+    puzzle
+  );
 
-        let savedState: any = null;
-
-        if (isResume) {
-          // 이어하기 시 로컬 IndexedDB에서 상태 복원
-          savedState = await loadPuzzleState(puzzleId);
-
-          const pendingSync = sessionStorage.getItem(`pending_sync_${puzzleId}`) === 'true';
-
-          if (savedState && token && pendingSync) {
-            try {
-              const serverProgressRes = await fetchMyProgress(puzzleId, token);
-              if (serverProgressRes.success && serverProgressRes.data?.detailState) {
-                // 양쪽에 다 진행 정보가 존재하면 팝업 선택 모달을 띄우기 위해 셋업 중단
-                setSyncChoiceData({
-                  localState: savedState,
-                  serverState: {
-                    ...serverProgressRes.data.detailState,
-                    progress: serverProgressRes.data.progress,
-                  },
-                });
-                setIsPageLoading(false);
-                return;
-              } else {
-                // 서버에 기존 데이터가 없으면 비로그인 시 진행한 현재 데이터를 바로 업로드
-                const correctCount = savedState.board.filter((cell: any, idx: number) => cell === idx).length;
-                const total = savedState.difficulty === 'novice' ? 36 : savedState.difficulty === 'expert' ? 256 : 100;
-                const progress = Math.round((correctCount / total) * 100);
-                await saveProgressApi(puzzleId, progress, token, {
-                  difficulty: savedState.difficulty,
-                  mode: savedState.mode || 'ranked',
-                  timerSeconds: savedState.timerSeconds,
-                  board: savedState.board,
-                  trayPieces: savedState.trayPieces,
-                  startedAt: savedState.startedAt || new Date().toISOString(),
-                });
-                sessionStorage.removeItem(`pending_sync_${puzzleId}`);
-              }
-            } catch (err) {
-              console.error('Failed to query progress for sync selection:', err);
-            }
-          }
-
-          if (token) {
-            // 로그인 상태 시 로컬 데이터 존재 유무와 관계없이 항상 서버에서 최신 정보 조회 시도
-            try {
-              const serverProgressRes = await fetchMyProgress(puzzleId, token);
-              if (serverProgressRes.success && serverProgressRes.data?.detailState) {
-                const s = serverProgressRes.data.detailState;
-                const serverProgress = serverProgressRes.data.progress;
-
-                // 로컬 데이터가 없거나, 진행 상황(진행도 또는 시간)이 다르면 서버 상태로 로컬 상태 덮어씌움
-                const shouldOverwrite = !savedState ||
-                  savedState.progress !== serverProgress ||
-                  savedState.timerSeconds !== s.timerSeconds;
-
-                if (shouldOverwrite) {
-                  savedState = {
-                    puzzleId,
-                    difficulty: s.difficulty,
-                    mode: s.mode || 'ranked',
-                    timerSeconds: s.timerSeconds,
-                    pieces: s.pieces || [],
-                    board: s.board,
-                    trayPieces: s.trayPieces,
-                    progress: serverProgress,
-                    completed: false,
-                    startedAt: s.startedAt || new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                  };
-
-                  // 이후 로컬 자동저장을 위해 IndexedDB에도 즉시 써줌
-                  await savePuzzleState(puzzleId, {
-                    difficulty: savedState.difficulty,
-                    mode: savedState.mode,
-                    timerSeconds: savedState.timerSeconds,
-                    pieces: savedState.pieces,
-                    board: savedState.board,
-                    trayPieces: savedState.trayPieces,
-                    progress: savedState.progress,
-                    completed: savedState.completed,
-                    startedAt: savedState.startedAt,
-                  }, true);
-                }
-              }
-            } catch (err) {
-              console.error('Failed to restore progress from server:', err);
-            }
-          }
-        }
-
-        const currentMode = isResume ? savedState?.mode || 'ranked' : modeParam;
-        const isTargetUserHana = token === '4754503547' && puzzleId === '6a2139eafde07d3537a49368';
-        const isTargetUserYura = token === '4929487660' && puzzleId === '6a2139eafde07d3537a49368' && (isResume ? (savedState?.difficulty === 'novice') : (diffParam === 'novice'));
-
-        if (isTargetUserHana) {
-          const targetDiff = isResume ? (savedState?.difficulty || 'beginner') : diffParam;
-          const targetMode = currentMode;
-          const total = targetDiff === 'novice' ? 36 : targetDiff === 'expert' ? 256 : 100;
-          const board = Array(total).fill(null);
-          for (let i = 0; i < total - 1; i++) {
-            board[i] = i;
-          }
-          const trayPieces = [total - 1];
-
-          initializePuzzle(puzzleId, res.data.imageUrl, targetDiff, targetMode);
-          resumePuzzle({
-            difficulty: targetDiff,
-            mode: targetMode,
-            timerSeconds: 99,
-            board,
-            trayPieces,
-            startedAt: new Date(Date.now() - 99000).toISOString(),
-            completed: false,
-          });
-
-          // 로컬 및 서버 진행률 자동 백업 동기화
-          const saveStateData = {
-            difficulty: targetDiff,
-            mode: targetMode,
-            timerSeconds: 99,
-            pieces: board.map((pieceId, idx) => ({
-              id: pieceId !== null ? pieceId : idx,
-              correctIndex: idx,
-            })),
-            board,
-            trayPieces,
-            progress: 99,
-            completed: false,
-            startedAt: new Date().toISOString(),
-          };
-          savePuzzleState(puzzleId, saveStateData, true);
-          saveProgressApi(puzzleId, 99, token!, {
-            difficulty: targetDiff,
-            mode: targetMode,
-            timerSeconds: 99,
-            board,
-            trayPieces,
-            startedAt: new Date().toISOString(),
-          }).catch(console.error);
-        } else if (isTargetUserYura) {
-          const targetMode = currentMode;
-          const total = 36;
-          const board = Array(total).fill(null);
-          for (let i = 0; i < total - 1; i++) {
-            board[i] = i;
-          }
-          const trayPieces = [total - 1];
-
-          initializePuzzle(puzzleId, res.data.imageUrl, 'novice', targetMode);
-          resumePuzzle({
-            difficulty: 'novice',
-            mode: targetMode,
-            timerSeconds: 35,
-            board,
-            trayPieces,
-            startedAt: new Date(Date.now() - 35000).toISOString(),
-            completed: false,
-          });
-
-          // 로컬 및 서버 진행률 자동 백업 동기화
-          const progress = Math.round((35 / 36) * 100);
-          const saveStateData = {
-            difficulty: 'novice' as const,
-            mode: targetMode,
-            timerSeconds: 35,
-            pieces: board.map((pieceId, idx) => ({
-              id: pieceId !== null ? pieceId : idx,
-              correctIndex: idx,
-            })),
-            board,
-            trayPieces,
-            progress,
-            completed: false,
-            startedAt: new Date().toISOString(),
-          };
-          savePuzzleState(puzzleId, saveStateData, true);
-          saveProgressApi(puzzleId, progress, token!, {
-            difficulty: 'novice',
-            mode: targetMode,
-            timerSeconds: 35,
-            board,
-            trayPieces,
-            startedAt: new Date().toISOString(),
-          }).catch(console.error);
-        } else if (isResume) {
-          if (savedState) {
-            initializePuzzle(puzzleId, res.data.imageUrl, savedState.difficulty, savedState.mode || 'ranked');
-            resumePuzzle({
-              difficulty: savedState.difficulty,
-              mode: savedState.mode || 'ranked',
-              timerSeconds: savedState.timerSeconds,
-              board: savedState.board || Array(totalPieces).fill(null),
-              trayPieces: savedState.trayPieces || savedState.pieces.map((p: any) => p.id),
-              startedAt: new Date(Date.now() - savedState.timerSeconds * 1000).toISOString(),
-              completed: savedState.completed,
-            });
-          } else {
-            await deletePuzzleState(puzzleId);
-            initializePuzzle(puzzleId, res.data.imageUrl, diffParam, modeParam, pageEnterTime);
-            if (token) {
-              clearMyProgress(token, puzzleId).catch(console.error);
-            }
-          }
-        } else {
-          // 새로하기
-          await deletePuzzleState(puzzleId);
-          initializePuzzle(puzzleId, res.data.imageUrl, diffParam, modeParam, pageEnterTime);
-          if (token) {
-            clearMyProgress(token, puzzleId).catch(console.error);
-          }
-        }
-
-        // 로그인된 상태이고 이번주 퍼즐 플레이 시 보안 챌린지 시작
-        const isCurrentPuzzle = !res.data.archived;
-        if (token && isCurrentPuzzle) {
-          const challengeRes = await startChallenge(puzzleId, token);
-          if (challengeRes.success && challengeRes.data?.challengeToken) {
-            setChallengeToken(challengeRes.data.challengeToken);
-          }
-        }
-
-        // URL에 resume=true가 없으면 추가해 줌 (새로고침 시 진행 상황 유지 보장)
-        if (!isResume) {
-          const params = new URLSearchParams(window.location.search);
-          params.set('resume', 'true');
-          window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
-        }
-      } catch (e) {
-        console.error('Setup game failed:', e);
-      } finally {
-        setIsPageLoading(false);
-      }
-    }
-
-    setupGame();
-  }, [puzzleId, searchParams, router, initializePuzzle, resumePuzzle, setChallengeToken, token, status]);
-
-  // 2. 타이머 틱 루프
   useEffect(() => {
     if (!isTimerRunning) return;
     const interval = setInterval(() => {
@@ -356,59 +103,10 @@ export default function PlayPage({ params }: PlayPageProps) {
     return () => clearInterval(interval);
   }, [isTimerRunning, tickTimer]);
 
-  // 3. 상태 변경 시마다 로컬 IndexedDB 및 서버 백업 자동 저장 (2초 디바운스는 IndexedDB 내부에서 처리)
-  useEffect(() => {
-    if (isPageLoading || !puzzleId || board.length === 0) return;
-
-    // 올바르게 맞춘 조각(제자리) 개수 계산
-    const correctCount = board.filter((cell, idx) => cell === idx).length;
-    const progress = Math.round((correctCount / totalPieces) * 100);
-
-    const piecesData = board.map((pieceId, idx) => ({
-      id: pieceId !== null ? pieceId : idx,
-      correctX: 0,
-      correctY: 0,
-      currentX: 0,
-      currentY: 0,
-      width: 0,
-      height: 0,
-      locked: pieceId === idx,
-    }));
-
-    const saveStateData = {
-      difficulty,
-      mode,
-      timerSeconds,
-      pieces: piecesData as any,
-      board,
-      trayPieces,
-      progress,
-      completed: isCompleted,
-      startedAt: startedAt || new Date().toISOString(),
-    };
-
-    // IndexedDB 로컬 자동 저장
-    savePuzzleState(puzzleId, saveStateData);
-
-    // 로그인된 상태 시 서버 진행률 자동 업로드
-    if (token) {
-      saveProgressApi(puzzleId, progress, token).catch(console.error);
-    }
-
-    // Cleanup: 언마운트 시 최종 진행 상황을 디바운스 없이 로컬에 즉시 저장 (마지막 타이머/조각 배치 데이터 유실 및 레이스 컨디션 방지)
-    return () => {
-      if (puzzleId && board.length > 0 && !isCompleted) {
-        savePuzzleState(puzzleId, saveStateData, true);
-      }
-    };
-  }, [board, timerSeconds, puzzleId, totalPieces, difficulty, mode, isCompleted, startedAt, isPageLoading, token]);
-
-  // 4. 모드 판정
   const gridSize = difficulty === 'novice' ? 6 : difficulty === 'beginner' ? 10 : 16;
   const correctCount = board.filter((cell, idx) => cell === idx).length;
   const progressPercent = Math.round((correctCount / totalPieces) * 100);
 
-  // 시간 포맷 포매터 (mm:ss)
   const formatTime = (seconds: number) => {
     const min = Math.floor(seconds / 60).toString().padStart(2, '0');
     const sec = (seconds % 60).toString().padStart(2, '0');
@@ -419,24 +117,17 @@ export default function PlayPage({ params }: PlayPageProps) {
     if (isCompleted) return;
 
     const cellVal = board[slotIdx];
-    
-    // 만약 이미 배치된 조각이 제자리(정답 위치)에 맞추어진 조각이라면 클릭 상호작용 자체를 막아서 잠금(고정) 처리
     if (cellVal !== null && cellVal === slotIdx) {
       return;
     }
 
     if (cellVal !== null) {
       if (selectedTrayPiece !== null) {
-        // 이미 조각 A를 든 상태에서 조각 B가 있는 슬롯을 클릭한 경우:
-        // 조각 A를 배치하고, 원래 슬롯에 있던 조각 B를 들기 (스왑)
         swapPieces(slotIdx, selectedTrayPiece);
       } else {
-        // 들고 있는 조각이 없는 상태에서 이미 배치된 조각을 클릭한 경우:
-        // 조각을 보드에서 떼어내고 "들기" (밑으로 내려보내지 않음)
         pickUpPiece(slotIdx);
       }
     } else if (selectedTrayPiece !== null) {
-      // 선택한 조각을 빈 슬롯에 배치
       placePiece(slotIdx, selectedTrayPiece);
     }
   };
@@ -450,232 +141,6 @@ export default function PlayPage({ params }: PlayPageProps) {
       shufflePieces();
     }
   };
-
-  const handleSaveManual = async () => {
-    if (manualSaveStatus !== 'idle') return;
-
-    // 비로그인 상태: 현재 진행 상태를 로컬에 저장 후 로그인 페이지로 유도
-    if (!token) {
-      try {
-        const correctCount = board.filter((cell, idx) => cell === idx).length;
-        const progress = Math.round((correctCount / totalPieces) * 100);
-        const piecesData = board.map((pieceId, idx) => ({
-          id: pieceId !== null ? pieceId : idx,
-          correctX: 0,
-          correctY: 0,
-          currentX: 0,
-          currentY: 0,
-          width: 0,
-          height: 0,
-          locked: pieceId === idx,
-        }));
-        await savePuzzleState(puzzleId, {
-          difficulty,
-          mode,
-          timerSeconds,
-          pieces: piecesData as any,
-          board,
-          trayPieces,
-          progress,
-          completed: isCompleted,
-          startedAt: startedAt || new Date().toISOString(),
-        }, true);
-        sessionStorage.setItem(`pending_sync_${puzzleId}`, 'true');
-      } catch (err) {
-        console.error('Failed to save state before login redirect:', err);
-      }
-      const params = new URLSearchParams(window.location.search);
-      params.set('resume', 'true');
-      const callback = encodeURIComponent(`${window.location.pathname}?${params.toString()}`);
-      router.push(`/login?callbackUrl=${callback}`);
-      return;
-    }
-
-    setManualSaveStatus('saving');
-
-    try {
-      // 올바르게 맞춘 조각(제자리) 개수 계산
-      const correctCount = board.filter((cell, idx) => cell === idx).length;
-      const progress = Math.round((correctCount / totalPieces) * 100);
-
-      const piecesData = board.map((pieceId, idx) => ({
-        id: pieceId !== null ? pieceId : idx,
-        correctX: 0,
-        correctY: 0,
-        currentX: 0,
-        currentY: 0,
-        width: 0,
-        height: 0,
-        locked: pieceId === idx,
-      }));
-
-      const saveStateData = {
-        difficulty,
-        mode,
-        timerSeconds,
-        pieces: piecesData as any,
-        board,
-        trayPieces,
-        progress,
-        completed: isCompleted,
-        startedAt: startedAt || new Date().toISOString(),
-      };
-
-      // 1. IndexedDB 로컬 수동 저장 (force = true로 즉시 플러시)
-      await savePuzzleState(puzzleId, saveStateData, true);
-
-      // 2. 로그인된 상태 시 서버 진행률 즉시 저장 (전체 세부 상태 함께 저장)
-      if (token) {
-        const res = await saveProgressApi(puzzleId, progress, token, {
-          difficulty,
-          mode,
-          timerSeconds,
-          board,
-          trayPieces,
-          startedAt: startedAt || new Date().toISOString(),
-        });
-        
-        // DB에서 회원 데이터가 강제 삭제되는 등 세션이 만료/유효하지 않은 상태인 경우 (401 에러)
-        if (res.status === 401) {
-          await signOut({ redirect: false });
-          const params = new URLSearchParams(window.location.search);
-          params.set('resume', 'true');
-          const callback = encodeURIComponent(`${window.location.pathname}?${params.toString()}`);
-          router.push(`/login?callbackUrl=${callback}`);
-          return;
-        }
-      }
-
-      // UX 시각 효과를 위해 최소 600ms 대기
-      await new Promise((resolve) => setTimeout(resolve, 600));
-
-      setManualSaveStatus('saved');
-
-      // 2초 후 원래대로 복원
-      setTimeout(() => {
-        setManualSaveStatus('idle');
-      }, 2000);
-    } catch (e) {
-      console.error('Manual save error:', e);
-      setManualSaveStatus('idle');
-    }
-  };
-
-  // 5. 완료 시 기록 제출 처리
-  const handleSaveRecord = async () => {
-    if (!puzzle || isSaved || isSubmitting || submittingRef.current) return;
-
-    if (!token) {
-      // 비로그인 시 로그인 가이드 유도 (로그인 후 돌아왔을 때 이어하기를 통해 완료 상태 복구)
-      // 현재 완료 상태를 IndexedDB에 즉시 저장하여 세션 유지
-      const correctCount = board.filter((cell, idx) => cell === idx).length;
-      const progress = Math.round((correctCount / totalPieces) * 100);
-      const piecesData = board.map((pieceId, idx) => ({
-        id: pieceId !== null ? pieceId : idx,
-        correctX: 0,
-        correctY: 0,
-        currentX: 0,
-        currentY: 0,
-        width: 0,
-        height: 0,
-        locked: pieceId === idx,
-      }));
-      
-      try {
-        await savePuzzleState(puzzleId, {
-          difficulty,
-          mode,
-          timerSeconds,
-          pieces: piecesData as any,
-          board,
-          trayPieces,
-          progress,
-          completed: true,
-          startedAt: startedAt || new Date().toISOString(),
-        }, true);
-      } catch (err) {
-        console.error('Failed to save state before login redirect:', err);
-      }
-
-      const params = new URLSearchParams(window.location.search);
-      params.set('resume', 'true');
-      const callback = encodeURIComponent(`${window.location.pathname}?${params.toString()}`);
-      router.push(`/login?callbackUrl=${callback}`);
-      return;
-    }
-
-    submittingRef.current = true;
-    setIsSubmitting(true);
-    try {
-      const submitMode = 'ranked';
-      
-      // 랭킹 모드인데 챌린지 토큰이 아직 미발급 상태라면 최대 3초 대기
-      if (submitMode === 'ranked' && !challengeToken) {
-        let waitCount = 0;
-        while (!usePuzzleStore.getState().challengeToken && waitCount < 30) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
-          waitCount++;
-        }
-      }
-
-      let activeToken = usePuzzleStore.getState().challengeToken || challengeToken;
-
-      // 랭킹 모드인데 여전히 챌린지 토큰이 없는 경우 마지막으로 즉시 발급 시도
-      if (submitMode === 'ranked' && !activeToken) {
-        try {
-          const challengeRes = await startChallenge(puzzleId, token);
-          if (challengeRes.success && challengeRes.data?.challengeToken) {
-            activeToken = challengeRes.data.challengeToken;
-            setChallengeToken(activeToken);
-          }
-        } catch (err) {
-          console.error('Failed to issue challenge token dynamically at completion:', err);
-        }
-      }
-
-      if (!activeToken) {
-        activeToken = 'no-challenge-token';
-      }
-      
-      const res = await submitResult({
-        puzzleId,
-        mode: submitMode,
-        difficulty,
-        challengeToken: activeToken,
-        startedAt: startedAt || new Date().toISOString(),
-        completedAt: new Date().toISOString(),
-        completionTime: timerSeconds,
-      }, token);
-
-      if (res.success) {
-        setIsSaved(true);
-        setSubmitError(null);
-        // 저장 성공 시 내 등수 즉시 업데이트
-        const rankingRes = await fetchMyRanking(puzzleId, token, difficulty);
-        if (rankingRes.success && rankingRes.data) {
-          setMyRanking(rankingRes.data);
-        }
-        // IndexedDB 로컬 임시 파일 비우기
-        await deletePuzzleState(puzzleId);
-      } else {
-        setSubmitError(res.error || '기록 저장에 실패했습니다. 치팅 방지 필터에 차단되었을 수 있습니다.');
-        submittingRef.current = false;
-      }
-    } catch (e) {
-      console.error(e);
-      setSubmitError('기록 업로드 중 알 수 없는 서버 에러가 발생했습니다.');
-      submittingRef.current = false;
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // 완료 시 자동으로 저장/제출 실행
-  useEffect(() => {
-    if (isCompleted && token && !isSaved && !isSubmitting) {
-      handleSaveRecord();
-    }
-  }, [isCompleted, token, isSaved, isSubmitting]);
 
   const handleShare = () => {
     if (typeof window !== 'undefined') {
@@ -737,18 +202,6 @@ export default function PlayPage({ params }: PlayPageProps) {
       completed: localState.completed,
     });
 
-    const correctCount = localState.board.filter((cell: any, idx: number) => cell === idx).length;
-    const progress = Math.round((correctCount / total) * 100);
-    await saveProgressApi(puzzleId, progress, token, {
-      difficulty: localState.difficulty,
-      mode: localState.mode || 'ranked',
-      timerSeconds: localState.timerSeconds,
-      board: localState.board,
-      trayPieces: localState.trayPieces,
-      startedAt: localState.startedAt || new Date().toISOString(),
-    });
-
-    sessionStorage.removeItem(`pending_sync_${puzzleId}`);
     setSyncChoiceData(null);
   };
 
@@ -767,20 +220,6 @@ export default function PlayPage({ params }: PlayPageProps) {
       locked: pieceId === idx,
     }));
 
-    const newLocalState = {
-      difficulty: serverState.difficulty,
-      mode: serverState.mode || 'ranked',
-      timerSeconds: serverState.timerSeconds,
-      pieces: piecesData,
-      board: serverState.board,
-      trayPieces: serverState.trayPieces,
-      progress: serverState.progress,
-      completed: false,
-      startedAt: serverState.startedAt || new Date().toISOString(),
-    };
-
-    await savePuzzleState(puzzleId, newLocalState, true);
-
     initializePuzzle(puzzleId, puzzle!.imageUrl, serverState.difficulty, serverState.mode || 'ranked');
     resumePuzzle({
       difficulty: serverState.difficulty,
@@ -792,12 +231,9 @@ export default function PlayPage({ params }: PlayPageProps) {
       completed: false,
     });
 
-    sessionStorage.removeItem(`pending_sync_${puzzleId}`);
     setSyncChoiceData(null);
   };
 
-  // ── Orientation 감지 ──
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { isLandscape, isLargeScreen } = useOrientation();
 
   if (isPageLoading || !puzzle || activePuzzleId === null) {
@@ -806,7 +242,6 @@ export default function PlayPage({ params }: PlayPageProps) {
         <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--puzzle-primary) var(--puzzle-primary) var(--puzzle-primary) transparent' }} />
         <span style={{ color: 'var(--puzzle-muted-foreground)' }}>캔버스 조각판을 세팅하는 중...</span>
 
-        {/* 동기화 선택 모달 */}
         {syncChoiceData && (
           <SyncChoiceModal
             localProgress={syncChoiceData.localState.progress}
@@ -821,7 +256,6 @@ export default function PlayPage({ params }: PlayPageProps) {
     );
   }
 
-  // ── 가로모드 분기 렌더링 ──
   if (isLandscape) {
     return (
       <LandscapePuzzleLayout
@@ -858,7 +292,6 @@ export default function PlayPage({ params }: PlayPageProps) {
     );
   }
 
-  // ── 세로모드 (기존 코드 그대로) ──
   return (
     <div
       className="flex flex-col min-h-screen select-none"
@@ -869,7 +302,6 @@ export default function PlayPage({ params }: PlayPageProps) {
         }
       }}
     >
-      {/* Play GNB Header */}
       <div 
         className="flex items-center justify-between px-4 py-3 border-b"
         style={{ 
@@ -898,7 +330,6 @@ export default function PlayPage({ params }: PlayPageProps) {
           </span>
         </div>
 
-        {/* Timer and Progress display */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1 text-sm font-bold" style={{ color: 'var(--puzzle-card-foreground)' }}>
             <Timer size={14} style={{ color: 'var(--puzzle-primary)' }} />
@@ -910,9 +341,6 @@ export default function PlayPage({ params }: PlayPageProps) {
         </div>
       </div>
 
-
-
-      {/* Play Canvas / Board Area */}
       <div 
         className="w-full flex-1 min-h-0 flex flex-col items-center justify-center p-4 relative overflow-hidden"
         onClick={() => {
@@ -921,7 +349,6 @@ export default function PlayPage({ params }: PlayPageProps) {
           }
         }}
       >
-        {/* Original guide overlay */}
         {showOriginal && (
           <div 
             className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-8"
@@ -951,7 +378,6 @@ export default function PlayPage({ params }: PlayPageProps) {
         />
       </div>
 
-      {/* Controls & Piece Tray Drawer */}
       <div className="p-2 sm:p-4 flex flex-col gap-2 sm:gap-4 mt-auto">
         <FloatingToolbar
           onOriginalToggle={() => setShowOriginal(!showOriginal)}
@@ -964,7 +390,6 @@ export default function PlayPage({ params }: PlayPageProps) {
           saveStatus={manualSaveStatus}
         />
 
-        {/* Adfit AD Banner (Placed between control toolbar and piece tray drawer to catch accidental clicks during gameplay) */}
         <div className="flex justify-center my-0.5">
           <KakaoAdfit unit={ADFIT_UNITS.MAIN_BANNER} {...ADFIT_SIZES.BANNER_320x50} />
         </div>
@@ -980,7 +405,6 @@ export default function PlayPage({ params }: PlayPageProps) {
         />
       </div>
 
-      {/* Completion Modal Ceremony */}
       {isCompleted && (
         <CompletionModal
           onClose={handleGoHome}
@@ -996,14 +420,12 @@ export default function PlayPage({ params }: PlayPageProps) {
         />
       )}
 
-      {/* 커서 조각 추적기 */}
       <CursorFollower
         selectedPieceId={selectedTrayPiece}
         image={puzzle.imageUrl}
         gridSize={gridSize}
       />
 
-      {/* 동기화 선택 모달 */}
       {syncChoiceData && (
         <SyncChoiceModal
           localProgress={syncChoiceData.localState.progress}

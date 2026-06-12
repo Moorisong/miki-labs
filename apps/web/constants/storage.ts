@@ -4,6 +4,8 @@
  */
 
 export const STORAGE_KEY = {
+  PUZZLE_BASKETS_PREFIX: 'puzzle-baskets-',
+  PENDING_SYNC_PREFIX: 'pending_sync_',
 } as const;
 
 export type StorageKey = keyof typeof STORAGE_KEY;
