@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Folder, HelpCircle, Lock } from 'lucide-react';
 import PieceCell from '../piece-cell';
+import KakaoAdfit, { ADFIT_SIZES, ADFIT_UNITS } from '@/components/ads/kakao-adfit';
 
 interface LandscapeTrayPanelProps {
   trayPieces: number[];
@@ -600,6 +601,16 @@ export default function LandscapeTrayPanel({
           </div>
         )}
       </div>
+
+      {/* 카카오 애드핏 광고 배너 (PC/태블릿에만 표시, 모바일 제외) */}
+      {isLarge && (
+        <div 
+          className="flex-shrink-0 border-t py-2.5 flex justify-center bg-white" 
+          style={{ borderColor: 'rgba(0, 0, 0, 0.08)' }}
+        >
+          <KakaoAdfit unit={ADFIT_UNITS.MAIN_BANNER} {...ADFIT_SIZES.BANNER_320x100} />
+        </div>
+      )}
 
       {/* 드래그 고스트 */}
       {draggedPiece && typeof document !== 'undefined' && createPortal(

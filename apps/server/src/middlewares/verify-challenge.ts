@@ -35,7 +35,87 @@ export const verifyChallenge = async (req: Request, res: Response, next: NextFun
       return;
     }
 
-    // 2. Challenge Token 유효성 검증
+    // ──────────────────────────────────────────────────────────────
+    // 비파괴적 검증 (Side-effect 없음)을 먼저 수행
+    // → 챌린지 토큰 소비(used=true)는 모든 검증 통과 후 최종 단계에서 수행
+    // → 이렇게 해야 다른 검증 실패 시 토큰이 불필요하게 소비되지 않음
+    // ──────────────────────────────────────────────────────────────
+
+    // 2. 플레이 경과 시간 무결성 검증
+    if (mode === 'ranked') {
+      const startMs = new Date(startedAt).getTime();
+      const completeMs = new Date(completedAt).getTime();
+
+      if (isNaN(startMs) || isNaN(completeMs)) {
+        res.status(400).json({ success: false, error: '유효하지 않은 시간 포맷입니다.' });
+        return;
+      }
+
+      const calculatedDurationSeconds = Math.round((completeMs - startMs) / 1000);
+
+      // 실제 흘러간 현실 시간(calculatedDurationSeconds)이 게임 상 기록된 퍼즐 타이머 시간(completionTime)보다 5초 이상 짧다면, 
+      // 클라이언트 측에서 타이머 속도를 임의로 가속했거나 조작한 치팅임.
+      // (단, 유저가 중간에 일시정지하거나 탭을 내려두는 등 현실 시간이 더 길어진 경우는 정상적인 플레이 패턴이므로 허용함)
+      if (calculatedDurationSeconds < completionTime - 5) {
+        res.status(400).json({ 
+          success: false, 
+          error: `플레이 시간 무결성 검증 실패 (현실 시간: ${calculatedDurationSeconds}초 / 타이머 시간: ${completionTime}초)` 
+        });
+        return;
+      }
+    }
+
+    // 3. 비정상 기록 자동 필터링 (30초 미만 스피드핵 차단)
+    if (completionTime < 30) {
+      res.status(400).json({ 
+        success: false, 
+        error: '비정상적으로 빠른 기록입니다. 치팅 시도로 의심되어 거부되었습니다.' 
+      });
+      return;
+    }
+
+    // 4. 난이도 및 활성화 상태 검증
+    const Puzzle = getPuzzleModel();
+    const puzzle = await Puzzle.findById(puzzleId);
+
+    if (!puzzle) {
+      res.status(404).json({ success: false, error: '존재하지 않는 퍼즐입니다.' });
+      return;
+    }
+
+    const now = new Date();
+    const isActive = now >= new Date(puzzle.startDate) && now <= new Date(puzzle.endDate);
+
+    if (mode === 'ranked') {
+      if (difficulty !== 'novice' && difficulty !== 'beginner' && difficulty !== 'expert') {
+        res.status(400).json({ success: false, error: '공식 랭킹 경쟁은 Novice(36조각), Beginner(100조각) 또는 Expert(256조각) 난이도만 지원합니다.' });
+        return;
+      }
+      if (!isActive || puzzle.archived) {
+        res.status(400).json({ success: false, error: '활성화 기간이 만료된 퍼즐은 랭킹 등록이 불가능합니다.' });
+        return;
+      }
+
+      // 4.5. 이미 이 난이도로 랭킹 기록이 등록되어 있는지 확인
+      const existingRankedResult = await PuzzleResult.findOne({
+        puzzleId,
+        userId: user._id,
+        difficulty,
+        mode: 'ranked',
+        completed: true
+      });
+
+      if (existingRankedResult) {
+        res.status(400).json({ success: false, error: '이 난이도는 이미 랭킹 등록이 완료되었습니다.' });
+        return;
+      }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // 5. Challenge Token 유효성 검증 및 소비 (최종 단계)
+    // → 위의 모든 비파괴적 검증을 통과한 뒤에만 토큰을 소비(used=true)
+    // → 다른 검증 실패 시 토큰이 불필요하게 소비되어 재시도 불가해지는 문제 방지
+    // ──────────────────────────────────────────────────────────────
     if (mode === 'ranked') {
       const ChallengeToken = getChallengeTokenModel();
       
@@ -61,80 +141,10 @@ export const verifyChallenge = async (req: Request, res: Response, next: NextFun
       }
     }
 
-    // 3. 플레이 경과 시간 무결성 검증
-    if (mode === 'ranked') {
-      const startMs = new Date(startedAt).getTime();
-      const completeMs = new Date(completedAt).getTime();
-
-      if (isNaN(startMs) || isNaN(completeMs)) {
-        res.status(400).json({ success: false, error: '유효하지 않은 시간 포맷입니다.' });
-        return;
-      }
-
-      const calculatedDurationSeconds = Math.round((completeMs - startMs) / 1000);
-
-      // 실제 흘러간 현실 시간(calculatedDurationSeconds)이 게임 상 기록된 퍼즐 타이머 시간(completionTime)보다 5초 이상 짧다면, 
-      // 클라이언트 측에서 타이머 속도를 임의로 가속했거나 조작한 치팅임.
-      // (단, 유저가 중간에 일시정지하거나 탭을 내려두는 등 현실 시간이 더 길어진 경우는 정상적인 플레이 패턴이므로 허용함)
-      if (calculatedDurationSeconds < completionTime - 5) {
-        res.status(400).json({ 
-          success: false, 
-          error: `플레이 시간 무결성 검증 실패 (현실 시간: ${calculatedDurationSeconds}초 / 타이머 시간: ${completionTime}초)` 
-        });
-        return;
-      }
-    }
-
-    // 4. 비정상 기록 자동 필터링 (30초 미만 스피드핵 차단)
-    if (completionTime < 30) {
-      res.status(400).json({ 
-        success: false, 
-        error: '비정상적으로 빠른 기록입니다. 치팅 시도로 의심되어 거부되었습니다.' 
-      });
-      return;
-    }
-
-    // 5. 난이도 및 활성화 상태 검증
-    const Puzzle = getPuzzleModel();
-    const puzzle = await Puzzle.findById(puzzleId);
-
-    if (!puzzle) {
-      res.status(404).json({ success: false, error: '존재하지 않는 퍼즐입니다.' });
-      return;
-    }
-
-    const now = new Date();
-    const isActive = now >= new Date(puzzle.startDate) && now <= new Date(puzzle.endDate);
-
-    if (mode === 'ranked') {
-      if (difficulty !== 'novice' && difficulty !== 'beginner' && difficulty !== 'expert') {
-        res.status(400).json({ success: false, error: '공식 랭킹 경쟁은 Novice(36조각), Beginner(100조각) 또는 Expert(256조각) 난이도만 지원합니다.' });
-        return;
-      }
-      if (!isActive || puzzle.archived) {
-        res.status(400).json({ success: false, error: '활성화 기간이 만료된 퍼즐은 랭킹 등록이 불가능합니다.' });
-        return;
-      }
-
-      // 5.5. 이미 이 난이도로 랭킹 기록이 등록되어 있는지 확인
-      const PuzzleResult = getPuzzleResultModel();
-      const existingRankedResult = await PuzzleResult.findOne({
-        puzzleId,
-        userId: user._id,
-        difficulty,
-        mode: 'ranked',
-        completed: true
-      });
-
-      if (existingRankedResult) {
-        res.status(400).json({ success: false, error: '이 난이도는 이미 랭킹 등록이 완료되었습니다.' });
-        return;
-      }
-    }
-
-    // 검증 성공! 다음 컨트롤러로 진행
+    // 모든 검증 성공! 다음 컨트롤러로 진행
     next();
   } catch (error) {
     next(error);
   }
 };
+

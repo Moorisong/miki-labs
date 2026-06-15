@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
     
     return {
       title: {
-        absolute: '하루퍼즐 | 주간 랭킹 직소퍼즐'
+        absolute: '하루퍼즐 | 주간 랭킹 퍼즐'
       },
       description: `바쁜 일상 속 소소한 퍼즐 한 조각 어떠세요? ☕`,
       openGraph: {
@@ -40,7 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: {
-      absolute: '하루퍼즐 | 주간 랭킹 직소퍼즐'
+      absolute: '하루퍼즐 | 주간 랭킹 퍼즐'
     },
     description: '바쁜 일상 속 소소한 퍼즐 한 조각 어떠세요? ☕',
   };

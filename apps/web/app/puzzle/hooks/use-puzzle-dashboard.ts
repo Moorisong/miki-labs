@@ -101,6 +101,15 @@ export function usePuzzleDashboard(token?: string | null) {
                 setSavedProgress(localProgress);
                 setSavedDifficulty(localState.difficulty);
               }
+            } else {
+              const localState = await loadPuzzleState(puzzleId);
+              if (localState) {
+                const { deletePuzzleState } = await import('@/lib/puzzle-db');
+                await deletePuzzleState(puzzleId);
+              }
+              setHasSavedGame(false);
+              setSavedProgress(0);
+              setSavedDifficulty(null);
             }
           }
         }
@@ -123,14 +132,22 @@ export function usePuzzleDashboard(token?: string | null) {
                 const savedTime = savedState.updatedAt ? new Date(savedState.updatedAt).getTime() : 0;
                 const lastCompletedTime = Math.max(...completedHistories.map((h: any) => new Date(h.savedAt || 0).getTime()));
                 
-                if (savedTime <= lastCompletedTime) {
+                if (savedTime <= lastCompletedTime || diffs.includes(savedState.difficulty)) {
                   const { deletePuzzleState } = await import('@/lib/puzzle-db');
                   await deletePuzzleState(puzzleId);
                   setHasSavedGame(false);
+                  setSavedProgress(0);
+                  setSavedDifficulty(null);
                 }
               }
             } catch (err) {
               console.error('Failed to clear local puzzle state after sync:', err);
+            }
+
+            if (savedDifficulty && diffs.includes(savedDifficulty)) {
+              setHasSavedGame(false);
+              setSavedProgress(0);
+              setSavedDifficulty(null);
             }
           } else {
             setHasCompleted(false);

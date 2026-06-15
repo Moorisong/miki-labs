@@ -45,6 +45,7 @@ export function usePuzzleSetup(puzzleId: string, token: string | undefined, stat
           savedState = await loadPuzzleState(puzzleId);
           const pendingSync = sessionStorage.getItem(`pending_sync_${puzzleId}`) === 'true';
 
+          let hasSynced = false;
           if (savedState && token && pendingSync) {
             try {
               const serverProgressRes = await fetchMyProgress(puzzleId, token);
@@ -58,27 +59,37 @@ export function usePuzzleSetup(puzzleId: string, token: string | undefined, stat
                 });
                 setIsPageLoading(false);
                 return;
-              } else {
-                const correctCount = savedState.board.filter((cell: any, idx: number) => cell === idx).length;
-                const total = savedState.difficulty === 'novice' ? 36 : savedState.difficulty === 'expert' ? 256 : 100;
-                const progress = Math.round((correctCount / total) * 100);
-                await saveProgressApi(puzzleId, progress, token, {
-                  difficulty: savedState.difficulty,
-                  mode: savedState.mode || 'ranked',
-                  timerSeconds: savedState.timerSeconds,
-                  board: savedState.board,
-                  trayPieces: savedState.trayPieces,
-                  startedAt: savedState.startedAt || new Date().toISOString(),
-                  updatedAt: savedState.updatedAt || new Date().toISOString(),
-                });
-                sessionStorage.removeItem(`pending_sync_${puzzleId}`);
               }
+
+              const correctCount = savedState.board.filter((cell: any, idx: number) => cell === idx).length;
+              const total = savedState.difficulty === 'novice' ? 36 : savedState.difficulty === 'expert' ? 256 : 100;
+              const progress = Math.round((correctCount / total) * 100);
+              
+              // 1. 로컬 데이터의 진행도를 100% 등으로 확실하게 보장해 갱신
+              savedState.progress = progress;
+              savedState.updatedAt = new Date().toISOString();
+              
+              await saveProgressApi(puzzleId, progress, token, {
+                difficulty: savedState.difficulty,
+                mode: savedState.mode || 'ranked',
+                timerSeconds: savedState.timerSeconds,
+                board: savedState.board,
+                trayPieces: savedState.trayPieces,
+                startedAt: savedState.startedAt || new Date().toISOString(),
+                updatedAt: savedState.updatedAt,
+              });
+              
+              // IndexedDB 로컬 상태도 업데이트하여 오버라이트 방지
+              await savePuzzleState(puzzleId, savedState, true);
+              
+              sessionStorage.removeItem(`pending_sync_${puzzleId}`);
+              hasSynced = true;
             } catch (err) {
               console.error('Failed to query progress for sync selection:', err);
             }
           }
 
-          if (token) {
+          if (token && !hasSynced) {
             try {
               const serverProgressRes = await fetchMyProgress(puzzleId, token);
               if (serverProgressRes.success && serverProgressRes.data?.detailState) {

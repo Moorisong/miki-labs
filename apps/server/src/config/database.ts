@@ -41,7 +41,11 @@ function buildPuzzleUri(baseUri: string): string {
 }
 
 export const connectDatabase = async (): Promise<void> => {
-  const mongoUri = process.env.MONGODB_URI;
+  let mongoUri = process.env.MONGODB_URI;
+  if (mongoUri && !mongoUri.includes('/haroo-box')) {
+    // 혹시 /가 없고 쿼리스트링만 있는 경우나 디비명이 누락된 경우 명시적 haroo-box 적용
+    mongoUri = mongoUri.replace(/\/[^/?]+(\?|$)/, '/haroo-box$1');
+  }
 
   if (!mongoUri) {
     console.warn('MONGO_URI not defined, skipping DB connection');
@@ -51,7 +55,7 @@ export const connectDatabase = async (): Promise<void> => {
   try {
     // 기본 DB 연결 (haroo-box)
     await mongoose.connect(mongoUri);
-    console.log('Connected to MongoDB (main)');
+    console.log('Connected to MongoDB (main):', mongoUri);
 
     // HTSM 전용 DB 연결
     const htsmUri = buildHtsmUri(mongoUri);

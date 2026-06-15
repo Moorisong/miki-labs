@@ -222,22 +222,25 @@ export function usePuzzleSubmit(
         await deletePuzzleState(puzzleId);
       } else {
         setSubmitError(res.error || '기록 저장에 실패했습니다. 치팅 방지 필터에 차단되었을 수 있습니다.');
-        submittingRef.current = false;
+        // submittingRef를 false로 되돌리지 않아 useEffect에 의한 자동 재시도를 차단
+        // (1회용 챌린지 토큰이 이미 소비된 상태에서 재시도하면 동일 에러 무한 반복)
       }
     } catch (e) {
       console.error(e);
       setSubmitError('기록 업로드 중 알 수 없는 서버 에러가 발생했습니다.');
-      submittingRef.current = false;
+      // 동일 이유로 자동 재시도 차단
     } finally {
       setIsSubmitting(false);
     }
   };
 
   useEffect(() => {
-    if (isCompleted && token && !isSaved && !isSubmitting) {
+    if (isCompleted && token && !isSaved && !submittingRef.current) {
       handleSaveRecord();
     }
-  }, [isCompleted, token, isSaved, isSubmitting]);
+  }, [isCompleted, token, isSaved]);
+  // isSubmitting을 의존성에서 제거: 제출 실패 시 isSubmitting이 false로 돌아가면서
+  // useEffect가 재실행되어 무한 루프(저장중↔에러 깜빡임)를 유발하던 버그 수정
 
   return {
     isSubmitting,

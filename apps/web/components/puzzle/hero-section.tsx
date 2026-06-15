@@ -40,6 +40,14 @@ export default function HeroSection({
   const totalPieces = savedDifficulty === 'novice' ? 36 : savedDifficulty === 'expert' ? 256 : 100;
   const matchedPieces = Math.round((progress / 100) * totalPieces);
 
+  const isSavedDifficultyCompleted = !!(
+    savedDifficulty &&
+    completedDifficulties &&
+    completedDifficulties.includes(savedDifficulty)
+  );
+
+  const showResume = hasSavedGame && onResume && !isSavedDifficultyCompleted;
+
   const [daysLeft, setDaysLeft] = useState<string>('');
 
   // 남은 날짜 계산
@@ -55,7 +63,7 @@ export default function HeroSection({
   };
 
   const handleLaunchGame = () => {
-    if (hasSavedGame) {
+    if (showResume) {
       setShowConfirmRestart(true);
     } else {
       onStart(tempDiff);
@@ -133,7 +141,7 @@ export default function HeroSection({
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row sm:flex-nowrap gap-3 relative">
-              {hasCompleted && hasSavedGame && onResume ? (
+              {hasCompleted && showResume ? (
                 <>
                   <button
                     onClick={onResume}
@@ -209,7 +217,7 @@ export default function HeroSection({
                     다시 도전하기
                   </button>
                 </>
-              ) : hasSavedGame && onResume ? (
+              ) : showResume ? (
                 <>
                   <button
                     onClick={onResume}
@@ -307,7 +315,7 @@ export default function HeroSection({
                     랭킹 등록 완료! 🏅
                   </p>
                 </>
-              ) : hasSavedGame && savedDifficulty ? (
+              ) : hasSavedGame && savedDifficulty && !isSavedDifficultyCompleted ? (
                 <>
                   <div className="flex items-center gap-1 text-xs font-bold" style={{ color: 'var(--puzzle-primary)' }}>
                     <Layers size={13} />

@@ -22,4 +22,12 @@ export default defineConfig({
       use: { ...devices['Pixel 5'] },
     },
   ],
+  webServer: {
+    command: 'npm run dev:web',
+    url: 'http://127.0.0.1:3001',
+    reuseExistingServer: true,
+    stdout: 'ignore',
+    stderr: 'pipe',
+    timeout: 120000,
+  },
 });
