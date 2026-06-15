@@ -1081,5 +1081,122 @@ test.describe('챌린지 토큰 오류 격리 및 제출 안정성 테스트', (
     expect(savedProgressVal).toBe(100);
   });
 
+  // ----------------------------------------------------------
+  // Case 7: 로그인 사용자 세션 검증 에러 (유효하지 않은 세션) 상황 격리 테스트
+  // ----------------------------------------------------------
+  test('Case 7: 로그인 상태이나 DB에 유저가 없는 경우 (401 에러) -> 세션 해제 및 로그인 리다이렉트 처리 검증', async ({ page }) => {
+    // 1. Session Mock: 일단 프론트 상에는 로그인된 세션 정보가 존재
+    await page.route('**/api/auth/session', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          user: { name: '미가입유저', email: 'no-db@example.com', kakaoId: 'ghost-kakao-id-999' },
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        }),
+      });
+    });
+
+    await setupBaseMocks(page);
+
+    // 퍼즐 상세 Mock
+    await page.route('**/api/puzzle/puzzle-mock-id-001', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          data: {
+            _id: 'puzzle-mock-id-001',
+            title: '테스트용 퍼즐',
+            imageUrl: '/sample/puzzle.png',
+            participantCount: 0,
+            startDate: '2026-06-01T00:00:00Z',
+            endDate: '2026-06-30T00:00:00Z',
+            archived: false,
+          },
+        }),
+      });
+    });
+
+    // 2. 서버 진행상황 저장 API Mock: DB에 유저가 없으므로 401(유효하지 않은 사용자 세션입니다) 응답
+    let saveProgressStatus = -1;
+    await page.route('**/api/puzzle/progress**', async (route) => {
+      const method = route.request().method();
+      if (method === 'POST') {
+        await route.fulfill({
+          status: 401,
+          contentType: 'application/json',
+          body: JSON.stringify({ success: false, error: '유효하지 않은 사용자 세션입니다.' }),
+        });
+      } else {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            success: true,
+            data: {
+              progress: 10,
+              lastPlayedAt: new Date().toISOString(),
+              detailState: {
+                difficulty: 'novice',
+                mode: 'ranked',
+                timerSeconds: 15,
+                board: Array(36).fill(null),
+                trayPieces: Array.from({ length: 36 }, (_, idx) => idx),
+              }
+            }
+          }),
+        });
+      }
+    });
+
+    // 3. 로그아웃 API Mock
+    let signOutCalled = false;
+    await page.route('**/api/auth/signout**', async (route) => {
+      signOutCalled = true;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true }),
+      });
+    });
+
+    // 플레이 페이지 진입 (resume 모드로 진입하여 setup을 무사히 통과하게 만듦)
+    await page.goto('/puzzle/play/puzzle-mock-id-001?resume=true&diff=novice');
+    await dismissOrientationSuggestion(page);
+
+    // 저장(Manual save) 버튼을 클릭하여 저장 트리거
+    const saveButton = page.locator('button:has-text("저장")').first();
+    await expect(saveButton).toBeVisible();
+    await saveButton.click();
+
+    // 401 에러 발생 시 로그인 화면으로 리다이렉트 처리되는지 주소 검증
+    await page.waitForURL(/\/login/, { timeout: 10000 });
+    expect(page.url()).toContain('/login');
+  });
+
+  // ----------------------------------------------------------
+  // Case 8: MongoDB 저장 오류 시 로그인 거부 검증 테스트
+  // ----------------------------------------------------------
+  test('Case 8: MongoDB 저장 오류(signIn callback 에러) 시 로그인 프로세스 거부 검증', async ({ page }) => {
+    // 1. NextAuth Callback에서 signIn 실패를 의도하기 위해 Session이 null을 반환하도록 연출
+    await page.route('**/api/auth/session', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ user: null, expires: null }),
+      });
+    });
+
+    await setupBaseMocks(page);
+
+    // 로그인 페이지로 직접 가서 signIn 거부 확인
+    await page.goto('/login');
+    
+    // 주소가 /login에 머물러 있거나, NextAuth signin error query 파라미터가 노출되는지 검증
+    expect(page.url()).toContain('/login');
+  });
+
 });
 

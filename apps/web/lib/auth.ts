@@ -63,6 +63,7 @@ export const authOptions: NextAuthOptions = {
           );
         } catch (error) {
           console.error('MongoDB 유저 저장 오류:', error);
+          return false; // 저장 실패 시 로그인 거부
         }
       }
       return true;
